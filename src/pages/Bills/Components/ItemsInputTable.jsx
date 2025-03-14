@@ -1,0 +1,129 @@
+import DynamicInpuTable from '@components/form/DynamicInpuTable'
+import { getDiscount, getDiscountRate, sumFromObjects } from '@utils/helper'
+import { Form, Select } from 'antd'
+import { sum } from 'lodash';
+import React, { useEffect, useState } from 'react'
+const { Option } = Select;
+
+function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSelectedItem, setTotals, disableAddItem = false, disableDelete = false }) {
+
+  const itemsFields = Form.useWatch(name, form)
+  const [discountType, setDiscountType] = useState({ 0: "percentage" })
+
+  const itemsColumns = [
+    {
+      title: 'Name',
+      dataIndex: ['name'],
+      width: '20%',
+      editable: true,
+      type: "autocomplete",
+      render: (value) => itemsOptions.find(item => item.value === value)?.label
+    },
+    {
+      title: 'Quantity',
+      dataIndex: 'qty',
+      editable: true,
+      defaultValue: 1
+    },
+    {
+      title: 'U.Price',
+      dataIndex: 'rate',
+      editable: true,
+    },
+    {
+      title: 'Discount',
+      dataIndex: 'discount',
+      editable: true,
+      type: "percentage",
+      selectAfter: (index) => {
+        return <Select
+          defaultValue={"percentage"}
+          onChange={(value) => {
+            setDiscountType({ ...discountType, [index]: value })
+          }
+          }
+          value={discountType[index]}
+        >
+          <Option value="percentage">%</Option>
+          <Option value="amount">₹</Option>
+        </Select>
+      },
+      render: (value, _, index) => (discountType[index] === "percentage" || !discountType[index]) ? `${value} %` : `₹ ${value}`
+    },
+    {
+      title: 'Sub Total',
+      dataIndex: 'subtotal',
+      editable: false,
+    },
+    {
+      title: 'Tax',
+      dataIndex: 'taxes',
+      editable: true,
+    },
+    {
+      title: 'Tax Amnt',
+      dataIndex: 'taxAmnt',
+      editable: false,
+    },
+    {
+      title: 'Total',
+      dataIndex: 'total',
+      editable: false,
+    },
+  ]
+
+  // Called wehn an item is selected in the items dropdown
+  const onItemsChange = (value, index) => {
+    const item = items?.find(item => item._id === value)
+    if (item) {
+      // Update the dependend field with selected item values
+      const row = form.getFieldValue(["items", index])
+      form.setFieldValue(["items", index], {
+        ...row,
+        rate: item.rate,
+        taxes: item.taxes,
+        discount: item.discount
+      })
+      setSelectedItem({
+        ...selectedItem,
+        [index]: item
+      })
+    }
+  }
+
+
+
+  // Called when any field in the items change so taht all other dependend values are recalculated
+  useEffect(() => {
+
+    const updatedFields = itemsFields?.map((field, index) => {
+      if (selectedItem[index] && field.qty) {
+        const updateObj = {
+          ...field,
+          discountType: discountType[index],
+          subtotal: (getDiscount(field.discount, field.rate, discountType[index])) * Number(field.qty),
+          taxAmnt: Number((Number(field.subtotal) * (Number(field.taxes) / 100)).toFixed(2)),
+          total: Number(field.subtotal) + Number(field.taxAmnt)
+        }
+        return updateObj
+      } else {
+        return field
+      }
+    }) || []
+
+    setTotals({
+      subtotal: sumFromObjects(updatedFields, "subtotal"),
+      total_tax: sumFromObjects(updatedFields, "taxAmnt"),
+      total: sumFromObjects(updatedFields, "total"),
+      total_discount: sum(updatedFields.map((field, index) => getDiscountRate(field.discount, field.rate, discountType[index]) * Number(field.qty)))
+    })
+    form.setFieldValue("items", updatedFields.filter(field => field.name !== undefined))
+  }, [itemsFields, discountType])
+
+  return (
+    <DynamicInpuTable form={form} name={name} columns={itemsColumns} options={itemsOptions} onSelect={onItemsChange} disableAddItem={disableAddItem} disableDelete={disableDelete} />
+
+  )
+}
+
+export default ItemsInputTable

@@ -1,0 +1,95 @@
+import Protected from "@components/layouts/Protected";
+import SidebarLayout from "@components/layouts/Sidebar";
+import { ROLES } from "@utils/constants";
+import { Spin } from "antd";
+import { lazy, Suspense } from "react";
+import { useLocation } from "react-router-dom";
+
+const Students = lazy(() => import("@pages/Students"))
+const Bills = lazy(() => import("@pages/Bills"));
+const BillDetails = lazy(() => import("@pages/Bills/Components/BillDetails"));
+const Inventory = lazy(() => import("@pages/Inventory"));
+const PayslipDetails = lazy(() => import("@pages/Payslips/components/PayslipDetails"));
+const ManagerPayslips = lazy(() => import("@pages/Payslips/Manager"));
+const ManagerFacultyDevelopmentProgram = lazy(() => import("@pages/FacultyDevelopmentProgram/Manager"));
+const ManagerMaterials = lazy(() => import("@pages/ManagerMaterials"));
+const FacultyAttendance = lazy(() => import("@pages/Attendance/FacultyAttendance"))
+
+export const LazyLoader = ({ element }) => {
+  const location = useLocation();
+  return (<Suspense
+    fallback={
+      <div className="w-full h-screen flex items-center justify-center">
+        <Spin size="large" />
+      </div>
+    }
+    key={location.pathname}
+  >
+    {element}
+  </Suspense>)
+};
+
+
+export const managerRoutes = [
+  {
+    element: <Protected roles={[ROLES.MANAGER]} />,
+    children: [
+      {
+        element: <SidebarLayout />,
+        children: [
+          {
+            path: "/manager/students",
+            element: <LazyLoader element={<Students />} />,
+            title: "Students"
+          },
+          {
+            path: "/manager/inventory",
+            element: <LazyLoader element={<Inventory />} />,
+            title: "Inventory"
+          },
+          {
+            path: "/manager/materials",
+            element: <LazyLoader element={<ManagerMaterials />} />,
+            title: "Materials"
+          },
+          {
+            path: "/manager/faculty-development-program",
+            element: <LazyLoader element={<ManagerFacultyDevelopmentProgram />} />,
+            title: "Materials"
+          },
+          {
+            path: "/manager/payslips",
+            element: <LazyLoader element={<ManagerPayslips />} />,
+            title: "Payslips",
+            children: [
+              {
+                path: ":id",
+                element: <LazyLoader element={<PayslipDetails />} />,
+                title: "Payslips"
+              },
+            ]
+          },
+          {
+            path: "/manager/bills",
+            element: <LazyLoader element={<Bills />} />,
+            title: "Bills",
+            children: [
+              {
+                path: ":id",
+                element: <LazyLoader element={<BillDetails />} />,
+                title: "Bills"
+              },
+            ]
+          },
+          {
+            path: "/manager/attendance/:id",
+            element: (
+              <LazyLoader element={<FacultyAttendance />} />
+            ),
+            title: "Attendance",
+          },
+        ]
+      }
+    ]
+  }
+]

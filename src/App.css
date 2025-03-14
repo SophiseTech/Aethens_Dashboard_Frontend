@@ -1,0 +1,20 @@
+body{
+  color: black;
+}
+
+ul {
+  list-style-type: disc; /* Ensures the disc bullet is shown */
+  list-style-position: inside;
+}
+
+.bar-chart line.apexcharts-xaxis-tick {
+  stroke: transparent;
+}
+
+.site-tree-search-value {
+  color: #f50;
+}
+
+.ant-select-focused{
+  box-shadow: none !important;
+}
