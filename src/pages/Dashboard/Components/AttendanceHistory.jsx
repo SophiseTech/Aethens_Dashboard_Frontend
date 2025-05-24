@@ -1,19 +1,19 @@
 import dayjs from 'dayjs'
 import React from 'react'
 
-function AttendanceHistory({records}) {
+function AttendanceHistory({ records }) {
   return (
     <div className='bg-card p-4 rounded-3xl flex-1 flex flex-col gap-3 overflow-auto'>
       <h1 className='font-bold | text-sm 2xl:text-xl'>Recent History</h1>
       <div className='flex flex-col gap-3 flex-1 overflow-auto no-scrollbar'>
-        {records?.map((item, index) => <HistoryItem key={index} item={item} />)}
+        {records?.slice(-5)?.map((item, index) => <HistoryItem key={index} item={item} />)}
       </div>
     </div>
   )
 }
 
-const HistoryItem = ({item}) => {
-  const dateObj = dayjs(item.date)
+const HistoryItem = ({ item }) => {
+  const dateObj = dayjs(item.start_date)
   return (
     <div className='flex items-center justify-start | p-1 2xl:p-3'>
       <div className='flex gap-3 flex-1 items-center'>
@@ -21,7 +21,20 @@ const HistoryItem = ({item}) => {
           <img src="/icons/alarm.svg" alt="alarm" className='w-3/4 h-fw-3/4' />
         </div>
         <div className='flex flex-col justify-center'>
-          <p className='text-green-500 | max-2xl:text-[0.6rem]'>On Time</p>
+          {item?.status === "attended" ?
+            <p className='text-green-500 | max-2xl:text-[0.6rem]'>On Time</p>
+            :
+            item?.status === "absent" ?
+              <p className='text-red-500 | max-2xl:text-[0.6rem]'>Absent</p>
+              :
+              item?.status === "cancelled" ?
+                <p className='text-red-500 | max-2xl:text-[0.6rem]'>Cancelled</p>
+                :
+                dayjs(item.start_date).isBefore(dayjs()) && item?.status === "booked" ?
+                  <p className='text-red-500 | max-2xl:text-[0.6rem]'>Absent</p>
+                  :
+                  <p className='text-yellow-500 | max-2xl:text-[0.6rem]'>Upcoming</p>
+          }
           <h1 className='font-bold | text-xs 2xl:text-xl'>{dateObj.format("D MMM, YYYY")}</h1>
         </div>
       </div>

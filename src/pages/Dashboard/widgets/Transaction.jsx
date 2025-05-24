@@ -41,7 +41,7 @@ const TransacionItem = ({ item }) => {
           <img src="/icons/rupee.svg" alt="alarm" className='w-3/4' />
         </div>
         <div className='flex flex-col justify-center'>
-          <p className='text-gray-500 | max-2xl:text-[0.6rem]'>Materials (Bill No: {item.invoiceNo})</p>
+          <p className='text-gray-500 | max-2xl:text-[0.6rem] capitalize'>{item.subject || "Invoice"} (Bill No: {item.invoiceNo})</p>
           <h1 className='font-bold | text-xs 2xl:text-xl'>Rs {item.total}</h1>
         </div>
       </div>

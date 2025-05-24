@@ -18,6 +18,7 @@ const Bills = lazy(() => import("@pages/Bills"));
 const BillDetails = lazy(() => import("@pages/Bills/Components/BillDetails"));
 const MarkAttendance = lazy(() => import("@pages/Temp/MarkAttendance"));
 const MarkFacultyAttendance = lazy(() => import("@pages/Temp/MarkFacultyAttendance"));
+const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCourseHistory"));
 
 const LazyLoader = ({ children }) => {
   const location = useLocation()
@@ -156,6 +157,24 @@ export const generalRoutes = [
             element: (
               <LazyLoader>
                 <Attendance />
+              </LazyLoader>
+            ),
+            title: "Slots",
+          },
+          {
+            path: "/attendance/c/:courseId",
+            element: (
+              <LazyLoader>
+                <Attendance />
+              </LazyLoader>
+            ),
+            title: "Slots",
+          },
+          {
+            path: "/courseHistory",
+            element: (
+              <LazyLoader>
+                <ManagerCourseHistory />
               </LazyLoader>
             ),
             title: "Slots",

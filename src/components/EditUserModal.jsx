@@ -5,10 +5,14 @@ import CustomInput from '@components/form/CustomInput';
 import CustomDatePicker from '@components/form/CustomDatePicker';
 import dayjs from 'dayjs';
 import ProfileImageUploader from '@components/ProfileImageUploader';
+import { useStore } from 'zustand';
+import userStore from '@stores/UserStore';
+import { ROLES } from '@utils/constants';
 
-const EditUserModal = ({ user, visible, onCancel, onSave }) => {
+const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = false }) => {
   const [form] = Form.useForm(); // Initialize form
   // Prefill form with user data when modal opens
+  const { user: loggedinUser } = useStore(userStore)
 
   const initialValues = {
     username: user?.username,
@@ -66,11 +70,13 @@ const EditUserModal = ({ user, visible, onCancel, onSave }) => {
           label="Address"
           placeholder="Enter your address"
         />
-        <CustomInput
-          name="school_uni_work"
-          label="Scool / University / Company Name"
-          placeholder="Scool / University / Company Name"
-        />
+        {(isStudentDetail || loggedinUser.role === ROLES.STUDENT) &&
+          <CustomInput
+            name="school_uni_work"
+            label="Scool / University / Company Name"
+            placeholder="Scool / University / Company Name"
+          />
+        }
         <Button type="primary" htmlType="submit">
           Save Changes
         </Button>

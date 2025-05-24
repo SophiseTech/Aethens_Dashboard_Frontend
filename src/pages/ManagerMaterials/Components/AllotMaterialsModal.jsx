@@ -35,7 +35,7 @@ function AllotMaterialsModal(props) {
         open={isModalOpen}
         footer={null}
         onCancel={handleCancel}
-        width={"60%"}
+        width={"90%"}
       >
         <AllotMaterials {...props} handleOk={handleOk} />
       </Modal>

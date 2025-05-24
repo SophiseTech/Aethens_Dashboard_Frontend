@@ -14,6 +14,8 @@ const ManagerPayslips = lazy(() => import("@pages/Payslips/Manager"));
 const ManagerFacultyDevelopmentProgram = lazy(() => import("@pages/FacultyDevelopmentProgram/Manager"));
 const ManagerMaterials = lazy(() => import("@pages/ManagerMaterials"));
 const FacultyAttendance = lazy(() => import("@pages/Attendance/FacultyAttendance"))
+const ManagerSlots = lazy(() => import("@pages/Slots/ManagerSlots"))
+const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCourseHistory"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -53,6 +55,11 @@ export const managerRoutes = [
             title: "Materials"
           },
           {
+            path: "/manager/courseHistory/:studentId",
+            element: <LazyLoader element={<ManagerCourseHistory />} />,
+            title: "Materials"
+          },
+          {
             path: "/manager/faculty-development-program",
             element: <LazyLoader element={<ManagerFacultyDevelopmentProgram />} />,
             title: "Materials"
@@ -82,11 +89,18 @@ export const managerRoutes = [
             ]
           },
           {
-            path: "/manager/attendance/:id",
+            path: "/manager/attendance/:id/c/:course_id",
             element: (
               <LazyLoader element={<FacultyAttendance />} />
             ),
             title: "Attendance",
+          },
+          {
+            path: "/manager/slots",
+            element: (
+              <LazyLoader element={<ManagerSlots />} />
+            ),
+            title: "Slots",
           },
         ]
       }

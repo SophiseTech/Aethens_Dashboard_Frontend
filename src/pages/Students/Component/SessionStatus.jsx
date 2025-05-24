@@ -1,5 +1,6 @@
 import SessionStatusTable from '@pages/Students/Component/SessionStatusTable';
 import SessionStautsForm from '@pages/Students/Component/SessionStautsForm';
+import { isUserActive } from '@utils/helper';
 import { Button, Modal } from 'antd';
 import React, { useState } from 'react'
 import { isMobile, isTablet } from 'react-device-detect';
@@ -23,7 +24,7 @@ function SessionStatus({ student }) {
 
   return (
     <>
-      <Button onClick={showModal} variant='filled' color='green'>
+      <Button onClick={showModal} variant='filled' color='green' disabled={!isUserActive(student)}>
         Add Session Status
       </Button>
       {/* <p  className='cursor-pointer hover:text-primary transition-colors'></p> */}

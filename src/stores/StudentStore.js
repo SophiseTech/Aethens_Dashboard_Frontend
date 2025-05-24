@@ -20,6 +20,7 @@ const studentStore = create((set, get) => ({
   syllabus: [],
   searchQuery: "",
   currentSessionAttendees: [],
+  activeStudentSessions: {},
   getStudentsByCenter: async (limit = 10, page = 1) => {
     try {
       set({ loading: true });
@@ -137,6 +138,55 @@ const studentStore = create((set, get) => ({
       set({ loading: false })
     }
   },
+  deactivateStudent: async (id) => {
+    try {
+      set({ loading: true })
+      if (!id) throw new Error("Bad Data")
+      await userService.deactivateUsers(id)
+      const { students } = get()
+      if (students) {
+        const updatedStudents = students.map(item => (
+          item._id === id ? { ...item, status: "inactive" } : item
+        ))
+        set({ students: updatedStudents })
+        handleSuccess("User details updated Succesfully")
+      }
+    } catch (error) {
+      handleInternalError(error)
+    }
+  },
+  activateStudent: async (id) => {
+    try {
+      set({ loading: true })
+      if (!id) throw new Error("Bad Data")
+      await userService.activateUsers(id)
+      const { students } = get()
+      if (students) {
+        const updatedStudents = students.map(item => (
+          item._id === id ? { ...item, status: "active" } : item
+        ))
+        set({ students: updatedStudents })
+        handleSuccess("User details updated Succesfully")
+      }
+    } catch (error) {
+      handleInternalError(error)
+    }
+  },
+  getActiveSessions: async (id) => {
+    try {
+      set({ loading: true })
+      if (!id) throw new Error("Bad Data")
+      const response = await studentService.getActiveSessions(id)
+      const { activeStudentSessions } = get()
+      const updatedStudentSessions = { ...activeStudentSessions, [id]: response }
+      set({ activeStudentSessions: updatedStudentSessions })
+      return response
+    } catch (error) {
+      handleInternalError(error)
+    } finally {
+      set({ loading: false })
+    }
+  }
 }))
 
 export default studentStore

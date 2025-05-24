@@ -5,7 +5,7 @@ import { sum } from 'lodash';
 import React, { useEffect, useState } from 'react'
 const { Option } = Select;
 
-function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSelectedItem, setTotals, disableAddItem = false, disableDelete = false }) {
+function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSelectedItem, setTotals, disableAddItem = false, disableDelete = false, itemType, onSearch }) {
 
   const itemsFields = Form.useWatch(name, form)
   const [discountType, setDiscountType] = useState({ 0: "percentage" })
@@ -14,10 +14,12 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
     {
       title: 'Name',
       dataIndex: ['name'],
-      width: '20%',
+      width: '30%',
       editable: true,
       type: "autocomplete",
-      render: (value) => itemsOptions.find(item => item.value === value)?.label
+      render: (value, record) => record.itemName,
+      onSearch: (value) => { onSearch(value, itemType) },
+      itemType: itemType
     },
     {
       title: 'Quantity',
@@ -54,6 +56,7 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
       title: 'Sub Total',
       dataIndex: 'subtotal',
       editable: false,
+      render: (value) => value ? value.toFixed(2) : 0
     },
     {
       title: 'Tax',
@@ -64,22 +67,27 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
       title: 'Tax Amnt',
       dataIndex: 'taxAmnt',
       editable: false,
+      render: (value) => value ? value.toFixed(2) : 0
     },
     {
       title: 'Total',
       dataIndex: 'total',
       editable: false,
+      render: (value) => value ? value.toFixed(2) : 0
     },
   ]
 
   // Called wehn an item is selected in the items dropdown
-  const onItemsChange = (value, index) => {
+  const onItemsChange = (value, index, option) => {
+    console.log(value, option);
+    
     const item = items?.find(item => item._id === value)
     if (item) {
       // Update the dependend field with selected item values
       const row = form.getFieldValue(["items", index])
       form.setFieldValue(["items", index], {
         ...row,
+        itemName: option.label,
         rate: item.rate,
         taxes: item.taxes,
         discount: item.discount

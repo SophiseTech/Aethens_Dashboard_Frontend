@@ -1,98 +1,252 @@
-import MaterialTable from '@pages/Bills/Components/MaterialTable'
-import { Badge } from 'antd'
-import dayjs from 'dayjs'
-import { useEffect, useRef } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+import {
+  Page,
+  Text,
+  View,
+  Document,
+  StyleSheet,
+} from '@react-pdf/renderer';
+import dayjs from 'dayjs';
 
-function Invoice({ bill, type, downloadRef }) {
+const styles = StyleSheet.create({
+  page: {
+    padding: 30,
+    fontSize: 10,
+    fontFamily: 'Helvetica',
+    color: '#1F2937', // gray-800
+    backgroundColor: '#fff',
+  },
+  headerContainer: {
+    padding: 12,
+    backgroundColor: '#4F651E', // blue-900
+    color: '#fff',
+    borderRadius: 6,
+    marginBottom: 20,
+  },
+  companyName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  companyAddress: {
+    fontSize: 9,
+  },
+  invoiceTitle: {
+    fontSize: 20,
+    textAlign: 'right',
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  section: {
+    marginVertical: 10,
+  },
+  box: {
+    border: '1px solid #E5E7EB',
+    padding: 8,
+    borderRadius: 4,
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    fontWeight: 'bold',
+    marginBottom: 4,
+    color: '#111827',
+    fontSize: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 2,
+  },
+  label: {
+    color: '#6B7280',
+  },
+  tableContainer: {
+    marginTop: 10,
+    border: '1px solid #D1D5DB',
+    borderRadius: 4,
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#D3D3D3', // blue-100
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    borderBottom: '1px solid #C7D2FE',
+    fontWeight: 'bold',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    borderBottom: '1px solid #F3F4F6', // light row borders
+  },
+  rowAlt: {
+    backgroundColor: '#F9FAFB',
+  },
+  col: {
+    paddingHorizontal: 4,
+    textAlign: 'left',
+  },
+  col1: { width: '5%' },
+  col2: { width: '45%' },
+  col3: { width: '15%' },
+  col4: { width: '15%' },
+  col5: { width: '20%', textAlign: 'right' },
+  summaryBox: {
+    border: '1px solid #D1D5DB',
+    marginTop: 12,
+    padding: 8,
+    borderRadius: 4,
+    backgroundColor: '#F3F4F6',
+    alignSelf: 'flex-end',
+    width: '40%',
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  notes: {
+    marginTop: 20,
+    fontSize: 9,
+    color: '#374151',
+    borderTop: '1px dashed #D1D5DB',
+    paddingTop: 10,
+  },
+  signature: {
+    marginTop: 30,
+    fontSize: 10,
+    textAlign: 'right',
+    color: '#1F2937',
+  },
+  summaryGrandTotal: {
+    fontFamily: "Helvetica-Bold",
+  },
+  fontBold: {
+    fontFamily: "Helvetica-Bold",
+  }
+});
 
-  const invoiceRef = useRef(null);
-  const parentPadding = 2 * 20;
+const InvoicePdf = ({ bill }) => {
+  const items = bill?.items || [];
+  const subtotal = bill?.subtotal || 0;
+  const discount = bill?.total_discount || 0;
+  const tax = bill?.total_tax || 0;
+  const total = bill?.total || 0;
 
-  useEffect(() => {
-    function adjustZoom() {
-      if (!invoiceRef.current || (!isMobile && !isTablet)) return;
+  console.log(items);
 
-      const documentWidth = window.innerWidth - parentPadding;
-      const documentHeight = window.innerHeight - parentPadding;
-      const cmToPx = 37.795276;
+  const ITEMS_FIRST_PAGE = 12; // you can change this
+  const ITEMS_PER_PAGE = 20;   // for subsequent pages
 
-      const zoomWidth = documentWidth / (23 * cmToPx);
-      const zoomHeight = documentHeight / (31.7 * cmToPx);
-      const zoomLevel = Math.min(zoomWidth, zoomHeight);
+  const getChunks = (items, firstPageLimit, pageLimit) => {
+    if (items.length <= firstPageLimit) return [items];
+    const firstChunk = items.slice(0, firstPageLimit);
+    const rest = items.slice(firstPageLimit);
+    const otherChunks = [];
 
-      if (zoomLevel < 1) {
-        invoiceRef.current.style.transform = `scale(${zoomLevel})`;
-        invoiceRef.current.style.transformOrigin = "top left"; // Ensures proper scaling
-      } else {
-        invoiceRef.current.style.transform = "scale(1)";
-      }
+    for (let i = 0; i < rest.length; i += pageLimit) {
+      otherChunks.push(rest.slice(i, i + pageLimit));
     }
 
-    adjustZoom();
-    window.addEventListener("resize", adjustZoom);
+    return [firstChunk, ...otherChunks];
+  };
 
-    return () => window.removeEventListener("resize", adjustZoom);
-  }, []);
 
   return (
-    <div ref={invoiceRef} className='h-full'>
-      <div className='shadow-paper bg-white rounded-lg lg:m-auto | w-[21cm] max-lg:h-[29.7cm] 2xl:w-10/12'>
+    <Document>
+      {getChunks(items, ITEMS_FIRST_PAGE, ITEMS_PER_PAGE).map((chunk, pageIndex) => (
+        <Page key={pageIndex} size="A4" style={styles.page}>
+          {/* Header & Details only on first page */}
+          {pageIndex === 0 && (
+            <>
+              <View style={styles.headerContainer}>
+                <View style={styles.row}>
+                  <View>
+                    <Text style={styles.companyName}>School of Athens</Text>
+                    <Text style={styles.companyAddress}>177, A Block, AECS Layout</Text>
+                    <Text style={styles.companyAddress}>Brookfields, Bangalore</Text>
+                    <Text style={styles.companyAddress}>Karnataka 560037</Text>
+                  </View>
+                  <Text style={styles.invoiceTitle}>INVOICE</Text>
+                </View>
+              </View>
 
-        <Badge.Ribbon color={bill?.status === "paid" ? "green" : bill?.status === "unpaid" ? "red" : "blue"} text={(bill?.status || "").toUpperCase()}>
-          <div className='flex flex-col gap-10 w-full | p-10 lg:p-16' ref={downloadRef}>
-            <div className='flex justify-between'>
-              <img src='/images/logo.png' className='w-1/3 object-contain' />
-              <div className='flex flex-col items-end gap-1'>
-                <h1 className='font-bold | text-2xl 2xl:text-3xl'>INVOICE</h1>
-                <p className='font-bold text-primary | text-sm 2xl:text-lg'>NO - {bill?.invoiceNo}</p>
-              </div>
-            </div>
+              <View style={styles.row}>
+                <Text>Invoice #: {bill?.invoiceNo}</Text>
+                <Text>Date: {dayjs(bill?.generated_on).format("DD/MM/YYYY")}</Text>
+              </View>
 
-            <div className='flex justify-between | text-sm 2xl:text-xl'>
-              <p className='font-bold'>Sub: {bill?.subject}</p>
-              <p className='font-bold text-secondary'>{dayjs(bill?.generated_on).format("D MMM, YYYY")}</p>
-            </div>
+              <View style={styles.section}>
+                <View style={styles.row}>
+                  <View style={styles.box}>
+                    <Text style={styles.sectionTitle}>Billed To</Text>
+                    <Text>{bill?.generated_for?.username}</Text>
+                    <Text>{bill?.generated_for?.address}</Text>
+                    <Text style={[styles.fontBold]}>Adm No: {bill?.generated_for?.details_id?.admissionNumber}</Text>
+                  </View>
+                </View>
+              </View>
+            </>
+          )}
 
-            <div className='flex justify-between'>
-              <div className='w-1/2'>
-                <p className='font-bold text-gray-400 | max-2xl:text-xs'>Billed To: </p>
-                <p className='| text-xs 2xl:text-lg'>Adm No: <strong>{bill?.generated_for?.details_id?.admissionNumber}</strong></p>
-                <p className='| text-xs 2xl:text-lg'>{bill?.generated_for?.username}</p>
-                <p className='| text-xs 2xl:text-lg'>{bill?.generated_for?.address}</p>
-              </div>
+          {/* Table Header */}
+          <View style={styles.tableContainer}>
+            <View style={styles.tableHeader}>
+              <Text style={[styles.col, styles.col1]}>#</Text>
+              <Text style={[styles.col, styles.col2]}>Item</Text>
+              <Text style={[styles.col, styles.col3]}>Qty</Text>
+              <Text style={[styles.col, styles.col4]}>Rate</Text>
+              <Text style={[styles.col, styles.col4]}>Discount</Text>
+              <Text style={[styles.col, styles.col4]}>Tax Rate</Text>
+              <Text style={[styles.col, styles.col4]}>Tax Amount</Text>
+              <Text style={[styles.col, styles.col5]}>Amount</Text>
+            </View>
 
-              <div className='w-1/2 | text-xs 2xl:text-lg'>
-                <p className='font-bold text-gray-400 text-sm | max-2xl:text-xs'>Billed From: </p>
-                <p>School of Athens</p>
-                <p>Banglore</p>
-              </div>
+            {chunk.map((item, i) => {
+              const index = pageIndex === 0 ? i : ITEMS_FIRST_PAGE + (pageIndex - 1) * ITEMS_PER_PAGE + i;
+              return (
+                <View key={i} style={[styles.tableRow, index % 2 === 1 && styles.rowAlt]}>
+                  <Text style={[styles.col, styles.col1]}>{index + 1}</Text>
+                  <Text style={[styles.col, styles.col2]}>{item.name}</Text>
+                  <Text style={[styles.col, styles.col3]}>{item.qty}</Text>
+                  <Text style={[styles.col, styles.col4]}>{item.rate}</Text>
+                  <Text style={[styles.col, styles.col4]}>{item.discount}</Text>
+                  <Text style={[styles.col, styles.col4]}>{item.taxes}</Text>
+                  <Text style={[styles.col, styles.col4]}>{item.taxAmnt}</Text>
+                  <Text style={[styles.col, styles.col5]}>₹{item.subtotal?.toFixed(2)}</Text>
+                </View>
+              );
+            })}
+          </View>
 
-            </div>
+          {/* Totals & Signature only on last page */}
+          {pageIndex === getChunks(items, ITEMS_FIRST_PAGE, ITEMS_PER_PAGE).length - 1 && (
+            <>
+              <View style={styles.summaryBox}>
+                <View style={styles.summaryRow}>
+                  <Text>Discount:</Text>
+                  <Text>(–) ₹{discount.toFixed(2)}</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text>Sub Total:</Text>
+                  <Text>₹{subtotal.toFixed(2)}</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text>Tax:</Text>
+                  <Text>₹{tax.toFixed(2)}</Text>
+                </View>
+                <View style={[styles.summaryRow, styles.summaryGrandTotal]}>
+                  <Text>Grand Total:</Text>
+                  <Text>₹{total.toFixed(2)}</Text>
+                </View>
+              </View>
 
-            <div className='flex flex-col items-end'>
-              {type === "materials" && <MaterialTable bill={bill} />}
-            </div>
+              <Text style={styles.signature}>Authorized Signature</Text>
+            </>
+          )}
+        </Page>
+      ))}
+    </Document>
+  );
 
-            <div className='| max-2xl:text-xs'>
-              <h1 className='font-bold | text-sm 2xl:text-lg'>Terms and conditions:</h1>
-              <ul >
-                <li>
-                  Terms and condition 1
-                </li>
-                <li>
-                  Terms and condition 1
-                </li>
-                <li>
-                  Terms and condition 1
-                </li>
-              </ul>
-            </div>
-          </div>
-        </Badge.Ribbon>
-      </div>
-    </div>
-  )
-}
+};
 
-export default Invoice
+export default InvoicePdf;

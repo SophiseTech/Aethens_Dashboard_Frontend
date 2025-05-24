@@ -10,10 +10,10 @@ function SessionStatusTable({ student }) {
   const { getFacultyRemarks, facultyRemarks, loading, deleteFacultyRemark } = useStore(facultyRemarksStore)
 
   useEffect(() => {
-    if (!facultyRemarks || facultyRemarks.length === 0) {
-      getFacultyRemarks({ query: { student_id: student._id }, populate: "faculty_id" })
-    }
-  }, [])
+    getFacultyRemarks({ query: { student_id: student._id, course_id: student?.details_id?.course_id?._id || student?.details_id?.course_id }, populate: "faculty_id" })
+    // if (!facultyRemarks || facultyRemarks.length === 0) {
+    // }
+  }, [student])
 
   const columns = [
     {
@@ -52,8 +52,6 @@ function SessionStatusTable({ student }) {
       ),
     }
   ]
-
-  console.log(facultyRemarks);
 
   return (
     <Table columns={columns} dataSource={facultyRemarks} loading={loading}

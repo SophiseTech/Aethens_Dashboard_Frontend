@@ -1,100 +1,129 @@
-import AddInventoryItem from '@pages/Inventory/Components/AddInventoryItem'
-import EditInventoryItem from '@pages/Inventory/Components/EditInventoryItem'
-import inventoryStore from '@stores/InventoryStore'
-import { groupByField } from '@utils/helper'
-import { Button, Flex, Segmented, Table } from 'antd'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Button, Flex, Input, Segmented, Table } from 'antd';
+import EditInventoryItem from '@pages/Inventory/Components/EditInventoryItem';
+import inventoryStore from '@stores/InventoryStore';
+import { groupByField } from '@utils/helper';
+
+const { Search } = Input
 
 function InventoryList() {
-
-  const { loading, items, inventory } = inventoryStore()
-  const [selectedCategoryItems, setSelectedCategoryItems] = useState([])
-  const [selectedTab, setSelectedTab] = useState("materials")
-  const [editItem, setEditItem] = useState({})
-
-  const handleEdit = (record) => {
-    if (record) {
-      setEditItem(record)
-    }
-  }
+  const { loading, items, getItems, total, searhcItems, searchResults, searchQuery, setSearchQuery, searchTotal } = inventoryStore();
+  const [selectedTab, setSelectedTab] = useState('materials');
+  const [editItem, setEditItem] = useState({});
+  const [searchTerm, setSearchTerm] = useState("")
 
   const columns = [
     {
       title: 'Name',
-      dataIndex: "name",
-      key: "inventory_name",
+      dataIndex: 'name',
+      key: 'inventory_name',
     },
     {
       title: 'Quantity',
-      dataIndex: "quantity",
-      key: "inventory_qty",
+      dataIndex: 'quantity',
+      key: 'inventory_qty',
     },
     {
       title: 'Rate (₹)',
-      dataIndex: "rate",
-      key: "inventory_rate",
+      dataIndex: 'rate',
+      key: 'inventory_rate',
     },
     {
       title: 'Discount (₹)',
-      dataIndex: "discount",
-      key: "inventory_discount",
+      dataIndex: 'discount',
+      key: 'inventory_discount',
     },
     {
       title: 'Tax (%)',
-      dataIndex: "taxes",
-      key: "inventory_tax",
+      dataIndex: 'taxes',
+      key: 'inventory_tax',
     },
     {
       title: 'Action',
-      dataIndex: "action",
-      key: "action",
+      key: 'action',
       render: (_, record) => (
-        <Flex>
-          <Button variant='filled' color='blue' onClick={() => { handleEdit(record) }}>
-            Edit
-          </Button>
-        </Flex>
-      )
+        <Button type="primary" onClick={() => setEditItem(record)}>
+          Edit
+        </Button>
+      ),
     },
-  ]
+  ];
 
   const segmentOptions = [
-    {
-      label: "Materials",
-      value: "materials",
-      key: "materials"
-    },
-    {
-      label: "Gallery",
-      value: "gallery",
-      key: "gallery"
-    },
-    {
-      label: "Assets",
-      value: "assets",
-      key: "assets"
-    },
-  ]
+    { label: 'Materials', value: 'materials' },
+    { label: 'Gallery', value: 'gallery' },
+    { label: 'Assets', value: 'assets' },
+  ];
 
-  const categorizedItems = useMemo(() => groupByField(items, "type", { gallery: [], materials: [], assets: [] }), [items])
+  const categorizedItems = useMemo(
+    () => groupByField(items, 'type', { gallery: [], materials: [], assets: [] }),
+    [items]
+  );
 
-  const handleSegmentedChange = (value) => {
-    setSelectedTab(value)
-  }
+  const selectedCategoryItems = useMemo(
+    () => categorizedItems[selectedTab] || [],
+    [categorizedItems, selectedTab]
+  );
 
   useEffect(() => {
-    if (categorizedItems && categorizedItems[selectedTab]) {
-      setSelectedCategoryItems(categorizedItems[selectedTab])
+    setSearchQuery("")
+    setSearchTerm("")
+    if (!items.length || !categorizedItems[selectedTab]?.length) {
+      getItems(10, { sort: '-createdAt', query: { type: selectedTab } }, 1);
     }
-  }, [categorizedItems, selectedTab])
+  }, [selectedTab]);
+
+  const handlePageChange = (page, pageSize) => {
+    if (searchQuery) {
+      searhcItems(pageSize, { searchQuery: searchQuery }, page)
+    } else {
+      getItems(pageSize, { sort: '-createdAt', query: { type: selectedTab } }, page);
+    }
+  };
+
+  const onSearch = (value, _e, info) => {
+    if (value === "") {
+      setSearchQuery(null)
+      return
+    }
+    searhcItems(10, { searchQuery: value }, 1)
+    // setSearchQuery(value)
+  }
+
+  const itemsToDisplay = useMemo(() => {
+    return searchQuery ? searchResults : items;
+  }, [items, searchResults, searchQuery]);
 
   return (
-    <Flex vertical gap={20} align='start'>
-      <Segmented options={segmentOptions} onChange={handleSegmentedChange} defaultValue={"materials"} />
-      <Table columns={columns} dataSource={selectedCategoryItems} loading={loading} className='w-full' />
+    <Flex vertical gap={20} align="start">
+      <Segmented
+        options={segmentOptions}
+        onChange={setSelectedTab}
+        defaultValue="materials"
+      />
+      <Search
+        placeholder="Search..."
+        onSearch={onSearch}
+        defaultValue={searchQuery}
+        className='w-1/4'
+        onChange={(e) => setSearchTerm(e.target.value)}
+        value={searchTerm}
+      />
+      <Table
+        columns={columns}
+        dataSource={itemsToDisplay}
+        loading={loading}
+        className="w-full"
+        rowKey="_id"
+        pagination={{
+          pageSize: 10,
+          onChange: handlePageChange,
+          total: searchQuery ? searchTotal : total,
+        }}
+      />
       <EditInventoryItem editItem={editItem} setEditItem={setEditItem} />
     </Flex>
-  )
+  );
 }
 
-export default InventoryList
+export default InventoryList;

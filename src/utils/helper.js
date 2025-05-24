@@ -42,28 +42,35 @@ export const groupActivities = (activities) => {
 }
 
 export function groupByMonthName(data) {
+  // Step 1: Group by "Month Year"
   const groupedData = data.reduce((groups, item) => {
-    const monthName = dayjs(item.start_date).format('MMMM'); // Get the full month name
+    const monthName = dayjs(item.start_date).format('MMMM YYYY');
     if (!groups[monthName]) {
-      groups[monthName] = []; // Initialize group if not present
+      groups[monthName] = [];
     }
-    groups[monthName].push(item); // Add the item to the respective group
+    groups[monthName].push(item);
     return groups;
   }, {});
 
-  // Sort each group by start_date first, then by session.start_time
-  Object.keys(groupedData).forEach(month => {
-    groupedData[month].sort((a, b) => {
+  // Step 2: Sort each group
+  Object.values(groupedData).forEach(group => {
+    group.sort((a, b) => {
       const dateComparison = dayjs(a?.start_date).unix() - dayjs(b?.start_date).unix();
-      if (dateComparison !== 0) {
-        return dateComparison;
-      }
+      if (dateComparison !== 0) return dateComparison;
       return dayjs(a.session?.start_time).unix() - dayjs(b.session?.start_time).unix();
     });
   });
 
-  return groupedData;
+  // Step 3: Sort the groupedData by month-year key chronologically
+  const sortedGroupedData = Object.fromEntries(
+    Object.entries(groupedData).sort(([a], [b]) =>
+      dayjs(a, 'MMMM YYYY').unix() - dayjs(b, 'MMMM YYYY').unix()
+    )
+  );
+
+  return sortedGroupedData;
 }
+
 
 export function groupByField(data, field, initial = {}) {
   return data.reduce((groups, item) => {
@@ -101,13 +108,80 @@ export function formatFileSize(bytes, decimals = 2) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(decimals))} ${sizes[i]}`;
 }
 
-export const getNextWeekdayDate = (weekDay) => {
-  const today = new Date();
-  const daysUntilNext = (weekDay - today.getDay() + 7) % 7;
-  const nextDate = new Date();
-  nextDate.setDate(today.getDate() + daysUntilNext);
-  return nextDate;
+export const getNextAvailableWeekdayDate = (
+  weekday,
+  studentSlots = [],
+  reschedulingSlot,
+  targetSession
+) => {
+  const baseDate = new Date(reschedulingSlot.start_date);
+
+  // Extract hours and minutes from both times
+  const [rescheduleHour, rescheduleMin] = new Date(reschedulingSlot.session.start_time)
+    .toTimeString()
+    .split(':')
+    .map(Number);
+
+  const [targetHour, targetMin] = new Date(targetSession.start_time)
+    .toTimeString()
+    .split(':')
+    .map(Number);
+
+  const maxIterations = 100;
+  let offset = (weekday - baseDate.getDay() + 7) % 7;
+  let iterations = 0;
+
+  while (iterations < maxIterations) {
+    const candidate = new Date(baseDate);
+    candidate.setDate(baseDate.getDate() + offset);
+    candidate.setHours(targetHour, targetMin, 0, 0);
+    const candidateDateStr = candidate.toDateString();
+    const rescheduleDateStr = baseDate.toDateString();
+
+
+
+    const isSameDay = candidateDateStr === rescheduleDateStr;
+
+    // 🔒 Skip if same day but target time is not strictly later than reschedule time
+    if (isSameDay) {
+      const targetMinutes = targetHour * 60 + targetMin;
+      const rescheduleMinutes = rescheduleHour * 60 + rescheduleMin;
+      if (targetMinutes <= rescheduleMinutes) {
+        offset += 7;
+        iterations++;
+        continue;
+      }
+    }
+
+    // ❌ Skip if student already has any slot on this date
+    const hasConflict = studentSlots.some(slot => {
+      const slotDate = new Date(slot.start_date);
+      const slotTime = new Date(slot.session.start_time);
+
+      const combinedSlotDateTime = new Date(slotDate);
+      combinedSlotDateTime.setHours(slotTime.getHours(), slotTime.getMinutes(), 0, 0);
+
+      // console.log(combinedSlotDateTime, candidateDateStr);
+      
+
+      return combinedSlotDateTime.toISOString() === candidate.toISOString();
+    });
+
+    
+    
+    
+    if (!hasConflict) {
+      console.log(hasConflict, candidate);
+      return candidate;
+    }
+
+    offset += 7;
+    iterations++;
+  }
+
+  throw new Error("No available weekday found within 100 weeks.");
 };
+
 
 export const getDiscount = (discount, rate, discountType) => {
   return (discountType === "percentage" || !discountType) ? rate - (rate * (discount / 100)) : rate - discount
@@ -142,3 +216,7 @@ export const isValidURL = (str) => {
     return false;
   }
 };
+
+export const isUserActive = (user) => {
+  return user?.status === "active"
+}

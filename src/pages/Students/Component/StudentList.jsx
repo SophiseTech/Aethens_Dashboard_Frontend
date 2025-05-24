@@ -27,17 +27,17 @@ function StudentList() {
 
   // Get initial view and page from query parameters
   const initialView = queryParams.get('view') || 'Current Students'; // Default to 'Current Students' if no query param
-  const initialPage = parseInt(queryParams.get('page')) || 1; // Default to page 1 if no query param
+  const currentPage = parseInt(queryParams.get('page')) || 1; // Default to page 1 if no query param
 
   const [visitedPages, setVisitedPages] = useState(new Set());
-  const [currentPage, setCurrentPage] = useState(initialPage);
+  // const [currentPage, setCurrentPage] = useState(initialPage);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedView, setSelectedView] = useState(initialView);
 
   useEffect(() => {
     fetchStudents();
-  }, [selectedView, searchQuery, currentPage]);
+  }, [selectedView, currentPage, searchQuery]);
 
   const fetchStudents = () => {
     if (selectedView === "All Students") {
@@ -59,12 +59,12 @@ function StudentList() {
 
   const handleSegmentChange = (view) => {
     setSelectedView(view);
-    setCurrentPage(1); // Reset to page 1 when view changes
+    // setCurrentPage(1); // Reset to page 1 when view changes
     updateURL(view, 1); // Update URL with new view and reset page to 1
   };
 
   const handlePageChange = (page, pageSize) => {
-    setCurrentPage(page);
+    // setCurrentPage(page);
     updateURL(selectedView, page); // Update URL with new page
     loadMore(page, pageSize); // Fetch data for the new page
   };
@@ -78,6 +78,9 @@ function StudentList() {
     if (selectedView === "Current Students") return currentSessionAttendees;
     return searchQuery ? searchResults : students;
   }, [students, searchResults, searchQuery, currentSessionAttendees, selectedView]);
+
+  console.log("search query: ", searchQuery, searchResults, currentPage);
+  
 
   const columns = [
     {
@@ -102,6 +105,10 @@ function StudentList() {
     {
       title: 'Email',
       dataIndex: 'email',
+    },
+    {
+      title: 'Type',
+      dataIndex: 'slotType',
     },
   ];
 
@@ -134,12 +141,17 @@ function StudentList() {
           total: searchQuery ? searchTotal : total,
           pageSize: 10,
         } : false}
+        rowClassName={(record) => {
+          // Example condition: highlight students with status 'Inactive'
+          return record.slotType === 'additional' ? 'bg-blue-200' : '';
+        }}
       />
       <UserDetailsDrawer
         user={selectedUser}
         visible={drawerVisible}
         onClose={() => setDrawerVisible(false)}
         showActions
+        isStudentDetail
       />
     </>
   );

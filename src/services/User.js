@@ -58,6 +58,22 @@ class UserService {
     }
   }
 
+  async deactivateUsers(userId) {
+    try {
+      await post(`/user/deactivateUser`, { userId })
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
+  async activateUsers(userId) {
+    try {
+      await post(`/user/activateUser`, { userId })
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
 }
 
 const userService = new UserService()

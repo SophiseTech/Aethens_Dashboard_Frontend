@@ -11,6 +11,8 @@ import { useStore } from 'zustand';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { downloadPdf } from '@utils/helper';
+import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
+import InvoicePdf from '@pages/Bills/Components/Invoice';
 
 function BillDetails() {
   const { bills, editBill, id, deleteBill, editMaterials } = useOutletContext();
@@ -51,20 +53,25 @@ function BillDetails() {
         <h1 className='font-bold | max-2xl:text-xl 2xl:text-2xl'>Preview</h1>
         <div className='flex gap-2'>
           {permissions.bills.record_payment.includes(user.role) &&
-            <RecordPaymentModal handleRecordPayment={handleRecordPayment} />
+            <RecordPaymentModal handleRecordPayment={handleRecordPayment} bill={bill} />
           }
 
-          <Button
-            className='rounded-full'
-            color='blue'
-            icon={<DownloadOutlined />}
-            variant='outlined'
-            onClick={() => {
-              downloadPdf(invoiceRef, `invoice_${bill?.invoiceNo}.pdf`)
-            }}
+
+          <PDFDownloadLink
+            document={<InvoicePdf bill={bill} />}
+            fileName={`INV-${bill?.invoiceNo || 'Untitled'}.pdf`}
           >
-            Download
-          </Button>
+            {({ loading, url, error }) => (
+              <Button
+                className='rounded-full'
+                color='blue'
+                icon={<DownloadOutlined />}
+                variant='outlined'
+              >
+                {loading ? 'Preparing PDF...' : 'Download'}
+              </Button>
+            )}
+          </PDFDownloadLink>
 
           {permissions.bills.delete.includes(user.role) &&
             <Popconfirm
@@ -85,7 +92,11 @@ function BillDetails() {
         </div>
       </div>
       <div className='lg:flex-1 lg:overflow-auto h-auto lg:h-full | p-5 lg:p-10'>
-        <Invoice bill={bill} type={"materials"} downloadRef={invoiceRef} />
+        {/* <Invoice bill={bill} type={"materials"} downloadRef={invoiceRef} /> */}
+
+        <PDFViewer width="100%" height="1000">
+          <InvoicePdf bill={bill} />
+        </PDFViewer>
       </div>
     </div>
   );

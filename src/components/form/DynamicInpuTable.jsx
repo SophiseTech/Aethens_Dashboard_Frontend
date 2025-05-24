@@ -1,6 +1,7 @@
 import { PlusOutlined } from '@ant-design/icons';
 import CustomSelect from '@components/form/CustomSelect';
-import { AutoComplete, Button, Flex, Form, Input, InputNumber, Popconfirm, Select, Table, Typography } from 'antd'
+import { AutoComplete, Button, Flex, Form, Input, InputNumber, Popconfirm, Select, Spin, Table, Typography } from 'antd'
+import { debounce } from 'lodash';
 import React, { useState } from 'react'
 
 
@@ -115,8 +116,10 @@ function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = (
         index,
         options,
         onSelect,
+        onSearch: col.onSearch,
         selectAfter: col.selectAfter,
         editing: isEditing(record),
+        itemType: col.itemType,
       }),
     };
   });
@@ -147,6 +150,9 @@ function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = (
           columns={mergedColumns}
           rowClassName="editable-row"
           pagination={false}
+          scroll={{
+            x: "max-content",
+          }}
         />
       </Form.Item>
       {!disableAddItem &&
@@ -170,19 +176,45 @@ const EditableCell = ({
   children,
   onSelect,
   selectAfter,
+  onSearch,
+  itemType,
   ...restProps
 }) => {
+
+  const [searchLoading, setSearchLoading] = useState(false)
+
+  const debouncedSearch = React.useMemo(() => {
+    if (!onSearch) return () => { };
+    return debounce((val) => {
+      try {
+        setSearchLoading(true);
+        onSearch?.(val, index);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+  }, [onSearch, index]);
+
   const inputNode = inputType === 'number' ?
     <InputNumber />
     : inputType === "autocomplete" ?
       <Select
         options={options}
-        onSelect={(value) => onSelect(value, index)}
-        filterOption={(inputValue, option) =>
-          option.label.toLowerCase().includes(inputValue.toLowerCase())
-        }
+        onSelect={(value, option) => onSelect(value, index, option)}
+        filterOption={itemType !== "course" ? false : (input, option) => {
+          return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+        }}
+        onSearch={debouncedSearch}
         showSearch
-      />
+      >
+        {searchLoading ? <Spin className='animate-spin' /> : options?.map((option) => (
+          <Select.Option key={option.value} value={option.value}>
+            {option.label}
+          </Select.Option>
+        ))}
+      </Select>
       : inputType === "percentage" ? <Input addonAfter={selectAfter(index)} />
         : <Input />;
 

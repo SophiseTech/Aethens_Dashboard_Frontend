@@ -7,17 +7,18 @@ import ItemsInputTable from '@pages/Bills/Components/ItemsInputTable';
 import { sumFromObjects } from '@utils/helper';
 import { Form, Modal, Table } from 'antd';
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 
 function GenerateBill({
-  items = [], customers = [], itemsOptions = [], customersOptions = [], invoiceNo, loadInitData = () => { }, onSave = async () => { }, handleCancel, isModalOpen, handleOk
+  items = [], courses = [], customers = [], customersOptions = [], invoiceNo, loadInitData = () => { }, onSave = async () => { }, handleCancel, isModalOpen, handleOk, onSearch
 }) {
 
 
   const [selectedItem, setSelectedItem] = useState({});
   const [totals, setTotals] = useState({});
   const [form] = Form.useForm();
+  const selectedSubject = Form.useWatch("subject", form)
 
 
   const initialValues = {
@@ -30,16 +31,46 @@ function GenerateBill({
   }
   const loading = false
 
+  const subjectOptions = [
+    {
+      label: "Materials",
+      value: "materials"
+    },
+    {
+      label: "Gallery",
+      value: "gallery"
+    },
+    {
+      label: "Courses",
+      value: "course"
+    },
+  ]
 
+  const getItemType = (selectedSubject) => {
+    switch (selectedSubject) {
+      case "materials":
+        return "InventoryItem"
+      case "gallery":
+        return "InventoryItem"
+      case "course":
+        return "Course"
+      default:
+        break;
+    }
+  }
 
   // Loading Initial dropdown data. Function should be passed from parent 
   useEffect(() => {
-    loadInitData()
-  }, [])
+    loadInitData({ itemType: selectedSubject })
+  }, [selectedSubject])
 
   // Submit function
   const onSubmit = async (values) => {
-    values?.items?.forEach((item, index) => item.item = selectedItem[index]?._id)
+    values?.items?.forEach((item, index) => {
+      item.item = selectedItem[index]?._id
+      item.name = selectedItem[index]?.name
+      item.item_type = getItemType(selectedSubject)
+    })
     console.log(values);
     await onSave({ ...values, ...totals })
     handleOk()
@@ -57,6 +88,14 @@ function GenerateBill({
       render: (value, _, index) => (index === 2 ? <p className='font-bold text-lg text-primary'>₹{value}</p> : `₹${value}`)
     },
   ]
+  // console.log(items);
+
+  const itemsOptionsBySubject = useMemo(() => {
+    if (!selectedSubject) {
+      return items?.map(item => ({ label: item.name, value: item._id }))
+    }
+    return items?.filter(item => item.type === selectedSubject)?.map(item => ({ label: item.name, value: item._id }))
+  }, [items, selectedSubject])
 
   return (
     <>
@@ -66,7 +105,7 @@ function GenerateBill({
         open={isModalOpen}
         footer={null}
         onCancel={handleCancel}
-        width={"70%"}
+        width={"90%"}
       >
         <CustomForm form={form} initialValues={initialValues} action={onSubmit}>
           <div className='flex gap-5'>
@@ -74,10 +113,11 @@ function GenerateBill({
             <CustomDatePicker label={"Invoice Date"} name={"generated_on"} className='w-full' />
           </div>
           <div className='flex gap-5'>
-            <CustomInput label={"Subject"} name={"subject"} placeholder={"Materials"} />
+            {/* <CustomInput label={"Subject"} name={"subject"} placeholder={"Materials"} /> */}
+            <CustomSelect name={"subject"} options={subjectOptions} label={"Subject"} placeholder='Subject' />
             <CustomSelect name={"generated_for"} options={customersOptions} label={"Select Customer"} placeholder='Customer' />
           </div>
-          <ItemsInputTable form={form} items={items} itemsOptions={itemsOptions} name={"items"} selectedItem={selectedItem} setSelectedItem={setSelectedItem} setTotals={setTotals} />
+          <ItemsInputTable form={form} items={items} itemsOptions={itemsOptionsBySubject} name={"items"} selectedItem={selectedItem} setSelectedItem={setSelectedItem} setTotals={setTotals} itemType={selectedSubject} onSearch={onSearch} />
           <Table
             className='w-fit ml-auto'
             showHeader={false}

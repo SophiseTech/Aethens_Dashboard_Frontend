@@ -13,7 +13,7 @@ function Slots() {
 
   useEffect(() => {
     if (!slots || slots.length <= 0) {
-      getSlots(0, {sort: {start_date : -1}, query: {booked_student_id: user._id}, populate: "center_id session"})
+      getSlots(0, { sort: { start_date: -1 }, query: { booked_student_id: user._id, course_id: user?.details_id?.course_id?._id || user?.details_id?.course_id }, populate: "center_id session" })
     }
   }, [])
 
@@ -22,7 +22,7 @@ function Slots() {
   return (
     <Title title={"Slots"}>
       <Suspense fallback={<Loader />}>
-        <SlotList groupedSlots={groupedSlots} />
+        <SlotList groupedSlots={groupedSlots} slots={slots} />
       </Suspense>
     </Title>
   )

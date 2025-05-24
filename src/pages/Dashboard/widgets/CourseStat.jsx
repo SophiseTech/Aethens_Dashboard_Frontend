@@ -118,7 +118,7 @@ const Progress = ({ value = 50, curr, total }) => (
     >
       <div className='flex flex-col items-center text-white'>
         <p className='font-bold | text-lg 2xl:text-3xl'>{curr} of {total}</p>
-        <p className='| text-[0.6rem] 2xl:text-sm'>Sessions completed</p>
+        <p className='| text-[0.6rem] 2xl:text-sm text-center'>Sessions completed</p>
       </div>
     </CircularProgressbarWithChildren>
   </div>

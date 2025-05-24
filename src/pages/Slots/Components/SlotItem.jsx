@@ -2,7 +2,7 @@ import { ClockCircleFilled, CloseOutlined, EllipsisOutlined, EnvironmentFilled }
 import SubMenu from '@components/SubMenu'
 import slotStore from '@stores/SlotStore'
 import { formatTime } from '@utils/helper'
-import { Avatar, Popover } from 'antd'
+import { Avatar, Modal, Popover } from 'antd'
 import { cva } from 'class-variance-authority'
 import dayjs from 'dayjs'
 import React from 'react'
@@ -11,9 +11,7 @@ import { useStore } from 'zustand'
 function SlotItem({ _id, session, center_id: { location }, type, slotType, start_date: sessionDate, showModal }) {
   const day = dayjs(sessionDate).format("ddd")
   const date = dayjs(sessionDate).format("DD")
-  const { setReschedulingSlot } = useStore(slotStore)
-
-  console.log(sessionDate);
+  const { setReschedulingSlot, markAbsent, createLoading } = useStore(slotStore)
 
   const containerStyle = cva(
     "border rounded-xl flex items-center relative overflow-hidden | gap-5 md:gap-10 p-5 2xl:p-10",
@@ -22,7 +20,10 @@ function SlotItem({ _id, session, center_id: { location }, type, slotType, start
         type: {
           upcoming: "border-primary",
           requested: "text-gray-500",
-          normal: "border-border"
+          normal: "border-border",
+          completed: "border-gray-200 text-gray-400",
+          absent: "border-red-500",
+          cancelled: "border-red-500",
         }
       },
       defaultVariants: {
@@ -38,7 +39,10 @@ function SlotItem({ _id, session, center_id: { location }, type, slotType, start
         type: {
           upcoming: "bg-primary text-white",
           requested: "bg-[#FFBBA7] text-[#C22F02]",
-          normal: "hidden"
+          normal: "hidden",
+          completed: "hidden",
+          absent: "bg-red-500 text-white",
+          cancelled: "bg-red-500 text-white",
         }
       },
       defaultVariants: {
@@ -47,34 +51,51 @@ function SlotItem({ _id, session, center_id: { location }, type, slotType, start
     }
   )
 
-  const isRequest = () => type === "requested"
+  const isRequest = () => type === "requested" || type === "completed"
 
-  const options = [
-    {
-      label: 'Request reschedule',
-      icon: <ClockCircleFilled />,
-      key: '1',
-      onClick: () => {
-        setReschedulingSlot({
-          start_date: sessionDate,
-          session: session,
-          _id
-        })
-        showModal()
-      }
-    },
-    // {
-    //   label: 'Mark Absent',
-    //   icon: <CloseOutlined />,
-    //   danger: true,
-    //   key: '2',
-    // },
-  ];
+  const getOptions = (type) => {
+    console.log(type);
+    
+    return [
+      {
+        label: 'Request reschedule',
+        icon: <ClockCircleFilled />,
+        key: '1',
+        onClick: () => {
+          setReschedulingSlot({
+            start_date: sessionDate,
+            session: session,
+            _id
+          })
+          showModal()
+        },
+        disabled: type === "completed" || type === "cancelled"
+      },
+      {
+        label: 'Mark Absent',
+        icon: <CloseOutlined />,
+        danger: true,
+        key: '2',
+        onClick: () => {
+          Modal.confirm({
+            title: 'Confirm Mark Absent',
+            content: 'Are you sure you want to mark this student as absent?',
+            okText: 'Yes',
+            cancelText: 'No',
+            onOk: () => {
+              markAbsent(_id, "cancelled"); // Or whatever logic marks the student absent
+            }
+          });
+        },
+        disabled: type === "completed" || type === "cancelled" || type === "absent"
+      },
+    ];
+  }
 
   return (
     <div className={containerStyle({ type })}>
 
-      <div className={tagStyles({ type })}>{type === "requested" ? "Requested" : "Upcoming"}</div>
+      <div className={tagStyles({ type })}>{type === "requested" ? "Requested" : type === "cancelled" ? "Cancelled" : type === "absent" ? "Absent" : "Upcoming"}</div>
 
       <div className='text-center'>
         <p className={`${isRequest() ? "text-gray-400" : "text-primary"} | text-lg 2xl:text-3xl`}>{day}</p>
@@ -113,7 +134,7 @@ function SlotItem({ _id, session, center_id: { location }, type, slotType, start
       </div>
 
       <div>
-        <SubMenu items={options} />
+        <SubMenu items={getOptions(type)} />
       </div>
 
       {isRequest() && <RequestMask />}

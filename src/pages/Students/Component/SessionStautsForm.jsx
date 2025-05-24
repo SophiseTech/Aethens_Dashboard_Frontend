@@ -21,20 +21,22 @@ function SessionStautsForm({ handleOk, student }) {
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [units, setUnits] = useState([]);
   const [topics, setTopics] = useState([]);
+  const { user } = useStore(userStore)
 
   useEffect(() => {
     if (student?.details_id?.course_id) {
       getCourse(student.details_id.course_id._id)
     }
-    if (!faculties || total === 0 || faculties.length < total) {
-      getFacultiesByCenter(0)
-    }
+    // if (!faculties || total === 0 || faculties.length < total) {
+    //   getFacultiesByCenter(0)
+    // }
   }, [])
 
   const onSubmit = async (values) => {
-    const faculty = faculties?.find(faculty => faculty.username === values.faculty_id)
-    values.faculty_id = faculty._id
+    // const faculty = faculties?.find(faculty => faculty.username === values.faculty_id)
+    values.faculty_id = user._id
     values.student_id = student._id
+    values.course_id = student.details_id.course_id._id
     if (values.isTopicComplete) {
       values.completedOn = new Date()
     }
@@ -104,7 +106,7 @@ function SessionStautsForm({ handleOk, student }) {
         <CustomSelect label={"Select Module"} name={"module"} options={moduleOptions} onChange={handleModuleChange} />
         <CustomSelect label={"Select Unit"} name={"unit"} options={units} onChange={handleUnitChange} />
         <CustomSelect label={"Select Topic"} name={"topic"} options={topics} />
-        <CustomSelect label={"Select Faculty"} name={"faculty_id"} options={facultyOptions} />
+        {/* <CustomSelect label={"Select Faculty"} name={"faculty_id"} options={facultyOptions} /> */}
       </Flex>
       <CustomInput label={"Remarks"} name={"remarks"} placeholder={"Any remarks regarding the student..."} type='textarea' />
       <CustomCheckbox label={"Is the topic completed?"} name={"isTopicComplete"} />

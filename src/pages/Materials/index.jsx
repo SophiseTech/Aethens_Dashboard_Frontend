@@ -14,9 +14,9 @@ function Materials() {
 
   useEffect(() => {
     getMaterials(10, {
-      query: { student_id: user._id },
+      query: { student_id: user._id, course_id: user.details_id.course_id?._id || user.details_id.course_id },
       populate: "inventory_item_id",
-      sort: "-createdAt"
+      sort: { createdAt: -1, _id: -1 }
     },
       currentPage
     )

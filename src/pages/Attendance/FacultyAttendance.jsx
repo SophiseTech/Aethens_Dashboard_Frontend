@@ -8,18 +8,22 @@ import dayjs from "dayjs";
 import AttendanceFilter from "@pages/Attendance/Components/AttendanceFilter";
 import AttendanceStats from "@pages/Attendance/Components/AttendanceStats";
 import AttendanceTrend from "@pages/Attendance/Components/AttendanceTrend";
+import { months } from "@utils/constants";
 
 function FacultyAttendance() {
   const { getSlots, loading, slots, getSlotStats, slotStats, createLoading } = slotStore();
-  const { id } = useParams();
-  const [selectedFilter, setSelectedFilter] = useState("this_month");
+  const { id, course_id } = useParams();
+  const [selectedFilter, setSelectedFilter] = useState(months[dayjs().month()]?.toLowerCase());
 
-  const filters = [
-    { label: "This Month", value: "this_month", range: [dayjs().startOf("month"), dayjs().endOf("month")] },
-    { label: "Last Month", value: "last_month", range: [dayjs().subtract(1, "month").startOf("month"), dayjs().subtract(1, "month").endOf("month")] },
-    { label: "This Year", value: "this_year", range: [dayjs().startOf("year"), dayjs().endOf("year")] },
-    { label: "Last Year", value: "last_year", range: [dayjs().subtract(1, "year").startOf("year"), dayjs().subtract(1, "year").endOf("year")] }
-  ];
+  const filters = Array.from({ length: 12 }, (_, index) => {
+    const month = dayjs().month(index); // Get the month index (0-11)
+    return {
+      label: month.format("MMMM"), // Full month name (e.g., January, February)
+      value: month.format("MMMM").toLowerCase(), // Lowercase month name for value
+      range: [month.startOf("month"), month.endOf("month")],
+    };
+  });
+
 
   useEffect(() => {
     const selectedRange = filters.find(f => f.value === selectedFilter)?.range ||
@@ -29,12 +33,13 @@ function FacultyAttendance() {
       sort: { start_date: -1 },
       query: {
         booked_student_id: id,
+        course_id: course_id,
         start_date: { $gte: selectedRange[0].toISOString(), $lte: selectedRange[1].toISOString() }
       },
       populate: "center_id session"
     });
 
-    getSlotStats(id)
+    getSlotStats(id, course_id)
   }, [id, selectedFilter]);
 
   return (
@@ -47,10 +52,10 @@ function FacultyAttendance() {
         />
         <Flex gap={20}>
           <Flex vertical gap={20}>
-            <AttendanceStats stats={slotStats} slots={slots} loading={loading} />
+            <AttendanceStats stats={slotStats} slots={slots} loading={loading} selectedFilter={selectedFilter} />
             <AttendanceTrend stats={slotStats} />
           </Flex>
-          <MonthlyReport slots={slots} loading={loading} />
+          <MonthlyReport slots={slots} loading={loading} month={selectedFilter} />
         </Flex>
       </div>
     </Title>

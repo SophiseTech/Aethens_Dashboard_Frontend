@@ -1,6 +1,6 @@
 import Book from '@/assets/Book';
 import Target from '@/assets/Target';
-import { AppstoreOutlined, BookOutlined, CalendarOutlined, DollarOutlined, FundProjectionScreenOutlined, LogoutOutlined, MenuUnfoldOutlined, MoneyCollectOutlined, PictureOutlined, ShopOutlined, SolutionOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, BookOutlined, CalendarOutlined, ClockCircleOutlined, DollarOutlined, FundProjectionScreenOutlined, LogoutOutlined, MenuUnfoldOutlined, MoneyCollectOutlined, PictureOutlined, ShopOutlined, SolutionOutlined } from '@ant-design/icons';
 import SubMenu from '@components/SubMenu';
 import UserDetailsDrawer from '@components/UserDetailsDrawer';
 import userStore from '@stores/UserStore';
@@ -26,6 +26,8 @@ function Sidebar({ children }) {
   const { user, logOut } = userStore()
   const nav = useNavigate()
   const [drawerVisible, setDrawerVisible] = useState(false);
+  console.log(user);
+  
 
 
   const isActive = (path) => pathname === path || pathname.startsWith(path) && path !== "/"
@@ -54,6 +56,9 @@ function Sidebar({ children }) {
     getItem("Attendance", '1', FundProjectionScreenOutlined, "/attendance", [ROLES.STUDENT]),
     getItem("Syllabus", '1', BookOutlined, `/syllabus/${user?.details_id?.course_id}`, [ROLES.STUDENT]),
     getItem("Gallery", '1', PictureOutlined, "/gallery", [ROLES.MANAGER, ROLES.FACULTY]),
+    getItem("Slots", '1', ClockCircleOutlined, "/manager/slots", [ROLES.MANAGER]),
+    getItem("Slots", '1', ClockCircleOutlined, "/faculty/slots", [ROLES.FACULTY]),
+    getItem("Course History", '1', ClockCircleOutlined, "/courseHistory", [ROLES.STUDENT]),
   ], [user])
 
 

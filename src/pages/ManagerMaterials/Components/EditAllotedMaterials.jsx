@@ -1,3 +1,4 @@
+import inventoryService from '@/services/Inventory'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import CustomForm from '@components/form/CustomForm'
 import CustomSubmit from '@components/form/CustomSubmit'
@@ -14,19 +15,24 @@ function EditAllotedMaterials({ selectedRowKeys, student_id, handleOk }) {
   const [form] = Form.useForm()
   const { user } = useStore(userStore)
   const { getInvoiceNo, createBill, createLoading: billLoading } = useStore(billStore)
-  const { items, getItems, total: inventoryTotal, editItem } = useStore(inventoryStore)
+  const { getItems, total: inventoryTotal, editItem } = useStore(inventoryStore)
   const [selecteItems, setSelecteItems] = useState({})
   const [totals, setTotals] = useState({})
   const { editMaterials, loading, materials } = useStore(materialStore)
-
+  const [items, setItems] = useState([])
 
   const [modal, contextHolder] = Modal.useModal()
 
   useEffect(() => {
-    if (inventoryTotal === 0 || items.length < inventoryTotal) {
-      getItems(0)
-    }
+    fetchItems(10, { query: { type: "materials" } })
   }, [])
+
+  const fetchItems = async (limit = 10, filters = {}) => {
+    const { items, total } = await inventoryService.getInventoryItems(0, limit, filters)
+    if (items) {
+      setItems(items)
+    }
+  }
 
   useEffect(() => {
     const materialMap = new Map(materials.map((m) => [m._id, m]));
@@ -74,6 +80,7 @@ function EditAllotedMaterials({ selectedRowKeys, student_id, handleOk }) {
 
       return {
         item: material.inventory_item_id?._id,
+        item_type: "InventoryItem",
         qty: material.qty,
         taxAmnt: material.taxAmnt,
         subtotal: material.subtotal,
@@ -81,7 +88,8 @@ function EditAllotedMaterials({ selectedRowKeys, student_id, handleOk }) {
         taxes: material.taxes,
         rate: material.rate,
         discount: material.discount,
-        discountType: material.discountType
+        discountType: material.discountType,
+        name: material?.inventory_item_id?.name,
       }
     })
 
@@ -120,6 +128,15 @@ function EditAllotedMaterials({ selectedRowKeys, student_id, handleOk }) {
   const itemsOptions = useMemo(() => items?.filter(item => (item.type === "default" || (item.quantity > 0 && item.type === "materials")))
     .map(item => ({ label: item.name, value: item._id })), [items])
 
+  const handleSearch = async (value) => {
+    const { items } = await inventoryService.getInventoryItems(
+      0,
+      0,
+      { searchQuery: value, query: { type: "materials" } }
+    )
+    setItems(items)
+  }
+
   return (
     <CustomForm form={form} action={handleMarkCollectedWithInvoice} >
       <ItemsInputTable
@@ -132,6 +149,7 @@ function EditAllotedMaterials({ selectedRowKeys, student_id, handleOk }) {
         setTotals={setTotals}
         disableAddItem
         disableDelete
+        onSearch={handleSearch}
       />
 
       <CustomSubmit label='Save And Generate Invoice' loading={billLoading} />

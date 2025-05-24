@@ -134,12 +134,29 @@ const slotStore = create((set, get) => ({
       set({ createLoading: false })
     }
   },
-  getSlotStats: async (user_id) => {
+  getSlotStats: async (user_id, course_id) => {
     try {
       set({ createLoading: true })
-      const stats = await slotService.slotStats(user_id)
+      const stats = await slotService.slotStats(user_id, course_id)
       if (stats) {
         set({ slotStats: stats })
+        return stats
+      }
+    } catch (error) {
+      handleInternalError(error)
+    } finally {
+      set({ createLoading: false })
+    }
+  },
+  markAbsent: async (slotId, status) => {
+    try {
+      set({ createLoading: true })
+      const stats = await slotService.updateSlotStatus(slotId, status)
+      if (stats) {
+        const { slots } = get()
+        const updatedSlots = slots.map(slot => slot._id === slotId ? { ...slot, status: "cancelled" } : slot)
+        set({ slots: updatedSlots })
+        handleSuccess("Slot Marked Absent Successfully")
         return stats
       }
     } catch (error) {

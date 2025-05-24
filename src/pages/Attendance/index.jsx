@@ -16,6 +16,7 @@ function Attendance() {
   const { getSlots, loading, slots, getSlotStats, slotStats, createLoading } = slotStore();
   const [selectedFilter, setSelectedFilter] = useState(months[dayjs().month()]?.toLowerCase());
   const { user } = useStore(userStore)
+  const { courseId } = useParams()
 
   const filters = Array.from({ length: 12 }, (_, index) => {
     const month = dayjs().month(index); // Get the month index (0-11)
@@ -34,12 +35,13 @@ function Attendance() {
       sort: { start_date: -1 },
       query: {
         booked_student_id: user?._id,
+        course_id: courseId || user?.details_id?.course_id?._id || user?.details_id?.course_id,
         start_date: { $gte: selectedRange[0].toISOString(), $lte: selectedRange[1].toISOString() }
       },
       populate: "center_id session"
     });
 
-    getSlotStats(user?._id)
+    getSlotStats(user?._id, courseId || user?.details_id?.course_id?._id || user?.details_id?.course_id)
   }, [user, selectedFilter]);
 
   return (
@@ -52,7 +54,7 @@ function Attendance() {
         />
         <Flex gap={20} className="max-lg:flex-col-reverse">
           <Flex vertical gap={20}>
-            <AttendanceStats stats={slotStats} slots={slots} loading={loading} />
+            <AttendanceStats stats={slotStats} slots={slots} loading={loading} selectedFilter={selectedFilter} />
             <AttendanceTrend stats={slotStats} />
           </Flex>
           <MonthlyReport slots={slots} loading={loading} month={selectedFilter} />

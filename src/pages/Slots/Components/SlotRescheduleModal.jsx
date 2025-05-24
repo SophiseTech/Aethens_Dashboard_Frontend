@@ -4,15 +4,18 @@ import CustomSelect from '@components/form/CustomSelect';
 import CustomSlotPicker from '@components/form/CustomSlotPicker';
 import CustomSubmit from '@components/form/CustomSubmit';
 import SessionStore from '@stores/SessionStore';
-import { getNextWeekdayDate } from '@utils/helper';
+import slotStore from '@stores/SlotStore';
+import { getNextAvailableWeekdayDate } from '@utils/helper';
+// import { getNextWeekdayDate } from '@utils/helper';
 import { Form, Modal } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useMemo, useState } from 'react'
 import { useStore } from 'zustand';
 
-function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel }) {
+function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlots = [] }) {
   const [form] = Form.useForm();
   const { getAvailableSessions, availableSessions, loading } = useStore(SessionStore)
+  const { reschedulingSlot } = slotStore()
 
   useEffect(() => {
     getAvailableSessions()
@@ -30,7 +33,7 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel }) {
 
   const handleSubmit = async (values) => {
     const session = availableSessions.find(session => session._id === values.session)
-    const nextDate = getNextWeekdayDate(session.weekDay)
+    const nextDate = getNextAvailableWeekdayDate(session.weekDay, studentsSlots, reschedulingSlot, session)
     nextDate.setHours(dayjs(session.start_time).hour())
     nextDate.setMinutes(dayjs(session.start_time).minute())
     values.requested_slot = {

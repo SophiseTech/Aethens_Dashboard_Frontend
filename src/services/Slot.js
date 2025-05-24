@@ -1,5 +1,5 @@
 import handleError from "@utils/handleError"
-import { post } from "@utils/Requests"
+import { del, post } from "@utils/Requests"
 
 class SlotService {
   async getSlots(filters, lastRefKey, limit) {
@@ -62,9 +62,29 @@ class SlotService {
     }
   }
 
-  async slotStats(userId) {
+  async slotStats(userId, course_id) {
     try {
-      const response = await post(`/slots/stats/`, { user_id: userId })
+      const response = await post(`/slots/stats/`, { user_id: userId, course_id: course_id })
+      if (!response) throw new Error("An error occured. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
+  async updateSlotStatus(slotId, status) {
+    try {
+      const response = await post(`/slots/updateStatus`, { slotId, status })
+      if (!response) throw new Error("An error occured. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
+  async deleteSlot(slotId) {
+    try {
+      const response = await del(`/slots/${slotId}`)
       if (!response) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {

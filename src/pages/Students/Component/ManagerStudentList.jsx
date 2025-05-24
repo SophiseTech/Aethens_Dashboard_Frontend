@@ -8,6 +8,7 @@ import { ROLES } from '@utils/constants';
 import UserDetailsDrawer from '@components/UserDetailsDrawer';
 import { useStore } from 'zustand';
 import Chip from '@components/Chips/Chip';
+import userStore from '@stores/UserStore';
 
 function StudentList() {
   const {
@@ -22,6 +23,8 @@ function StudentList() {
     getCurrentSessionAttendees,
     currentSessionAttendees,
   } = useStore(studentStore);
+
+  const { user } = useStore(userStore);
 
   const nav = useNavigate();
   const location = useLocation();
@@ -44,7 +47,7 @@ function StudentList() {
   const fetchStudents = () => {
     if (selectedView === "All Students") {
       if (searchQuery) {
-        search(10, { searchQuery, query: { role: ROLES.STUDENT }, page: currentPage }, currentPage);
+        search(10, { searchQuery, query: { role: ROLES.STUDENT, center_id: user.center_id }, page: currentPage }, currentPage);
       } else {
         getStudentsByCenter(10, currentPage);
       }
@@ -143,6 +146,7 @@ function StudentList() {
         visible={drawerVisible}
         onClose={() => setDrawerVisible(false)}
         showActions
+        isStudentDetail
       />
     </>
   );

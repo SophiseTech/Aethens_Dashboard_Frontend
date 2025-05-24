@@ -15,15 +15,16 @@ const inventoryStore = create((set, get) => ({
   searchLastRefKey: 0,
   searchQuery: null,
   searchTotal: 0,
-  getItems: async (limit = 10, filters = {}) => {
+  getItems: async (limit = 10, filters = {}, page = 1) => {
     try {
       set({ loading: true })
       const { lastRefKey, items: prevItems } = get()
-      const { items, total } = await inventoryService.getInventoryItems(lastRefKey, limit, filters)
+      const offset = (page - 1) * limit;
+
+      const { items, total } = await inventoryService.getInventoryItems(offset, limit, filters)
       if (items) {
         set({
-          items: [...prevItems, ...items],
-          lastRefKey: lastRefKey + items.length,
+          items: items,
           total: total
         })
       }
@@ -33,19 +34,21 @@ const inventoryStore = create((set, get) => ({
       set({ loading: false })
     }
   },
-  searhcItems: async (limit = 10, filters = {}) => {
+  searhcItems: async (limit = 10, filters = {}, page = 1) => {
     try {
       set({ loading: true })
       const { searchLastRefKey, searchResults: prevItems, searchQuery } = get()
+      const offset = (page - 1) * limit;
+
       const { items, total } = await inventoryService.getInventoryItems(
-        filters.searchQuery !== searchQuery ? 0 : searchLastRefKey,
+        offset,
         limit,
         filters
       )
       if (items) {
         set({
-          searchResults: filters.searchQuery !== searchQuery ? items : [...prevItems, ...items],
-          searchLastRefKey: filters.searchQuery !== searchQuery ? items.length : searchLastRefKey + items.length,
+          searchResults: items,
+          // searchLastRefKey: filters.searchQuery !== searchQuery ? items.length : searchLastRefKey + items.length,
           searchTotal: total,
           searchQuery: filters.searchQuery
         })

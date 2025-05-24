@@ -19,11 +19,11 @@ function Inventory() {
   const { requests, getRequests, approveRequest, rejectRequest, loading } = requestsStore()
 
   useEffect(() => {
-    if (!items || items.length <= 0) {
-      getItems(30, {
-        sort: "-createdAt"
-      })
-    }
+    // if (!items || items.length <= 0) {
+    //   getItems(30, {
+    //     sort: "-createdAt"
+    //   })
+    // }
     if (_.isEmpty(inventory)) {
       getInventory({ query: { center_id: user.center_id } })
     }

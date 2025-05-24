@@ -9,6 +9,19 @@ import { create } from "zustand"
 const SessionStore = create((set, get) => ({
   availableSessions: [],
   loading: false,
+  sessions: [],
+  getAllSessions: async () => {
+    try {
+      set({ loading: true })
+      const data = await sessionService.getAllSessions()
+      set({ sessions: data })
+      return data
+    } catch (error) {
+      handleInternalError(error)
+    } finally {
+      set({ loading: false })
+    }
+  },
   getAvailableSessions: async () => {
     try {
       set({ loading: true })

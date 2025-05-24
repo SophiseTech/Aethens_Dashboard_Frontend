@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.2",
+    "@react-pdf/renderer": "^4.3.0",
     "antd": "^5.23.0",
     "antd-img-crop": "^4.24.0",
     "class-variance-authority": "^0.7.1",

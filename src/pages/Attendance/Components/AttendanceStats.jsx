@@ -1,10 +1,11 @@
 import { UserOutlined } from '@ant-design/icons'
 import DataDisplay from '@pages/Dashboard/Components/DataDisplay'
+import { months } from '@utils/constants'
 import dayjs from 'dayjs'
 import React from 'react'
 
-function AttendanceStats({ stats, slots, loading }) {
-  const { totalCounts, monthlyStats } = stats || {}
+function AttendanceStats({ stats, slots, loading, selectedFilter }) {
+  const { totalCounts, monthlyStats, totalSlots } = stats || {}
   const totalSessionsCount = slots?.length
 
   const { attended, unattended } = slots?.reduce((acc, curr) => {
@@ -22,25 +23,25 @@ function AttendanceStats({ stats, slots, loading }) {
     <div className='grid grid-cols-2 gap-5'>
       <DataDisplay
         loading={loading}
-        title={"Attended Sessions"}
+        title={`Attended Sessions (${selectedFilter})`}
         count={`${attended} / ${totalSessionsCount}`}
         icon={<UserOutlined className='text-xl text-white' />}
       />
       <DataDisplay
         loading={loading}
-        title={"Unattended Sessions"}
+        title={`Unattended Sessions (${selectedFilter})`}
         count={unattended}
         icon={<UserOutlined className='text-xl text-white' />}
       />
       <DataDisplay
         loading={loading}
-        title={`Attended Sessions till ${lastMonthName}`}
-        count={`${totalCounts.attended} / ${totalCounts.attended + totalCounts.non_attended}`}
+        title={`Total Attended Sessions`}
+        count={`${totalCounts.attended} / ${totalSlots}`}
         icon={<UserOutlined className='text-xl text-white' />}
       />
       <DataDisplay
         loading={loading}
-        title={`Unattended Sessions till ${lastMonthName}`}
+        title={`Total Unattended Sessions`}
         count={totalCounts.non_attended}
         icon={<UserOutlined className='text-xl text-white' />}
       />

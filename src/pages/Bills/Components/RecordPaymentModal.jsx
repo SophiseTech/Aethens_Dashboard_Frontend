@@ -7,7 +7,7 @@ import CustomDatePicker from '@components/form/CustomDatePicker';
 import CustomSubmit from '@components/form/CustomSubmit';
 import dayjs from 'dayjs';
 
-function RecordPaymentModal({ handleRecordPayment }) {
+function RecordPaymentModal({ handleRecordPayment, bill }) {
   const { showModal, handleOk, handleCancel, isModalOpen } = useModal(handleRecordPayment);
   const [form] = Form.useForm();
 
@@ -34,6 +34,7 @@ function RecordPaymentModal({ handleRecordPayment }) {
         icon={<p>₹</p>}
         variant='outlined'
         onClick={showModal}
+        disabled={bill?.status === "paid"}
       >
         Record Payment
       </Button>

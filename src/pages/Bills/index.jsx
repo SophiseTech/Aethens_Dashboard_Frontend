@@ -1,14 +1,17 @@
+import courseService from '@/services/Course'
+import inventoryService from '@/services/Inventory'
 import Title from '@components/layouts/Title'
 import BillsLayot from '@pages/Bills/Components/BillsLayot'
 import GenerateBillButton from '@pages/Bills/Components/GenerateBillButton'
 import billStore from '@stores/BillStore'
+import courseStore from '@stores/CourseStore'
 import inventoryStore from '@stores/InventoryStore'
 import studentStore from '@stores/StudentStore'
 import userStore from '@stores/UserStore'
 import { ROLES } from '@utils/constants'
 import permissions from '@utils/permissions'
 import _ from 'lodash'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useStore } from 'zustand'
 
@@ -16,11 +19,14 @@ import { useStore } from 'zustand'
 function Bills() {
 
   const { getBills, bills, loading, createBill, total, getInvoiceNo, invoiceNo, filters: stateFilters } = billStore()
-  const { getItems, items, loading: itemsLoading, total: inventoryTotal } = inventoryStore()
+  const { getItems, searhcItems } = inventoryStore()
   const { getStudentsByCenter, total: studentTotal, students } = studentStore()
   const [searchParams, setSearchParams] = useSearchParams();
   const student_id = searchParams.get("student_id")
   const { user } = useStore(userStore)
+  const { courses, getCourses, total: courseTotal } = useStore(courseStore)
+  const [lineItems, setLineItems] = useState([])
+  // const [lineItemSearchFunction, setLneItemSearchFunction] = useState(() => { })
 
   useEffect(() => {
     console.log(stateFilters?.query?.generated_for != student_id, stateFilters?.query?.generated_for, student_id);
@@ -48,24 +54,39 @@ function Bills() {
       ...stateFilters, ...filters, populate: [
         { path: "generated_for", populate: { path: "details_id", model: "Student" } }, // Deep populate details_id
         { path: "generated_by" },
-        { path: "items.item" }
+        { path: "items.item", model: "Course" }
       ]
     })
   }
 
-  const loadInitData = () => {
+  const loadInitData = async ({ itemType }) => {
+    console.log(itemType);
+
     if (!invoiceNo || invoiceNo === 0) {
       getInvoiceNo()
     }
-    if (inventoryTotal === 0 || items.length < inventoryTotal) {
-      getItems(0)
+    if (itemType === "materials") {
+      const { items } = await inventoryService.getInventoryItems(0, 10, { query: { type: "materials" } })
+      setLineItems(items)
+      // setLneItemSearchFunction(searhcItems)
+    }
+    if (itemType === "course") {
+      const { courses } = await courseService.getCourses({}, 0, 10)
+      setLineItems([...courses?.map(course => ({ name: course.course_name, _id: course._id, type: "course" })), { name: "Registration Fee", _id: "67c00eb2073609b23054ca01", type: "course" }])
+    }
+    if (itemType === "gallery") {
+      const { items } = await inventoryService.getInventoryItems(0, 10, { query: { type: "gallery" } })
+      setLineItems(items)
+      // setLneItemSearchFunction(searhcItems)
     }
     if (studentTotal === 0 || students.length < studentTotal) {
       getStudentsByCenter(0)
     }
+    // if (courseTotal === 0 || courses.length < courseTotal) {
+    //   getCourses(0)
+    // }
   }
 
-  const itemsOptions = useMemo(() => items?.map(item => ({ label: item.name, value: item._id })), [items])
   const customerOptions = useMemo(() => students?.map(item => ({ label: item.username, value: item._id })), [students])
 
   const handleOnSave = async (values) => {
@@ -73,17 +94,39 @@ function Bills() {
     await createBill(values)
   }
 
+  const handleSearch = async (value, itemType) => {
+    if (itemType === "materials") {
+      const { items } = await inventoryService.getInventoryItems(
+        0,
+        value === "" ? 10 : 0,
+        { searchQuery: value, query: { type: "materials" } }
+      )
+      setLineItems(items)
+      return
+    }
+    if (itemType === "gallery") {
+      const { items } = await inventoryService.getInventoryItems(
+        0,
+        value === "" ? 10 : 0,
+        { searchQuery: value, query: { type: "gallery" } }
+      )
+      setLineItems(items)
+      return
+    }
+  }
+
   return (
     <Title title={"Bills"} button={
       permissions.bills.add.includes(user.role) &&
       <GenerateBillButton
-        itemsOptions={itemsOptions}
+        // itemsOptions={itemsOptions}
         customersOptions={customerOptions}
         loadInitData={loadInitData}
-        items={items}
+        items={lineItems}
         customers={students}
         onSave={handleOnSave}
         invoiceNo={invoiceNo}
+        onSearch={handleSearch}
       />
     }>
       <BillsLayot

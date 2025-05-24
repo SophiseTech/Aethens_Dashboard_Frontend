@@ -14,12 +14,14 @@ import studentStore from '@stores/StudentStore';
 import { useStore } from 'zustand';
 import { ROLES } from '@utils/constants';
 import DrawerActionButtons from '@components/DrawerActionButtons';
+import userStore from '@stores/UserStore';
 
 const { Title, Text } = Typography;
 
-const UserDetailsDrawer = ({ user, visible, onClose, showActions = false }) => {
+const UserDetailsDrawer = ({ user, visible, onClose, showActions = false, isStudentDetail = false }) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const { editUser } = useStore(studentStore)
+  const { user: loggedinUser } = useStore(userStore)
   // Open the edit modal
   const handleEditClick = () => {
     setIsEditModalVisible(true);
@@ -46,6 +48,7 @@ const UserDetailsDrawer = ({ user, visible, onClose, showActions = false }) => {
         headerStyle={{ background: '#f0f2f5', borderBottom: '1px solid #e8e8e8' }}
         bodyStyle={{ padding: '20px' }}
         extra={
+          (!isStudentDetail || loggedinUser.role !== ROLES.FACULTY) &&
           <Button
             type="primary"
             icon={<EditOutlined />}
@@ -98,29 +101,36 @@ const UserDetailsDrawer = ({ user, visible, onClose, showActions = false }) => {
                 </Text>
               </Col>
             }
-            <Col span={24}>
-              <Text strong>
-                <MailOutlined style={{ marginRight: '8px' }} />
-                Email:
-              </Text>
-              <Text style={{ marginLeft: '8px' }}>{user?.email}</Text>
-            </Col>
-            <Col span={24}>
-              <Text strong>
-                <PhoneOutlined style={{ marginRight: '8px' }} />
-                Mobile Number:
-              </Text>
-              <Text style={{ marginLeft: '8px' }}>{user?.phone}</Text>
-            </Col>
-            <Col span={24}>
-              <Text strong>
-                <CalendarOutlined style={{ marginRight: '8px' }} />
-                Date Of Birth:
-              </Text>
-              <Text style={{ marginLeft: '8px' }}>
-                {formatDate(user?.DOB) || 'N/A'}
-              </Text>
-            </Col>
+            {(!isStudentDetail || loggedinUser.role !== ROLES.FACULTY) &&
+              <>
+                <Col span={24}>
+                  <Text strong>
+                    <MailOutlined style={{ marginRight: '8px' }} />
+                    Email:
+                  </Text>
+                  <Text style={{ marginLeft: '8px' }}>{user?.email}</Text>
+                </Col>
+                <Col span={24}>
+                  <Text strong>
+                    <PhoneOutlined style={{ marginRight: '8px' }} />
+                    Mobile Number:
+                  </Text>
+                  <Text style={{ marginLeft: '8px' }}>{user?.phone}</Text>
+                </Col>
+              </>
+            }
+            {
+              user?.role === ROLES.STUDENT &&
+              <Col span={24}>
+                <Text strong>
+                  <CalendarOutlined style={{ marginRight: '8px' }} />
+                  Date Of Birth:
+                </Text>
+                <Text style={{ marginLeft: '8px' }}>
+                  {formatDate(user?.DOB) || 'N/A'}
+                </Text>
+              </Col>
+            }
             <Col span={24}>
               <Text strong>
                 <CalendarOutlined style={{ marginRight: '8px' }} />
@@ -135,30 +145,34 @@ const UserDetailsDrawer = ({ user, visible, onClose, showActions = false }) => {
 
         <Divider style={{ margin: '16px 0' }} />
 
-        <Card
-          bordered={false}
-          style={{ boxShadow: 'none', background: 'transparent' }}
-        >
-          <Title level={5} style={{ marginBottom: '16px' }}>
-            Additional Information
-          </Title>
-          <Row gutter={[16, 16]}>
-            <Col span={24}>
-              <Text strong>Course Enrolled:</Text>
-              <Text style={{ marginLeft: '8px' }}>{user?.details_id?.course_id?.course_name}</Text>
-            </Col>
-            <Col span={24}>
+        {
+          user?.role === ROLES.STUDENT &&
+          <Card
+            bordered={false}
+            style={{ boxShadow: 'none', background: 'transparent' }}
+          >
+            <Title level={5} style={{ marginBottom: '16px' }}>
+
+              Additional Information
+            </Title>
+            <Row gutter={[16, 16]}>
+              <Col span={24}>
+                <Text strong>Course Enrolled:</Text>
+                <Text style={{ marginLeft: '8px' }}>{user?.details_id?.course?.course_name}</Text>
+              </Col>
+              {/* <Col span={24}>
               <Text strong>Role:</Text>
               <Text style={{ marginLeft: '8px' }}>{user?.role}</Text>
-            </Col>
-            <Col span={24}>
-              <Text strong>Status:</Text>
-              <Text style={{ marginLeft: '8px' }}>Active</Text>
-            </Col>
-          </Row>
-        </Card>
+            </Col> */}
+              <Col span={24}>
+                <Text strong>Status:</Text>
+                <Text style={{ marginLeft: '8px', textTransform: "capitalize" }}>{user?.status}</Text>
+              </Col>
+            </Row>
+          </Card>
+        }
 
-        {showActions &&
+        {isStudentDetail &&
           <Card
             bordered={false}
             style={{ boxShadow: 'none', background: 'transparent' }}
@@ -167,15 +181,15 @@ const UserDetailsDrawer = ({ user, visible, onClose, showActions = false }) => {
           </Card>
         }
 
-      </Drawer>
-
-      {/* Edit Modal */}
-      <EditUserModal
-        user={user}
-        visible={isEditModalVisible}
-        onCancel={() => setIsEditModalVisible(false)}
-        onSave={handleSave}
-      />
+      </Drawer >
+      {(!isStudentDetail || loggedinUser.role !== ROLES.FACULTY) &&
+        < EditUserModal
+          user={user}
+          visible={isEditModalVisible}
+          onCancel={() => setIsEditModalVisible(false)}
+          onSave={handleSave}
+        />
+      }
     </>
   );
 };
