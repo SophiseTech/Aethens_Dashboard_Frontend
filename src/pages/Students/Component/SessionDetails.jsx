@@ -15,6 +15,7 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [deallocating, setDeallocating] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   const { getActiveSessions } = studentStore();
   const activeStudentSessions = studentStore((state) => state.activeStudentSessions);
@@ -97,6 +98,19 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
     }
   };
 
+  const handleSyncSlots = async () => {
+    try {
+      setSyncing(true);
+      await slotService.syncSlots(student._id);
+      message.success('Slots synced successfully');
+      // Optionally refresh slots or sessions here
+      await fetchSlots();
+    } catch (error) {
+      message.error('Failed to sync slots');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const monthOptions = Array.from({ length: 12 }, (_, i) => ({
     label: dayjs().month(i).format('MMMM YYYY'),
@@ -313,17 +327,27 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
             </Button>
           </Space>
 
-          {studentActiveSession.length > 0 && (
+          <Space size="middle">
+            {studentActiveSession.length > 0 && (
+              <Button
+                danger
+                type="primary"
+                onClick={handleDeallocateSessions}
+                loading={deallocating}
+                disabled={deallocating || loadingSessions}
+              >
+                Deallocate Sessions
+              </Button>
+            )}
             <Button
-              danger
-              type="primary"
-              onClick={handleDeallocateSessions}
-              loading={deallocating}
-              disabled={deallocating || loadingSessions}
+              type="default"
+              onClick={handleSyncSlots}
+              loading={syncing}
+              disabled={syncing || loadingSessions}
             >
-              Deallocate Sessions
+              Sync Slots
             </Button>
-          )}
+          </Space>
         </Flex>
 
         <Table

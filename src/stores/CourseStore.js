@@ -22,7 +22,7 @@ const courseStore = create((set, get) => ({
           set({ course: existingCourse })
           return existingCourse
         }
-      }
+      }      
       const course = await courseService.getById(id, filters)
       if (course) {
         set({ course: course })

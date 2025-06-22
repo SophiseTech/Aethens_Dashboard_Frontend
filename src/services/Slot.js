@@ -92,6 +92,16 @@ class SlotService {
     }
   }
 
+  async syncSlots(student_id) {
+    try {
+      const response = await post(`/slots/syncSlots`, { student_id })
+      if (!response) throw new Error("An error occured. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
 
 }
 

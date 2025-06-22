@@ -211,7 +211,7 @@ const InvoicePdf = ({ bill }) => {
                   <Text style={[styles.col, styles.col4]}>{item.discount}</Text>
                   <Text style={[styles.col, styles.col4]}>{item.taxes}</Text>
                   <Text style={[styles.col, styles.col4]}>{item.taxAmnt}</Text>
-                  <Text style={[styles.col, styles.col5]}>₹{item.subtotal?.toFixed(2)}</Text>
+                  <Text style={[styles.col, styles.col5]}>{item.subtotal?.toFixed(2)}</Text>
                 </View>
               );
             })}
@@ -223,19 +223,19 @@ const InvoicePdf = ({ bill }) => {
               <View style={styles.summaryBox}>
                 <View style={styles.summaryRow}>
                   <Text>Discount:</Text>
-                  <Text>(–) ₹{discount.toFixed(2)}</Text>
+                  <Text>(-) {discount.toFixed(2)}</Text>
                 </View>
                 <View style={styles.summaryRow}>
                   <Text>Sub Total:</Text>
-                  <Text>₹{subtotal.toFixed(2)}</Text>
+                  <Text>{subtotal.toFixed(2)}</Text>
                 </View>
                 <View style={styles.summaryRow}>
                   <Text>Tax:</Text>
-                  <Text>₹{tax.toFixed(2)}</Text>
+                  <Text>{tax.toFixed(2)}</Text>
                 </View>
                 <View style={[styles.summaryRow, styles.summaryGrandTotal]}>
                   <Text>Grand Total:</Text>
-                  <Text>₹{total.toFixed(2)}</Text>
+                  <Text>{total.toFixed(2)}</Text>
                 </View>
               </View>
 

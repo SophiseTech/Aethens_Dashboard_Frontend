@@ -25,7 +25,7 @@ function SessionStautsForm({ handleOk, student }) {
 
   useEffect(() => {
     if (student?.details_id?.course_id) {
-      getCourse(student.details_id.course_id._id)
+      getCourse(student.details_id.course_id)
     }
     // if (!faculties || total === 0 || faculties.length < total) {
     //   getFacultiesByCenter(0)
@@ -36,7 +36,7 @@ function SessionStautsForm({ handleOk, student }) {
     // const faculty = faculties?.find(faculty => faculty.username === values.faculty_id)
     values.faculty_id = user._id
     values.student_id = student._id
-    values.course_id = student.details_id.course_id._id
+    values.course_id = student.details_id.course_id
     if (values.isTopicComplete) {
       values.completedOn = new Date()
     }
