@@ -31,6 +31,9 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
 
   // Handle form submission
   const handleSubmit = async (values) => {
+    // values.DOB = values.DOB ? values.DOB.toISOString() : null; // Convert date to ISO string
+    const formattedDate = values.DOB?.format('YYYY-MM-DD');
+    values.DOB = formattedDate ? new Date(formattedDate) : null; // Convert date to Date object
     await onSave(values);
     form.resetFields();
   };

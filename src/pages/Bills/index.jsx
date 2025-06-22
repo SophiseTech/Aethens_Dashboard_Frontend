@@ -71,7 +71,7 @@ function Bills() {
       // setLneItemSearchFunction(searhcItems)
     }
     if (itemType === "course") {
-      const { courses } = await courseService.getCourses({}, 0, 10)
+      const { courses } = await courseService.getCourses({}, 0, 0)
       setLineItems([...courses?.map(course => ({ name: course.course_name, _id: course._id, type: "course" })), { name: "Registration Fee", _id: "67c00eb2073609b23054ca01", type: "course" }])
     }
     if (itemType === "gallery") {

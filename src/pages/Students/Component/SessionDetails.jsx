@@ -55,7 +55,7 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
             $lte: dayjs().month(selectedMonth).endOf('month').toDate()
           },
           booked_student_id: student._id,
-          course_id: student?.details_id?.course_id?._id,
+          course_id: student?.details_id?.course_id?._id || student?.details_id?.course_id,
         },
         populate: "session",
         sort: "start_date",

@@ -40,7 +40,7 @@ function AllotSessions({ student }) {
   const onSubmit = async (values) => {
     if (values.type === "regular" && studentActiveSession?.length > 0) return handleError("Student already has an active session")
     values.booked_student_id = student._id
-    values.course_id = student.details_id?.course_id?._id
+    values.course_id = student.details_id?.course_id?._id || student?.details_id?.course_id
     console.log(values);
     if (sessionType === "regular") {
       await bookSession(values)
@@ -94,6 +94,7 @@ export const sessionSlotOptionRenderer = (option, user) => {
   // - session: contains start_time and weekDay
   // - remainingSlots: number of available slots
 
+
   const { data: session } = option.data;
   if (!session) return null;
   const { remainingSlots } = session
@@ -119,21 +120,18 @@ export const sessionSlotOptionRenderer = (option, user) => {
           {time}
         </p>
       </div>
-      {
-        user.role === ROLES.MANAGER &&
-        <div>
-          <Tag
-            color={slotColor}
-            style={{
-              fontWeight: 600,
-              borderRadius: 4,
-              marginRight: 0
-            }}
-          >
-            {remainingSlots} slot{remainingSlots !== 1 ? 's' : ''} left
-          </Tag>
-        </div>
-      }
+      <div>
+        <Tag
+          color={slotColor}
+          style={{
+            fontWeight: 600,
+            borderRadius: 4,
+            marginRight: 0
+          }}
+        >
+          {remainingSlots} slot{remainingSlots !== 1 ? 's' : ''} left
+        </Tag>
+      </div>
     </Flex>
   );
 };

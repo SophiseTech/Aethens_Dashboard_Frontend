@@ -37,7 +37,7 @@ function AddStudent() {
 
   useEffect(() => {
     if (!courses || total === 0 || courses.length < total) {
-      getCourses(10)
+      getCourses(0)
     }
   }, [])
 

@@ -1,6 +1,7 @@
 import useModal from '@hooks/useModal'
 import AllotSessions from '@pages/Students/Component/AllotSessions'
 import DeactivateStudent from '@pages/Students/Component/DeactivateStudent'
+import MigrateCenter from '@pages/Students/Component/MigrateCenter'
 import MigrateCourse from '@pages/Students/Component/MigrateCourse'
 import ProjectDetailModal from '@pages/Students/Component/ProjectDetailModal'
 import ViewStudentSessions from '@pages/Students/Component/SessionDetails'
@@ -54,10 +55,10 @@ const ManagerActionButtons = ({ userDetails }) => {
       <Button onClick={() => handleViewBills(userDetails._id)} variant="filled" color="cyan">
         View Bills
       </Button>
-      <Button onClick={() => handleViewMaterials(userDetails._id, userDetails?.details_id?.course_id?._id)} variant="filled" color="blue">
+      <Button onClick={() => handleViewMaterials(userDetails._id, userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id)} variant="filled" color="blue">
         View Materials
       </Button>
-      <Button onClick={() => handleViewAttendance(userDetails._id, userDetails?.details_id?.course_id?._id)} variant="filled" color="orange">
+      <Button onClick={() => handleViewAttendance(userDetails._id, userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id)} variant="filled" color="orange">
         View Attendance
       </Button>
       <SessionStatus student={userDetails} />
@@ -68,6 +69,8 @@ const ManagerActionButtons = ({ userDetails }) => {
         View Course History
       </Button>
       <MigrateCourse student={userDetails} />
+
+      <MigrateCenter student={userDetails} />
 
       <DeactivateStudent student={userDetails} />
 
@@ -105,10 +108,10 @@ const FacultyActionButton = ({ userDetails }) => {
   return (
     <>
       <Flex wrap gap={10}>
-        <Button onClick={() => handleViewAttendance(userDetails._id, userDetails?.details_id?.course_id?._id)} variant='filled' color='cyan'>
+        <Button onClick={() => handleViewAttendance(userDetails._id, userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id)} variant='filled' color='cyan'>
           View Attendance
         </Button>
-        <Button onClick={() => { handleViewMaterials(userDetails._id, userDetails?.details_id?.course_id?._id) }} variant='filled' color='blue'>
+        <Button onClick={() => { handleViewMaterials(userDetails._id, userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id) }} variant='filled' color='blue'>
           View Materials
         </Button>
         <SessionStatus student={userDetails} />

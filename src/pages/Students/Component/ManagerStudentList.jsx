@@ -102,7 +102,7 @@ function StudentList() {
     },
     {
       title: 'Course',
-      dataIndex: ["details_id", "course_id", "course_name"],
+      dataIndex: ["details_id", "course", "course_name"],
     },
     {
       title: "Status",

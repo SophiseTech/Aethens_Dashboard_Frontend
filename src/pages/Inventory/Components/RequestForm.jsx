@@ -1,3 +1,4 @@
+import inventoryService from '@/services/Inventory';
 import CustomForm from '@components/form/CustomForm';
 import CustomInput from '@components/form/CustomInput';
 import CustomSelect from '@components/form/CustomSelect';
@@ -20,6 +21,7 @@ function RequestForm() {
   const { createLoading, loading, createRequest } = requestsStore()
   const { user } = userStore()
   const fieldItems = Form.useWatch("items", form)
+  const [lineItems, setLineItems] = useState([])
 
   const initialValues = {
     raised_to_center: "",
@@ -31,10 +33,18 @@ function RequestForm() {
     if (!centers || total === 0 || centers.length < total) {
       getCenters(0)
     }
-    if (inventoryTotal === 0 || items.length < inventoryTotal) {
-      getItems(0)
+    // if (inventoryTotal === 0 || items.length < inventoryTotal) {
+    //   getItems(0)
+    // }
+    if (lineItems.length === 0) {
+      fetchItems(0, 10, { query: { type: "materials" } })
     }
   }, [])
+
+  const fetchItems = async (page = 0, limit = 10, filters = {}) => {
+    const { items } = await inventoryService.getInventoryItems(page, limit, filters)
+    setLineItems(items)
+  }
 
   useEffect(() => {
     const handleChange = async () => {
@@ -59,7 +69,7 @@ function RequestForm() {
     ?.filter(center => center._id !== user.center_id)
     .map(center => ({ label: center.location, value: center.location })),
     [centers])
-  const itemsOptions = useMemo(() => items?.map(item => ({ label: item.name, value: item._id })), [items])
+  const itemsOptions = useMemo(() => lineItems?.map(item => ({ label: item.name, value: item._id })), [lineItems])
 
   const columns = [
     {
@@ -68,7 +78,8 @@ function RequestForm() {
       editable: true,
       type: "autocomplete",
       width: "40%",
-      render: (value) => itemsOptions.find(item => item.value === value)?.label
+      render: (value, record) => record.itemName,
+      onSearch: (value) => { handleSearch(value) },
     },
     {
       title: "Quantity",
@@ -79,9 +90,16 @@ function RequestForm() {
   ]
 
   // Called wehn an item is selected in the items dropdown
-  const onItemsChange = (value, index) => {
-    const item = items?.find(item => item.name === value)
+  const onItemsChange = (value, index, option) => {
+    const item = lineItems?.find(item => item._id === value)
+    console.log(item, option);
+    
     if (item) {
+      const row = form.getFieldValue(["items", index])
+      form.setFieldValue(["items", index], {
+        ...row,
+        itemName: option.label,
+      })
       setSelectedItems({
         ...selectedItems,
         [index]: item
@@ -100,12 +118,20 @@ function RequestForm() {
     await createRequest(values)
   }
 
+  const handleSearch = async (value) => {
+    const { items } = await inventoryService.getInventoryItems(
+      0,
+      value === "" ? 10 : 0,
+      { searchQuery: value, query: { type: "materials" } }
+    )
+    setLineItems(items)
+  }
 
   return (
     <CustomForm form={form} initialValues={initialValues} action={handleSubmit}>
       <CustomSelect name={"raised_to_center"} options={centersOptions} label={"Select the center to send the items"} />
       <CustomInput label={"Remarks"} name={"request_details"} placeholder={"Something about the request"} />
-      <DynamicInpuTable form={form} name={"items"} columns={columns} onSelect={onItemsChange} options={itemsOptions} />
+      <DynamicInpuTable form={form} name={"items"} columns={columns} onSelect={onItemsChange} options={itemsOptions} onS />
       <CustomSubmit className='bg-primary' label='Save' loading={createLoading} />
     </CustomForm>
   )

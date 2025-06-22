@@ -122,7 +122,7 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
     setTotals({
       subtotal: sumFromObjects(updatedFields, "subtotal"),
       total_tax: sumFromObjects(updatedFields, "taxAmnt"),
-      total: sumFromObjects(updatedFields, "total"),
+      total: Math.round(sumFromObjects(updatedFields, "total")),
       total_discount: sum(updatedFields.map((field, index) => getDiscountRate(field.discount, field.rate, discountType[index]) * Number(field.qty)))
     })
     form.setFieldValue("items", updatedFields.filter(field => field.name !== undefined))

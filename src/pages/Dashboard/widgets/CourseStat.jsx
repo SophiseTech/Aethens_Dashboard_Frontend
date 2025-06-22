@@ -51,7 +51,7 @@ function CourseStat() {
 
   return (
     <div className='bg-card rounded-3xl w-full space-y-5 | p-2 2xl:p-5'>
-      <div className='bg-cardGradient rounded-3xl p-5 flex gap-5 justify-between items-center | max-lg:flex-col'>
+      <div className='bg-cardGradient rounded-3xl p-5 flex gap-5 justify-between items-center | max-xl:flex-col'>
 
         <Progress value={(completedCount / course?.total_session) * 100} curr={completedCount} total={course?.total_session} />
 
@@ -105,7 +105,7 @@ const StatItem = ({ title, label, icon }) => (
 )
 
 const Progress = ({ value = 50, curr, total }) => (
-  <div className='bg-black/30 rounded-full aspect-square | p-2 2xl:p-4 w-1/2 lg:w-1/4'>
+  <div className='bg-black/30 rounded-full aspect-square | p-2 2xl:p-4 w-1/2 lg:w-1/3'>
     <CircularProgressbarWithChildren
       value={value}
       strokeWidth={5}

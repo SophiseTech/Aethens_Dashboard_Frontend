@@ -75,7 +75,7 @@ const UserDetailsDrawer = ({ user, visible, onClose, showActions = false, isStud
               <Title level={4} style={{ marginBottom: 0 }}>
                 {user?.username}
               </Title>
-              <Text type="secondary">{user?.email}</Text>
+              { (!isStudentDetail || (loggedinUser.role === ROLES.MANAGER || loggedinUser.role === ROLES.STUDENT)) && <Text type="secondary">{user?.email}</Text>}
             </Col>
           </Row>
         </Card>
@@ -137,7 +137,7 @@ const UserDetailsDrawer = ({ user, visible, onClose, showActions = false, isStud
                 Joined Date:
               </Text>
               <Text style={{ marginLeft: '8px' }}>
-                {formatDate(user?.createdAt) || 'N/A'}
+                {formatDate(user?.details_id?.enrollment_date || user?.createdAt) || 'N/A'}
               </Text>
             </Col>
           </Row>

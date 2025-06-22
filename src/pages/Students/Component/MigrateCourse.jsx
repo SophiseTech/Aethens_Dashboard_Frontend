@@ -26,7 +26,7 @@ function MigrateCourse({ student }) {
           const prevCoursesMap = new Map(prevCoursesResponse?.courseHistories?.map((c) => [c.course_id, c]));
           setPrevCourses(prevCoursesMap)
 
-          const availableCourses = res?.courses?.filter(c => (c._id !== student?.details_id?.course_id?._id)) || [];
+          const availableCourses = res?.courses?.filter(c => (c._id !== student?.details_id?.course_id?._id || student?.details_id?.course_id)) || [];
           setCourses(availableCourses);
         } catch (err) {
           console.error(err);

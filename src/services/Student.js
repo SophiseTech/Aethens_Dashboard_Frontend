@@ -43,12 +43,20 @@ class StudentService {
       handleError(error)
     }
   }
+  async migrateStudentCenter(userId, newCenterId) {
+    try {
+      const response = await post("/student/migrateStudentCenter", { userId, newCenterId })
+      if (!response) throw new Error("An error occured. Please try again")
+    } catch (error) {
+      handleError(error)
+    }
+  }
 
   async getCourseHistory(lastRef = 0, limit = 10, filters = {}) {
     try {
-      const response = await post(`/courseHistory/list/all?lastRef=${lastRef}&limit=${limit}`, {filters})
+      const response = await post(`/courseHistory/list/all?lastRef=${lastRef}&limit=${limit}`, { filters })
       if (!response) throw new Error("An error occured. Please try again")
-        return response.data
+      return response.data
     } catch (error) {
       handleError(error)
     }

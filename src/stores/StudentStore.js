@@ -123,13 +123,20 @@ const studentStore = create((set, get) => ({
     try {
       set({ loading: true })
       if (!id || !updateData) throw new Error("Bad Data")
-      const { students } = get()
+      const { students, searchResults, searchQuery } = get()
       const student = await userService.edit(id, updateData)
-      if (student && students) {
-        const updatedStudents = students.map(item => (
-          item._id === student._id ? { ...item, ...updateData } : item
-        ))
-        set({ students: updatedStudents })
+      if (student) {
+        if (searchQuery) {
+          const updatedSearchResults = searchResults?.map(item => (
+            item._id === student._id ? { ...item, ...updateData } : item
+          ))
+          set({ searchResults: updatedSearchResults })
+        } else {
+          const updatedStudents = students?.map(item => (
+            item._id === student._id ? { ...item, ...updateData } : item
+          ))
+          set({ students: updatedStudents })
+        }
         handleSuccess("User details updated Succesfully")
       }
     } catch (error) {
