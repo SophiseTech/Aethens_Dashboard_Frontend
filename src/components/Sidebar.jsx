@@ -59,6 +59,8 @@ function Sidebar({ children }) {
     getItem("Slots", '1', ClockCircleOutlined, "/manager/slots", [ROLES.MANAGER]),
     getItem("Slots", '1', ClockCircleOutlined, "/faculty/slots", [ROLES.FACULTY]),
     getItem("Course History", '1', ClockCircleOutlined, "/courseHistory", [ROLES.STUDENT]),
+    getItem("Announcements", '1', ClockCircleOutlined, "/manager/announcements", [ROLES.MANAGER]),
+    getItem("Announcements", '1', ClockCircleOutlined, "/student/announcements", [ROLES.STUDENT]),
   ], [user])
 
 

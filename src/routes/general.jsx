@@ -19,6 +19,7 @@ const BillDetails = lazy(() => import("@pages/Bills/Components/BillDetails"));
 const MarkAttendance = lazy(() => import("@pages/Temp/MarkAttendance"));
 const MarkFacultyAttendance = lazy(() => import("@pages/Temp/MarkFacultyAttendance"));
 const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCourseHistory"));
+const StudentAnnouncement = lazy(() => import("@pages/Announcement/StudentAnnouncement"));
 
 const LazyLoader = ({ children }) => {
   const location = useLocation()
@@ -194,7 +195,16 @@ export const generalRoutes = [
                 title: "Bills"
               },
             ]
-          }
+          },
+          {
+            path: "/student/announcements",
+            element: (
+              <LazyLoader>
+                <StudentAnnouncement />
+              </LazyLoader>
+            ),
+            title: "Slots",
+          },
         ],
       },
     ],

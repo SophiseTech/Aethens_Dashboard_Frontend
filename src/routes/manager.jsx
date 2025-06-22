@@ -16,6 +16,7 @@ const ManagerMaterials = lazy(() => import("@pages/ManagerMaterials"));
 const FacultyAttendance = lazy(() => import("@pages/Attendance/FacultyAttendance"))
 const ManagerSlots = lazy(() => import("@pages/Slots/ManagerSlots"))
 const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCourseHistory"))
+const ManagerAnnouncementPage = lazy(() => import("@pages/Announcement/ManagerAnnouncement"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -99,6 +100,13 @@ export const managerRoutes = [
             path: "/manager/slots",
             element: (
               <LazyLoader element={<ManagerSlots />} />
+            ),
+            title: "Slots",
+          },
+          {
+            path: "/manager/announcements",
+            element: (
+              <LazyLoader element={<ManagerAnnouncementPage />} />
             ),
             title: "Slots",
           },
