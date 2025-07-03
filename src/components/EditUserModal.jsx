@@ -33,7 +33,9 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
   const handleSubmit = async (values) => {
     // values.DOB = values.DOB ? values.DOB.toISOString() : null; // Convert date to ISO string
     const formattedDate = values.DOB?.format('YYYY-MM-DD');
+    const formattedDOJ = values.DOJ?.format('YYYY-MM-DD');
     values.DOB = formattedDate ? new Date(formattedDate) : null; // Convert date to Date object
+    values.DOJ = formattedDOJ ? new Date(formattedDOJ) : null; // Convert date to Date object
     await onSave(values);
     form.resetFields();
   };
@@ -61,6 +63,12 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
           name={"DOB"}
           label={"Date Of Birth"}
           placeholder='DOB'
+          className='w-full'
+        />
+        <CustomDatePicker
+          name={"DOJ"}
+          label={"Date Of Joining"}
+          placeholder='DOJ'
           className='w-full'
         />
         <CustomInput

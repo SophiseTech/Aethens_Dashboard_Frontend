@@ -114,7 +114,12 @@ export const getNextAvailableWeekdayDate = (
   reschedulingSlot,
   targetSession
 ) => {
-  const baseDate = new Date(reschedulingSlot.start_date);
+  // Determine baseDate: today if reschedulingSlot.start_date <= today, else reschedulingSlot.start_date
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const rescheduleDate = new Date(reschedulingSlot.start_date);
+  rescheduleDate.setHours(0, 0, 0, 0);
+  const baseDate = (rescheduleDate <= today) ? new Date(today) : new Date(rescheduleDate);
 
   // Extract hours and minutes from both times
   const [rescheduleHour, rescheduleMin] = new Date(reschedulingSlot.session.start_time)
@@ -138,8 +143,6 @@ export const getNextAvailableWeekdayDate = (
     const candidateDateStr = candidate.toDateString();
     const rescheduleDateStr = baseDate.toDateString();
 
-
-
     const isSameDay = candidateDateStr === rescheduleDateStr;
 
     // 🔒 Skip if same day but target time is not strictly later than reschedule time
@@ -161,17 +164,10 @@ export const getNextAvailableWeekdayDate = (
       const combinedSlotDateTime = new Date(slotDate);
       combinedSlotDateTime.setHours(slotTime.getHours(), slotTime.getMinutes(), 0, 0);
 
-      // console.log(combinedSlotDateTime, candidateDateStr);
-      
-
       return combinedSlotDateTime.toISOString() === candidate.toISOString();
     });
 
-    
-    
-    
     if (!hasConflict) {
-      console.log(hasConflict, candidate);
       return candidate;
     }
 

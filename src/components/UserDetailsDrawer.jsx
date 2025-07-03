@@ -137,7 +137,7 @@ const UserDetailsDrawer = ({ user, visible, onClose, showActions = false, isStud
                 Joined Date:
               </Text>
               <Text style={{ marginLeft: '8px' }}>
-                {formatDate(user?.details_id?.enrollment_date || user?.createdAt) || 'N/A'}
+                {formatDate(user?.DOJ || user?.createdAt) || 'N/A'}
               </Text>
             </Col>
           </Row>

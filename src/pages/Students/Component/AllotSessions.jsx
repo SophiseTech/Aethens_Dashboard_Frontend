@@ -1,4 +1,6 @@
+import CustomDatePicker from '@components/form/CustomDatePicker';
 import CustomForm from '@components/form/CustomForm';
+import CustomInput from '@components/form/CustomInput';
 import CustomSelect from '@components/form/CustomSelect';
 import CustomSubmit from '@components/form/CustomSubmit';
 import SessionStore from '@stores/SessionStore';
@@ -52,7 +54,9 @@ function AllotSessions({ student }) {
 
   const initialValues = {
     sessions: [],
-    type: studentActiveSession?.length > 0 ? "additional" : "regular"
+    type: studentActiveSession?.length > 0 ? "additional" : "regular",
+    customStartDate: "",
+    customSessionCount: 0
   }
 
   const slotTypeOptions = [
@@ -82,6 +86,8 @@ function AllotSessions({ student }) {
         <CustomForm form={form} initialValues={initialValues} action={onSubmit}>
           <CustomSelect name="type" label="Select Slot Type" options={slotTypeOptions} />
           <CustomSelect name={"sessions"} label={"Select Slots"} options={slotOptions} mode={"multiple"} maxCount={sessionType === "regular" ? 2 : 1} optionRender={sessionSlotOptionRenderer} />
+          <CustomDatePicker name={"customStartDate"} label={"Custom Start Date"} time={false} required={false} className='w-full' disabled={sessionType === "additional"} />
+          <CustomInput type='number' name={"customSessionCount"} label={"Number of sessions to allot"} placeholder={10} className='w-full' required={false} />
           <CustomSubmit className='bg-primary' label='Submit' loading={loading} />
         </CustomForm>
       </Modal>
