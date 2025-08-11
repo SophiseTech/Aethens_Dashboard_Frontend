@@ -77,6 +77,11 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
           placeholder="+91 7884574875"
         />
         <CustomInput
+          name="phone_alt"
+          label="Alternate Mobile Number"
+          placeholder="+91 7884574875"
+        />
+        <CustomInput
           name="address"
           label="Address"
           placeholder="Enter your address"

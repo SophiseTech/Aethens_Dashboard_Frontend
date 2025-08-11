@@ -5,8 +5,9 @@ import _, { initial } from "lodash";
 import React from "react";
 
 export const formatDate = (date) => {
-  if (!date) return ""
-  return dayjs(new Date(date).toISOString().split('T')[0]).format("D MMM, YYYY")
+  if (!date) return "";
+  // Add 5 hours 30 minutes to convert to UTC+5:30, then format
+  return dayjs(date).add(330, 'minute').format("D MMM, YYYY");
 };
 
 export const formatTime = (time) => {

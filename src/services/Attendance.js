@@ -1,5 +1,5 @@
 import handleError from "@utils/handleError"
-import { post } from "@utils/Requests"
+import { get, post } from "@utils/Requests"
 
 class AttendanceService {
   async getHistory(query = {}, recordQuery = {}, lastRef = 0, limit = 10) {
@@ -36,6 +36,16 @@ class AttendanceService {
       const response = await post(`/attendance/markFacultyAttendance`, { email })
       if (!response) throw new Error("An error occured. Please try again")
       return response?.message
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
+  async getGraphSummary(center_id, startDate, endDate) {
+    try {
+      const response = await get(`/open/attendance-summary?center_id=${center_id}&startDate=${startDate}&endDate=${endDate}`)
+      if (!response) throw new Error("An error occured. Please try again")
+      return response?.report
     } catch (error) {
       handleError(error)
     }

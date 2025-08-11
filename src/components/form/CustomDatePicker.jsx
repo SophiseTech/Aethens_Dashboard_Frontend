@@ -16,7 +16,7 @@ function CustomDatePicker({ name, label, placeholder = "Select a date", classNam
         placeholder={placeholder} 
         className={className} 
         showTime={time} 
-        format={time ? "YYYY-MM-DD HH:mm" : "YYYY-MM-DD"} 
+        format={time ? "DD-MM-YYYY HH:mm" : "DD-MM-YYYY"} 
         disabled={disabled}
       />
     </Form.Item>

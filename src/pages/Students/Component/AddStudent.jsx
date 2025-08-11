@@ -31,6 +31,7 @@ function AddStudent() {
     course_id: "",
     DOB: null,
     phone: "",
+    phone_alt: "",
     school_uni_work: "",
     profile_img: "https://app.schoolofathens.art/images/default.jpg"
   }
@@ -78,9 +79,10 @@ function AddStudent() {
             path={`uploads/profile_img/${user?._id}`}
           />
           <CustomInput label={"Full Name"} name={"username"} placeholder={"John Doe"} />
-          <CustomDatePicker name={"DOB"} label={"Date of Birth"} placeholder='2025-02-13' className='w-full' />
+          <CustomDatePicker name={"DOB"} label={"Date of Birth"} placeholder='13-02-2025' className='w-full' />
           <CustomInput label={"Address"} name={"address"} placeholder={"Building No, Street Address"} />
           <CustomInput label={"Mobile Number"} name={"phone"} placeholder={"+91 7845784785"} />
+          <CustomInput label={"Alternative Mobile Number"} name={"phone_alt"} placeholder={"+91 7845784785"} />
           <CustomInput label={"Email"} name={"email"} type='email' placeholder={"john@doe.com"} />
           <CustomInput label={"School / University / Company Name"} name={"school_uni_work"} placeholder={"Name of your School / University / Company"} />
           <CustomSelect name={"course_id"} options={options} label={"Select Course"} />

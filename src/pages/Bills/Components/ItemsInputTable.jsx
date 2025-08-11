@@ -25,18 +25,23 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
       title: 'Quantity',
       dataIndex: 'qty',
       editable: true,
-      defaultValue: 1
+      defaultValue: 1,
+      width: '10%',
     },
     {
       title: 'U.Price',
       dataIndex: 'rate',
       editable: true,
+      width: '10%',
+
     },
     {
       title: 'Discount',
       dataIndex: 'discount',
       editable: true,
       type: "percentage",
+      width: '10%',
+
       selectAfter: (index) => {
         return <Select
           defaultValue={"percentage"}
@@ -56,23 +61,31 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
       title: 'Sub Total',
       dataIndex: 'subtotal',
       editable: false,
+      width: '10%',
+
       render: (value) => value ? value.toFixed(2) : 0
     },
     {
       title: 'Tax',
       dataIndex: 'taxes',
       editable: true,
+      width: '5%',
+
     },
     {
       title: 'Tax Amnt',
       dataIndex: 'taxAmnt',
       editable: false,
+      width: '5%',
+
       render: (value) => value ? value.toFixed(2) : 0
     },
     {
       title: 'Total',
       dataIndex: 'total',
       editable: false,
+      width: '10%',
+
       render: (value) => value ? value.toFixed(2) : 0
     },
   ]

@@ -1,9 +1,10 @@
-body{
+body {
   color: black;
 }
 
 ul {
-  list-style-type: disc; /* Ensures the disc bullet is shown */
+  list-style-type: disc;
+  /* Ensures the disc bullet is shown */
   list-style-position: inside;
 }
 
@@ -15,6 +16,13 @@ ul {
   color: #f50;
 }
 
-.ant-select-focused{
+.ant-select-focused {
   box-shadow: none !important;
+}
+
+@media only screen and (max-width: 1000px) {
+  .itemsInputTable table {
+    overflow: auto;
+    width: max-content;
+  }
 }

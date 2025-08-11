@@ -47,7 +47,7 @@ function CourseStat() {
     },
   ];
 
-  const isFinalprojectActive = (Number(completedCount) / Number(course?.total_session)) > 0.9 
+  const isFinalprojectActive = (Number(completedCount) / Number(course?.total_session)) > 0 
 
   return (
     <div className='bg-card rounded-3xl w-full space-y-5 | p-2 2xl:p-5'>
