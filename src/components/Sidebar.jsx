@@ -1,136 +1,345 @@
+import { useMemo, useState, useCallback } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Avatar } from 'antd';
+import { 
+  AppstoreOutlined, 
+  BookOutlined, 
+  CalendarOutlined, 
+  ClockCircleOutlined, 
+  DollarOutlined, 
+  FundProjectionScreenOutlined, 
+  LogoutOutlined, 
+  MenuUnfoldOutlined, 
+  MoneyCollectOutlined, 
+  PictureOutlined, 
+  ShopOutlined, 
+  SolutionOutlined 
+} from '@ant-design/icons';
+
 import Book from '@/assets/Book';
 import Target from '@/assets/Target';
-import { AppstoreOutlined, BookOutlined, CalendarOutlined, ClockCircleOutlined, DollarOutlined, FundProjectionScreenOutlined, LogoutOutlined, MenuUnfoldOutlined, MoneyCollectOutlined, PictureOutlined, ShopOutlined, SolutionOutlined } from '@ant-design/icons';
 import SubMenu from '@components/SubMenu';
 import UserDetailsDrawer from '@components/UserDetailsDrawer';
 import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
-import Avatar from 'antd/es/avatar/avatar';
-import { useMemo, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-const getItem = (label, key, icon, path, roles, children) => {
-  return {
-    key,
-    icon,
-    children,
-    label,
-    path,
-    roles
+// Constants - Move menu configuration outside component
+const MENU_CONFIG = [
+  { 
+    label: "Dashboard", 
+    icon: AppstoreOutlined, 
+    path: "/", 
+    roles: [ROLES.STUDENT, ROLES.MANAGER] 
+  },
+  { 
+    label: "Students", 
+    icon: SolutionOutlined, 
+    path: "/", 
+    roles: [ROLES.FACULTY] 
+  },
+  { 
+    label: "Materials", 
+    icon: Book, 
+    path: "/materials", 
+    roles: [ROLES.STUDENT] 
+  },
+  { 
+    label: "Activities", 
+    icon: Target, 
+    path: "/activities", 
+    roles: [ROLES.STUDENT] 
+  },
+  { 
+    label: "Slots", 
+    icon: CalendarOutlined, 
+    path: "/slots", 
+    roles: [ROLES.STUDENT] 
+  },
+  { 
+    label: "Students", 
+    icon: SolutionOutlined, 
+    path: "/manager/students", 
+    roles: [ROLES.MANAGER] 
+  },
+  { 
+    label: "Bills", 
+    icon: DollarOutlined, 
+    path: "/manager/bills", 
+    roles: [ROLES.MANAGER] 
+  },
+  { 
+    label: "Bills", 
+    icon: DollarOutlined, 
+    path: "/bills", 
+    roles: [ROLES.STUDENT] 
+  },
+  { 
+    label: "Inventory", 
+    icon: ShopOutlined, 
+    path: "/manager/inventory", 
+    roles: [ROLES.MANAGER] 
+  },
+  { 
+    label: "Payslips", 
+    icon: MoneyCollectOutlined, 
+    path: "/manager/payslips", 
+    roles: [ROLES.MANAGER] 
+  },
+  { 
+    label: "Courses", 
+    icon: BookOutlined, 
+    path: "/faculty/courses", 
+    roles: [ROLES.FACULTY] 
+  },
+  { 
+    label: "Payslips", 
+    icon: MoneyCollectOutlined, 
+    path: "/faculty/payslips", 
+    roles: [ROLES.FACULTY] 
+  },
+  { 
+    label: "FDA", 
+    icon: FundProjectionScreenOutlined, 
+    path: "/manager/faculty-development-program", 
+    roles: [ROLES.MANAGER] 
+  },
+  { 
+    label: "FDA", 
+    icon: FundProjectionScreenOutlined, 
+    path: "/faculty/faculty-development-program", 
+    roles: [ROLES.FACULTY] 
+  },
+  { 
+    label: "Attendance", 
+    icon: FundProjectionScreenOutlined, 
+    path: "/attendance", 
+    roles: [ROLES.STUDENT] 
+  },
+  { 
+    label: "Gallery", 
+    icon: PictureOutlined, 
+    path: "/gallery", 
+    roles: [ROLES.MANAGER, ROLES.FACULTY] 
+  },
+  { 
+    label: "Slots", 
+    icon: ClockCircleOutlined, 
+    path: "/manager/slots", 
+    roles: [ROLES.MANAGER] 
+  },
+  { 
+    label: "Slots", 
+    icon: ClockCircleOutlined, 
+    path: "/faculty/slots", 
+    roles: [ROLES.FACULTY] 
+  },
+  { 
+    label: "Course History", 
+    icon: ClockCircleOutlined, 
+    path: "/courseHistory", 
+    roles: [ROLES.STUDENT] 
+  },
+  { 
+    label: "Announcements", 
+    icon: ClockCircleOutlined, 
+    path: "/manager/announcements", 
+    roles: [ROLES.MANAGER] 
+  },
+  { 
+    label: "Announcements", 
+    icon: ClockCircleOutlined, 
+    path: "/student/announcements", 
+    roles: [ROLES.STUDENT] 
+  },
+  { 
+    label: "Final Project", 
+    icon: ClockCircleOutlined, 
+    path: "/student/final-project", 
+    roles: [ROLES.STUDENT] 
+  },
+  { 
+    label: "Final Project", 
+    icon: ClockCircleOutlined, 
+    path: "/manager/final-project", 
+    roles: [ROLES.MANAGER] 
+  },
+];
+
+// Utility function for dynamic paths
+const getDynamicPath = (path, user) => {
+  if (path.includes('${user?.details_id?.course_id}')) {
+    return path.replace('${user?.details_id?.course_id}', user?.details_id?.course_id || '');
   }
-}
+  return path;
+};
+
+// Separate components for better organization
+const SidebarLogo = () => (
+  <img 
+    src="/images/logo.png" 
+    alt="Logo" 
+    className="self-center p-5 px-0 max-2xl:w-3/4 2xl:p-10" 
+  />
+);
+
+const MenuItem = ({ item, isActive, user }) => {
+  const IconComponent = item.icon;
+  const dynamicPath = getDynamicPath(item.path, user);
+  
+  return (
+    <Link to={dynamicPath} className="block">
+      <div className="flex gap-10 items-center group hover:bg-gray-50 transition-colors duration-200 rounded-r-xl">
+        <div 
+          className={`rounded-r-xl bg-secondary transition-opacity duration-200 w-1 h-9 2xl:w-1.5 2xl:h-12 ${
+            isActive ? 'opacity-100' : 'opacity-0'
+          }`} 
+        />
+        <div className="flex items-center gap-3 2xl:gap-5 py-2">
+          <IconComponent 
+            className="text-sm 2xl:text-xl w-[15px] 2xl:w-auto transition-all duration-200" 
+            style={{ strokeWidth: isActive ? 3 : 2 }} 
+          />
+          <p className={`transition-all duration-200 text-sm 2xl:text-lg ${
+            isActive ? 'font-bold text-primary' : 'font-normal text-gray-700'
+          }`}>
+            {item.label}
+          </p>
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+const UserProfile = ({ user, onProfileClick, onLogout }) => (
+  <div className="p-3 m-5 bg-card rounded-full flex gap-2 justify-between items-center shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div 
+      className="flex gap-2 cursor-pointer flex-1" 
+      onClick={onProfileClick}
+    >
+      <Avatar 
+        src={user?.profile_img} 
+        className="flex-shrink-0"
+      >
+        {user?.username?.charAt(0)?.toUpperCase()}
+      </Avatar>
+      <div className="min-w-0 flex-1">
+        <h1 className="text-sm font-bold truncate">{user?.username}</h1>
+        <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+      </div>
+    </div>
+    <SubMenu 
+      items={[{
+        label: 'Logout',
+        icon: <LogoutOutlined />,
+        key: 'logout',
+        danger: true,
+        onClick: onLogout
+      }]} 
+    />
+  </div>
+);
+
+const MobileMenuButton = () => (
+  <label 
+    htmlFor="my-drawer" 
+    className="drawer-button lg:hidden fixed right-5 top-5 bg-primary text-white flex items-center p-2 rounded-lg z-10 shadow-lg hover:shadow-xl transition-shadow duration-200"
+  >
+    <MenuUnfoldOutlined />
+  </label>
+);
 
 function Sidebar({ children }) {
-
   const { pathname } = useLocation();
-  const { user, logOut } = userStore()
-  const nav = useNavigate()
+  const navigate = useNavigate();
+  const { user, logOut } = userStore();
   const [drawerVisible, setDrawerVisible] = useState(false);
-  console.log(user);
-  
 
+  // Memoized filtered menu items
+  const visibleMenuItems = useMemo(() => 
+    MENU_CONFIG.filter(item => item.roles.includes(user?.role)),
+    [user?.role]
+  );
 
-  const isActive = (path) => pathname === path || pathname.startsWith(path) && path !== "/"
+  // Add syllabus dynamically if user is student
+  const menuItems = useMemo(() => {
+    const items = [...visibleMenuItems];
+    if (user?.role === ROLES.STUDENT && user?.details_id?.course_id) {
+      items.push({
+        label: "Syllabus",
+        icon: BookOutlined,
+        path: `/syllabus/${user.details_id.course_id}`,
+        roles: [ROLES.STUDENT]
+      });
+    }
+    return items;
+  }, [visibleMenuItems, user]);
 
-  const handleLogout = () => {
-    logOut()
-    // nav('/auth/login')
-    window.location.replace("/auth/login")
-  }
+  // Optimized active check
+  const isActive = useCallback((path) => {
+    if (path === "/") return pathname === "/";
+    return pathname.startsWith(path);
+  }, [pathname]);
 
-  const items = useMemo(() => [
-    getItem("Dashboard", '1', AppstoreOutlined, "/", [ROLES.STUDENT, ROLES.MANAGER]),
-    getItem("Students", '1', SolutionOutlined, "/", [ROLES.FACULTY]),
-    getItem("Materials", '1', Book, "/materials", [ROLES.STUDENT]),
-    getItem("Activities", '1', Target, "/activities", [ROLES.STUDENT]),
-    getItem("Slots", '1', CalendarOutlined, "/slots", [ROLES.STUDENT]),
-    getItem("Students", '1', SolutionOutlined, "/manager/students", [ROLES.MANAGER]),
-    getItem("Bills", '1', DollarOutlined, "/manager/bills", [ROLES.MANAGER]),
-    getItem("Bills", '1', DollarOutlined, "/bills", [ROLES.STUDENT]),
-    getItem("Inventory", '1', ShopOutlined, "/manager/inventory", [ROLES.MANAGER]),
-    getItem("Payslips", '1', MoneyCollectOutlined, "/manager/payslips", [ROLES.MANAGER]),
-    getItem("Courses", '1', BookOutlined, "/faculty/courses", [ROLES.FACULTY]),
-    getItem("Payslips", '1', MoneyCollectOutlined, "/faculty/payslips", [ROLES.FACULTY]),
-    getItem("FDA", '1', FundProjectionScreenOutlined, "/manager/faculty-development-program", [ROLES.MANAGER]),
-    getItem("FDA", '1', FundProjectionScreenOutlined, "/faculty/faculty-development-program", [ROLES.FACULTY]),
-    getItem("Attendance", '1', FundProjectionScreenOutlined, "/attendance", [ROLES.STUDENT]),
-    getItem("Syllabus", '1', BookOutlined, `/syllabus/${user?.details_id?.course_id}`, [ROLES.STUDENT]),
-    getItem("Gallery", '1', PictureOutlined, "/gallery", [ROLES.MANAGER, ROLES.FACULTY]),
-    getItem("Slots", '1', ClockCircleOutlined, "/manager/slots", [ROLES.MANAGER]),
-    getItem("Slots", '1', ClockCircleOutlined, "/faculty/slots", [ROLES.FACULTY]),
-    getItem("Course History", '1', ClockCircleOutlined, "/courseHistory", [ROLES.STUDENT]),
-    getItem("Announcements", '1', ClockCircleOutlined, "/manager/announcements", [ROLES.MANAGER]),
-    getItem("Announcements", '1', ClockCircleOutlined, "/student/announcements", [ROLES.STUDENT]),
-  ], [user])
+  // Event handlers
+  const handleLogout = useCallback(() => {
+    logOut();
+    window.location.replace("/auth/login");
+  }, [logOut]);
 
-
-  const handleNameClick = () => {
+  const handleProfileClick = useCallback(() => {
     setDrawerVisible(true);
-  };
+  }, []);
+
+  const handleDrawerClose = useCallback(() => {
+    setDrawerVisible(false);
+  }, []);
 
   return (
     <div className="drawer h-full lg:drawer-open">
       <input id="my-drawer" type="checkbox" className="drawer-toggle" />
 
       <div className="drawer-content">
-        <label htmlFor="my-drawer" className="drawer-button lg:hidden fixed right-5 top-5 bg-primary text-white flex items-center p-2 rounded-lg z-10">
-          <MenuUnfoldOutlined />
-        </label>
+        <MobileMenuButton />
         {children}
       </div>
 
       <div className="drawer-side z-20">
-        <label htmlFor="my-drawer" className="drawer-overlay"></label>
+        <label htmlFor="my-drawer" className="drawer-overlay" />
 
-        <div className='h-full flex flex-col justify-between bg-white max-sm:w-80 w-96'>
-          <div className='flex flex-col | gap-0 2xl:gap-5'>
-            <img src="/images/logo.png" alt="" className='self-center | p-5 px-0 max-2xl:w-3/4 2xl:p-10' />
-            <ul className="flex flex-col | 2xl:gap-3">
-              {/* Sidebar content here */}
-              {items.map((item, index) => (
-                item.roles.includes(user.role) &&
-                <Link key={index} to={item.path}>
-                  <div className='flex gap-10 items-center'>
-                    <div className={`rounded-r-xl bg-secondary ${isActive(item.path) ? 'opacity-100' : "opacity-0"} | w-1 h-9 2xl:w-1.5 2xl:h-12 `}>
-
-                    </div>
-                    <div className='flex items-center | gap-3 2xl:gap-5'>
-                      <item.icon className="| text-sm 2xl:text-xl w-[15px] 2xl:w-auto" style={{ strokeWidth: isActive(item.path) ? 3 : 2 }} />
-                      <p className={`${isActive(item.path) ? "font-bold" : "font-normal"} | text-sm 2xl:text-lg `}>{item.label}</p>
-                    </div>
-                  </div>
-                </Link>
+        <aside className="h-full flex flex-col justify-between bg-white max-sm:w-80 w-96 shadow-lg">
+          {/* Header */}
+          <div className="flex flex-col gap-0 2xl:gap-5">
+            <SidebarLogo />
+            
+            {/* Navigation Menu */}
+            <nav className="flex flex-col 2xl:gap-3 px-2">
+              {menuItems.map((item, index) => (
+                <MenuItem
+                  key={`${item.path}-${index}`}
+                  item={item}
+                  isActive={isActive(item.path)}
+                  user={user}
+                />
               ))}
-            </ul>
+            </nav>
           </div>
-          <div className='p-3 m-5 bg-card rounded-full flex gap-2 justify-between items-center'>
-            <div className='flex gap-2' onClick={() => { setDrawerVisible(true) }}>
-              <Avatar src={user?.profile_img} />
-              <div>
-                <h1 className='text-sm font-bold'>{user?.username}</h1>
-                <p className='text-xs text-gray-500'>{user?.email}</p>
-              </div>
-            </div>
-            <div className=''>
-              {/* <MoreOutlined className='text-xl'/> */}
-              <SubMenu items={[{
-                label: 'Logout',
-                icon: <LogoutOutlined />,
-                key: '1',
-                danger: true,
-                onClick: handleLogout
-              }]} />
-            </div>
-          </div>
-        </div>
+
+          {/* User Profile */}
+          <UserProfile
+            user={user}
+            onProfileClick={handleProfileClick}
+            onLogout={handleLogout}
+          />
+        </aside>
       </div>
+
       <UserDetailsDrawer
         user={user}
         visible={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
+        onClose={handleDrawerClose}
       />
     </div>
-  )
+  );
 }
 
-export default Sidebar
+export default Sidebar;

@@ -1,5 +1,6 @@
 import Protected from "@components/layouts/Protected";
 import SidebarLayout from "@components/layouts/Sidebar";
+import FinalProjectPage from "@pages/FinalProject";
 import { ROLES } from "@utils/constants";
 import { Spin } from "antd";
 import { lazy, Suspense } from "react";
@@ -17,6 +18,9 @@ const FacultyAttendance = lazy(() => import("@pages/Attendance/FacultyAttendance
 const ManagerSlots = lazy(() => import("@pages/Slots/ManagerSlots"))
 const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCourseHistory"))
 const ManagerAnnouncementPage = lazy(() => import("@pages/Announcement/ManagerAnnouncement"))
+const ReviewSubmission = lazy(() => import("@pages/FinalProject/ReviewSubmission"))
+const StudentProjectDetails = lazy(() => import("@pages/FinalProject/StudentProjectDetails"))
+const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -107,6 +111,30 @@ export const managerRoutes = [
             path: "/manager/announcements",
             element: (
               <LazyLoader element={<ManagerAnnouncementPage />} />
+            ),
+            title: "Slots",
+          },
+          {
+            path: "/manager/final-project",
+            element: (
+              <FinalProjectPage />
+            ),
+            title: "Slots",
+          },
+          {
+            path: "/manager/final-project/submission/:submissionId",
+            element: <LazyLoader element={<ReviewSubmission />} />,
+            title: "Payslips"
+          },
+          {
+            path: "/manager/final-project/student/:studentId/course/:courseId/details",
+            element: <LazyLoader element={<StudentProjectDetails />} />,
+            title: "Payslips"
+          },
+          {
+            path: "/manager/final-project/student/:studentId/phase/:phaseId",
+            element: (
+              <LazyLoader element={<PhaseDetails />} />
             ),
             title: "Slots",
           },

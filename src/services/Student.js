@@ -1,5 +1,5 @@
 import handleError from "@utils/handleError"
-import { del, post } from "@utils/Requests"
+import { del, get, post } from "@utils/Requests"
 
 class StudentService {
   async enroll({ username, email, password, role, address, center_id, course_id, DOB, phone, phone_alt, school_uni_work, profile_img }) {
@@ -72,6 +72,15 @@ class StudentService {
     }
   }
 
+  async getProjectOpenedStudents() {
+    try {
+      const response = await get(`/v2/students/project-opened`)
+      if (!response) throw new Error("An error occured. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
 
 }
 

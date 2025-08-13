@@ -41,6 +41,77 @@ class FinalProjectService {
       handleError(error);
     }
   }
+
+
+  // =========================
+  // V2 Methods (Student)
+  // =========================
+
+  async getStudentProjectPhases(studentId, courseId) {
+    try {
+      const response = await get(`/v2/finalProject/student/${studentId}/course/${courseId}/phases`);
+      if (!response) throw new Error("An error occurred while fetching phases");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async getPhaseDetailsWithHistory(studentId, phaseId) {
+    try {
+      const response = await get(`/v2/finalProject/student/${studentId}/phase/${phaseId}/details`);
+      if (!response) throw new Error("An error occurred while fetching phase details");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async submitPhaseAttempt(phaseId, data) {
+    try {
+      const response = await post(`/v2/finalProject/phase/${phaseId}/submit`, data);
+      if (!response) throw new Error("An error occurred while submitting phase attempt");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  // =========================
+  // V2 Methods (Manager)
+  // =========================
+
+  async getPendingSubmissions(params = {}) {
+    try {
+      const queryString = new URLSearchParams(params).toString();
+      const response = await get(`/v2/finalProject/pending-submissions${queryString ? `?${queryString}` : ""}`);
+      if (!response) throw new Error("An error occurred while fetching submissions");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async getSubmissionDetails(submissionId) {
+    try {
+      const response = await get(`/v2/finalProject/submission/${submissionId}/details`);
+      if (!response) throw new Error("An error occurred while fetching submission details");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async reviewSubmission(submissionId, data) {
+    try {
+      const response = await post(`/v2/finalProject/submission/${submissionId}/review`, data);
+      if (!response) throw new Error("An error occurred while reviewing submission");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
 }
 
 const finalProjectService = new FinalProjectService();
