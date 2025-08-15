@@ -114,8 +114,8 @@ function GenerateBill({
           </div>
           <div className='flex gap-5'>
             {/* <CustomInput label={"Subject"} name={"subject"} placeholder={"Materials"} /> */}
-            <CustomSelect name={"subject"} options={subjectOptions} label={"Subject"} placeholder='Subject' />
             <CustomSelect name={"generated_for"} options={customersOptions} label={"Select Customer"} placeholder='Customer' />
+            <CustomSelect name={"subject"} options={subjectOptions} label={"Subject"} placeholder='Subject' />
           </div>
           <ItemsInputTable form={form} items={items} itemsOptions={itemsOptionsBySubject} name={"items"} selectedItem={selectedItem} setSelectedItem={setSelectedItem} setTotals={setTotals} itemType={selectedSubject} onSearch={onSearch} />
           <Table
