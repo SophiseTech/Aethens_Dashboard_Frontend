@@ -1,88 +1,66 @@
-import { ArrowLeftOutlined, LoadingOutlined } from '@ant-design/icons';
-import { useFinalProject } from '@hooks/useFinalProject';
-import useUser from '@hooks/useUser';
-import CourseHeader from '@pages/FinalProject/Components/CourseHeader'
-import PhaseList from '@pages/FinalProject/Components/PhaseList';
-import ProgressBar from '@pages/FinalProject/Components/ProgressBar'
-import { Button, Spin } from 'antd';
-import React, { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom';
+import useProjectsView from '@hooks/business/useProjectsView';
+import ProjectCard from '@pages/FinalProject/Components/ProjectCard';
+import { Card, List, Typography, Button, Empty, Skeleton } from 'antd';
 
-// Dummy Data
+const { Title, Text } = Typography;
 
-export const phasesData = [
-  {
-    _id: 1,
-    title: "Project Planning & Requirements",
-    phaseNumber: 1,
-    requiresSubject: true,
-    status: 'approved',
-    lastSubmittedDate: '2024-01-15',
-    description: "Define project scope, requirements, and create detailed project plan"
-  },
-  {
-    _id: 2,
-    title: "UI/UX Design & Wireframes",
-    phaseNumber: 2,
-    requiresSubject: true,
-    status: 'approved',
-    lastSubmittedDate: '2024-01-22',
-    description: "Create user interface designs and wireframes for the application"
-  },
-  {
-    _id: 3,
-    title: "Backend Development",
-    phaseNumber: 3,
-    requiresSubject: false,
-    status: 'under-review',
-    lastSubmittedDate: '2024-01-30',
-    description: "Develop backend APIs, database design, and server infrastructure"
-  },
-  {
-    _id: 4,
-    title: "Frontend Development",
-    phaseNumber: 4,
-    requiresSubject: true,
-    status: 'not-started',
-    lastSubmittedDate: null,
-    description: "Build the frontend application using modern frameworks"
-  },
-  {
-    _id: 5,
-    title: "Testing & Deployment",
-    phaseNumber: 5,
-    requiresSubject: false,
-    status: 'not-started',
-    lastSubmittedDate: null,
-    description: "Comprehensive testing and production deployment"
-  }
-];
+
+
 
 function FinalProjectStudentView() {
-  const navigate = useNavigate();
-  const { phases, loading, fetchPhases, submissionInfo } = useFinalProject();
-  const { user } = useUser()
-  const courseData = user?.details_id?.course
-
-  useEffect(() => {
-    fetchPhases({ courseId: courseData?._id, studentId: user._id });
-  }, []);
-
-  const handleViewPhase = (phase) => {
-    navigate(`/student/final-project/phase/${phase._id}`);
-  };
+  const { projectsInfo, viewContext, loading } = useProjectsView();
+  const { projects } = projectsInfo;
 
   if (loading) {
-    return <div className='w-full h-full flex items-center justify-center'><Spin size="large" /></div>
+    return (
+      <div className="max-w-6xl mx-auto p-6 min-h-screen space-y-4">
+        {[1, 2].map(i => (
+          <Card key={i}>
+            <Skeleton active paragraph={{ rows: 3 }} />
+          </Card>
+        ))}
+      </div>
+    );
   }
-  
+
+  if (!projects?.length) {
+    return (
+      <Empty
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+        description={
+          <div className="text-gray-500">
+            <p className="mb-1">No projects found</p>
+            <Text type="secondary" className="text-sm">
+              You haven't been enrolled in any final projects yet
+            </Text>
+          </div>
+        }
+      />
+    );
+  }
+
   return (
-    <div className="max-w-6xl mx-auto p-6 min-h-screen">
-      <CourseHeader course={courseData} />
-      <ProgressBar submissionInfo={submissionInfo} />
-      <PhaseList phases={phases} onViewPhase={handleViewPhase} submissionInfo={submissionInfo} />
+    <div className="max-w-6xl mx-auto p-6 min-h-screen space-y-4">
+      <div className="flex justify-between items-center mb-6">
+        <Title level={3} className="mb-4">Final Projects</Title>
+        {viewContext.isManagerView && (
+          <Button type="primary">
+            Create New Project
+          </Button>
+        )}
+      </div>
+
+      <List
+        grid={{ gutter: 16, xs: 1, sm: 1, md: 1, lg: 1, xl: 1, xxl: 1 }}
+        dataSource={projects}
+        renderItem={project => (
+          <List.Item>
+            <ProjectCard project={project} />
+          </List.Item>
+        )}
+      />
     </div>
-  );
+  )
 }
 
 export default FinalProjectStudentView

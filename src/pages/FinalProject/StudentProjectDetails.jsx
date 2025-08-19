@@ -8,19 +8,18 @@ import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 function StudentProjectDetails() {
-  const { studentId, courseId } = useParams()
-  const { phases, loading, fetchPhases, submissionInfo } = useFinalProject();
-  const { getCourse, course, loading: courseLoading } = useCourse()
+  const { studentId, projectId } = useParams()
+  const { phases, loading, fetchPhases, submissionInfo, currentProject } = useFinalProject();
+  const course = currentProject?.course || {}
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchPhases({ courseId: courseId, studentId: studentId });
-    getCourse(courseId)
+    fetchPhases({ projectId, studentId });
   }, []);
 
   const handleViewPhase = (phase) => {
-    navigate(`/manager/final-project/student/${studentId}/phase/${phase._id}`);
+    navigate(`/manager/final-project/${projectId}/student/${studentId}/phase/${phase._id}`);
   };
 
   if (loading) {
@@ -29,7 +28,7 @@ function StudentProjectDetails() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 min-h-screen">
-      {courseLoading ?
+      {loading ?
         (
           <Skeleton active title={false} className="mb-6" />
         )

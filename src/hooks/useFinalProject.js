@@ -1,4 +1,4 @@
-import { statusConfig } from "@pages/FinalProject";
+import { projectStatusConfig, statusConfig } from "@pages/FinalProject";
 import { useFinalProjectStore } from "@stores/FinalProjectV2";
 import { PHASE_STATUS } from "@utils/constants";
 import { useCallback, useMemo } from "react";
@@ -12,6 +12,11 @@ export const useFinalProject = () => {
     pendingSubmissions,
     loading,
     error,
+    filters,
+    projectPagination,
+    currentProject,
+    totalProjects,
+    createLoading,
 
     fetchProjects,
     fetchPhases,
@@ -19,7 +24,14 @@ export const useFinalProject = () => {
     fetchPhaseDetails,
     fetchPendingSubmissions,
     submitPhase,
-    reviewSubmission
+    reviewSubmission,
+    setFilters,
+    setProjectPagination,
+    resetFilters,
+    createProject,
+    updateProject,
+    getProjectById,
+    listProjects
   } = useFinalProjectStore();
 
 
@@ -77,6 +89,29 @@ export const useFinalProject = () => {
       hasUnderReviewPhases: (stats[PHASE_STATUS.UNDER_REVIEW] || 0) > 0
     };
   };
+
+  const getProjectsInfo = () => {
+    const transofrmedProjects = projects.map(project => {
+      const statusConfig = getProjectStatusConfig(project.status);
+      return {
+        ...project,
+        statusText: statusConfig.text,
+        statusColor: statusConfig.color,
+        statusIcon: statusConfig.icon,
+        course: project.courseId,
+        student: project.studentId,
+        faculty: project.facultyId
+      };
+    });
+
+    return {
+      total: totalProjects,
+      filters: filters,
+      pagination: projectPagination,
+      projects: transofrmedProjects,
+      loading,
+    }
+  }
 
   const canSubmitPhase = (phase, allPhases = []) => {
     const status = phase.latestSubmission?.status || PHASE_STATUS.NOT_STARTED;
@@ -204,9 +239,19 @@ export const useFinalProject = () => {
   );
 
   const getStatusConfig = (status) => {
-    const config = statusConfig[status] || statusConfig['not-started'];
+    const config = statusConfig[status] || statusConfig['not_started'];
     return config
   }
+
+  const getProjectStatusConfig = (status) => {
+    const config = projectStatusConfig[status] || projectStatusConfig['not_started'];
+    return config
+  }
+
+  const projectsInfo = useMemo(() =>
+    getProjectsInfo(),
+    [projects]
+  );
 
   return {
     projects,
@@ -227,6 +272,16 @@ export const useFinalProject = () => {
     getSubmissionEligibility,
     findNextPhase: () => findNextPhaseToSubmit(phases),
     currentPhaseInfo,
-    getStatusConfig
+    getStatusConfig,
+    projects,
+    currentProject,
+    listProjects,
+    getProjectById,
+    updateProject,
+    totalProjects,
+    projectsInfo,
+    getProjectStatusConfig,
+    createProject,
+    createLoading,
   };
 };

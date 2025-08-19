@@ -2,7 +2,7 @@ import { Form, DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import React from 'react';
 
-function CustomDatePicker({ name, label, placeholder = "Select a date", className = "", time = false, required=true, disabled = false }) {
+function CustomDatePicker({ name, label, placeholder = "Select a date", className = "", time = false, required = true, disabled = false, inputProps = {} }) {
   return (
     <Form.Item
       name={name}
@@ -12,12 +12,13 @@ function CustomDatePicker({ name, label, placeholder = "Select a date", classNam
       ]}
       className='w-full'
     >
-      <DatePicker 
-        placeholder={placeholder} 
-        className={className} 
-        showTime={time} 
-        format={time ? "DD-MM-YYYY HH:mm" : "DD-MM-YYYY"} 
+      <DatePicker
+        placeholder={placeholder}
+        className={className}
+        showTime={time}
+        format={time ? "DD-MM-YYYY HH:mm" : "DD-MM-YYYY"}
         disabled={disabled}
+        {...inputProps}
       />
     </Form.Item>
   );

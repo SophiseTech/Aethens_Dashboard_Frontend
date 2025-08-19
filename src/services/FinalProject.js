@@ -14,7 +14,7 @@ class FinalProjectService {
 
   async createFinalProject(data) {
     try {
-      const response = await post(`/finalProject`, data);
+      const response = await post(`/v2/finalProject`, data);
       if (!response) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {
@@ -47,9 +47,9 @@ class FinalProjectService {
   // V2 Methods (Student)
   // =========================
 
-  async getStudentProjectPhases(studentId, courseId) {
+  async getStudentProjectPhases(studentId, projectId) {
     try {
-      const response = await get(`/v2/finalProject/student/${studentId}/course/${courseId}/phases`);
+      const response = await get(`/v2/finalProject/student/${studentId}/project/${projectId}/phases`);
       if (!response) throw new Error("An error occurred while fetching phases");
       return response.data;
     } catch (error) {
@@ -57,9 +57,9 @@ class FinalProjectService {
     }
   }
 
-  async getPhaseDetailsWithHistory(studentId, phaseId) {
+  async getPhaseDetailsWithHistory(studentId, phaseId, projectId) {
     try {
-      const response = await get(`/v2/finalProject/student/${studentId}/phase/${phaseId}/details`);
+      const response = await get(`/v2/finalProject/${projectId}/student/${studentId}/phase/${phaseId}/details`);
       if (!response) throw new Error("An error occurred while fetching phase details");
       return response.data;
     } catch (error) {
@@ -96,6 +96,54 @@ class FinalProjectService {
     try {
       const response = await get(`/v2/finalProject/submission/${submissionId}/details`);
       if (!response) throw new Error("An error occurred while fetching submission details");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async create(data) {
+    try {
+      const response = await post(`/v2/finalProject`, data);
+      if (!response) throw new Error("An error occurred while creating final project");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async update(id, updateData) {
+    try {
+      const response = await put(`/v2/finalProject/${id}`, updateData);
+      if (!response) throw new Error("An error occurred while updating final project");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async getById(id) {
+    try {
+      const response = await get(`/v2/finalProject/${id}`);
+      if (!response) throw new Error("An error occurred while fetching final project");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async list(filters = {}, pagination = { page: 1, limit: 10 }, populate) {
+    try {
+      const queryParams = new URLSearchParams({
+
+        ...filters,
+        page: pagination.page,
+        limit: pagination.limit,
+        sort: JSON.stringify(pagination.sort || { createdAt: -1 })
+      }).toString();
+
+      const response = await post(`/v2/finalProject/list?${queryParams}`, { populate });
+      if (!response) throw new Error("An error occurred while fetching final projects");
       return response.data;
     } catch (error) {
       handleError(error);

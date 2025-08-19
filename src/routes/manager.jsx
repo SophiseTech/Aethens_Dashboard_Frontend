@@ -1,6 +1,7 @@
 import Protected from "@components/layouts/Protected";
 import SidebarLayout from "@components/layouts/Sidebar";
 import FinalProjectPage from "@pages/FinalProject";
+import PhaseListPage from "@pages/FinalProject/PhaseList";
 import { ROLES } from "@utils/constants";
 import { Spin } from "antd";
 import { lazy, Suspense } from "react";
@@ -127,12 +128,12 @@ export const managerRoutes = [
             title: "Payslips"
           },
           {
-            path: "/manager/final-project/student/:studentId/course/:courseId/details",
+            path: "/manager/final-project/:projectId/student/:studentId/phases",
             element: <LazyLoader element={<StudentProjectDetails />} />,
             title: "Payslips"
           },
           {
-            path: "/manager/final-project/student/:studentId/phase/:phaseId",
+            path: "/manager/final-project/:projectId/student/:studentId/phase/:phaseId",
             element: (
               <LazyLoader element={<PhaseDetails />} />
             ),

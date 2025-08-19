@@ -1,13 +1,15 @@
 import { BookOutlined, CalendarOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
 import { useFinalProject } from '@hooks/useFinalProject';
 import useStudents from '@hooks/useStudents';
+import useUser from '@hooks/useUser';
+import CreateProject from '@pages/FinalProject/Components/CreateProject';
 import FilterBar from '@pages/FinalProject/Components/FilterBar';
 import ProjectOpenedStudentsList from '@pages/FinalProject/Components/ProjectOpenedStudentsList';
 import StudentSearchBar from '@pages/FinalProject/Components/StudentSearchBar';
 import { formatDate } from '@utils/helper';
 import { Avatar, Button, Card, message, Pagination, Space, Spin, Table, Tag, Typography } from 'antd';
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const { Text, Title } = Typography
 
@@ -41,29 +43,35 @@ export const mockSubmissions = [
 function FinalProjectManagerView() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const { getStatusConfig, fetchPendingSubmissions, pendingSubmissions, loading } = useFinalProject()
-  const { getStudentsByCenter, students, loading: studentListLoading, getProjectOpenedStudents, projectOpenedStudents, loading: projectOpenedStudentsLoading } = useStudents()
+  const { getStatusConfig, fetchPendingSubmissions, pendingSubmissions, loading, listProjects, projectsInfo } = useFinalProject()
+  const { loading: projectOpenedStudentsLoading } = useStudents()
   const nav = useNavigate()
+  const { projectId } = useParams()
+  const { user } = useUser()
 
   useEffect(() => {
-    fetchPendingSubmissions()
-    getStudentsByCenter()
-    getProjectOpenedStudents()
+    fetchPendingSubmissions({}, projectId)
+    listProjects({
+      query: {status: 'pending'},
+      populate: [
+        {
+          path: "studentId",
+          select: "username center_id",
+        },
+        {
+          path: "facultyId",
+          select: "username"
+        },
+        {
+          path: 'courseId',
+          select: "course_name"
+        }
+      ]
+    })
   }, [])
 
-  const onSelectStudent = (value) => {
-    const student = students.find(s => s._id === value);
-    console.log('Selected student id:', value);
-    if (!student) {
-      message.error('Student not found');
-      return
-    }
-    console.log('Selected student:', student);
-    nav(`/manager/final-project/student/${value}/course/${student?.details_id?.course_id}/details`);
-  }
-
-  const onViewStudents = (studentid, courseId) => {
-    nav(`/manager/final-project/student/${studentid}/course/${courseId}/details`);
+  const onViewStudents = (projectId, studentId) => {
+    nav(`/manager/final-project/${projectId}/student/${studentId}/phases`);
   }
 
   const columns = [
@@ -136,7 +144,9 @@ function FinalProjectManagerView() {
 
       {/* <FilterBar onFiltersChange={(values) => console.log('Filters:', values)} /> */}
 
-      <StudentSearchBar students={students} onSelect={onSelectStudent} />
+      {/* <StudentSearchBar students={students} onSelect={onSelectStudent} /> */}
+
+      <CreateProject />
 
       <Card className='mb-4'>
         <Title level={4}>Submissions</Title>
@@ -149,7 +159,7 @@ function FinalProjectManagerView() {
         />
       </Card>
 
-      <ProjectOpenedStudentsList students={projectOpenedStudents} loading={projectOpenedStudentsLoading} onView={onViewStudents} />
+      <ProjectOpenedStudentsList projectsInfo={projectsInfo} loading={projectOpenedStudentsLoading} onView={onViewStudents} />
     </div>
   );
 };

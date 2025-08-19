@@ -22,6 +22,7 @@ const MarkFacultyAttendance = lazy(() => import("@pages/Temp/MarkFacultyAttendan
 const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCourseHistory"));
 const StudentAnnouncement = lazy(() => import("@pages/Announcement/StudentAnnouncement"));
 const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"));
+const PhaseListPage = lazy(() => import("@pages/FinalProject/PhaseList"));
 
 const LazyLoader = ({ children }) => {
   const location = useLocation()
@@ -213,7 +214,12 @@ export const generalRoutes = [
             title: "Slots",
           },
           {
-            path: "/student/final-project/phase/:phaseId",
+            path: "/student/final-project/:projectId/phases",
+            element: <LazyLoader><PhaseListPage /></LazyLoader>,
+            title: "Slots",
+          },
+          {
+            path: "/student/final-project/:projectId/phase/:phaseId",
             element: (
               <LazyLoader>
                 <PhaseDetails />

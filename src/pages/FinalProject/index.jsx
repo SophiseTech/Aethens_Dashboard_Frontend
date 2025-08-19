@@ -11,6 +11,14 @@ export const statusConfig = {
   'rejected': { color: 'error', icon: <CloseCircleOutlined />, text: 'Rejected' }
 };
 
+// Status Configuration
+export const projectStatusConfig = {
+  'not_started': { color: 'default', icon: <InfoCircleOutlined />, text: 'Not Started' },
+  'active': { color: 'processing', icon: <ClockCircleOutlined className="text-blue-500" />, text: 'Active' },
+  'completed': { color: 'success', icon: <CheckCircleOutlined className="text-green-500" />, text: 'Completed' },
+  'archived': { color: 'warning', icon: <ClockCircleOutlined className="text-orange-500" />, text: 'Archived' },
+};
+
 export default function FinalProjectPage() {
   const { user } = useStore(userStore);
 

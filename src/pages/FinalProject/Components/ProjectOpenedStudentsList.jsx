@@ -2,12 +2,12 @@ import { BookOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Button, Card, Space, Table, Tag, Typography } from 'antd';
 const { Text, Title } = Typography;
 
-function ProjectOpenedStudentsList({ students, loading, onView }) {
+function ProjectOpenedStudentsList({ projectsInfo = [], loading, onView }) {
 
   const columns = [
     {
       title: 'Student',
-      dataIndex: 'username',
+      dataIndex: ['student','username'],
       key: 'studentName',
       render: (name) => (
         <Space>
@@ -40,7 +40,7 @@ function ProjectOpenedStudentsList({ students, loading, onView }) {
         <Button
           type="primary"
           icon={<EyeOutlined />}
-          onClick={() => onView(record._id, record.course._id)}
+          onClick={() => onView(record._id, record.student._id)}
         >
           View
         </Button>
@@ -53,7 +53,7 @@ function ProjectOpenedStudentsList({ students, loading, onView }) {
       <Title level={4}>Project Opened Students</Title>
       <Table
         columns={columns}
-        dataSource={students}
+        dataSource={projectsInfo?.projects || []}
         rowKey="id"
         pagination={true}
         className="mb-4"

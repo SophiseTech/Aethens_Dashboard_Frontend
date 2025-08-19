@@ -1,4 +1,5 @@
 import studentStore from "@stores/StudentStore"
+import { useMemo } from "react"
 
 function useStudents() {
 
@@ -11,12 +12,15 @@ function useStudents() {
     projectOpenedStudents
   } = studentStore()
 
+  const studentOptions = useMemo(() => students?.map(student => ({ label: student.username, value: student._id })), [students]) || []
+
   return {
     getStudentsByCenter,
     getProjectOpenedStudents,
 
     students,
     loading,
+    studentOptions,
     projectOpenedStudents
   }
 }

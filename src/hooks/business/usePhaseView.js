@@ -5,7 +5,7 @@ import useUser from '@hooks/useUser';
 import { ROLES } from '@utils/constants';
 
 export const usePhaseView = () => {
-  const { phaseId, studentId } = useParams();
+  const { phaseId, studentId, projectId } = useParams();
   const { fetchPhaseDetails, currentPhaseInfo, submitPhase, submitReview, loading } = useFinalProject();
   const { user } = useUser();
 
@@ -22,6 +22,7 @@ export const usePhaseView = () => {
     fetchPhaseDetails({
       studentId: viewContext.targetStudentId,
       phaseId,
+      projectId,
       viewerRole: user.role
     });
   }, [viewContext.targetStudentId, phaseId, user.role]);
@@ -32,8 +33,9 @@ export const usePhaseView = () => {
     const images = data.upload?.map(file => file.response);
     data.studentId = user._id;
     data.images = images || [];
+    data.projectId = projectId
     await submitPhase(phaseId, data);
-    await fetchPhaseDetails({ studentId: user._id, phaseId });
+    await fetchPhaseDetails({ studentId: user._id, phaseId, projectId });
   };
 
   const handleReview = async (reviewData) => {
