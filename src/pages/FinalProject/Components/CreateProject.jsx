@@ -19,7 +19,7 @@ function CreateProject() {
   const { user } = useUser()
 
   useEffect(() => {
-    getStudentsByCenter()
+    getStudentsByCenter(0)
     getCourses()
   }, [])
 

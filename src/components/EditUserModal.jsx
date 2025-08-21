@@ -70,6 +70,7 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
           label={"Date Of Joining"}
           placeholder='DOJ'
           className='w-full'
+          required={false}
         />
         <CustomInput
           name="phone"
@@ -80,6 +81,7 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
           name="phone_alt"
           label="Alternate Mobile Number"
           placeholder="+91 7884574875"
+          required={false}
         />
         <CustomInput
           name="address"
