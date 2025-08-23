@@ -22,6 +22,7 @@ const ManagerAnnouncementPage = lazy(() => import("@pages/Announcement/ManagerAn
 const ReviewSubmission = lazy(() => import("@pages/FinalProject/ReviewSubmission"))
 const StudentProjectDetails = lazy(() => import("@pages/FinalProject/StudentProjectDetails"))
 const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"))
+const FinalProjectStudentView = lazy(() => import("@pages/FinalProject/Components/FinalProjectStudentView"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -137,6 +138,11 @@ export const managerRoutes = [
             element: (
               <LazyLoader element={<PhaseDetails />} />
             ),
+            title: "Slots",
+          },
+          {
+            path: "/manager/final-project/student/:studentId/details",
+            element: <LazyLoader element={<FinalProjectStudentView /> } />,
             title: "Slots",
           },
         ]

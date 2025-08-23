@@ -13,6 +13,7 @@ export const useFinalProjectStore = create((set, get) => ({
   loading: false,
   error: null,
   createLoading: false,
+  latestSubmission: null,
 
   // Filters and Pagination
   filters: {},
@@ -164,11 +165,11 @@ export const useFinalProjectStore = create((set, get) => ({
   },
 
   // List final projects with current filters and pagination
-  listProjects: async (newFilters = { query: {}, populate: "" }) => {
+  listProjects: async (newFilters = { query: {}, populate: "", pagination: null }) => {
     const { filters, pagination } = get();
     set({ loading: true, error: null });
     try {
-      const response = await finalProjectService.list({ ...filters, ...newFilters.query }, pagination, newFilters.populate);
+      const response = await finalProjectService.list({ ...filters, ...newFilters.query }, newFilters.pagination || pagination, newFilters.populate);
       set({
         projects: response.projects,
         totalProjects: response.pagination.total,
@@ -180,6 +181,24 @@ export const useFinalProjectStore = create((set, get) => ({
       throw error;
     }
   },
+
+
+  // Get latest submission by filters (only studentId, projectId filter enabled in server)
+  getLatestSubmission: async (filters = {}) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await finalProjectService.getLatestSubmission(filters);
+      set({
+        latestSubmission: response,
+        loading: false
+      });
+      return response;
+    } catch (error) {
+      set({ error, loading: false });
+      throw error;
+    }
+  },
+
 
   // Clear current project
   clearCurrentProject: () => {

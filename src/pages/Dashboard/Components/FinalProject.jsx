@@ -1,3 +1,4 @@
+import { useFinalProject } from '@hooks/useFinalProject'
 import useModal from '@hooks/useModal'
 import ProjectRequestModal from '@pages/Dashboard/Components/ProjectRequestModal'
 import finalProjectStore from '@stores/FinalProjectStore'
@@ -5,11 +6,12 @@ import userStore from '@stores/UserStore'
 import { Button, Tag } from 'antd'
 import _ from 'lodash'
 import React, { useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useStore } from 'zustand'
 
-function FinalProject({ isActive }) {
+function FinalProject({ finalProjectInfo = {} }) {
 
-  const { getProject, project, loading, createProject } = useStore(finalProjectStore)
+  const { getProject, project, createProject } = useStore(finalProjectStore)
   const { user } = useStore(userStore)
 
   const handleSubmit = async (values) => {
@@ -29,52 +31,51 @@ function FinalProject({ isActive }) {
   }
   const { handleCancel, isModalOpen, handleOk, showModal } = useModal(handleSubmit)
 
-  useEffect(() => {
-    getProject({
-      query: {
-        course_id: user.details_id?.course_id,
-        $or: [{ status: "approved" }, { status: "pending" }]
-      }
-    })
-  }, [])
+
 
   const renderProjectStatus = (status) => {
-    if (!isActive) return <Tag>Not Opened</Tag>
     switch (status) {
       case "approved":
         return <Tag color='green'>Approved</Tag>
-      case "pending":
+      case "under_review":
         return <Tag color='red'>Pending</Tag>
       case "rejected":
         return <Tag color='red'>Rejected</Tag>
       default:
-        return <Tag color='blue'>Not Requested</Tag>
+        return <Tag color='blue'>Not Opened</Tag>
     }
   }
 
-  const renderRequestButton = (project) => {
-    if (!isActive) return
-    if (_.isEmpty(project)) {
-      return <Button size='small' color='green' variant='filled' onClick={showModal}>Request</Button>
-    }
-    return <Button size='small' color='green' variant='filled' type='link' href={project.image} target='_blank'>View Image</Button>
-  }
+  const renderRequestButton = () => {
+    const project = finalProjectInfo?.project
+    const phase = finalProjectInfo?.phase
 
+    if (!project || _.isEmpty(project)) { return }
+    return <Link to={`/student/final-project/${project._id}/phase/${phase?._id}`}>
+      <Button variant='filled' color='green' size='small'>View More</Button>
+    </Link>
+  }
 
   return (
     <div className='bg-black/30 text-white relative rounded-3xl p-4 pr-0 flex justify-between items-center | gap-5 2xl:gap-10'>
       <div className='space-y-5'>
         <p className='font-bold flex gap-3 items-center | text-xs 2xl:text-lg'>
           Final Project
-          {renderProjectStatus(project?.status)}
+          {renderProjectStatus(finalProjectInfo?.latestSubmission?.status)}
         </p>
-        <p className='| text-xs 2xl:text-sm'>
-          {!isActive ? "Project is not yet opened" : project?.project_details ? project?.project_details : "No Projects approved"}
-        </p>
+        <div className='space-y-2'>
+          <p className='font-bold'>{finalProjectInfo?.project?.title} - {finalProjectInfo?.phase?.title}</p>
+          <p className="| text-xs 2xl:text-sm">
+            {finalProjectInfo?.latestSubmission?.status === "approved" && "✅ Your last submission was approved. Great job!"}
+            {finalProjectInfo?.latestSubmission?.status === "under_review" && "⏳ Your last submission is under review. Please wait for feedback."}
+            {finalProjectInfo?.latestSubmission?.status === "rejected" && "❌ Your last submission was rejected. Please review the feedback and resubmit."}
+          </p>
+        </div>
+
       </div>
       {/* <img src="/icons/project.png" alt="" className="self-end opacity-50 | max-2xl:w-1/4" /> */}
       <div className='absolute right-5'>
-        {renderRequestButton(project)}
+        {renderRequestButton()}
       </div>
 
       <ProjectRequestModal handleCancel={handleCancel} handleOk={handleOk} isModalOpen={isModalOpen} />

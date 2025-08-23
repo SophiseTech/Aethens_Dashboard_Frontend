@@ -12,12 +12,12 @@ import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-pro
 import 'react-circular-progressbar/dist/styles.css';
 import { useStore } from 'zustand';
 
-function CourseStat() {
+function CourseStat({finalProject = {}}) {
 
   const { getCourse, course } = courseStore()
   const { user } = userStore()
   const { slots, getCompletedCount, completedCount } = slotStore()
-  const { project } = useStore(finalProjectStore)
+  const project = finalProject?.project
 
   const mostUpcoming = useMemo(() => slots
     .filter(item => dayjs(item.start_date) >= dayjs())
@@ -42,12 +42,10 @@ function CourseStat() {
     },
     {
       title: "Project Deadline",
-      label: (project?.status === "approved" && project?.deadline) ? `${formatDate(project?.deadline)}` : "-------",
+      label: (finalProject?.latestSubmission?.status === "approved" && project?.endDate) ? `${formatDate(project?.endDate)}` : "-------",
       icon: <img src="/icons/hourglass.svg" alt="" className="self-end | max-2xl:w-1/4" />,
     },
   ];
-
-  const isFinalprojectActive = (Number(completedCount) / Number(course?.total_session)) > 0 
 
   return (
     <div className='bg-card rounded-3xl w-full space-y-5 | p-2 2xl:p-5'>
@@ -68,7 +66,7 @@ function CourseStat() {
             </div>
           </div>
 
-          <FinalProject isActive={isFinalprojectActive} />
+          <FinalProject finalProjectInfo={finalProject}  />
 
         </div>
 
@@ -98,7 +96,7 @@ const StatItem = ({ title, label, icon }) => (
   <div className='bg-black/30 rounded-3xl p-4 pr-0 flex justify-between | gap-5 2xl:gap-10'>
     <div className='space-y-5'>
       <p className='| text-xs 2xl:text-lg'>{title}</p>
-      <p className='| text-lg 2xl:text-3xl font-bold'>{label}</p>
+      <p className='| text-lg 2xl:text-2xl font-bold'>{label}</p>
     </div>
     {icon}
   </div>

@@ -160,6 +160,17 @@ class FinalProjectService {
     }
   }
 
+
+  async getLatestSubmission(filters = {}) {
+    try {
+      const response = await post(`/v2/finalProject/submissions/latest`, filters);
+      if (!response) throw new Error("An error occurred while fetching latest submission");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
 }
 
 const finalProjectService = new FinalProjectService();

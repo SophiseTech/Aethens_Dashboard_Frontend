@@ -17,6 +17,7 @@ export const useFinalProject = () => {
     currentProject,
     totalProjects,
     createLoading,
+    latestSubmission,
 
     fetchProjects,
     fetchPhases,
@@ -31,7 +32,8 @@ export const useFinalProject = () => {
     createProject,
     updateProject,
     getProjectById,
-    listProjects
+    listProjects,
+    getLatestSubmission
   } = useFinalProjectStore();
 
 
@@ -283,5 +285,7 @@ export const useFinalProject = () => {
     getProjectStatusConfig,
     createProject,
     createLoading,
+    latestSubmission,
+    getLatestSubmission
   };
 };

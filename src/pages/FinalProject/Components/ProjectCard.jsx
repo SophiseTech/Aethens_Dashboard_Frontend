@@ -54,16 +54,6 @@ function ProjectCard({ project }) {
             >
               {project.statusText}
             </Tag>
-
-            {project.faculty?.name && (
-              <Tag
-                icon={<TeamOutlined />}
-                color="blue"
-                className="px-3 py-1 rounded-full"
-              >
-                {project.faculty.name}
-              </Tag>
-            )}
           </Space>
 
           {/* Progress Section */}
@@ -104,10 +94,10 @@ function ProjectCard({ project }) {
             )}
           </div>
 
-          <div className="flex items-center text-gray-500 text-sm mt-2">
+          {/* <div className="flex items-center text-gray-500 text-sm mt-2">
             <UserOutlined className="mr-2" />
             <span>{project.faculty?.username}</span>
-          </div>
+          </div> */}
         </div>
 
         {/* Action Button */}

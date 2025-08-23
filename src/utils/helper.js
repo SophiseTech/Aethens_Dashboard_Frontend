@@ -217,3 +217,16 @@ export const isValidURL = (str) => {
 export const isUserActive = (user) => {
   return user?.status === "active"
 }
+
+export function formatText(raw) {
+  if (!raw) return "";
+
+  return raw
+    // Add newline BEFORE each numbered bullet (1. text OR 1.text)
+    .replace(/(\d+\.)/g, "\n$1 ")
+    // Add newline BEFORE dash bullets (- Bullet)
+    .replace(/(-\s?)/g, "\n$1")
+    // Add newline AFTER period only if letter before and letter after
+    .replace(/(?<=[A-Za-z])\.(?=[A-Za-z])/g, ".\n")
+    .trim();
+}

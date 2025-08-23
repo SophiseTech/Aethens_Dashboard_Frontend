@@ -1,5 +1,6 @@
-import React, { lazy, Suspense } from 'react'
-import { Skeleton } from 'antd'
+import { lazy, Suspense } from 'react';
+import { Skeleton } from 'antd';
+import useStudentDashboardView from '@hooks/business/useStudentDashboardView';
 
 const Attendance = lazy(() => import('@pages/Dashboard/widgets/Attendance'));
 const CourseStat = lazy(() => import('@pages/Dashboard/widgets/CourseStat'));
@@ -8,6 +9,9 @@ const Updates = lazy(() => import('@pages/Dashboard/widgets/Updates'));
 const Announcement = lazy(() => import('@pages/Dashboard/widgets/Announcement'));
 
 function Student() {
+
+  const { dashboardInfo } = useStudentDashboardView()
+
   return (
     <>
       {/* Desktop */}
@@ -15,7 +19,7 @@ function Student() {
         <Suspense fallback={<Loader />}>
           <Attendance />
           <div className='flex-1 flex flex-col gap-5 min-h-full h-auto'>
-            <CourseStat />
+            <CourseStat finalProject={dashboardInfo.finalProject} />
             <div className='flex gap-5'>
               <div className='w-1/2 flex flex-col gap-5'>
                 <Updates />
@@ -31,7 +35,7 @@ function Student() {
       <Suspense fallback={<Loader />}>
         <div className='flex gap-5 flex-col lg:hidden'>
           <div className='flex gap-5 flex-col md:flex-row'>
-            <CourseStat />
+            <CourseStat finalProject={dashboardInfo.finalProject}/>
             <Attendance />
           </div>
           <Updates />

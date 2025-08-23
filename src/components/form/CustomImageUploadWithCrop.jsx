@@ -104,7 +104,7 @@ function CustomImageUploadWithCrop({ action,
           customRequest={customRequest}
           maxCount={!multiple && 1}
           multiple={multiple}
-          accept='images/*'
+          accept="image/*;capture=camera"
         >
           {customUploadButton || uploadButton}
         </Upload>

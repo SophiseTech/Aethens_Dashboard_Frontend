@@ -77,6 +77,7 @@ function CustomFileUpload({ form, name, label, path, className = "", maxCount = 
         showUploadList={{ showRemoveIcon: true }}
         customRequest={customRequest}
         multiple={multiple}
+        accept="image/*;capture=camera"
       >
         {children || <Button icon={<UploadOutlined />}>Upload {label}</Button>}
       </Upload>

@@ -46,7 +46,7 @@ const ManagerActionButtons = ({ userDetails }) => {
   };
 
   const handleViewFinalProject = (student_id, course_id) => {
-    nav(`/manager/final-project/student/${student_id}/course/${course_id}/details`);
+  nav(`/manager/final-project/student/${student_id}/details`);
   };
 
   const handleViewSession = () => {
