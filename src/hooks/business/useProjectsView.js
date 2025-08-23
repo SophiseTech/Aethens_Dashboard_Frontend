@@ -1,17 +1,26 @@
 import { useFinalProject } from "@hooks/useFinalProject";
 import useUser from "@hooks/useUser";
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 function useProjectsView() {
   const { user } = useUser();
   const { studentId } = useParams()
   const { listProjects, projectsInfo, loading } = useFinalProject()
-  
+  const nav = useNavigate()
+
   const viewContext = {
     userRole: user.role,
     isManagerView: user.role === 'manager',
     targetStudentId: studentId || user._id,
+  }
+
+  const handleViewProjectDetails = (project) => {
+    if (viewContext.isManagerView) {
+      nav(`/manager/final-project/${project._id}/student/${studentId}/phases`)
+    } else {
+      nav(`/student/final-project/${project._id}/phases`)
+    }
   }
 
   useEffect(() => {
@@ -38,7 +47,8 @@ function useProjectsView() {
   return {
     projectsInfo,
     loading,
-    viewContext
+    viewContext,
+    handleViewProjectDetails
   }
 }
 

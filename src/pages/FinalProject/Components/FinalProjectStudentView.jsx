@@ -8,7 +8,7 @@ const { Title, Text } = Typography;
 
 
 function FinalProjectStudentView() {
-  const { projectsInfo, viewContext, loading } = useProjectsView();
+  const { projectsInfo, viewContext, loading, handleViewProjectDetails } = useProjectsView();
   const { projects } = projectsInfo;
 
   if (loading) {
@@ -61,7 +61,7 @@ function FinalProjectStudentView() {
         dataSource={projects}
         renderItem={project => (
           <List.Item>
-            <ProjectCard project={project} />
+            <ProjectCard project={project} handleViewProjectDetails={handleViewProjectDetails} />
           </List.Item>
         )}
       />

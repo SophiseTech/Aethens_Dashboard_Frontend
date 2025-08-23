@@ -10,8 +10,16 @@ import { formatDate } from '@utils/helper';
 
 const { Title, Text, Paragraph } = Typography
 
-function ProjectCard({ project }) {
+function ProjectCard({ project, handleViewProjectDetails }) {
   const progress = project.approvedPhases / project.totalPhases * 100;
+
+  const projectDetailsUrl = () => {
+    if (viewContext.isManagerView) {
+      return `/manager/final-project/${project._id}/details`
+    } else {
+      return `/student/final-project/${project._id}/phases`
+    }
+  }
 
   return (
     <Card
@@ -102,15 +110,14 @@ function ProjectCard({ project }) {
 
         {/* Action Button */}
         <div className="ml-6">
-          <Link to={`/student/final-project/${project._id}/phases`}>
-            <Button
-              type="primary"
-              icon={<RightOutlined />}
-              className="h-10 px-6 rounded-lg font-medium shadow-sm hover:shadow-md transition-all duration-200"
-            >
-              View Details
-            </Button>
-          </Link>
+          <Button
+            type="primary"
+            icon={<RightOutlined />}
+            className="h-10 px-6 rounded-lg font-medium shadow-sm hover:shadow-md transition-all duration-200"
+            onClick={() => handleViewProjectDetails(project)}
+          >
+            View Details
+          </Button>
         </div>
       </div>
     </Card>
