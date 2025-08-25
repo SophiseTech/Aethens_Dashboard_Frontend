@@ -122,6 +122,7 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
         const updateObj = {
           ...field,
           discountType: discountType[index],
+          undiscountedTotal: Number((Number(field.rate) * Number(field.qty)).toFixed(2)),
           subtotal: (getDiscount(field.discount, field.rate, discountType[index])) * Number(field.qty),
           taxAmnt: Number((Number(field.subtotal) * (Number(field.taxes) / 100)).toFixed(2)),
           total: Number(field.subtotal) + Number(field.taxAmnt)
@@ -133,10 +134,11 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
     }) || []
 
     setTotals({
+      undiscountedTotal: sumFromObjects(updatedFields, "undiscountedTotal"),
       subtotal: sumFromObjects(updatedFields, "subtotal"),
       total_tax: sumFromObjects(updatedFields, "taxAmnt"),
       total: Math.round(sumFromObjects(updatedFields, "total")),
-      total_discount: sum(updatedFields.map((field, index) => getDiscountRate(field.discount, field.rate, discountType[index]) * Number(field.qty)))
+      total_discount: sum(updatedFields.map((field, index) => Number((getDiscountRate(field.discount, field.rate, discountType[index]) * Number(field.qty)).toFixed(2))))
     })
     form.setFieldValue("items", updatedFields.filter(field => field.name !== undefined))
   }, [itemsFields, discountType])

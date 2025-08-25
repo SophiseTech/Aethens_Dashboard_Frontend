@@ -43,11 +43,26 @@ export const useFinalProject = () => {
     }
 
     // Priority order for finding next phase to submit:
-    // 1. First rejected phase (needs resubmission)
-    // 2. First not-started phase (new submission)
-    // 3. Return null if all are approved or under review
+    // 1. Phase immediately after the last approved phase
+    // 2. First rejected phase (needs resubmission)
+    // 3. First not-started phase (new submission)
+    // 4. Return null if all are approved or under review
 
-    // First, look for rejected phases (highest priority)
+    // Find the last approved phase
+    const lastApprovedPhase = [...phases].reverse().find(phase =>
+      phase.latestSubmission?.status === PHASE_STATUS.APPROVED
+    );
+
+    if (lastApprovedPhase) {
+      const nextPhase = phases.find(phase =>
+        phase.phaseNumber === lastApprovedPhase.phaseNumber + 1
+      );
+      if (nextPhase) {
+        return nextPhase;
+      }
+    }
+
+    // Look for rejected phases (next priority)
     const rejectedPhase = phases.find(phase =>
       phase.latestSubmission?.status === PHASE_STATUS.REJECTED
     );
@@ -57,12 +72,20 @@ export const useFinalProject = () => {
     }
 
     // Then look for not-started phases
-    const notStartedPhase = phases.find(phase =>
-      !phase.latestSubmission ||
-      phase.latestSubmission?.status === PHASE_STATUS.NOT_STARTED
+    const underReviewPhase = phases.find(phase =>
+      phase.latestSubmission?.status === PHASE_STATUS.UNDER_REVIEW
     );
 
-    return notStartedPhase || null;
+    if (underReviewPhase) {
+      return underReviewPhase;
+    }
+
+    const notStartedPhase = phases.find(phase =>
+      !phase.latestSubmission ||
+      phase.latestSubmission?.status === PHASE_STATUS.NOT_STARTED)
+
+    return notStartedPhase || null
+
   };
 
   const getPhaseSubmissionInfo = (phases) => {

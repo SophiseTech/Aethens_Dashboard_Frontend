@@ -85,7 +85,7 @@ function GenerateBill({
     {
       dataIndex: "value",
       className: "text-end",
-      render: (value, _, index) => (index === 2 ? <p className='font-bold text-lg text-primary'>₹{value}</p> : `₹${value}`)
+      render: (value, _, index) => (index === 4 ? <p className='font-bold text-lg text-primary'>₹{value}</p> : `₹${value}`)
     },
   ]
   // console.log(items);
@@ -124,6 +124,8 @@ function GenerateBill({
             columns={columns2}
             pagination={false}
             dataSource={[
+              { name: "Gross Total", value: totals?.undiscountedTotal },
+              { name: "Discount", value: totals?.total_discount },
               { name: "Subtotal", value: totals?.subtotal },
               { name: "Total Tax", value: totals?.total_tax },
               { name: "Grand Total", value: totals?.total },

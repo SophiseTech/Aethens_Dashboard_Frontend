@@ -7,6 +7,7 @@ import {
 } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { formatDate } from '@utils/helper';
+import { round } from 'lodash';
 
 const { Title, Text, Paragraph } = Typography
 
@@ -26,8 +27,8 @@ function ProjectCard({ project, handleViewProjectDetails }) {
       className="mb-4 hover:shadow-lg transition-all duration-300 border border-gray-200 rounded-lg overflow-hidden"
       bodyStyle={{ padding: '24px' }}
     >
-      <div className="flex justify-between items-start">
-        <div className="flex-1">
+      <div className="flex flex-col md:flex-row gap-3 justify-between items-start">
+        <div className="flex-1 max-md:w-full">
           {/* Header with course icon and title */}
           <div className="flex items-center mb-3">
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-sm font-semibold mr-3 shadow-sm">
@@ -76,7 +77,7 @@ function ProjectCard({ project, handleViewProjectDetails }) {
                 </Text>
               </div>
               <Progress
-                percent={progress}
+                percent={round(progress, 2)}
                 size="small"
                 strokeColor={{
                   from: '#4F46E5',
@@ -90,13 +91,15 @@ function ProjectCard({ project, handleViewProjectDetails }) {
           )}
 
           {/* Footer with date */}
-          <div className="flex items-center text-gray-500 text-sm">
-            <CalendarOutlined className="mr-2" />
-            <span>Started on {formatDate(project.startDate || project.createdAt)}</span>
+          <div className="flex max-md:flex-col md:items-center text-gray-500 text-sm">
+            <div>
+              <CalendarOutlined className="mr-2" />
+              <span>Started on {formatDate(project.startDate || project.createdAt)}</span>
+            </div>
 
             {project.endDate && (
               <>
-                <span className="mx-2">•</span>
+                <span className="max-md:hidden mx-2">•</span>
                 <span>Due {formatDate(project.endDate)}</span>
               </>
             )}
@@ -109,7 +112,7 @@ function ProjectCard({ project, handleViewProjectDetails }) {
         </div>
 
         {/* Action Button */}
-        <div className="ml-6">
+        <div className="md:ml-6">
           <Button
             type="primary"
             icon={<RightOutlined />}

@@ -13,12 +13,15 @@ function NewSubmissionForm({ phase, onSubmit }) {
   const handleSubmit = async (values) => {
     setSubmitting(true);
     try {
+      if(values.upload?.length < 3){
+        throw new Error("You should upload atleast 3 files.");
+      }
       await onSubmit(values);
       message.success('Submission sent successfully!');
       form.resetFields();
     } catch (error) {
       console.error(error);
-      message.error('Submission failed. Please try again.');
+      message.error(error.message || 'Submission failed. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -40,7 +43,7 @@ function NewSubmissionForm({ phase, onSubmit }) {
           type={'drag'}
           name="upload"
           label="Image"
-          maxCount={10}
+          maxCount={3}
           form={form}
           path={`uploads/final_project/${user.username}/${user?.details_id?.course?.course_name}/${phase.title}`}
           multiple={true}

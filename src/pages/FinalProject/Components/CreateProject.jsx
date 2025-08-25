@@ -20,7 +20,7 @@ function CreateProject() {
 
   useEffect(() => {
     getStudentsByCenter(0)
-    getCourses()
+    getCourses(0)
   }, [])
 
 

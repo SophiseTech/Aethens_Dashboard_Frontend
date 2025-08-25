@@ -12,20 +12,22 @@ function PhaseCard({ phase, onViewPhase, disabled = false }) {
       className="mb-4 hover:shadow-md transition-shadow duration-200 border border-gray-200"
       bodyStyle={{ padding: '20px' }}
     >
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
         <div className="flex-1">
           <div className="flex items-center mb-2">
             <div className="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-semibold mr-3">
               {phase.phaseNumber}
             </div>
-            <Title level={4} className="!mb-0">{phase.title}</Title>
+            <Title level={4} className="!mb-0">
+              {phase.title}
+            </Title>
           </div>
 
           <Paragraph className="text-gray-600 mb-3" ellipsis={{ rows: 2 }}>
             {phase.description}
           </Paragraph>
 
-          <Space size="middle" className="mb-3">
+          <Space size={[0, 8]} wrap className="mb-3">
             <Tag icon={config.icon} color={config.color}>
               {config.text}
             </Tag>
@@ -44,18 +46,20 @@ function PhaseCard({ phase, onViewPhase, disabled = false }) {
           </Space>
         </div>
 
-        <Button
-          type="primary"
-          icon={phase.status === 'not-started' ? <EditOutlined /> : <EyeOutlined />}
-          onClick={() => onViewPhase(phase)}
-          className="ml-4"
-          disabled={disabled}
-        >
-          {phase.status === 'not-started' ? 'Submit Phase' : 'View Phase'}
-        </Button>
+        <div className="mt-4 sm:mt-0 sm:ml-4 w-full sm:w-auto">
+          <Button
+            type="primary"
+            icon={phase.status === 'not-started' ? <EditOutlined /> : <EyeOutlined />}
+            onClick={() => onViewPhase(phase)}
+            className="w-full sm:w-auto"
+            disabled={disabled}
+          >
+            {phase.status === 'not-started' ? 'Submit Phase' : 'View Phase'}
+          </Button>
+        </div>
       </div>
     </Card>
   );
 }
 
-export default PhaseCard
+export default PhaseCard;
