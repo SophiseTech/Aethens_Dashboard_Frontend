@@ -25,18 +25,23 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
       title: 'Quantity',
       dataIndex: 'qty',
       editable: true,
-      defaultValue: 1
+      defaultValue: 1,
+      width: '10%',
     },
     {
       title: 'U.Price',
       dataIndex: 'rate',
       editable: true,
+      width: '10%',
+
     },
     {
       title: 'Discount',
       dataIndex: 'discount',
       editable: true,
       type: "percentage",
+      width: '10%',
+
       selectAfter: (index) => {
         return <Select
           defaultValue={"percentage"}
@@ -56,23 +61,31 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
       title: 'Sub Total',
       dataIndex: 'subtotal',
       editable: false,
+      width: '10%',
+
       render: (value) => value ? value.toFixed(2) : 0
     },
     {
       title: 'Tax',
       dataIndex: 'taxes',
       editable: true,
+      width: '5%',
+
     },
     {
       title: 'Tax Amnt',
       dataIndex: 'taxAmnt',
       editable: false,
+      width: '5%',
+
       render: (value) => value ? value.toFixed(2) : 0
     },
     {
       title: 'Total',
       dataIndex: 'total',
       editable: false,
+      width: '10%',
+
       render: (value) => value ? value.toFixed(2) : 0
     },
   ]
@@ -109,6 +122,7 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
         const updateObj = {
           ...field,
           discountType: discountType[index],
+          undiscountedTotal: Number((Number(field.rate) * Number(field.qty)).toFixed(2)),
           subtotal: (getDiscount(field.discount, field.rate, discountType[index])) * Number(field.qty),
           taxAmnt: Number((Number(field.subtotal) * (Number(field.taxes) / 100)).toFixed(2)),
           total: Number(field.subtotal) + Number(field.taxAmnt)
@@ -120,10 +134,11 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
     }) || []
 
     setTotals({
+      undiscountedTotal: sumFromObjects(updatedFields, "undiscountedTotal"),
       subtotal: sumFromObjects(updatedFields, "subtotal"),
       total_tax: sumFromObjects(updatedFields, "taxAmnt"),
       total: Math.round(sumFromObjects(updatedFields, "total")),
-      total_discount: sum(updatedFields.map((field, index) => getDiscountRate(field.discount, field.rate, discountType[index]) * Number(field.qty)))
+      total_discount: sum(updatedFields.map((field, index) => Number((getDiscountRate(field.discount, field.rate, discountType[index]) * Number(field.qty)).toFixed(2))))
     })
     form.setFieldValue("items", updatedFields.filter(field => field.name !== undefined))
   }, [itemsFields, discountType])

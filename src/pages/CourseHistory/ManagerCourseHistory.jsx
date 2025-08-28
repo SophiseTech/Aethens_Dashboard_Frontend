@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, Dropdown, Menu, Space, Typography, Empty, Spin, message, List, Button, Tag, Tooltip } from 'antd';
-import { EllipsisOutlined, ReloadOutlined, FileTextOutlined, DownloadOutlined, CalendarOutlined } from '@ant-design/icons';
+import { EllipsisOutlined, ReloadOutlined, FileTextOutlined, DownloadOutlined, CalendarOutlined, DeleteFilled } from '@ant-design/icons';
 import studentService from '@/services/Student';
 import { useNavigate, useParams } from 'react-router-dom';
 import { formatDate } from '@utils/helper';
@@ -19,6 +19,7 @@ function CourseOptions({ course, onAction }) {
       items={[
         { key: 'materials', icon: <FileTextOutlined />, label: 'View Materials', disabled: user.role === ROLES.FACULTY || user.role === ROLES.STUDENT },
         { key: 'attendance', icon: <CalendarOutlined />, label: 'View Attendance', disabled: user.role === ROLES.MANAGER },
+        { key: 'remove', icon: <DeleteFilled />, label: 'Remove', disabled: user.role !== ROLES.MANAGER },
         // { key: 'certificate', icon: <DownloadOutlined />, label: 'Download Certificate' },
       ]}
     />
@@ -102,6 +103,16 @@ function ManagerCourseHistory() {
       } else if (user.role === ROLES.FACULTY) {
         return nav(`/faculty/attendance/${studentId}/c/${course.course_id}`);
       }
+    } else if(actionKey === 'remove') {
+      return studentService.deleteCourseHistory(course._id)
+        .then(() => {
+          message.success('Course removed successfully');
+          fetchCourses();
+        })
+        .catch(err => {
+          message.error('Failed to remove course');
+          console.error(err);
+        });
     }
   };
 

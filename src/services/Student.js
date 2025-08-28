@@ -1,8 +1,8 @@
 import handleError from "@utils/handleError"
-import { post } from "@utils/Requests"
+import { del, get, post } from "@utils/Requests"
 
 class StudentService {
-  async enroll({ username, email, password, role, address, center_id, course_id, DOB, phone, school_uni_work, profile_img }) {
+  async enroll({ username, email, password, role, address, center_id, course_id, DOB, phone, phone_alt, school_uni_work, profile_img }) {
     try {
       if (!username || !email || !password || !role || !address || !center_id || !course_id) throw new Error("Bad Data")
       const response = await post("/enrollment/create-student", {
@@ -15,6 +15,7 @@ class StudentService {
         course_id,
         DOB,
         phone,
+        phone_alt,
         school_uni_work,
         profile_img
       })
@@ -61,7 +62,25 @@ class StudentService {
       handleError(error)
     }
   }
+  async deleteCourseHistory(courseHistoryId) {
+    try {
+      const response = await del(`/courseHistory/${courseHistoryId}`)
+      if (!response) throw new Error("An error occured. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
 
+  async getProjectOpenedStudents() {
+    try {
+      const response = await get(`/v2/students/project-opened`)
+      if (!response) throw new Error("An error occured. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
 
 }
 

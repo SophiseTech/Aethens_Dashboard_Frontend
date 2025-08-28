@@ -21,6 +21,7 @@ const studentStore = create((set, get) => ({
   searchQuery: "",
   currentSessionAttendees: [],
   activeStudentSessions: {},
+  projectOpenedStudents: [],
   getStudentsByCenter: async (limit = 10, page = 1) => {
     try {
       set({ loading: true });
@@ -188,6 +189,17 @@ const studentStore = create((set, get) => ({
       const updatedStudentSessions = { ...activeStudentSessions, [id]: response }
       set({ activeStudentSessions: updatedStudentSessions })
       return response
+    } catch (error) {
+      handleInternalError(error)
+    } finally {
+      set({ loading: false })
+    }
+  },
+  getProjectOpenedStudents: async () => {
+    try {
+      set({loading: true})
+      const response = await studentService.getProjectOpenedStudents()
+      set({ projectOpenedStudents: response })
     } catch (error) {
       handleInternalError(error)
     } finally {

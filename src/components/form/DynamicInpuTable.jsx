@@ -63,10 +63,11 @@ function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = (
     {
       title: 'Action',
       dataIndex: 'operation',
+      width: '10%',
       render: (_, record, index) => {
         const editable = isEditing(record);
         return editable ? (
-          <Flex gap={5} align='center'>
+          <Flex gap={5} align='center' wrap='wrap'>
             <Button
               variant='filled'
               color='green'
@@ -125,7 +126,7 @@ function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = (
   });
 
   return (
-    <div className='flex flex-col'>
+    <div className='flex flex-col itemsInputTable'>
       <Form.Item
         name={name}
         className='w-full'
@@ -151,8 +152,9 @@ function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = (
           rowClassName="editable-row"
           pagination={false}
           scroll={{
-            x: "max-content",
+            // x: 'max-content',
           }}
+          className='max-lg:overflow-auto'
         />
       </Form.Item>
       {!disableAddItem &&

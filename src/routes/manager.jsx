@@ -1,5 +1,7 @@
 import Protected from "@components/layouts/Protected";
 import SidebarLayout from "@components/layouts/Sidebar";
+import FinalProjectPage from "@pages/FinalProject";
+import PhaseListPage from "@pages/FinalProject/PhaseList";
 import { ROLES } from "@utils/constants";
 import { Spin } from "antd";
 import { lazy, Suspense } from "react";
@@ -17,6 +19,10 @@ const FacultyAttendance = lazy(() => import("@pages/Attendance/FacultyAttendance
 const ManagerSlots = lazy(() => import("@pages/Slots/ManagerSlots"))
 const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCourseHistory"))
 const ManagerAnnouncementPage = lazy(() => import("@pages/Announcement/ManagerAnnouncement"))
+const ReviewSubmission = lazy(() => import("@pages/FinalProject/ReviewSubmission"))
+const StudentProjectDetails = lazy(() => import("@pages/FinalProject/StudentProjectDetails"))
+const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"))
+const FinalProjectStudentView = lazy(() => import("@pages/FinalProject/Components/FinalProjectStudentView"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -108,6 +114,35 @@ export const managerRoutes = [
             element: (
               <LazyLoader element={<ManagerAnnouncementPage />} />
             ),
+            title: "Slots",
+          },
+          {
+            path: "/manager/final-project",
+            element: (
+              <FinalProjectPage />
+            ),
+            title: "Slots",
+          },
+          {
+            path: "/manager/final-project/submission/:submissionId",
+            element: <LazyLoader element={<ReviewSubmission />} />,
+            title: "Payslips"
+          },
+          {
+            path: "/manager/final-project/:projectId/student/:studentId/phases",
+            element: <LazyLoader element={<StudentProjectDetails />} />,
+            title: "Payslips"
+          },
+          {
+            path: "/manager/final-project/:projectId/student/:studentId/phase/:phaseId",
+            element: (
+              <LazyLoader element={<PhaseDetails />} />
+            ),
+            title: "Slots",
+          },
+          {
+            path: "/manager/final-project/student/:studentId/details",
+            element: <LazyLoader element={<FinalProjectStudentView /> } />,
             title: "Slots",
           },
         ]

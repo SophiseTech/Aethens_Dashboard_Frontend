@@ -45,6 +45,10 @@ const ManagerActionButtons = ({ userDetails }) => {
     nav(`/manager/courseHistory/${student_id}`);
   };
 
+  const handleViewFinalProject = (student_id, course_id) => {
+  nav(`/manager/final-project/student/${student_id}/details`);
+  };
+
   const handleViewSession = () => {
     setIsModalOpen(true);
   };
@@ -75,6 +79,10 @@ const ManagerActionButtons = ({ userDetails }) => {
       <DeactivateStudent student={userDetails} />
 
       <ViewStudentSessions isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} student={userDetails} />
+
+      <Button onClick={() => handleViewFinalProject(userDetails?._id, userDetails?.details_id?.course_id)} variant='filled' color='orange'>
+        View Final Project
+      </Button>
     </Flex>
   )
 }

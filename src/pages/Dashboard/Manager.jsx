@@ -11,6 +11,7 @@ import { getMonthRange } from '@utils/helper'
 import { Col, Flex, Grid, Row, DatePicker } from 'antd'
 import _ from 'lodash'
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useStore } from 'zustand'
 
 function Manager() {
@@ -74,18 +75,22 @@ function Manager() {
           <StudentCounts />
         </Col>
         <Col xxl={{ span: 6 }} span={12}>
-          <IncomeStat />
+          <Link to={'/manager/bills'}>
+            <IncomeStat />
+          </Link>
         </Col>
         <Col xxl={{ span: 6 }} span={12}>
           <ExpenseStat />
         </Col>
         <Col xxl={{ span: 6 }} span={12}>
-          <DueStat />
+          <Link to={'/manager/bills?status=unpaid'}>
+            <DueStat />
+          </Link>
         </Col>
       </Row>
       <Flex gap={20}>
         <IncomeChart />
-        <StudentChart />
+        <StudentChart dateRange={dateRange} />
       </Flex>
     </Flex>
   )

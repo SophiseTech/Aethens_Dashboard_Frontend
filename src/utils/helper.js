@@ -5,8 +5,9 @@ import _, { initial } from "lodash";
 import React from "react";
 
 export const formatDate = (date) => {
-  if (!date) return ""
-  return dayjs(new Date(date).toISOString().split('T')[0]).format("D MMM, YYYY")
+  if (!date) return "";
+  // Add 5 hours 30 minutes to convert to UTC+5:30, then format
+  return dayjs(date).add(330, 'minute').format("D MMM, YYYY");
 };
 
 export const formatTime = (time) => {
@@ -114,7 +115,12 @@ export const getNextAvailableWeekdayDate = (
   reschedulingSlot,
   targetSession
 ) => {
-  const baseDate = new Date(reschedulingSlot.start_date);
+  // Determine baseDate: today if reschedulingSlot.start_date <= today, else reschedulingSlot.start_date
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const rescheduleDate = new Date(reschedulingSlot.start_date);
+  rescheduleDate.setHours(0, 0, 0, 0);
+  const baseDate = (rescheduleDate <= today) ? new Date(today) : new Date(rescheduleDate);
 
   // Extract hours and minutes from both times
   const [rescheduleHour, rescheduleMin] = new Date(reschedulingSlot.session.start_time)
@@ -138,8 +144,6 @@ export const getNextAvailableWeekdayDate = (
     const candidateDateStr = candidate.toDateString();
     const rescheduleDateStr = baseDate.toDateString();
 
-
-
     const isSameDay = candidateDateStr === rescheduleDateStr;
 
     // 🔒 Skip if same day but target time is not strictly later than reschedule time
@@ -161,17 +165,10 @@ export const getNextAvailableWeekdayDate = (
       const combinedSlotDateTime = new Date(slotDate);
       combinedSlotDateTime.setHours(slotTime.getHours(), slotTime.getMinutes(), 0, 0);
 
-      // console.log(combinedSlotDateTime, candidateDateStr);
-      
-
       return combinedSlotDateTime.toISOString() === candidate.toISOString();
     });
 
-    
-    
-    
     if (!hasConflict) {
-      console.log(hasConflict, candidate);
       return candidate;
     }
 
@@ -219,4 +216,17 @@ export const isValidURL = (str) => {
 
 export const isUserActive = (user) => {
   return user?.status === "active"
+}
+
+export function formatText(raw) {
+  if (!raw) return "";
+
+  return raw
+    // Add newline BEFORE each numbered bullet (1. text OR 1.text)
+    .replace(/(\d+\.)/g, "\n$1 ")
+    // Add newline BEFORE dash bullets (- Bullet)
+    .replace(/(-\s?)/g, "\n$1")
+    // Add newline AFTER period only if letter before and letter after
+    .replace(/(?<=[A-Za-z])\.(?=[A-Za-z])/g, ".\n")
+    .trim();
 }

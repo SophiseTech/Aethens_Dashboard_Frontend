@@ -104,11 +104,11 @@ function SessionStautsForm({ handleOk, student }) {
     <CustomForm form={form} initialValues={initialValues} action={onSubmit}>
       <Flex gap={5}>
         <CustomSelect label={"Select Module"} name={"module"} options={moduleOptions} onChange={handleModuleChange} />
-        <CustomSelect label={"Select Unit"} name={"unit"} options={units} onChange={handleUnitChange} />
-        <CustomSelect label={"Select Topic"} name={"topic"} options={topics} />
+        <CustomSelect label={"Select Unit"} name={"unit"} options={units} required={false} onChange={handleUnitChange} />
+        <CustomSelect label={"Select Topic"} name={"topic"} options={topics} required={false} />
         {/* <CustomSelect label={"Select Faculty"} name={"faculty_id"} options={facultyOptions} /> */}
       </Flex>
-      <CustomInput label={"Remarks"} name={"remarks"} placeholder={"Any remarks regarding the student..."} type='textarea' />
+      <CustomInput label={"Remarks"} name={"remarks"} placeholder={"Any remarks regarding the student..."} type='textarea' required={false} />
       <CustomCheckbox label={"Is the topic completed?"} name={"isTopicComplete"} />
       <CustomSubmit className='bg-primary' label='Submit' loading={createLoading} />
 

@@ -4,23 +4,22 @@ import { ROLES } from '@utils/constants';
 import { Spin } from 'antd';
 import { lazy, Suspense } from 'react';
 
+// ✅ Define lazy imports ONCE here
+const Student = lazy(() => import('@pages/Dashboard/Student'));
+const Manager = lazy(() => import('@pages/Dashboard/Manager'));
+const ManagerStudents = lazy(() => import('@pages/Students/ManagerStudents'));
+
 function Dashboard() {
   const { user } = userStore();
 
   const renderDashboard = () => {
     switch (user.role) {
-      case ROLES.STUDENT: {
-        const Student = lazy(() => import('@pages/Dashboard/Student'));
+      case ROLES.STUDENT:
         return <Student />;
-      }
-      case ROLES.MANAGER: {
-        const Manager = lazy(() => import('@pages/Dashboard/Manager'));
+      case ROLES.MANAGER:
         return <Manager />;
-      }
-      case ROLES.FACULTY: {
-        const ManagerStudents = lazy(() => import('@pages/Students/ManagerStudents'));
+      case ROLES.FACULTY:
         return <ManagerStudents />;
-      }
       default:
         return <p>404</p>;
     }

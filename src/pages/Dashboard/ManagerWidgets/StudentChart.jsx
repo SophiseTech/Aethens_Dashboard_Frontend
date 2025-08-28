@@ -1,17 +1,34 @@
+import attendanceService from '@/services/Attendance'
 import EChart from '@pages/Dashboard/Chart/EChart'
 import userStore from '@stores/UserStore'
 import { Card } from 'antd'
 import dayjs from 'dayjs'
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useStore } from 'zustand'
 
-function StudentChart() {
+function StudentChart({ dateRange }) {
+  const { user } = useStore(userStore)
+  const { firstDay, lastDay } = dateRange;
+  const [data, setData] = useState([])
 
-  const { summary } = useStore(userStore)
+  const fetchData = async () => {
+    const report  = await attendanceService.getGraphSummary(user.center_id, firstDay, lastDay) || []
+    setData(report)
+  }
 
-  const allDates = useMemo(() => summary?.students?.map(item => new Date(item._id).setHours(0, 0, 0, 0)) || [], [summary])
+  useEffect(() => {
+    fetchData()
+  }, [dateRange])
+  
+  // Sort data chronologically and extract required values
+  const sortedData = useMemo(() => {
+    return [...data].sort((a, b) => new Date(a.date) - new Date(b.date))
+  }, [data])
 
-  const studentCount = useMemo(() => summary?.students?.map(item => item.count) || [], [summary])
+  const dates = useMemo(() => sortedData.map(item => item.date), [sortedData])
+  const presentCounts = useMemo(() => sortedData.map(item => item.presentCount), [sortedData])
+
+  console.log(dates, presentCounts, sortedData);
 
   const options = {
     chart: {
@@ -23,24 +40,21 @@ function StudentChart() {
       },
     },
     xaxis: {
-      type: 'datetime',
-      categories: allDates,
+      type: 'category',
+      categories: dates,
       labels: {
         show: true,
-        align: "right",
-        minWidth: 0,
-        maxWidth: 160,
         style: {
           colors: "black",
+          fontSize: '12px',
         },
-        formatter: function (value) {
-          // Format the label as a date (e.g., 'dd MMM yyyy')
-          return dayjs(value).format('DD MMM, YYYY'); // You can adjust the locale as needed
-        }
       },
-      tooltip: {
-        enabled: false
-      }
+      axisTicks: {
+        show: true,
+      },
+      axisBorder: {
+        show: true,
+      },
     },
     yaxis: {
       seriesName: 'Students',
@@ -80,14 +94,17 @@ function StudentChart() {
   }
 
   return (
-    <Card title="Student Count" className='border border-border w-full'>
+    <Card title="Monthly Attendance" className='border border-border w-full'>
       <EChart
         series={[
           {
-            name: "Students",
+            name: "Present Students",
             type: "line",
-            data: studentCount,
-            color: "#e15759"
+            data: presentCounts,
+            color: "#4CAF50",
+            marker: {
+              size: 6
+            },
           }
         ]}
         options={options}

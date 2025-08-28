@@ -130,6 +130,7 @@ const InvoicePdf = ({ bill }) => {
   const discount = bill?.total_discount || 0;
   const tax = bill?.total_tax || 0;
   const total = bill?.total || 0;
+  const undiscountedTotal = bill?.undiscountedTotal || 0;
 
   console.log(items);
 
@@ -221,6 +222,10 @@ const InvoicePdf = ({ bill }) => {
           {pageIndex === getChunks(items, ITEMS_FIRST_PAGE, ITEMS_PER_PAGE).length - 1 && (
             <>
               <View style={styles.summaryBox}>
+                <View style={styles.summaryRow}>
+                  <Text>Gross Total:</Text>
+                  <Text>(-) {undiscountedTotal.toFixed(2)}</Text>
+                </View>
                 <View style={styles.summaryRow}>
                   <Text>Discount:</Text>
                   <Text>(-) {discount.toFixed(2)}</Text>

@@ -1,0 +1,12 @@
+name: Agency Linting
+
+on:
+  pull_request:
+
+jobs:
+  call-lint:
+    uses: nyonTech/ci-workflows/.github/workflows/lint.yml@main
+    with:
+      node-version: '18'
+      pr-title: ${{ github.event.pull_request.title }}
+      pr-body: ${{ github.event.pull_request.body }}

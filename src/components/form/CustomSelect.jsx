@@ -9,6 +9,7 @@ function CustomSelect({
   mode, 
   className = "", 
   optionRender, // New prop for custom option rendering
+  required=true,
   ...props 
 }) {
   return (
@@ -17,7 +18,7 @@ function CustomSelect({
       label={label}
       className={`w-full ${className}`}
       rules={[
-        { required: true, message: `Please input the ${label}!` },
+        { required: required, message: `Please input the ${label}!` },
       ]}
     >
       <Select

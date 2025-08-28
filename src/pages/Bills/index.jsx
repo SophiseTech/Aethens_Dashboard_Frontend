@@ -26,6 +26,7 @@ function Bills() {
   const { user } = useStore(userStore)
   const { courses, getCourses, total: courseTotal } = useStore(courseStore)
   const [lineItems, setLineItems] = useState([])
+  const urlStatus = searchParams.get("status")
   // const [lineItemSearchFunction, setLneItemSearchFunction] = useState(() => { })
 
   useEffect(() => {
@@ -42,12 +43,16 @@ function Bills() {
       } else {
         delete filters.query.generated_for
       }
+
+      if( urlStatus && ['paid', 'unpaid'].includes(urlStatus)) {
+        filters.query.status = urlStatus
+      }
       console.log("useeffect filters: ", filters.query);
 
       // filters = { ...filters, query: { ...filters.query, ...stateFilters.query } }
       fetchBills(10, filters)
     }
-  }, [student_id])
+  }, [student_id, urlStatus])
 
   const fetchBills = (limit = 10, filters = {}) => {
     getBills(limit, {
@@ -72,7 +77,7 @@ function Bills() {
     }
     if (itemType === "course") {
       const { courses } = await courseService.getCourses({}, 0, 0)
-      setLineItems([...courses?.map(course => ({ name: course.course_name, _id: course._id, type: "course" })), { name: "Registration Fee", _id: "67c00eb2073609b23054ca01", type: "course" }])
+      setLineItems([...courses?.map(course => ({ name: course.course_name, _id: course._id, type: "course", rate: course.rate, discount: 0, taxes: 0 })), { name: "Registration Fee", _id: "67c00eb2073609b23054ca01", type: "course", rate: 3500, discount: 0, taxes: 0 }])
     }
     if (itemType === "gallery") {
       const { items } = await inventoryService.getInventoryItems(0, 10, { query: { type: "gallery" } })

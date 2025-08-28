@@ -39,7 +39,7 @@ function SyllabusList({ modules, loading }) {
             module: module.name,
             unit: unit.name,
             topic: "-",
-            completed: false,
+            completed: unit?.completed || false,
           });
           moduleAdded = true;
         }
@@ -51,7 +51,7 @@ function SyllabusList({ modules, loading }) {
           module: module.name,
           unit: "-",
           topic: "-",
-          completed: false,
+          completed: module?.completed || false,
         });
       }
     });

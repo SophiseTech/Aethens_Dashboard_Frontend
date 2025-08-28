@@ -1,0 +1,28 @@
+name: CI/CD Frontend Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/backend-ci-cd.yml
+    with:
+      app_name: Aethens_Dashboard_Frontend
+      node_version: '20.10.x'
+      package_manager: npm
+      build_command: build
+      staging_branch: develop
+      production_branch: master
+      enable_slack_notifications: false
+    secrets:
+      AWS_IAM_ROLE: ${{ secrets.AWS_IAM_ROLE }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      STAGING_S3_BUCKET: ${{ secrets.STAGING_S3_BUCKET }}
+      PROD_S3_BUCKET: ${{ secrets.PROD_S3_BUCKET }}
+      STAGING_CF_DIST_ID: ${{ secrets.STAGING_CF_DIST_ID }}
+      PROD_CF_DIST_ID: ${{ secrets.PROD_CF_DIST_ID }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

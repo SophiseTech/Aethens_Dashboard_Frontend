@@ -4,6 +4,7 @@ import SidebarLayout from "@components/layouts/Sidebar";
 import { ROLES } from "@utils/constants";
 import { Spin } from "antd";
 import { useLocation } from "react-router-dom";
+import FinalProjectPage from "@pages/FinalProject";
 
 const Login = lazy(() => import("@pages/Login"));
 const Dashboard = lazy(() => import("@pages/Dashboard"));
@@ -20,6 +21,8 @@ const MarkAttendance = lazy(() => import("@pages/Temp/MarkAttendance"));
 const MarkFacultyAttendance = lazy(() => import("@pages/Temp/MarkFacultyAttendance"));
 const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCourseHistory"));
 const StudentAnnouncement = lazy(() => import("@pages/Announcement/StudentAnnouncement"));
+const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"));
+const PhaseListPage = lazy(() => import("@pages/FinalProject/PhaseList"));
 
 const LazyLoader = ({ children }) => {
   const location = useLocation()
@@ -201,6 +204,25 @@ export const generalRoutes = [
             element: (
               <LazyLoader>
                 <StudentAnnouncement />
+              </LazyLoader>
+            ),
+            title: "Slots",
+          },
+          {
+            path: "/student/final-project",
+            element: <FinalProjectPage />,
+            title: "Slots",
+          },
+          {
+            path: "/student/final-project/:projectId/phases",
+            element: <LazyLoader><PhaseListPage /></LazyLoader>,
+            title: "Slots",
+          },
+          {
+            path: "/student/final-project/:projectId/phase/:phaseId",
+            element: (
+              <LazyLoader>
+                <PhaseDetails />
               </LazyLoader>
             ),
             title: "Slots",

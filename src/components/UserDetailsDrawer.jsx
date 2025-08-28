@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Drawer, Card, Avatar, Typography, Row, Col, Divider, Button } from 'antd';
+import { Drawer, Card, Avatar, Typography, Row, Col, Divider, Button, Flex } from 'antd';
 import {
   UserOutlined,
   MailOutlined,
@@ -75,7 +75,7 @@ const UserDetailsDrawer = ({ user, visible, onClose, showActions = false, isStud
               <Title level={4} style={{ marginBottom: 0 }}>
                 {user?.username}
               </Title>
-              { (!isStudentDetail || (loggedinUser.role === ROLES.MANAGER || loggedinUser.role === ROLES.STUDENT)) && <Text type="secondary">{user?.email}</Text>}
+              {(!isStudentDetail || (loggedinUser.role === ROLES.MANAGER || loggedinUser.role === ROLES.STUDENT)) && <Text type="secondary">{user?.email}</Text>}
             </Col>
           </Row>
         </Card>
@@ -111,11 +111,16 @@ const UserDetailsDrawer = ({ user, visible, onClose, showActions = false, isStud
                   <Text style={{ marginLeft: '8px' }}>{user?.email}</Text>
                 </Col>
                 <Col span={24}>
-                  <Text strong>
-                    <PhoneOutlined style={{ marginRight: '8px' }} />
-                    Mobile Number:
-                  </Text>
-                  <Text style={{ marginLeft: '8px' }}>{user?.phone}</Text>
+                  <Flex align='center' gap={2} wrap='wrap'>
+                    <Text strong>
+                      <PhoneOutlined style={{ marginRight: '8px' }} />
+                      Mobile Number:
+                    </Text>
+                    <Flex vertical>
+                      <Text style={{ marginLeft: '8px' }}>{user?.phone},</Text>
+                      <Text style={{ marginLeft: '8px' }}>{user?.phone_alt}</Text>
+                    </Flex>
+                  </Flex>
                 </Col>
               </>
             }
@@ -137,7 +142,7 @@ const UserDetailsDrawer = ({ user, visible, onClose, showActions = false, isStud
                 Joined Date:
               </Text>
               <Text style={{ marginLeft: '8px' }}>
-                {formatDate(user?.details_id?.enrollment_date || user?.createdAt) || 'N/A'}
+                {formatDate(user?.DOJ || user?.createdAt) || 'N/A'}
               </Text>
             </Col>
           </Row>

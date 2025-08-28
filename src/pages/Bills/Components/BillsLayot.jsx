@@ -6,14 +6,13 @@ import { formatDate } from '@utils/helper'
 import { Empty } from 'antd'
 import dayjs from 'dayjs'
 import React, { useMemo } from 'react'
-import { Outlet, useParams } from 'react-router-dom'
+import { Outlet, useParams, useSearchParams } from 'react-router-dom'
 
 function BillsLayot({ bills, loading, total, onLoadMore }) {
 
   const { id } = useParams()
-  const { editBill, deleteBill, setFilters, filters } = billStore()
+  const { editBill, deleteBill, setFilters, filters, fe } = billStore()
   const { editMaterialsByBillId } = materialStore()
-
 
   const fields = {
     title: ["generated_for", "username"],
