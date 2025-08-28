@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    uses: nyonTech/ci-workflows/workflows/frontend-ci-cd.yml@main
+    uses: nyonTech/ci-workflows/.github/workflows/frontend-deployment.yml@main
     with:
       app_name: Aethens_Dashboard_Frontend
       node_version: '20.10.x'
