@@ -1,5 +1,8 @@
 import { BookOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
+import { formatDate } from '@utils/helper';
 import { Avatar, Button, Card, Space, Table, Tag, Typography } from 'antd';
+import PropTypes from 'prop-types';
+
 const { Text, Title } = Typography;
 
 function ProjectOpenedStudentsList({ projectsInfo = [], loading, onView }) {
@@ -7,7 +10,7 @@ function ProjectOpenedStudentsList({ projectsInfo = [], loading, onView }) {
   const columns = [
     {
       title: 'Student',
-      dataIndex: ['student','username'],
+      dataIndex: ['student', 'username'],
       key: 'studentName',
       render: (name) => (
         <Space>
@@ -28,10 +31,16 @@ function ProjectOpenedStudentsList({ projectsInfo = [], loading, onView }) {
       ),
     },
     {
+      title: 'Date',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (date) => formatDate(date),
+    },
+    {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => <Tag color={'green'}>Opened</Tag>,
+      render: () => <Tag color={'green'}>Opened</Tag>,
     },
     {
       title: 'Action',
@@ -55,27 +64,29 @@ function ProjectOpenedStudentsList({ projectsInfo = [], loading, onView }) {
         columns={columns}
         dataSource={projectsInfo?.projects || []}
         rowKey="id"
-        pagination={true}
+        pagination={{
+          current: projectsInfo?.pagination?.page || 1,
+          pageSize: projectsInfo?.pagination?.limit || 10,
+          total: projectsInfo?.total || 0,
+          showSizeChanger: false,
+          showQuickJumper: false,
+          onChange: projectsInfo?.handlePaginationChange,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+        }}
         className="mb-4"
         loading={loading}
       />
-
-      <div className="flex justify-end">
-        {/* <Pagination
-          current={currentPage}
-          total={students.length}
-          pageSize={pageSize}
-          showSizeChanger
-          showQuickJumper
-          showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} items`}
-          onChange={(page, size) => {
-            setCurrentPage(page);
-            setPageSize(size);
-          }}
-        /> */}
-      </div>
     </Card>
-  )
+  );
 }
 
-export default ProjectOpenedStudentsList
+ProjectOpenedStudentsList.propTypes = {
+  projectsInfo: PropTypes.shape({
+    projects: PropTypes.array,
+    total: PropTypes.number,
+  }),
+  loading: PropTypes.bool,
+  onView: PropTypes.func.isRequired,
+};
+
+export default ProjectOpenedStudentsList;

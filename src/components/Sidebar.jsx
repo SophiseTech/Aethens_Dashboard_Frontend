@@ -98,13 +98,13 @@ const MENU_CONFIG = [
     roles: [ROLES.FACULTY] 
   },
   { 
-    label: "FDA", 
+    label: "FDP", 
     icon: FundProjectionScreenOutlined, 
     path: "/manager/faculty-development-program", 
     roles: [ROLES.MANAGER] 
   },
   { 
-    label: "FDA", 
+    label: "FDP", 
     icon: FundProjectionScreenOutlined, 
     path: "/faculty/faculty-development-program", 
     roles: [ROLES.FACULTY] 

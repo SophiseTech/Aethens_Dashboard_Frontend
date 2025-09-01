@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import _, { initial } from "lodash";
+import _ from "lodash";
 import React from "react";
 
 export const formatDate = (date) => {
@@ -149,7 +149,10 @@ export const getNextAvailableWeekdayDate = (
     // 🔒 Skip if same day but target time is not strictly later than reschedule time
     if (isSameDay) {
       const targetMinutes = targetHour * 60 + targetMin;
-      const rescheduleMinutes = rescheduleHour * 60 + rescheduleMin;
+      const rescheduleMinutes = (rescheduleDate <= today)
+        ? (today.getHours() * 60 + today.getMinutes())  // use current time
+        : (rescheduleHour * 60 + rescheduleMin);
+
       if (targetMinutes <= rescheduleMinutes) {
         offset += 7;
         iterations++;
@@ -210,6 +213,7 @@ export const isValidURL = (str) => {
     new URL(str);
     return true;
   } catch (e) {
+    console.log(str, "is not a valid url", "\n Error:", e);
     return false;
   }
 };

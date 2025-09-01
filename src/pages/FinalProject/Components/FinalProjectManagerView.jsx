@@ -1,53 +1,21 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { BookOutlined, CalendarOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
 import { useFinalProject } from '@hooks/useFinalProject';
 import useStudents from '@hooks/useStudents';
-import useUser from '@hooks/useUser';
 import CreateProject from '@pages/FinalProject/Components/CreateProject';
-import FilterBar from '@pages/FinalProject/Components/FilterBar';
 import ProjectOpenedStudentsList from '@pages/FinalProject/Components/ProjectOpenedStudentsList';
-import StudentSearchBar from '@pages/FinalProject/Components/StudentSearchBar';
 import { formatDate } from '@utils/helper';
-import { Avatar, Button, Card, message, Pagination, Space, Spin, Table, Tag, Typography } from 'antd';
-import React, { useEffect, useState } from 'react'
+import { Avatar, Button, Card, Space, Spin, Table, Tag, Typography } from 'antd';
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const { Text, Title } = Typography
 
-export const mockSubmissions = [
-  {
-    _id: 1,
-    studentName: 'John Doe',
-    courseName: 'Web Development Fundamentals',
-    phaseTitle: 'Frontend Implementation',
-    submittedDate: '2025-01-10',
-    status: 'under_review'
-  },
-  {
-    _id: 2,
-    studentName: 'Jane Smith',
-    courseName: 'React Advanced Concepts',
-    phaseTitle: 'State Management',
-    submittedDate: '2025-01-09',
-    status: 'under_review'
-  },
-  {
-    _id: 3,
-    studentName: 'Mike Johnson',
-    courseName: 'Node.js Backend Development',
-    phaseTitle: 'Database Design',
-    submittedDate: '2025-01-08',
-    status: 'under_review'
-  }
-];
-
 function FinalProjectManagerView() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const { getStatusConfig, fetchPendingSubmissions, pendingSubmissions, loading, listProjects, projectsInfo } = useFinalProject()
+  const { getStatusConfig, fetchPendingSubmissions, pendingSubmissions, loading, listProjects, projectsInfo, handlePaginationChange } = useFinalProject()
   const { loading: projectOpenedStudentsLoading } = useStudents()
   const nav = useNavigate()
   const { projectId } = useParams()
-  const { user } = useUser()
 
   useEffect(() => {
     fetchPendingSubmissions({}, projectId)
@@ -117,7 +85,7 @@ function FinalProjectManagerView() {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => <Tag color={getStatusConfig('under_review').color}>{getStatusConfig('under_review').text}</Tag>,
+      render: () => <Tag color={getStatusConfig('under_review').color}>{getStatusConfig('under_review').text}</Tag>,
     },
     {
       title: 'Action',
@@ -159,7 +127,14 @@ function FinalProjectManagerView() {
         />
       </Card>
 
-      <ProjectOpenedStudentsList projectsInfo={projectsInfo} loading={projectOpenedStudentsLoading} onView={onViewStudents} />
+      <ProjectOpenedStudentsList 
+        projectsInfo={{
+          ...projectsInfo,
+          handlePaginationChange: handlePaginationChange
+        }} 
+        loading={projectOpenedStudentsLoading} 
+        onView={onViewStudents} 
+      />
     </div>
   );
 };
