@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { projectStatusConfig, statusConfig } from "@pages/FinalProject";
 import { useFinalProjectStore } from "@stores/FinalProjectV2";
 import { PHASE_STATUS } from "@utils/constants";
@@ -19,16 +20,13 @@ export const useFinalProject = () => {
     createLoading,
     latestSubmission,
 
-    fetchProjects,
     fetchPhases,
     fetchSubmissionDetails,
     fetchPhaseDetails,
     fetchPendingSubmissions,
     submitPhase,
     reviewSubmission,
-    setFilters,
     setProjectPagination,
-    resetFilters,
     createProject,
     updateProject,
     getProjectById,
@@ -273,19 +271,42 @@ export const useFinalProject = () => {
     return config
   }
 
+  const fetchProjects = useCallback((page = 1, pageSize = 10) => {
+    listProjects({
+      query: { status: 'pending' },
+      populate: [
+        {
+          path: "studentId",
+          select: "username center_id",
+        },
+        {
+          path: "facultyId",
+          select: "username"
+        },
+        {
+          path: 'courseId',
+          select: "course_name"
+        }
+      ],
+      pagination: { page, limit: pageSize }
+    });
+  }, [listProjects]);
+
+  const handlePaginationChange = useCallback((page, pageSize) => {
+    setProjectPagination({ page, limit: pageSize });
+    fetchProjects(page, pageSize);
+  }, [fetchProjects, setProjectPagination]);
+
   const projectsInfo = useMemo(() =>
-    getProjectsInfo(),
-    [projects]
-  );
+    getProjectsInfo()
+    , [getProjectsInfo]);
 
   return {
-    projects,
     phases,
     currentSubmission,
     pendingSubmissions,
     loading,
     error,
-    fetchProjects,
     fetchPhases,
     fetchSubmissionDetails,
     fetchPendingSubmissions,
@@ -298,9 +319,9 @@ export const useFinalProject = () => {
     findNextPhase: () => findNextPhaseToSubmit(phases),
     currentPhaseInfo,
     getStatusConfig,
-    projects,
     currentProject,
     listProjects,
+    handlePaginationChange,
     getProjectById,
     updateProject,
     totalProjects,
