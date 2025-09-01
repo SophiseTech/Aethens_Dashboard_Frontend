@@ -1,9 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Modal, Button, Select, Typography, Space, Flex, Card, message } from 'antd';
 import { useEffect, useState } from 'react';
 import courseService from '@/services/Course';
 import studentService from '@/services/Student';
-import dayjs from 'dayjs';
 import { isUserActive } from '@utils/helper';
+import PropTypes from 'prop-types';
 
 const { Title, Text } = Typography;
 
@@ -26,7 +27,7 @@ function MigrateCourse({ student }) {
           const prevCoursesMap = new Map(prevCoursesResponse?.courseHistories?.map((c) => [c.course_id, c]));
           setPrevCourses(prevCoursesMap)
 
-          const availableCourses = res?.courses?.filter(c => (c._id !== student?.details_id?.course_id?._id || student?.details_id?.course_id)) || [];
+          const availableCourses = res?.courses?.filter(c => (c._id !== (student?.details_id?.course_id?._id || student?.details_id?.course_id))) || [];
           setCourses(availableCourses);
         } catch (err) {
           console.error(err);
@@ -71,7 +72,7 @@ function MigrateCourse({ student }) {
       }
     });
   };
-console.log(prevCourses);
+  console.log(prevCourses);
 
   return (
     <>
@@ -97,7 +98,7 @@ console.log(prevCourses);
               </div>
               <div>
                 <Text strong>Current Course: </Text>
-                <Text>{student.details_id?.course_id?.course_name || 'N/A'}</Text>
+                <Text>{student.details_id?.course?.course_name || 'N/A'}</Text>
               </div>
             </Space>
           </Card>
@@ -141,5 +142,25 @@ console.log(prevCourses);
     </>
   );
 }
+
+MigrateCourse.propTypes = {
+  student: PropTypes.shape({
+    _id: PropTypes.string,
+    username: PropTypes.string,
+    course_id: PropTypes.string,
+    details_id: PropTypes.shape({
+      _id: PropTypes.string,
+      course_id: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.shape({
+          _id: PropTypes.string,
+        }),
+      ]),
+      course: PropTypes.shape({
+        course_name: PropTypes.string,
+      }),
+    }),
+  }).isRequired,
+};
 
 export default MigrateCourse;
