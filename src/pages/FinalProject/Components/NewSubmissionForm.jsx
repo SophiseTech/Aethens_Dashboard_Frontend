@@ -2,7 +2,7 @@ import { UploadOutlined } from '@ant-design/icons';
 import CustomFileUpload from '@components/form/CustomFileUpload';
 import CustomInput from '@components/form/CustomInput';
 import useUser from '@hooks/useUser';
-import { Button, Card, Form, message } from 'antd';
+import { Button, Card, Form, message, Upload } from 'antd';
 import React, { useState } from 'react'
 
 function NewSubmissionForm({ phase, onSubmit }) {
@@ -13,7 +13,7 @@ function NewSubmissionForm({ phase, onSubmit }) {
   const handleSubmit = async (values) => {
     setSubmitting(true);
     try {
-      if(values.upload?.length < 3){
+      if (values.upload?.length < 3) {
         throw new Error("You should upload atleast 3 files.");
       }
       await onSubmit(values);
@@ -48,13 +48,14 @@ function NewSubmissionForm({ phase, onSubmit }) {
           path={`uploads/final_project/${user.username}/${user?.details_id?.course?.course_name}/${phase.title}`}
           multiple={true}
           beforeUpload={(file) => {
-            // Add custom validation logic here
             const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
             if (!isJpgOrPng) {
               message.error('You can only upload JPG/PNG files!');
+              return Upload.LIST_IGNORE; // Prevent upload and remove file from the list
             }
-            return isJpgOrPng;
+            return true; // Allow upload
           }}
+
         >
           <div className="hover:border-blue-400">
             <p className="ant-upload-drag-icon">

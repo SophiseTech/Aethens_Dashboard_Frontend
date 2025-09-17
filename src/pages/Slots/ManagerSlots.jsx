@@ -59,7 +59,8 @@ function ManagerSlots() {
         name: student.username,
         email: student.email,
         status: student.status,
-        course_name: student.course_name
+        course_name: student.course_name,
+        type: student.type
       }));
       setStudents(formatted);
     } catch (error) {
@@ -106,6 +107,13 @@ function ManagerSlots() {
       dataIndex: 'email',
       key: 'email',
       roles: [ROLES.MANAGER]
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+      roles: [ROLES.FACULTY,ROLES.MANAGER],
+      render: (value) => value ? String(value).charAt(0).toUpperCase() + String(value).slice(1) : ''
     },
     // {
     //   title: 'Status',
