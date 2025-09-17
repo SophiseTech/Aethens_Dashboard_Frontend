@@ -12,11 +12,13 @@ function SubmissionImageViewer({ images, selectedImage, setSelectedImage }) {
       <Row gutter={16}>
         <Col span={16}>
           <div className="text-center">
-            <Image
-              src={images.find(img => img._id === selectedImage)?.fileUrl || images[0].fileUrl}
-              alt="Selected submission"
-              style={{ maxHeight: '200px' }}
-            />
+            {images?.length > 0 &&
+              <Image
+                src={images.find(img => img._id === selectedImage)?.fileUrl || images[0]?.fileUrl}
+                alt="Selected submission"
+                style={{ maxHeight: '200px' }}
+              />
+            }
           </div>
         </Col>
         <Col span={8}>

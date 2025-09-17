@@ -32,7 +32,7 @@ function SubmitHistoryCard({ submission }) {
 
       {submission.remark && (
         <Alert
-          message="Manager Feedback"
+          message="Feedback"
           description={submission.remark}
           type={submission.status === 'rejected' ? 'error' : 'info'}
           size="small"
