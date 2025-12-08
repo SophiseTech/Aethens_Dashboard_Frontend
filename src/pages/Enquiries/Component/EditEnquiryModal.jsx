@@ -36,7 +36,7 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
           ? dayjs(enquiry.demoSlot.scheduledAt)
           : null,
         demoNotes: enquiry?.demoSlot?.notes || "",
-        centerId: enquiry?.centerId,
+        centerId: enquiry?.centerId?._id || enquiry?.centerId,
       });
     }
   }, [enquiry]);
