@@ -328,7 +328,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
         {/* Action Buttons Based on Parent Page */}
         {/* Case where enquiry is in new and not changed to demo */}
         {parentPage === "enquiryList" && enquiry?.stage === "New" && (
-          <>
+          <div className="flex gap-2 items-center">
             <Button
               type="primary"
               danger
@@ -342,21 +342,21 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
             >
               Book Demo Slot
             </Button>
-          </>
+          </div>
         )}
 
         {/* case where item is in demo state */}
         {(parentPage === "slotlist" || parentPage === "enquiryList") &&
           enquiry?.stage === "Demo" &&
           enquiry?.demoSlot?.status !== "Completed" && (
-            <>
+            <div className="flex gap-2 items-center">
               <Button type="primary" onClick={() => setReschduleSlot(true)}>
                 Reschedule Slot
               </Button>
               <Button type="primary" danger onClick={handleMarkCompleted}>
                 Mark As Completed
               </Button>
-            </>
+            </div>
           )}
 
         {/* case where demo is completed */}
