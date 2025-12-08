@@ -1,6 +1,6 @@
 import handleError from "@utils/handleError";
 import { del, get, post, put } from "@utils/Requests";
-import { message, notification } from "antd";
+import { notification } from "antd";
 
 class EnquiryService {
   // Create enquiry (optional placeholder)
@@ -18,7 +18,10 @@ class EnquiryService {
   // Get paginated enquiry list
   async getEnquiries(offset = 1, limit = 10, filters = {}) {
     try {
-      const response = await post(`/v3/enquiry/list?page=${offset}&limit=${limit}`, { filters });
+      const response = await post(
+        `/v3/enquiry/list?page=${offset}&limit=${limit}`,
+        { filters }
+      );
       if (!response || !response.data)
         throw new Error("An error occurred. Please try again");
       return response.data; // expected: { enquiries, total }
@@ -88,8 +91,11 @@ class EnquiryService {
       if (!field) throw new Error("field is required");
       // encode value to be safe in query string
       const qsValue = encodeURIComponent(value ?? "");
-      const response = await get(`/v3/enquiry/exists?field=${field}&value=${qsValue}`);
-      if (!response || response.status >= 400) throw new Error("An error occurred. Please try again");
+      const response = await get(
+        `/v3/enquiry/exists?field=${field}&value=${qsValue}`
+      );
+      if (!response || response.status >= 400)
+        throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {
       handleError(error);
@@ -102,7 +108,8 @@ class EnquiryService {
       if (!id) throw new Error("Invalid enquiry ID");
       const payload = { stage, reason };
       const response = await post(`/v3/enquiry/${id}/transition`, payload);
-      if (!response || !response.data) throw new Error("An error occurred. Please try again");
+      if (!response || !response.data)
+        throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {
       handleError(error);
@@ -147,6 +154,45 @@ class EnquiryService {
   async getEnquiryKPI(period, startDate, endDate) {
     try {
       const response = await get(`/v3/enquiry/kpi?period=${period}&startDate=${startDate}&endDate=${endDate}`);
+      if (!response) throw new Error("An error occurred. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+  async getDemoHistory(id) {
+    try {
+      const response = await get(`v3/${id}/demo/history`);
+      if (!response) throw new Error("An error occurred. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async addFollowUpDate(id, payload) {
+    try {
+      const response = await post(`/v3/enquiry/${id}/followup`, payload);
+      if (!response) throw new Error("An error occurred. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async rescheduleSlot(id, payload) {
+    try {
+      const response = await put(`/v3/enquiry/${id}/demo/postpone`, payload);
+      if (!response) throw new Error("An error occurred. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async enrollStudent(id, payload) {
+    try {
+      const response = await post(`/v3/enquiry/${id}/enroll`, payload);
       if (!response) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {
