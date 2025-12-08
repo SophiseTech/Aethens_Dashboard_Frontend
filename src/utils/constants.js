@@ -185,7 +185,13 @@ export const PHASE_STATUS = {
   REJECTED: 'rejected'
 };
 
-export const age_categories = [{label:"5-7 Years",value:"5_7_years"},{label:"7 - 8 Years",value:"7_8_years"}]
+export const age_categories = [
+  {label:"5 - 7 Years",value:"5_7_years"},
+  {label:"8 - 14 Years",value:"7_8_years"},
+  {label:"15+ Years",value:"15+_years"},
+  {label:"Professional",value:"professional"},
+  {label:"Diploma",value:"dimploma"},
+]
 
 export const closing_remarks = [
   { label: "Not Interested", value: "not_interested" },
