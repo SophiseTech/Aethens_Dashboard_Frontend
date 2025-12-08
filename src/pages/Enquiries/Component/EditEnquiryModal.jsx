@@ -1,10 +1,11 @@
-import { useEffect,useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Modal, Form, Input, Select, DatePicker } from "antd";
 import dayjs from "dayjs";
 import { useStore } from 'zustand';
 import courseStore from '@stores/CourseStore';
 import CustomSelect from "@components/form/CustomSelect";
 import { age_categories } from "@utils/constants";
+import centersStore from "@stores/CentersStore";
 
 const { TextArea } = Input;
 
@@ -13,10 +14,11 @@ const DEMO_STATUSES = ["Scheduled", "Completed", "Cancelled"];
 
 const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
   const { getCourses, courses, total, loading: courseLoading } = useStore(courseStore)
+  const { centers, getCenters } = useStore(centersStore)
   const options = useMemo(() => courses?.map(course => ({ label: course.course_name, value: course._id })), [courses])
   const [form] = Form.useForm();
   console.log(enquiry);
-  
+
 
   useEffect(() => {
     if (enquiry) {
@@ -34,6 +36,7 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
           ? dayjs(enquiry.demoSlot.scheduledAt)
           : null,
         demoNotes: enquiry?.demoSlot?.notes || "",
+        centerId: enquiry?.centerId,
       });
     }
   }, [enquiry]);
@@ -42,6 +45,7 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
     if (!courses || total === 0 || courses.length < total) {
       getCourses(0)
     }
+    getCenters(0)
   }, [])
 
   const handleOk = () => {
@@ -61,7 +65,7 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
       centered
     >
       <Form form={form} layout="vertical">
-        
+
         <Form.Item label="Name" name="name" rules={[{ required: true }]}>
           <Input placeholder="Enter name" />
         </Form.Item>
@@ -70,10 +74,16 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
           <Input placeholder="Enter phone number" />
         </Form.Item>
 
-        <CustomSelect 
-        label={'Age Category'}
-        name={'ageCategory'}
-        options={age_categories}
+        <CustomSelect
+          label={'Center'}
+          name={'centerId'}
+          options={centers?.map(c => ({ label: c.center_name, value: c._id }))}
+        />
+
+        <CustomSelect
+          label={'Age Category'}
+          name={'ageCategory'}
+          options={age_categories}
         />
 
         <Form.Item label="How they found us" name="foundUsBy">

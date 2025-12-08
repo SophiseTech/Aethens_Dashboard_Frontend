@@ -4,6 +4,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import enquiryStore from "@stores/EnquiryStore";
 import EnquiryDetailsDrawer from "@pages/Enquiries/Component/EnquiryDetailsDrawer";
 import ViewWiseFilters from './ViewWiseFilters'
+import { formatDate } from "@utils/helper";
+import Chip from "@components/Chips/Chip";
+import EnquiryDashboard from "@pages/Enquiries/Component/EnquiryDashboard";
 
 function EnquiryList() {
   const {
@@ -33,7 +36,7 @@ function EnquiryList() {
     if (searchQuery) {
       search(10, { searchQuery }, currentPage);
     } else {
-      getEnquiries(10, currentPage, {stage: selectedView});
+      getEnquiries(10, currentPage, { stage: selectedView });
     }
   }, [searchQuery, getEnquiries, search, currentPage, selectedView]);
 
@@ -75,16 +78,24 @@ function EnquiryList() {
 
   const columns = [
     {
+      title: "#",
+      dataIndex: 'enquiryNumber',
+      key: 'enquiryNumber',
+    },
+    {
       title: "Name",
       dataIndex: "name",
       key: "name",
       render: (value, record) => (
-        <p
-          className="cursor-pointer text-blue-600 hover:underline"
-          onClick={() => handleRowClick(record)}
-        >
-          {value}
-        </p>
+        <div className="flex gap-2 items-center">
+          <p
+            className="cursor-pointer text-blue-600 hover:underline"
+            onClick={() => handleRowClick(record)}
+          >
+            {value}
+          </p>
+          {record?.isTransferred && (<Chip key={value} label="Transferred" size="xs" type="draft" glow={false} />)}
+        </div>
       ),
     },
     {
@@ -97,52 +108,79 @@ function EnquiryList() {
       render: (courses) => courses?.map(c => c.course_name).join(", ")
     },
     {
+      title: selectedView === "Demo" ? "Demo Date" : "Created At",
+      dataIndex: "createdAt",
+      render: (_, row) => {
+        const finalDate =
+          row?.stage === "Demo"
+            ? row?.demoSlot?.scheduledAt
+            : row?.createdAt;
+
+        return formatDate(finalDate);
+      },
+    },
+    {
       title: "Status",
       dataIndex: "stage",
-    },
+      render: (_, row) => {
+        return row?.stage === "Demo"
+          ? row?.demoSlot?.status || "Not Scheduled"
+          : row?.stage;
+      },
+    }
   ];
 
   return (
     <>
       <Segmented
-        options={["All", "New", "Demo", "Enrolled", "Closed"]}
+        options={["Dashboard","All", "New", "Demo", "Enrolled", "Closed"]}
         className="w-fit"
         value={selectedView}
-        onChange={(view) => {updateURL(currentPage, view)}}
+        onChange={(view) => { updateURL(currentPage, view) }}
       />
 
-      <ViewWiseFilters
-        selectedView={selectedView}
-        onApply={(filters) => {
-          // reset to page 1 and call search with filters
-          updateURL(1, selectedView)
-          getEnquiries(10, 1, filters)
-        }}
-        onClear={() => {
-          updateURL(1, selectedView)
-          getEnquiries(10, 1)
-        }}
-      />
+      {selectedView === 'Dashboard' ?
+        <EnquiryDashboard />
+        :
+        <div>
+          <ViewWiseFilters
+            selectedView={selectedView}
+            onApply={(filters) => {
+              // reset to page 1 and call search with filters
+              updateURL(1, selectedView)
+              getEnquiries(10, 1, filters)
+            }}
+            onClear={() => {
+              updateURL(1, selectedView)
+              getEnquiries(10, 1, { stage: selectedView })
+            }}
+          />
 
-      <Table
-        columns={columns}
-        dataSource={enquiries}
-        loading={loading}
-        pagination={{
-          current: currentPage,
-          onChange: handlePageChange,
-          total: searchQuery ? searchTotal : total,
-          pageSize: 10,
-        }}
-        rowKey="_id"
-      />
+          <div>
+            <p>Total Enquiries: <span className="font-bold">{total}</span></p>
+          </div>
 
-      <EnquiryDetailsDrawer
-        enquiry={selectedEnquiry}
-        visible={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
-        parentPage="enquiryList"
-      />
+          <Table
+            columns={columns}
+            dataSource={enquiries}
+            loading={loading}
+            pagination={{
+              current: currentPage,
+              onChange: handlePageChange,
+              total: searchQuery ? searchTotal : total,
+              pageSize: 10,
+            }}
+            rowKey="_id"
+          />
+
+          <EnquiryDetailsDrawer
+            enquiry={selectedEnquiry}
+            visible={drawerVisible}
+            onClose={() => setDrawerVisible(false)}
+            parentPage="enquiryList"
+          />
+        </div>
+      }
     </>
   );
 }

@@ -196,5 +196,15 @@ export const closing_remarks = [
   { label: "Other", value: "other" }
 ]
 
-export const foundUsOptions = [{label:"Instagram",value:"instagram"},{label:"Facebook",value:"facebook"}];
+export const foundUsOptions = [{ label: "Social Media", value: "Social Media" },
+{ label: "Walk-in", value: "Walk-in" },
+{ label: "Referral", value: "Referral" },
+{ label: "Google Maps", value: "Google Maps" }];
 export const EnquiryModeOptions = [{label:"Walk-in",value:"Walk-in"},{label:"Call",value:"Call"},{label:"Online",value:"Online"}];
+
+export const demoStatuses = [
+  { label: "Scheduled", value: "Scheduled" },
+  { label: "Completed", value: "Completed" },
+  { label: "Cancelled", value: "Cancelled" },
+  { label: "Rescheduled", value: "Rescheduled" },
+];

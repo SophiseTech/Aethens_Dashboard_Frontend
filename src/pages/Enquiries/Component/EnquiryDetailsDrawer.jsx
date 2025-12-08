@@ -27,6 +27,7 @@ import { useStore } from "zustand";
 import EditEnquiryModal from "./EditEnquiryModal";
 import CloseEnquiryModal from './CloseEnquiryModal';
 import { age_categories } from "@utils/constants";
+import BranchTransferCard from "@pages/Enquiries/Component/BranchTranserCard";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -124,9 +125,11 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
               />
             </Col>
             <Col>
-              <Title level={4} style={{ marginBottom: 0 }}>
+              <Title level={4} style={{ marginBottom: 0 }} className="flex items-center">
                 {enquiry?.name}
+                {enquiry?.isTransferred && (<Tag style={{ marginLeft: 8 }} color="blue">Transferred</Tag>)}
               </Title>
+              <Text>Enquiry No: {enquiry?.enquiryNumber}</Text><br />
               <Text>{age_categories.find(item => item.value == enquiry?.ageCategory)?.label}</Text>
             </Col>
           </Row>
@@ -194,6 +197,13 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
             </Card>
           </>
         )}
+
+        <Divider />
+
+        <BranchTransferCard
+          formatDate={formatDate}
+          transfers={enquiry?.centerTransfers}
+        />
 
         <Divider />
 

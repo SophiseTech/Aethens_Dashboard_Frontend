@@ -1,5 +1,6 @@
 import handleError from "@utils/handleError";
 import { del, get, post, put } from "@utils/Requests";
+import { message, notification } from "antd";
 
 class EnquiryService {
   // Create enquiry (optional placeholder)
@@ -22,6 +23,11 @@ class EnquiryService {
         throw new Error("An error occurred. Please try again");
       return response.data; // expected: { enquiries, total }
     } catch (error) {
+      notification.error({
+        message: "Error",
+        description: error?.message || error,
+        placement: "topRight",
+      });
       handleError(error);
     }
   }
@@ -131,6 +137,16 @@ class EnquiryService {
   async getDemoSlots() {
     try {
       const response = await get("/v3/enquiry/demo/slots");
+      if (!response) throw new Error("An error occurred. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async getEnquiryKPI(period, startDate, endDate) {
+    try {
+      const response = await get(`/v3/enquiry/kpi?period=${period}&startDate=${startDate}&endDate=${endDate}`);
       if (!response) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {

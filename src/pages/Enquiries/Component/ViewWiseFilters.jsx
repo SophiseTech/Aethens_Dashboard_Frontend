@@ -3,7 +3,9 @@ import PropTypes from 'prop-types'
 import CustomInput from '@components/form/CustomInput'
 import CustomSelect from '@components/form/CustomSelect'
 import CustomDatePicker from '@components/form/CustomDatePicker'
-import { age_categories, EnquiryModeOptions, foundUsOptions } from '@utils/constants'
+import { age_categories, closing_remarks, demoStatuses, EnquiryModeOptions, foundUsOptions } from '@utils/constants'
+import CustomCheckbox from '@components/form/CustomCheckBox'
+import { useEffect } from 'react'
 
 /**
  * ViewWiseFilters
@@ -12,18 +14,12 @@ import { age_categories, EnquiryModeOptions, foundUsOptions } from '@utils/const
  * - onApply: function(filters) called when user submits filters
  * - onClear: function() called when user resets filters
  */
-function ViewWiseFilters({ selectedView = 'All', onApply = () => {}, onClear = () => {}, viewsConfig = null, normalize = null }) {
+function ViewWiseFilters({ selectedView = 'All', onApply = () => { }, onClear = () => { }, viewsConfig = null }) {
   const [form] = Form.useForm()
 
-  // default closed reasons (can be extended or provided via viewsConfig)
-  const defaultClosedReasons = [
-    { label: 'Not interested', value: 'not_interested' },
-    { label: 'Price', value: 'price' },
-    { label: 'Already enrolled', value: 'already_enrolled' },
-    { label: 'Invalid number', value: 'invalid_number' },
-    { label: 'Other', value: 'other' },
-  ]
-
+  useEffect(() => {
+    form.resetFields()
+  }, [selectedView])
   // Default view -> fields configuration. Each field: { name, label, type, required?, options? }
   const defaultViewsConfig = {
     All: [
@@ -33,45 +29,37 @@ function ViewWiseFilters({ selectedView = 'All', onApply = () => {}, onClear = (
       { name: 'endDate', label: 'To', type: 'date' },
     ],
     New: [
+      { name: 'phoneNumber', label: 'Phone', type: 'input' },
       { name: 'ageCategory', label: 'Age Category', type: 'select', options: age_categories },
       { name: 'foundUsBy', label: 'Found Us By', type: 'select', options: foundUsOptions },
       { name: 'modeOfEnquiry', label: 'Mode of Enquiry', type: 'select', options: EnquiryModeOptions },
-      { name: 'new_startDate', label: 'From', type: 'date' },
-      { name: 'new_endDate', label: 'To', type: 'date' },
+      { name: 'new_startDate', label: 'Created From', type: 'date', disabledMode: 'after', targetDate: new Date() },
+      { name: 'new_endDate', label: 'Created To', type: 'date', disabledMode: 'after', targetDate: new Date() },
+      { name: 'follow_startDate', label: 'Follow Up From', type: 'date' },
+      { name: 'follow_endDate', label: 'Follow Up To', type: 'date' },
+      { name: 'showStaleNew', label: 'Show Only Stale Enquiries', type: 'checkbox' },
     ],
     Demo: [
       { name: 'phoneNumber', label: 'Phone', type: 'input' },
-      { name: 'course', label: 'Course', type: 'input' },
-      { name: 'demoFrom', label: 'Demo From', type: 'date' },
-      { name: 'demoTo', label: 'Demo To', type: 'date' },
+      { name: 'demo_startDate', label: 'Demo From', type: 'date' },
+      { name: 'demo_endDate', label: 'Demo To', type: 'date' },
+      { name: 'demoSlot.status', label: 'Status', type: 'select', options: demoStatuses },
+      { name: 'showStaleDemo', label: 'Show Only Stale Enquiries', type: 'checkbox' },
     ],
     Enrolled: [
       { name: 'phoneNumber', label: 'Phone', type: 'input' },
-      { name: 'course', label: 'Course', type: 'input' },
-      { name: 'enrolledFrom', label: 'Enrolled From', type: 'date' },
-      { name: 'enrolledTo', label: 'Enrolled To', type: 'date' },
+      { name: 'enrolled_startDate', label: 'Enrolled From', type: 'date' },
+      { name: 'enrolled_endDate', label: 'Enrolled To', type: 'date' },
     ],
     Closed: [
       { name: 'phoneNumber', label: 'Phone', type: 'input' },
-      { name: 'course', label: 'Course', type: 'input' },
-      { name: 'closedReason', label: 'Closed Reason', type: 'select', options: defaultClosedReasons },
-      { name: 'closedFrom', label: 'Closed From', type: 'date' },
-      { name: 'closedTo', label: 'Closed To', type: 'date' },
+      { name: 'closedReason', label: 'Closed Reason', type: 'select', options: closing_remarks },
+      { name: 'closed_startDate', label: 'Closed From', type: 'date' },
+      { name: 'closed_endDate', label: 'Closed To', type: 'date' },
     ],
   }
 
   const cfg = viewsConfig || defaultViewsConfig
-
-  // default normalization: map any "from"-like field to startDate and "to"-like to endDate
-  const defaultNormalize = (values) => {
-    const filters = { ...values }
-    // find a from-like key
-    const fromKey = Object.keys(values).find(k => /from$|From$|^start|Start|FromDate|fromDate/i.test(k))
-    const toKey = Object.keys(values).find(k => /to$|To$|^end|End|ToDate|toDate/i.test(k))
-    if (fromKey && !filters.startDate) filters.startDate = values[fromKey]
-    if (toKey && !filters.endDate) filters.endDate = values[toKey]
-    return filters
-  }
 
   const handleFinish = (values) => {
     // const normalizer = normalize || defaultNormalize
@@ -88,7 +76,7 @@ function ViewWiseFilters({ selectedView = 'All', onApply = () => {}, onClear = (
 
   // render a single field based on descriptor
   const renderField = (field) => {
-    const { name, label, type, required = false, options = [] } = field
+    const { name, label, type, required = false, options = [], disabledMode = null, targetDate = null, range = null } = field
     switch (type) {
       case 'select':
         return (
@@ -96,7 +84,11 @@ function ViewWiseFilters({ selectedView = 'All', onApply = () => {}, onClear = (
         )
       case 'date':
         return (
-          <CustomDatePicker key={name} name={name} label={label} required={required} />
+          <CustomDatePicker key={name} name={name} label={label} required={required} disabledMode={disabledMode} targetDate={targetDate} range={range} className='w-full' />
+        )
+      case 'checkbox':
+        return (
+          <CustomCheckbox key={name} name={name} label={label} required={required} />
         )
       case 'input':
       default:
