@@ -55,6 +55,54 @@ const enquiryStore = create((set, get) => ({
     }
   },
 
+  addfollowUpDate: async (id, slotData) => {
+    try {
+      set({ loading: true });
+
+      const response = await enquiryService.addFollowUpDate(id,slotData);
+      if (!response) return;
+
+      handleSuccess("Followup Date Updated successfully");
+    } catch (error) {
+      handleInternalError(error);
+    }
+    finally{
+      set({loading : false})
+    }
+  },
+
+  rescheduleSlot: async (id, slotData) => {
+    try {
+      set({ loading: true });
+
+      const response = await enquiryService.rescheduleSlot(id,slotData);
+      if (!response) return;
+
+      handleSuccess("Demo Slot rescheduled successfully");
+    } catch (error) {
+      handleInternalError(error);
+    }
+    finally {
+      set({loading : false})
+    }
+  },
+
+  enrollStudent: async (id,payload) => {
+    try {
+      set({ loading: true });
+
+      const response = await enquiryService.enrollStudent(id,payload);
+      if (!response) return;
+
+      handleSuccess("Student Enrolled Successfully");
+    } catch (error) {
+      handleInternalError(error);
+    }
+    finally {
+      set({loading : false})
+    }
+  },
+
   markDemoCompleted: async (id, notes) => {
     try {
       set({ loading: true });
