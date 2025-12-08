@@ -2,7 +2,7 @@ import ReactApexChart from "react-apexcharts";
 import eChart from "@pages/Dashboard/Chart/EchrConfig";
 import _ from "lodash";
 
-function EChart({ series = [], options = {}, className = "" }) {
+function EChart({ series = [], options = {}, className = "", type = "line" }) {
   if (_.isEmpty(series) || _.isEmpty(options)) return null
   return (
     <>
@@ -10,7 +10,7 @@ function EChart({ series = [], options = {}, className = "" }) {
         className={className}
         options={options}
         series={series}
-        type="line"
+        type={options?.chart?.type ?? type}
       />
     </>
   );

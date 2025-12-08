@@ -39,7 +39,7 @@ function SlotRequests({ handleClose, drawerState }) {
     ...request,
     request_details: <p>
       {request.raised_by_center?.username} has requested to reschedule their slot
-      from <span className='font-bold'>{formatDate(request?.current_slot?.start_date)}, {formatTime(request?.current_slot.session?.start_time)}</span>&nbsp;
+      from <span className='font-bold'>{formatDate(request?.current_slot?.start_date)}, {formatTime(request?.current_slot?.session?.start_time)}</span>&nbsp;
       to <span className='font-bold'>{formatDate(request?.requested_slot?.date)}, {formatTime(request?.requested_slot?.date)}</span>
     </p>
   })), [slotRequests])

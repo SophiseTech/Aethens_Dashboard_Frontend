@@ -48,7 +48,7 @@ function Chip({size = "small", type = "success", label = "Label", glow = true}) 
   )
   return (
     <div className={styles({size, type})}>
-      <div className={glowStyles({size, type})}></div>
+      {glow && <div className={glowStyles({size, type})} />}
       <p>{label}</p>
     </div>
   )

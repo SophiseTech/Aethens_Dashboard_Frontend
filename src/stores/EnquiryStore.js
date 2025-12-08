@@ -14,13 +14,14 @@ const enquiryStore = create((set, get) => ({
   demoSlots: {},
 
   // Fetch enquiries list with pagination
-  getEnquiries: async (limit = 10, page = 1) => {
+  getEnquiries: async (limit = 10, page = 1, filters = {}) => {
     try {
       set({ loading: true });
 
       const { enquiries, total } = await enquiryService.getEnquiries(
         page,
-        limit
+        limit,
+        filters
       );
 
       if (enquiries) {
@@ -51,6 +52,54 @@ const enquiryStore = create((set, get) => ({
       handleInternalError(error);
     } finally {
       set({ loading: false });
+    }
+  },
+
+  addfollowUpDate: async (id, slotData) => {
+    try {
+      set({ loading: true });
+
+      const response = await enquiryService.addFollowUpDate(id,slotData);
+      if (!response) return;
+
+      handleSuccess("Followup Date Updated successfully");
+    } catch (error) {
+      handleInternalError(error);
+    }
+    finally{
+      set({loading : false})
+    }
+  },
+
+  rescheduleSlot: async (id, slotData) => {
+    try {
+      set({ loading: true });
+
+      const response = await enquiryService.rescheduleSlot(id,slotData);
+      if (!response) return;
+
+      handleSuccess("Demo Slot rescheduled successfully");
+    } catch (error) {
+      handleInternalError(error);
+    }
+    finally {
+      set({loading : false})
+    }
+  },
+
+  enrollStudent: async (id,payload) => {
+    try {
+      set({ loading: true });
+
+      const response = await enquiryService.enrollStudent(id,payload);
+      if (!response) return;
+
+      handleSuccess("Student Enrolled Successfully");
+    } catch (error) {
+      handleInternalError(error);
+    }
+    finally {
+      set({loading : false})
     }
   },
 

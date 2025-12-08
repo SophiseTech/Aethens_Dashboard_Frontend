@@ -320,7 +320,7 @@ function Sidebar({ children }) {
         {children}
       </div>
 
-      <div className="drawer-side z-20">
+      <div className="drawer-side z-20 no-scrollbar">
         <label htmlFor="my-drawer" className="drawer-overlay" />
 
         <aside className="h-full flex flex-col justify-between bg-white max-sm:w-80 w-96 shadow-lg">
