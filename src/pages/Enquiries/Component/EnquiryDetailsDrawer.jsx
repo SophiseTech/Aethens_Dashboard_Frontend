@@ -19,11 +19,14 @@ import {
   PhoneOutlined,
   EditOutlined,
   CalendarOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import { formatDate } from "@utils/helper";
 import enquiryStore from "@stores/EnquiryStore";
 import { useStore } from "zustand";
 import EditEnquiryModal from "./EditEnquiryModal";
+import CloseEnquiryModal from './CloseEnquiryModal';
+import { age_categories } from "@utils/constants";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -31,6 +34,7 @@ const { TextArea } = Input;
 const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isBookSlotModalVisible, setIsBookSlotModalVisible] = useState(false);
+  const [isCloseModalVisible, setIsCloseModalVisible] = useState(false);
 
   const {
     editEnquiry,
@@ -41,7 +45,10 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
   } = useStore(enquiryStore);
   const [form] = Form.useForm();
 
+  const isClosed = (enquiry?.stage === 'Closed' || enquiry?.state === 'Closed');
+
   const handleEditClick = () => setIsEditModalVisible(true);
+  const handleCloseClick = () => setIsCloseModalVisible(true);
 
   const handleSave = async (values) => {
     const updateData = {
@@ -85,14 +92,24 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
         headerStyle={{ background: "#f0f2f5" }}
         bodyStyle={{ padding: 20 }}
         extra={
-          parentPage === "enquiryList" ? (
-            <Button
-              type="primary"
-              icon={<EditOutlined />}
-              onClick={handleEditClick}
-            >
-              Edit
-            </Button>
+          parentPage === "enquiryList" && !isClosed ? (
+            <div className="flex gap-2">
+              <Button
+                type="primary"
+                icon={<EditOutlined />}
+                onClick={handleEditClick}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="solid"
+                color="danger"
+                icon={<DeleteOutlined />}
+                onClick={handleCloseClick}
+              >
+                Close
+              </Button>
+            </div>
           ) : null
         }
       >
@@ -110,7 +127,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
               <Title level={4} style={{ marginBottom: 0 }}>
                 {enquiry?.name}
               </Title>
-              <Text>{enquiry?.ageCategory}</Text>
+              <Text>{age_categories.find(item => item.value == enquiry?.ageCategory)?.label}</Text>
             </Col>
           </Row>
         </Card>
@@ -181,17 +198,19 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
         <Divider />
 
         {/* Action Buttons Based on Parent Page */}
-        {parentPage === "enquiryList" && (
-          <Button
-            type="primary"
-            block
-            onClick={() => setIsBookSlotModalVisible(true)}
-          >
-            Book Demo Slot
-          </Button>
+        {parentPage === "enquiryList" && !isClosed && (
+          <>
+            <Button
+              type="primary"
+              block
+              onClick={() => setIsBookSlotModalVisible(true)}
+            >
+              Book Demo Slot
+            </Button>
+          </>
         )}
 
-        {parentPage === "slotlist" &&
+        {parentPage === "slotlist" && !isClosed &&
           enquiry?.demoSlot?.status !== "Completed" && (
             <Button type="primary" danger block onClick={handleMarkCompleted}>
               Mark As Completed
@@ -229,6 +248,16 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
           </Form.Item>
         </Form>
       </Modal>
+
+      {/* Close Enquiry Modal */}
+      <CloseEnquiryModal
+        visible={isCloseModalVisible}
+        onCancel={() => {
+          setIsCloseModalVisible(false)
+          onClose();
+        }}
+        enquiry={enquiry}
+      />
     </>
   );
 };

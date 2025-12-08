@@ -3,6 +3,8 @@ import { Modal, Form, Input, Select, DatePicker } from "antd";
 import dayjs from "dayjs";
 import { useStore } from 'zustand';
 import courseStore from '@stores/CourseStore';
+import CustomSelect from "@components/form/CustomSelect";
+import { age_categories } from "@utils/constants";
 
 const { TextArea } = Input;
 
@@ -13,6 +15,8 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
   const { getCourses, courses, total, loading: courseLoading } = useStore(courseStore)
   const options = useMemo(() => courses?.map(course => ({ label: course.course_name, value: course._id })), [courses])
   const [form] = Form.useForm();
+  console.log(enquiry);
+  
 
   useEffect(() => {
     if (enquiry) {
@@ -66,9 +70,11 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
           <Input placeholder="Enter phone number" />
         </Form.Item>
 
-        <Form.Item label="Age Category" name="ageCategory">
-          <Input placeholder="Enter age category" />
-        </Form.Item>
+        <CustomSelect 
+        label={'Age Category'}
+        name={'ageCategory'}
+        options={age_categories}
+        />
 
         <Form.Item label="How they found us" name="foundUsBy">
           <Input placeholder="eg: Instagram, Google Search" />

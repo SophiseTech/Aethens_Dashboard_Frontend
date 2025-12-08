@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { Segmented, Table } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import enquiryStore from "@stores/EnquiryStore";
 import EnquiryDetailsDrawer from "@pages/Enquiries/Component/EnquiryDetailsDrawer";
+import ViewWiseFilters from './ViewWiseFilters'
 
 function EnquiryList() {
   const {
@@ -22,29 +23,32 @@ function EnquiryList() {
 
   // default view / page from URL params
   const currentPage = parseInt(queryParams.get("page")) || 1;
+  const selectedView = queryParams.get("view") || 'All';
 
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
-  const [selectedView, setSelectedView] = useState("All");
+  // const [selectedView, setSelectedView] = useState("All");
 
-  useEffect(() => {
-    fetchEnquiries();
-  }, [selectedView, currentPage, searchQuery]);
-
-  const fetchEnquiries = () => {
+  const fetchEnquiries = useCallback(() => {
     if (searchQuery) {
       search(10, { searchQuery }, currentPage);
     } else {
-      getEnquiries(10, currentPage);
+      getEnquiries(10, currentPage, {stage: selectedView});
     }
-  };
+  }, [searchQuery, getEnquiries, search, currentPage, selectedView]);
 
-  const updateURL = (page) => {
-    nav(`?page=${page}`, { replace: true });
+  useEffect(() => {
+    fetchEnquiries();
+    // fetchEnquiries depends on searchQuery/currentPage/selectedView
+    // include fetchEnquiries to satisfy exhaustive-deps
+  }, [selectedView, currentPage, searchQuery, fetchEnquiries]);
+
+  const updateURL = (page, view) => {
+    nav(`?page=${page}&view=${view}`, { replace: true });
   };
 
   const handlePageChange = (page, pageSize) => {
-    updateURL(page);
+    updateURL(page, selectedView);
     loadMore(page, pageSize);
   };
 
@@ -61,13 +65,13 @@ function EnquiryList() {
     setDrawerVisible(true);
   };
 
-  const enquiriesToDisplay = useMemo(() => {
-    const base = searchQuery ? searchResults : enquiries;
-    if (selectedView === "All") return base;
-    return base.filter(
-      (item) => item.stage?.toLowerCase() === selectedView.toLowerCase()
-    );
-  }, [enquiries, searchResults, searchQuery, selectedView]);
+  // const enquiriesToDisplay = useMemo(() => {
+  //   const base = searchQuery ? searchResults : enquiries;
+  //   if (selectedView === "All") return base;
+  //   return base.filter(
+  //     (item) => item.stage?.toLowerCase() === selectedView.toLowerCase()
+  //   );
+  // }, [enquiries, searchResults, searchQuery, selectedView]);
 
   const columns = [
     {
@@ -101,15 +105,28 @@ function EnquiryList() {
   return (
     <>
       <Segmented
-        options={["All","New", "Demo", "Enrolled", "Closed"]}
+        options={["All", "New", "Demo", "Enrolled", "Closed"]}
         className="w-fit"
         value={selectedView}
-        onChange={setSelectedView}
+        onChange={(view) => {updateURL(currentPage, view)}}
+      />
+
+      <ViewWiseFilters
+        selectedView={selectedView}
+        onApply={(filters) => {
+          // reset to page 1 and call search with filters
+          updateURL(1, selectedView)
+          getEnquiries(10, 1, filters)
+        }}
+        onClear={() => {
+          updateURL(1, selectedView)
+          getEnquiries(10, 1)
+        }}
       />
 
       <Table
         columns={columns}
-        dataSource={enquiriesToDisplay}
+        dataSource={enquiries}
         loading={loading}
         pagination={{
           current: currentPage,

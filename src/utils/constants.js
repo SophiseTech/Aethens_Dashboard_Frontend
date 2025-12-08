@@ -184,3 +184,17 @@ export const PHASE_STATUS = {
   APPROVED: 'approved',
   REJECTED: 'rejected'
 };
+
+export const age_categories = [{label:"5-7 Years",value:"5_7_years"},{label:"7 - 8 Years",value:"7_8_years"}]
+
+export const closing_remarks = [
+  { label: "Not Interested", value: "not_interested" },
+  { label: "Budget Constraints", value: "budget_constraints" },
+  { label: "Found Another Institute", value: "found_another_institute" },
+  { label: "Relocated", value: "relocated" },
+  { label: "Timing Issues", value: "timing_issues" },
+  { label: "Other", value: "other" }
+]
+
+export const foundUsOptions = [{label:"Instagram",value:"instagram"},{label:"Facebook",value:"facebook"}];
+export const EnquiryModeOptions = [{label:"Walk-in",value:"Walk-in"},{label:"Call",value:"Call"},{label:"Online",value:"Online"}];

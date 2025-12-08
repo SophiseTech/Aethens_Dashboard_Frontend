@@ -14,13 +14,14 @@ const enquiryStore = create((set, get) => ({
   demoSlots: {},
 
   // Fetch enquiries list with pagination
-  getEnquiries: async (limit = 10, page = 1) => {
+  getEnquiries: async (limit = 10, page = 1, filters = {}) => {
     try {
       set({ loading: true });
 
       const { enquiries, total } = await enquiryService.getEnquiries(
         page,
-        limit
+        limit,
+        filters
       );
 
       if (enquiries) {

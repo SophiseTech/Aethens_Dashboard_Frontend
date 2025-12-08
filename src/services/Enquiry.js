@@ -15,9 +15,9 @@ class EnquiryService {
   }
 
   // Get paginated enquiry list
-  async getEnquiries(offset = 1, limit = 10) {
+  async getEnquiries(offset = 1, limit = 10, filters = {}) {
     try {
-      const response = await get(`/v3/enquiry?page=${offset}&limit=${limit}`);
+      const response = await post(`/v3/enquiry/list?page=${offset}&limit=${limit}`, { filters });
       if (!response || !response.data)
         throw new Error("An error occurred. Please try again");
       return response.data; // expected: { enquiries, total }
@@ -70,6 +70,33 @@ class EnquiryService {
       const response = await get(`/enquiries/${id}`);
       if (!response || !response.data)
         throw new Error("An error occurred. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  // Check if an enquiry exists based on a field and value
+  async enquiryExists(field, value) {
+    try {
+      if (!field) throw new Error("field is required");
+      // encode value to be safe in query string
+      const qsValue = encodeURIComponent(value ?? "");
+      const response = await get(`/v3/enquiry/exists?field=${field}&value=${qsValue}`);
+      if (!response || response.status >= 400) throw new Error("An error occurred. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  // Transition enquiry to a new stage (e.g., closed) with an optional reason
+  async transitionEnquiry(id, stage, reason) {
+    try {
+      if (!id) throw new Error("Invalid enquiry ID");
+      const payload = { stage, reason };
+      const response = await post(`/v3/enquiry/${id}/transition`, payload);
+      if (!response || !response.data) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {
       handleError(error);

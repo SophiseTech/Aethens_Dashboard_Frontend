@@ -1,7 +1,7 @@
 import { Form, message } from 'antd';
-import React, { useEffect } from 'react'
+import PropTypes from 'prop-types';
 
-function CustomForm({ form, children, action, initialValues = {}, className = "" }) {
+function CustomForm({ form, children, action, initialValues = {}, className = "", resetOnFinish = true }) {
 
   if (!form) throw new Error("Invalid form element")
 
@@ -14,10 +14,23 @@ function CustomForm({ form, children, action, initialValues = {}, className = ""
 
   // useEffect(() => form.resetFields(), [initialValues]);
   const onFinish = async (values) => {
-    console.log(values);
+    // call the provided action and allow it to return a value
+    // which can be used to decide whether to reset the form
+    const result = await action(values);
 
-    await action(values)
-    form.resetFields()
+    let shouldReset = true;
+    if (typeof resetOnFinish === 'function') {
+      try {
+        shouldReset = Boolean(resetOnFinish(result));
+      } catch {
+        shouldReset = true;
+      }
+    } else {
+      shouldReset = Boolean(resetOnFinish);
+    }
+
+    if (shouldReset) form.resetFields();
+    return result;
   }
 
   // Function to handle form submission errors
@@ -41,3 +54,12 @@ function CustomForm({ form, children, action, initialValues = {}, className = ""
 }
 
 export default CustomForm
+
+CustomForm.propTypes = {
+  form: PropTypes.object.isRequired,
+  children: PropTypes.node,
+  action: PropTypes.func.isRequired,
+  initialValues: PropTypes.object,
+  className: PropTypes.string,
+  resetOnFinish: PropTypes.oneOfType([PropTypes.bool, PropTypes.func])
+}
