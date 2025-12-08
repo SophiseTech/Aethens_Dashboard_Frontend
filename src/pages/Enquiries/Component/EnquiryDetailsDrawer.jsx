@@ -27,11 +27,8 @@ import { useStore } from "zustand";
 import EditEnquiryModal from "./EditEnquiryModal";
 import CloseEnquiryModal from './CloseEnquiryModal';
 import { age_categories } from "@utils/constants";
-<<<<<<< HEAD
 import BranchTransferCard from "@pages/Enquiries/Component/BranchTranserCard";
-=======
 import CustomSelect from "@components/form/CustomSelect";
->>>>>>> fixes/zeus
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -181,18 +178,8 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
                 {enquiry?.name}
                 {enquiry?.isTransferred && (<Tag style={{ marginLeft: 8 }} color="blue">Transferred</Tag>)}
               </Title>
-<<<<<<< HEAD
               <Text>Enquiry No: {enquiry?.enquiryNumber}</Text><br />
               <Text>{age_categories.find(item => item.value == enquiry?.ageCategory)?.label}</Text>
-=======
-              <Text>
-                {
-                  age_categories.find(
-                    (item) => item.value == enquiry?.ageCategory
-                  )?.label
-                }
-              </Text>
->>>>>>> fixes/zeus
             </Col>
           </Row>
         </Card>
