@@ -15,6 +15,7 @@ import {
   ShopOutlined,
   SolutionOutlined,
   MessageOutlined,
+  WalletOutlined
 } from "@ant-design/icons";
 
 import Book from "@/assets/Book";
@@ -72,6 +73,12 @@ const MENU_CONFIG = [
     label: "Students",
     icon: SolutionOutlined,
     path: "/manager/students",
+    roles: [ROLES.MANAGER],
+  },
+  {
+    label: "Wallets",
+    icon: WalletOutlined,
+    path: "/manager/wallets",
     roles: [ROLES.MANAGER],
   },
   {
