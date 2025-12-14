@@ -9,6 +9,7 @@ import { useLocation } from "react-router-dom";
 
 const Students = lazy(() => import("@pages/Students"))
 const Enquiries = lazy(() => import("@pages/Enquiries"))
+const Wallets = lazy(() => import("@pages/Wallets/index.jsx"))
 const EnquirySlots = lazy(() => import("@pages/EnquirySlots"))
 const Bills = lazy(() => import("@pages/Bills"));
 const BillDetails = lazy(() => import("@pages/Bills/Components/BillDetails"));
@@ -57,6 +58,11 @@ export const managerRoutes = [
             path: "/manager/enquiries",
             element: <LazyLoader element={<Enquiries />} />,
             title: "Enquiries"
+          },
+          {
+            path: "/manager/wallets",
+            element: <LazyLoader element={<Wallets />} />,
+            title: "Wallets"
           },
           {
             path: "/manager/enquiry-slots",

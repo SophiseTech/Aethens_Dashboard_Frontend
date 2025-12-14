@@ -33,7 +33,7 @@ function StudentSearch() {
   return (
     <div className='| w-full lg:w-1/4'>
       <Search
-        placeholder="Search by name, email and admission number..."
+        placeholder="Search by name, email, phone number and admission number..."
         onSearch={onSearch}
         defaultValue={searchQuery}
       />

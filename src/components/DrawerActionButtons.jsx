@@ -1,4 +1,5 @@
 import useModal from '@hooks/useModal'
+import AddStudentRemarks from '@pages/Students/Component/AddStudentRemarks'
 import AllotSessions from '@pages/Students/Component/AllotSessions'
 import DeactivateStudent from '@pages/Students/Component/DeactivateStudent'
 import MigrateCenter from '@pages/Students/Component/MigrateCenter'
@@ -6,6 +7,7 @@ import MigrateCourse from '@pages/Students/Component/MigrateCourse'
 import ProjectDetailModal from '@pages/Students/Component/ProjectDetailModal'
 import ViewStudentSessions from '@pages/Students/Component/SessionDetails'
 import SessionStatus from '@pages/Students/Component/SessionStatus'
+import ViewStudentRemarks from '@pages/Students/Component/ViewStudentRemarks'
 import userStore from '@stores/UserStore'
 import { ROLES } from '@utils/constants'
 import { isUserActive } from '@utils/helper'
@@ -49,6 +51,10 @@ const ManagerActionButtons = ({ userDetails }) => {
   nav(`/manager/final-project/student/${student_id}/details`);
   };
 
+  const handleViewWallet = (student_id)=>{
+    nav(`/manager/wallets?studentId=${student_id}`)
+  }
+
   const handleViewSession = () => {
     setIsModalOpen(true);
   };
@@ -58,6 +64,9 @@ const ManagerActionButtons = ({ userDetails }) => {
       <AllotSessions student={userDetails} />
       <Button onClick={() => handleViewBills(userDetails._id)} variant="filled" color="cyan">
         View Bills
+      </Button>
+      <Button onClick={() => handleViewWallet(userDetails._id)} variant="filled" color="cyan">
+        View Wallet
       </Button>
       <Button onClick={() => handleViewMaterials(userDetails._id, userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id)} variant="filled" color="blue">
         View Materials
@@ -73,6 +82,8 @@ const ManagerActionButtons = ({ userDetails }) => {
         View Course History
       </Button>
       <MigrateCourse student={userDetails} />
+      <AddStudentRemarks student={userDetails} />
+      <ViewStudentRemarks student={userDetails} />
 
       <MigrateCenter student={userDetails} />
 
