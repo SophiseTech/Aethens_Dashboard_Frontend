@@ -1,26 +1,31 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { BookOutlined, CalendarOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
 import { useFinalProject } from '@hooks/useFinalProject';
-import useStudents from '@hooks/useStudents';
+// import useStudents from '@hooks/useStudents';
 import CreateProject from '@pages/FinalProject/Components/CreateProject';
 import ProjectOpenedStudentsList from '@pages/FinalProject/Components/ProjectOpenedStudentsList';
 import { formatDate } from '@utils/helper';
-import { Avatar, Button, Card, Space, Spin, Table, Tag, Typography } from 'antd';
+import { Avatar, Button, Card, Segmented, Space, Spin, Table, Tag, Typography } from 'antd';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const { Text, Title } = Typography
 
 function FinalProjectManagerView() {
-  const { getStatusConfig, fetchPendingSubmissions, pendingSubmissions, loading, listProjects, projectsInfo, handlePaginationChange } = useFinalProject()
-  const { loading: projectOpenedStudentsLoading } = useStudents()
+  const { getStatusConfig, fetchPendingSubmissions, pendingSubmissions, loading, listProjects, projectsInfo, handlePaginationChange,
+    selectedView, setView, projectFetchLoading
+  } = useFinalProject()
+  // const { loading: projectOpenedStudentsLoading } = useStudents()
   const nav = useNavigate()
   const { projectId } = useParams()
 
   useEffect(() => {
     fetchPendingSubmissions({}, projectId)
+  }, [])
+
+  useEffect(() => {
     listProjects({
-      query: {status: 'pending'},
+      query: { status: selectedView },
       populate: [
         {
           path: "studentId",
@@ -34,9 +39,10 @@ function FinalProjectManagerView() {
           path: 'courseId',
           select: "course_name"
         }
-      ]
+      ],
+      pagination: projectsInfo.pagination
     })
-  }, [])
+  }, [selectedView])
 
   const onViewStudents = (projectId, studentId) => {
     nav(`/manager/final-project/${projectId}/student/${studentId}/phases`);
@@ -127,13 +133,21 @@ function FinalProjectManagerView() {
         />
       </Card>
 
-      <ProjectOpenedStudentsList 
+      <Segmented
+        options={[{ label: 'Completed Students', value: 'completed' }, { label: 'Opened Students', value: 'pending' }]}
+        value={selectedView}
+        onChange={setView}
+        className='mb-2'
+      />
+
+      <ProjectOpenedStudentsList
         projectsInfo={{
           ...projectsInfo,
           handlePaginationChange: handlePaginationChange
-        }} 
-        loading={projectOpenedStudentsLoading} 
-        onView={onViewStudents} 
+        }}
+        loading={projectFetchLoading}
+        onView={onViewStudents}
+        title={selectedView === 'completed' ? 'Completed Students' : 'Opened Students'}
       />
     </div>
   );

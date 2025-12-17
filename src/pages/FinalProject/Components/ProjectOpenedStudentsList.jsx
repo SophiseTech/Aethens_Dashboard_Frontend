@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 
 const { Text, Title } = Typography;
 
-function ProjectOpenedStudentsList({ projectsInfo = [], loading, onView }) {
+function ProjectOpenedStudentsList({ projectsInfo = [], loading, onView, title = 'Project Opened Students' }) {
 
   const columns = [
     {
@@ -40,7 +40,7 @@ function ProjectOpenedStudentsList({ projectsInfo = [], loading, onView }) {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: () => <Tag color={'green'}>Opened</Tag>,
+      render: (_, row) => <Tag color={row.statusColor}>{row.statusIcon} {row.statusText}</Tag>,
     },
     {
       title: 'Action',
@@ -59,7 +59,7 @@ function ProjectOpenedStudentsList({ projectsInfo = [], loading, onView }) {
 
   return (
     <Card>
-      <Title level={4}>Project Opened Students</Title>
+      <Title level={4}>{title}</Title>
       <Table
         columns={columns}
         dataSource={projectsInfo?.projects || []}
@@ -87,6 +87,7 @@ ProjectOpenedStudentsList.propTypes = {
   }),
   loading: PropTypes.bool,
   onView: PropTypes.func.isRequired,
+  title: PropTypes.string,
 };
 
 export default ProjectOpenedStudentsList;

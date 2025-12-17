@@ -11,6 +11,7 @@ export const useFinalProjectStore = create((set, get) => ({
   currentProject: null,
   totalProjects: 0,
   loading: false,
+  projectFetchLoading: false,
   error: null,
   createLoading: false,
   latestSubmission: null,
@@ -167,17 +168,17 @@ export const useFinalProjectStore = create((set, get) => ({
   // List final projects with current filters and pagination
   listProjects: async (newFilters = { query: {}, populate: "", pagination: null }) => {
     const { filters, pagination } = get();
-    set({ loading: true, error: null });
+    set({ projectFetchLoading: true, error: null });
     try {
       const response = await finalProjectService.list({ ...filters, ...newFilters.query }, newFilters.pagination || pagination, newFilters.populate);
       set({
         projects: response.projects,
         totalProjects: response.pagination.total,
-        loading: false
+        projectFetchLoading: false
       });
       return response;
     } catch (error) {
-      set({ error, loading: false });
+      set({ error, projectFetchLoading: false });
       throw error;
     }
   },
