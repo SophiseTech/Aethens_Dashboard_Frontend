@@ -3,6 +3,7 @@ import { projectStatusConfig, statusConfig } from "@pages/FinalProject";
 import { useFinalProjectStore } from "@stores/FinalProjectV2";
 import { PHASE_STATUS } from "@utils/constants";
 import { useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 
 export const useFinalProject = () => {
   const {
@@ -31,7 +32,8 @@ export const useFinalProject = () => {
     updateProject,
     getProjectById,
     listProjects,
-    getLatestSubmission
+    getLatestSubmission,
+    projectFetchLoading
   } = useFinalProjectStore();
 
 
@@ -271,9 +273,9 @@ export const useFinalProject = () => {
     return config
   }
 
-  const fetchProjects = useCallback((page = 1, pageSize = 10) => {
+  const fetchProjects = useCallback((page = 1, pageSize = 10, view = 'pending') => {
     listProjects({
-      query: { status: 'pending' },
+      query: { status: view },
       populate: [
         {
           path: "studentId",
@@ -292,10 +294,22 @@ export const useFinalProject = () => {
     });
   }, [listProjects]);
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const selectedView = searchParams.get("view") || "pending";
+
+  const setView = (view) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("view", view);
+    setSearchParams(params, { replace: true });
+    setProjectPagination({ page: 1, limit: 10 });
+  };
+
   const handlePaginationChange = useCallback((page, pageSize) => {
+    const view = searchParams.get("view") || "pending";
     setProjectPagination({ page, limit: pageSize });
-    fetchProjects(page, pageSize);
-  }, [fetchProjects, setProjectPagination]);
+    fetchProjects(page, pageSize, view);
+  }, [fetchProjects, setProjectPagination, searchParams]);
 
   const projectsInfo = useMemo(() =>
     getProjectsInfo()
@@ -330,6 +344,9 @@ export const useFinalProject = () => {
     createProject,
     createLoading,
     latestSubmission,
-    getLatestSubmission
+    getLatestSubmission,
+    setView,
+    selectedView,
+    projectFetchLoading
   };
 };

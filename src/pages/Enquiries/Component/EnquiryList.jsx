@@ -112,7 +112,7 @@ function EnquiryList() {
       dataIndex: "createdAt",
       render: (_, row) => {
         const finalDate =
-          row?.stage === "Demo"
+          (row?.stage === "Demo" && selectedView === "Demo")
             ? row?.demoSlot?.scheduledAt
             : row?.createdAt;
 
@@ -136,7 +136,7 @@ function EnquiryList() {
         options={["Dashboard","All", "New", "Demo", "Enrolled", "Closed"]}
         className="w-fit"
         value={selectedView}
-        onChange={(view) => { updateURL(currentPage, view) }}
+        onChange={(view) => { updateURL(1, view) }}
       />
 
       {selectedView === 'Dashboard' ?
