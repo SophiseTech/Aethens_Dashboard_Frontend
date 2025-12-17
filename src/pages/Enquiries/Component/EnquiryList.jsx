@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Segmented, Table } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import enquiryStore from "@stores/EnquiryStore";
@@ -14,7 +14,6 @@ function EnquiryList() {
     loading,
     getEnquiries,
     total,
-    searchResults,
     searchQuery,
     searchTotal,
     search,
