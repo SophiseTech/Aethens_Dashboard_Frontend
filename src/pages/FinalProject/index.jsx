@@ -8,7 +8,8 @@ export const statusConfig = {
   'not_started': { color: 'default', icon: <InfoCircleOutlined />, text: 'Not Started' },
   'under_review': { color: 'processing', icon: <ClockCircleOutlined />, text: 'Under Review' },
   'approved': { color: 'success', icon: <CheckCircleOutlined />, text: 'Approved' },
-  'rejected': { color: 'error', icon: <CloseCircleOutlined />, text: 'Rejected' }
+  'rejected': { color: 'error', icon: <CloseCircleOutlined />, text: 'Rejected' },
+  'no_phases': { color: 'warning', icon: <InfoCircleOutlined />, text: 'No Phases' },
 };
 
 // Status Configuration
@@ -17,6 +18,7 @@ export const projectStatusConfig = {
   'active': { color: 'processing', icon: <ClockCircleOutlined className="text-blue-500" />, text: 'Active' },
   'completed': { color: 'success', icon: <CheckCircleOutlined className="text-green-500" />, text: 'Completed' },
   'archived': { color: 'warning', icon: <ClockCircleOutlined className="text-orange-500" />, text: 'Archived' },
+  'no_phases': { color: 'red', icon: <InfoCircleOutlined />, text: 'No Phases' },
 };
 
 export default function FinalProjectPage() {

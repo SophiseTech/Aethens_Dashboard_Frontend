@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Segmented, Table } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import enquiryStore from "@stores/EnquiryStore";
@@ -14,7 +14,6 @@ function EnquiryList() {
     loading,
     getEnquiries,
     total,
-    searchResults,
     searchQuery,
     searchTotal,
     search,
@@ -112,7 +111,7 @@ function EnquiryList() {
       dataIndex: "createdAt",
       render: (_, row) => {
         const finalDate =
-          row?.stage === "Demo"
+          (row?.stage === "Demo" && selectedView === "Demo")
             ? row?.demoSlot?.scheduledAt
             : row?.createdAt;
 
@@ -136,7 +135,7 @@ function EnquiryList() {
         options={["Dashboard","All", "New", "Demo", "Enrolled", "Closed"]}
         className="w-fit"
         value={selectedView}
-        onChange={(view) => { updateURL(currentPage, view) }}
+        onChange={(view) => { updateURL(1, view) }}
       />
 
       {selectedView === 'Dashboard' ?
