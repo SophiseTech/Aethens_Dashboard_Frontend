@@ -1,3 +1,5 @@
+import centersStore from "@stores/CentersStore"
+import userStore from "@stores/UserStore"
 import handleError from "@utils/handleError"
 import { get, post } from "@utils/Requests"
 
@@ -42,7 +44,16 @@ class SessionService {
 
   async getAllSessions(userId) {
     try {
-      const response = await get("/sessions/getAll")
+      const { user } = userStore.getState();
+      const {selectedCenter} = centersStore.getState();
+
+      let constructedPath;
+      if(user.role === 'admin' && selectedCenter){
+        constructedPath = `/sessions/getAll?centerId=${selectedCenter}`;
+      }else{
+        constructedPath = `/sessions/getAll?`;
+      }
+      const response = await get(constructedPath);
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {

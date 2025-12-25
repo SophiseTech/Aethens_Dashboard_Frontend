@@ -31,7 +31,7 @@ const MENU_CONFIG = [
     label: "Dashboard",
     icon: AppstoreOutlined,
     path: "/",
-    roles: [ROLES.STUDENT, ROLES.MANAGER],
+    roles: [ROLES.STUDENT, ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Students",
@@ -43,13 +43,13 @@ const MENU_CONFIG = [
     label: "Enquiries",
     icon: MessageOutlined,
     path: "/manager/enquiries",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Enquiry Slots",
     icon: MessageOutlined,
     path: "/manager/enquiry-slots",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Materials",
@@ -73,19 +73,19 @@ const MENU_CONFIG = [
     label: "Students",
     icon: SolutionOutlined,
     path: "/manager/students",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Wallets",
     icon: WalletOutlined,
     path: "/manager/wallets",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Bills",
     icon: DollarOutlined,
     path: "/manager/bills",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Bills",
@@ -97,13 +97,13 @@ const MENU_CONFIG = [
     label: "Inventory",
     icon: ShopOutlined,
     path: "/manager/inventory",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Payslips",
     icon: MoneyCollectOutlined,
     path: "/manager/payslips",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Courses",
@@ -121,7 +121,7 @@ const MENU_CONFIG = [
     label: "FDP",
     icon: FundProjectionScreenOutlined,
     path: "/manager/faculty-development-program",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "FDP",
@@ -139,13 +139,13 @@ const MENU_CONFIG = [
     label: "Gallery",
     icon: PictureOutlined,
     path: "/gallery",
-    roles: [ROLES.MANAGER, ROLES.FACULTY],
+    roles: [ROLES.MANAGER, ROLES.FACULTY, ROLES.ADMIN],
   },
   {
     label: "Slots",
     icon: ClockCircleOutlined,
     path: "/manager/slots",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Slots",
@@ -163,7 +163,7 @@ const MENU_CONFIG = [
     label: "Announcements",
     icon: ClockCircleOutlined,
     path: "/manager/announcements",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Announcements",
@@ -181,7 +181,7 @@ const MENU_CONFIG = [
     label: "Final Project",
     icon: ClockCircleOutlined,
     path: "/manager/final-project",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
 ];
 

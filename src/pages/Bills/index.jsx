@@ -1,9 +1,11 @@
+import centersService from '@/services/Centers'
 import courseService from '@/services/Course'
 import inventoryService from '@/services/Inventory'
 import Title from '@components/layouts/Title'
 import BillsLayot from '@pages/Bills/Components/BillsLayot'
 import GenerateBillButton from '@pages/Bills/Components/GenerateBillButton'
 import billStore from '@stores/BillStore'
+import centersStore from '@stores/CentersStore'
 import courseStore from '@stores/CourseStore'
 import inventoryStore from '@stores/InventoryStore'
 import studentStore from '@stores/StudentStore'
@@ -24,6 +26,7 @@ function Bills() {
   const [searchParams, setSearchParams] = useSearchParams();
   const student_id = searchParams.get("student_id")
   const { user } = useStore(userStore)
+  const {selectedCenter} = useStore(centersStore);
   const { courses, getCourses, total: courseTotal } = useStore(courseStore)
   const [lineItems, setLineItems] = useState([])
   const urlStatus = searchParams.get("status")
@@ -32,7 +35,7 @@ function Bills() {
   useEffect(() => {
     console.log(stateFilters?.query?.generated_for != student_id, stateFilters?.query?.generated_for, student_id);
 
-    if (!bills || stateFilters?.query?.generated_for != student_id || bills.length <= 0) {
+    if (!bills || stateFilters?.query?.generated_for != student_id || bills.length <= 0 || user.role === 'admin') {
       let filters = _.cloneDeep(stateFilters);
       filters.query = filters.query || {};
 
@@ -51,8 +54,9 @@ function Bills() {
 
       // filters = { ...filters, query: { ...filters.query, ...stateFilters.query } }
       fetchBills(10, filters)
+
     }
-  }, [student_id, urlStatus])
+  }, [student_id, urlStatus,selectedCenter])
 
   const fetchBills = (limit = 10, filters = {}) => {
     getBills(limit, {

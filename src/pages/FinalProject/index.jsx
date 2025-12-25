@@ -27,7 +27,7 @@ export default function FinalProjectPage() {
   let LazyComponent = null;
   if (user.role === "student") {
     LazyComponent = React.lazy(() => import("@pages/FinalProject/Components/FinalProjectStudentView"));
-  } else if (user.role === "manager") {
+  } else if (user.role === "manager" || user.role === 'admin') {
     LazyComponent = React.lazy(() => import("@pages/FinalProject/Components/FinalProjectManagerView"));
   }
 

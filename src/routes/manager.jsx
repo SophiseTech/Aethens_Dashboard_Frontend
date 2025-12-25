@@ -44,7 +44,7 @@ export const LazyLoader = ({ element }) => {
 
 export const managerRoutes = [
   {
-    element: <Protected roles={[ROLES.MANAGER]} />,
+    element: <Protected roles={[ROLES.MANAGER, ROLES.ADMIN]} />,
     children: [
       {
         element: <SidebarLayout />,

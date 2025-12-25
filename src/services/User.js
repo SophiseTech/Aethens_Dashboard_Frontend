@@ -26,9 +26,9 @@ class UserService {
     }
   }
 
-  async getCurrentSessionAttendees() {
+  async getCurrentSessionAttendees(centerId) {
     try {
-      const response = await post(`/user/getCurrentSessionAttendees`,)
+      const response = !centerId ? await post(`/user/getCurrentSessionAttendees`,) : await post(`/user/getCurrentSessionAttendees`,{centerId})
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {

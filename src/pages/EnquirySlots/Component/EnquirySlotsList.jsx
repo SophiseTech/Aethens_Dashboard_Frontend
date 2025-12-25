@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Segmented, Table } from "antd";
 import EnquiryDetailsDrawer from "@pages/Enquiries/Component/EnquiryDetailsDrawer";
 import enquiryStore from "@stores/EnquiryStore";
+import userStore from "@stores/UserStore";
+import centersStore from "@stores/CentersStore";
 
 function EnquirySlotsList() {
   const {
@@ -13,9 +15,15 @@ function EnquirySlotsList() {
   const [selectedView, setSelectedView] = useState("Scheduled");
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
+  const {user} = userStore();
+  const {selectedCenter} = centersStore();
 
   useEffect(() => {
-    getDemoSlots();     // fetch once when component loads
+    if(user.role === 'admin' && selectedCenter){
+      getDemoSlots(selectedCenter);
+    }else{
+      getDemoSlots();     // fetch once when component loads
+    }
   }, []);
 
   const handleRowClick = (record) => {

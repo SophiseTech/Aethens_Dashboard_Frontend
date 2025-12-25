@@ -1,10 +1,13 @@
 import handleError from "@utils/handleError"
 import { del, get, post, put } from "@utils/Requests"
+import centersStore from "@stores/CentersStore";
+import userStore from "@stores/UserStore";
 
 class BillServices {
   async getBills(filters = {}, lastRefKey = 0, limit = 10) {
     try {
-      const response = await post(`/bills/getBills?lastRef=${lastRefKey}&limit=${limit}`, { filters })
+      const {selectedCenter} = centersStore.getState();
+      const response = await post(`/bills/getBills?lastRef=${lastRefKey}&limit=${limit}&centerId=${selectedCenter}`, { filters })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {

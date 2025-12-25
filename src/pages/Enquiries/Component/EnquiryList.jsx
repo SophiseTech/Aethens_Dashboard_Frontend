@@ -7,6 +7,8 @@ import ViewWiseFilters from './ViewWiseFilters'
 import { formatDate } from "@utils/helper";
 import Chip from "@components/Chips/Chip";
 import EnquiryDashboard from "@pages/Enquiries/Component/EnquiryDashboard";
+import userStore from "@stores/UserStore";
+import centersStore from "@stores/CentersStore";
 
 function EnquiryList() {
   const {
@@ -18,6 +20,8 @@ function EnquiryList() {
     searchTotal,
     search,
   } = enquiryStore();
+  const { user } = userStore();
+  const { selectedCenter } = centersStore();
 
   const nav = useNavigate();
   const location = useLocation();
@@ -35,7 +39,11 @@ function EnquiryList() {
     if (searchQuery) {
       search(10, { searchQuery }, currentPage);
     } else {
-      getEnquiries(10, currentPage, { stage: selectedView });
+      if(user.role === 'admin' && selectedCenter !== null){
+        getEnquiries(10, currentPage, { stage: selectedView,centerId: selectedCenter });
+      }else{
+        getEnquiries(10, currentPage, { stage: selectedView });
+      }
     }
   }, [searchQuery, getEnquiries, search, currentPage, selectedView]);
 

@@ -38,7 +38,6 @@ function StudentList() {
 
   useEffect(() => {
     fetchStudents();
-    console.log(students);
   }, [selectedView, currentPage, searchQuery]);
 
   const fetchStudents = () => {

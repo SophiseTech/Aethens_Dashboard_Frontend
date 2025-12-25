@@ -2,6 +2,7 @@ import Title from '@components/layouts/Title'
 import AddInventoryItem from '@pages/Inventory/Components/AddInventoryItem';
 import RaiseRequest from '@pages/Inventory/Components/RaiseRequest';
 import RequestList from '@pages/Inventory/Components/RequestList';
+import centersStore from '@stores/CentersStore';
 import inventoryStore from '@stores/InventoryStore'
 import requestsStore from '@stores/RequestsStore';
 import userStore from '@stores/UserStore';
@@ -15,6 +16,7 @@ function Inventory() {
 
   const { getItems, items, getInventory, inventory } = inventoryStore()
   const { user } = userStore()
+  const { selectedCenter } = centersStore()
   const [drawerState, setDrawerState] = useState(false);
   const { requests, getRequests, approveRequest, rejectRequest, loading } = requestsStore()
 
@@ -25,7 +27,8 @@ function Inventory() {
     //   })
     // }
     if (_.isEmpty(inventory)) {
-      getInventory({ query: { center_id: user.center_id } })
+      const centerId = (user.role === 'admin' && selectedCenter) ? selectedCenter : user.center_id;
+      getInventory({ query: { center_id: centerId } })
     }
   }, [])
 
