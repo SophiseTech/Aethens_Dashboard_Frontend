@@ -63,7 +63,16 @@ class SessionService {
 
   async getStudentsBySessionId(sessionId) {
     try {
-      const response = await post("/sessions/getStudentsBySessionId", { sessionId })
+      const { user } = userStore.getState();
+      const {selectedCenter} = centersStore.getState();
+
+      let constructedPath;
+      if(user.role === 'admin' && selectedCenter){
+        constructedPath = `/sessions/getStudentsBySessionId?centerId=${selectedCenter}`;
+      }else{
+        constructedPath = `/sessions/getStudentsBySessionId`;
+      }
+      const response = await post(constructedPath, { sessionId })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {

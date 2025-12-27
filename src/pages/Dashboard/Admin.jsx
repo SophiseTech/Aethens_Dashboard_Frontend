@@ -14,17 +14,16 @@ import _ from "lodash";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useStore } from "zustand";
+import AdminCenterSelector from "@components/AdminCenterSelector";
 
 function Admin() {
   const [dateRange, setDateRange] = useState(getMonthRange(new Date()));
   const { getSummary, summary } = useStore(userStore);
   const { getSummary: getBillsSummary, summary: billSummary } = useStore(billStore);
   const { getSummary: getPayslipSummary, summary: payslipummary } = useStore(payslipStore);
-  const { Option } = Select;
-  const { centers, getCenters,selectedCenter,setSelectedCenter } = useStore(centerStore);
+  const { selectedCenter } = useStore(centerStore);
 
   useEffect(() => {
-    getCenters();
     const { firstDay, lastDay } = dateRange;
     getSummary({
       query: {
@@ -71,32 +70,14 @@ function Admin() {
     }
   };
 
-  const handleCenterChange = (center_id)=>{
-    setSelectedCenter(center_id);
-  }
+  
 
   return (
     <Flex vertical gap={20}>
-      <Row justify="space-between">
         <DatePicker.RangePicker
           onChange={handleDateChange}
           className="w-1/2 border-primary text-primary"
         />
-
-        <Select
-          value={selectedCenter}
-          onChange={handleCenterChange}
-          className="w-1/3"
-          placeholder="Select Center"
-          allowClear={false}
-        >
-          {centers?.map((center) => (
-            <Option key={center._id} value={center._id}>
-              {center.center_name}
-            </Option>
-          ))}
-        </Select>
-      </Row>
       <Row gutter={[20, 20]}>
         <Col xxl={{ span: 6 }} span={12}>
           <StudentCounts />

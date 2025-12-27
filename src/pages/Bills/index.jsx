@@ -47,6 +47,10 @@ function Bills() {
         delete filters.query.generated_for
       }
 
+      if(user.role === ROLES.ADMIN){
+        filters.query.center_id = selectedCenter;
+      }
+
       if( urlStatus && ['paid', 'unpaid'].includes(urlStatus)) {
         filters.query.status = urlStatus
       }

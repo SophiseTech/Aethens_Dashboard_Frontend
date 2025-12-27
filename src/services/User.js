@@ -4,10 +4,10 @@ import { post, put } from "@utils/Requests"
 class UserService {
   async getByRoleByCenter(role, centerId, lastRefKey = 0, limit = 10) {
     try {
-      if (!role || !centerId) throw new Error("Bad Data")
+      if (!role) throw new Error("Bad Data")
       const response = await post(`/user/getByRoleByCenter?lastRefKey=${lastRefKey}&limit=${limit}`, {
         role: role,
-        centerId: centerId
+        centerId: centerId === null ? 'all' : centerId
       })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data

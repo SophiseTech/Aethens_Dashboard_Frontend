@@ -14,7 +14,7 @@ const InventoryList = lazy(() => import('@pages/Inventory/Components/InventoryLi
 
 function Inventory() {
 
-  const { getItems, items, getInventory, inventory } = inventoryStore()
+  const { getInventory, inventory } = inventoryStore()
   const { user } = userStore()
   const { selectedCenter } = centersStore()
   const [drawerState, setDrawerState] = useState(false);
@@ -30,7 +30,7 @@ function Inventory() {
       const centerId = (user.role === 'admin' && selectedCenter) ? selectedCenter : user.center_id;
       getInventory({ query: { center_id: centerId } })
     }
-  }, [])
+  }, [selectedCenter])
 
   const loadRequests = () => {
     if (!requests || requests.length <= 0) {

@@ -10,11 +10,8 @@ const centersStore = create((set, get) => ({
   createLoading: false,
   lastRefKey: 0,
   total: 0,
-  selectedCenter: null,
+  selectedCenter: "all",
   setSelectedCenter: (center_id) => {
-    if(center_id === null){
-      return;
-    }
     set({ selectedCenter: center_id});
   },
   getCenters: async (limit = 2, filters = {}) => {

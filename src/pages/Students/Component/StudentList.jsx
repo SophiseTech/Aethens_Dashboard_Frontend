@@ -7,6 +7,8 @@ import studentStore from "@stores/StudentStore";
 import { ROLES } from "@utils/constants";
 import UserDetailsDrawer from "@components/UserDetailsDrawer";
 import { render } from "@react-pdf/renderer";
+import { useStore } from "zustand";
+import centersStore from "@stores/CentersStore";
 
 function StudentList() {
   const {
@@ -25,6 +27,7 @@ function StudentList() {
   const nav = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
+  const {selectedCenter} = useStore(centersStore);
 
   // Get initial view and page from query parameters
   const initialView = queryParams.get("view") || "Current Students"; // Default to 'Current Students' if no query param
@@ -38,7 +41,7 @@ function StudentList() {
 
   useEffect(() => {
     fetchStudents();
-  }, [selectedView, currentPage, searchQuery]);
+  }, [selectedView, currentPage, searchQuery, selectedCenter]);
 
   const fetchStudents = () => {
     if (selectedView === "All Students") {

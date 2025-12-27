@@ -6,8 +6,7 @@ import userStore from "@stores/UserStore";
 class BillServices {
   async getBills(filters = {}, lastRefKey = 0, limit = 10) {
     try {
-      const {selectedCenter} = centersStore.getState();
-      const response = await post(`/bills/getBills?lastRef=${lastRefKey}&limit=${limit}&centerId=${selectedCenter}`, { filters })
+      const response = await post(`/bills/getBills?lastRef=${lastRefKey}&limit=${limit}`, { filters })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {
