@@ -115,7 +115,7 @@ function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = (
         title: col.title,
         name: name,
         index,
-        options,
+        options: col.options,
         onSelect,
         onSearch: col.onSearch,
         selectAfter: col.selectAfter,
@@ -198,7 +198,7 @@ const EditableCell = ({
       }
     }, 300);
   }, [onSearch, index]);
-
+  
   const inputNode = inputType === 'number' ?
     <InputNumber />
     : inputType === "autocomplete" ?
@@ -218,6 +218,11 @@ const EditableCell = ({
         ))}
       </Select>
       : inputType === "percentage" ? <Input addonAfter={selectAfter(index)} />
+      : inputType === "select" ?
+      <Select
+        options={options}
+      >
+      </Select>
         : <Input />;
 
   return (

@@ -77,7 +77,7 @@ function Bills() {
     }
     if (itemType === "course") {
       const { courses } = await courseService.getCourses({}, 0, 0)
-      setLineItems([...courses?.map(course => ({ name: course.course_name, _id: course._id, type: "course", rate: course.rate, discount: 0, taxes: 0 })), { name: "Registration Fee", _id: "67c00eb2073609b23054ca01", type: "course", rate: 3500, discount: 0, taxes: 0 }])
+      setLineItems([...courses?.map(course => ({ name: course.course_name, _id: course._id, type: "course", rate: course.rate, discount: 0, taxes: 18 })), { name: "Registration Fee", _id: "67c00eb2073609b23054ca01", type: "course", rate: 3500, discount: 0, taxes: 18 }])
     }
     if (itemType === "gallery") {
       const { items } = await inventoryService.getInventoryItems(0, 10, { query: { type: "gallery" } })
