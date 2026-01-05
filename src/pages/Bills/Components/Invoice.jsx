@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
   },
   companyAddress: {
     fontSize: 9,
+    margintop: 4,
   },
   invoiceTitle: {
     fontSize: 20,
@@ -89,13 +90,19 @@ const styles = StyleSheet.create({
   col3: { width: '15%' },
   col4: { width: '15%' },
   col5: { width: '20%', textAlign: 'right' },
+  summaryContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    display: 'flex',
+    alignItems: 'flex-start',
+    marginTop: 12,
+  },
   summaryBox: {
     border: '1px solid #D1D5DB',
-    marginTop: 12,
     padding: 8,
     borderRadius: 4,
     backgroundColor: '#F3F4F6',
-    alignSelf: 'flex-end',
+    // alignSelf: 'flex-end',
     width: '40%',
   },
   summaryRow: {
@@ -150,6 +157,17 @@ const InvoicePdf = ({ bill }) => {
     return [firstChunk, ...otherChunks];
   };
 
+  const getDiscountSymbol = (type) => {
+    switch (type) {
+      case 'percentage':
+        return '%';
+      case 'amount':
+        return '';
+      default:
+        return '';
+    }
+  }
+  const year = new Date().getFullYear().toString().slice(-2);
 
   return (
     <Document>
@@ -161,17 +179,18 @@ const InvoicePdf = ({ bill }) => {
               <View style={styles.headerContainer}>
                 <View style={styles.row}>
                   <View>
-                    <Text style={styles.companyName}>School of Athens</Text>
-                    <Text style={styles.companyAddress}>177, A Block, AECS Layout</Text>
-                    <Text style={styles.companyAddress}>Brookfields, Bangalore</Text>
-                    <Text style={styles.companyAddress}>Karnataka 560037</Text>
+                    <Text style={styles.companyName}>SCHOOLOFATHENS LLP</Text>
+                    <Text style={styles.companyAddress}>2nd Floor, 238/242/11/3A/11/3</Text>
+                    <Text style={styles.companyAddress}>ELV Amoris main road</Text>
+                    <Text style={styles.companyAddress}>Whitefield, Bengaluru, 560066</Text>
+                    <Text style={[styles.companyAddress, styles.fontBold]}>GSTIN: 29AFBFS0754B1Z8</Text>
                   </View>
-                  <Text style={styles.invoiceTitle}>INVOICE</Text>
+                  <Text style={styles.invoiceTitle}>TAX INVOICE</Text>
                 </View>
               </View>
 
               <View style={styles.row}>
-                <Text>Invoice #: {bill?.invoiceNo}</Text>
+                <Text style={[styles.fontBold]}>Invoice: SOA{bill?.invoiceNo}/{year}</Text>
                 <Text>Date: {dayjs(bill?.generated_on).format("DD/MM/YYYY")}</Text>
               </View>
 
@@ -197,7 +216,8 @@ const InvoicePdf = ({ bill }) => {
               <Text style={[styles.col, styles.col4]}>Rate</Text>
               <Text style={[styles.col, styles.col4]}>Discount</Text>
               <Text style={[styles.col, styles.col4]}>Tax Rate</Text>
-              <Text style={[styles.col, styles.col4]}>Tax Amount</Text>
+              <Text style={[styles.col, styles.col4]}>SGST</Text>
+              <Text style={[styles.col, styles.col4]}>CGST</Text>
               <Text style={[styles.col, styles.col5]}>Amount</Text>
             </View>
 
@@ -209,9 +229,10 @@ const InvoicePdf = ({ bill }) => {
                   <Text style={[styles.col, styles.col2]}>{item.name}</Text>
                   <Text style={[styles.col, styles.col3]}>{item.qty}</Text>
                   <Text style={[styles.col, styles.col4]}>{item.rate}</Text>
-                  <Text style={[styles.col, styles.col4]}>{item.discount}</Text>
-                  <Text style={[styles.col, styles.col4]}>{item.taxes}</Text>
-                  <Text style={[styles.col, styles.col4]}>{item.taxAmnt}</Text>
+                  <Text style={[styles.col, styles.col4]}>{item.discount}{getDiscountSymbol(item.discountType)}</Text>
+                  <Text style={[styles.col, styles.col4]}>{item.taxes}%</Text>
+                  <Text style={[styles.col, styles.col4]}>{((Number(item.taxAmnt) || 0) / 2).toFixed(2)}</Text>
+                  <Text style={[styles.col, styles.col4]}>{((Number(item.taxAmnt) || 0) / 2).toFixed(2)}</Text>
                   <Text style={[styles.col, styles.col5]}>{item.subtotal?.toFixed(2)}</Text>
                 </View>
               );
@@ -221,29 +242,45 @@ const InvoicePdf = ({ bill }) => {
           {/* Totals & Signature only on last page */}
           {pageIndex === getChunks(items, ITEMS_FIRST_PAGE, ITEMS_PER_PAGE).length - 1 && (
             <>
-              <View style={styles.summaryBox}>
-                <View style={styles.summaryRow}>
-                  <Text>Gross Total:</Text>
-                  <Text>(-) {undiscountedTotal.toFixed(2)}</Text>
+              <View style={[styles.summaryContainer]}>
+                <View style={styles.summaryBox}>
+                  <View style={styles.summaryRow}>
+                    <Text>SGST:</Text>
+                    <Text>{(tax / 2).toFixed(2)}</Text>
+                  </View>
+                  <View style={styles.summaryRow}>
+                    <Text>CGST:</Text>
+                    <Text>{(tax / 2).toFixed(2)}</Text>
+                  </View>
+                  <View style={[styles.summaryRow, styles.summaryGrandTotal]}>
+                    <Text>Total Tax:</Text>
+                    <Text>{tax.toFixed(2)}</Text>
+                  </View>
                 </View>
-                <View style={styles.summaryRow}>
-                  <Text>Discount:</Text>
-                  <Text>(-) {discount.toFixed(2)}</Text>
+                <View style={styles.summaryBox}>
+                  <View style={styles.summaryRow}>
+                    <Text>Gross Total:</Text>
+                    <Text>(-) {undiscountedTotal.toFixed(2)}</Text>
+                  </View>
+                  <View style={styles.summaryRow}>
+                    <Text>Discount:</Text>
+                    <Text>(-) {discount.toFixed(2)}</Text>
+                  </View>
+                  <View style={styles.summaryRow}>
+                    <Text>Sub Total:</Text>
+                    <Text>{subtotal.toFixed(2)}</Text>
+                  </View>
+                  <View style={styles.summaryRow}>
+                    <Text>Tax:</Text>
+                    <Text>{tax.toFixed(2)}</Text>
+                  </View>
+                  <View style={[styles.summaryRow, styles.summaryGrandTotal]}>
+                    <Text>Grand Total:</Text>
+                    <Text>{total.toFixed(2)}</Text>
+                  </View>
                 </View>
-                <View style={styles.summaryRow}>
-                  <Text>Sub Total:</Text>
-                  <Text>{subtotal.toFixed(2)}</Text>
-                </View>
-                <View style={styles.summaryRow}>
-                  <Text>Tax:</Text>
-                  <Text>{tax.toFixed(2)}</Text>
-                </View>
-                <View style={[styles.summaryRow, styles.summaryGrandTotal]}>
-                  <Text>Grand Total:</Text>
-                  <Text>{total.toFixed(2)}</Text>
-                </View>
-              </View>
 
+              </View>
               <Text style={styles.signature}>Authorized Signature</Text>
             </>
           )}

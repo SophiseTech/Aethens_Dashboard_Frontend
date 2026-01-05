@@ -19,7 +19,8 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
       type: "autocomplete",
       render: (value, record) => record.itemName,
       onSearch: (value) => { onSearch(value, itemType) },
-      itemType: itemType
+      itemType: itemType,
+      options: itemsOptions,
     },
     {
       title: 'Quantity',
@@ -73,6 +74,18 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
 
     },
     {
+      title: 'Tax Mode',
+      dataIndex: 'taxMode',
+      editable: true,
+      width: '8%',
+      defaultValue: 'exclusive',
+      type: "select",
+      options: [
+        { label: 'Exclusive', value: 'exclusive' },
+        { label: 'Inclusive', value: 'inclusive' },
+      ]
+    },
+    {
       title: 'Tax Amnt',
       dataIndex: 'taxAmnt',
       editable: false,
@@ -103,7 +116,8 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
         itemName: option.label,
         rate: item.rate,
         taxes: item.taxes,
-        discount: item.discount
+        discount: item.discount,
+        taxMode: row.taxMode || 'exclusive'
       })
       setSelectedItem({
         ...selectedItem,
@@ -119,13 +133,36 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
 
     const updatedFields = itemsFields?.map((field, index) => {
       if (selectedItem[index] && field.qty) {
+        const taxMode = field.taxMode || 'exclusive'
+        const unitAfterDiscount = Number(getDiscount(field.discount, field.rate, discountType[index]))
+        const qty = Number(field.qty)
+        let undiscountedTotal = Number((Number(field.rate) * qty).toFixed(2))
+        let subtotal = 0
+        let taxAmnt = 0
+        let total = 0
+
+        if (taxMode === 'exclusive') {
+          // rate is exclusive of tax
+          subtotal = Number((unitAfterDiscount * qty).toFixed(2))
+          taxAmnt = Number((subtotal * (Number(field.taxes || 0) / 100)).toFixed(2))
+          total = Number((subtotal + taxAmnt).toFixed(2))
+        } else {
+          // tax inclusive: rate includes tax; extract tax portion
+          const taxRate = Number(field.taxes || 0)
+          const unitExTax = taxRate === 0 ? unitAfterDiscount : Number((unitAfterDiscount / (1 + (taxRate / 100))).toFixed(6))
+          console.log(unitExTax)
+          subtotal = Number((unitExTax * qty).toFixed(2))
+          taxAmnt = Number(( (unitAfterDiscount * qty) - subtotal ).toFixed(2))
+          total = Number((unitAfterDiscount * qty).toFixed(2))
+        }
+
         const updateObj = {
           ...field,
           discountType: discountType[index],
-          undiscountedTotal: Number((Number(field.rate) * Number(field.qty)).toFixed(2)),
-          subtotal: (getDiscount(field.discount, field.rate, discountType[index])) * Number(field.qty),
-          taxAmnt: Number((Number(field.subtotal) * (Number(field.taxes) / 100)).toFixed(2)),
-          total: Number(field.subtotal) + Number(field.taxAmnt)
+          undiscountedTotal,
+          subtotal,
+          taxAmnt,
+          total
         }
         return updateObj
       } else {
