@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Drawer,
   Card,
@@ -25,6 +25,7 @@ import { useStore } from "zustand";
 import { ROLES } from "@utils/constants";
 import DrawerActionButtons from "@components/DrawerActionButtons";
 import userStore from "@stores/UserStore";
+import PropTypes from "prop-types";
 
 const { Title, Text } = Typography;
 
@@ -32,7 +33,6 @@ const UserDetailsDrawer = ({
   user,
   visible,
   onClose,
-  showActions = false,
   isStudentDetail = false,
 }) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -247,6 +247,22 @@ const UserDetailsDrawer = ({
       )}
     </>
   );
+};
+
+UserDetailsDrawer.propTypes = {
+  user: PropTypes.object,
+  visible: PropTypes.bool,
+  onClose: PropTypes.func,
+  showActions: PropTypes.bool,
+  isStudentDetail: PropTypes.bool,
+};
+
+UserDetailsDrawer.defaultProps = {
+  user: {},
+  visible: false,
+  onClose: () => {},
+  showActions: false,
+  isStudentDetail: false,
 };
 
 export default UserDetailsDrawer;
