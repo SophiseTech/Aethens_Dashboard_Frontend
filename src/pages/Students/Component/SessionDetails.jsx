@@ -1,4 +1,4 @@
-import { Button, Modal, Table, Select, Space, Typography, Card, Flex, Tag, message, Empty, Popconfirm } from 'antd';
+import { Button, Modal, Table, DatePicker, Space, Typography, Card, Flex, Tag, message, Empty, Popconfirm } from 'antd';
 import studentStore from '@stores/StudentStore';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
@@ -10,7 +10,7 @@ import { render } from 'react-dom';
 const { Text, Title } = Typography;
 
 function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
-  const [selectedMonth, setSelectedMonth] = useState(dayjs().month());
+  const [selectedMonth, setSelectedMonth] = useState(dayjs().startOf('month'));
   const [slots, setSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [loadingSessions, setLoadingSessions] = useState(false);
@@ -43,17 +43,25 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
   const handleCancel = () => {
     setIsModalOpen(false);
     setSlots([]);
-    setSelectedMonth(dayjs().month());
+    setSelectedMonth(dayjs().startOf('month'));
   };
 
   const fetchSlots = async () => {
     try {
       setLoadingSlots(true);
+
+      // Support both legacy numeric month (0-11) and new dayjs month object
+      const isNumberMonth = typeof selectedMonth === 'number';
+      const monthDayjs = isNumberMonth ? dayjs().month(selectedMonth) : selectedMonth;
+
+      const start = (monthDayjs && monthDayjs.startOf ? monthDayjs.startOf('month') : dayjs().startOf('month')).toDate();
+      const end = (monthDayjs && monthDayjs.endOf ? monthDayjs.endOf('month') : dayjs().endOf('month')).toDate();
+
       const response = await slotService.getSlots({
         query: {
           start_date: {
-            $gte: dayjs().month(selectedMonth).startOf('month').toDate(),
-            $lte: dayjs().month(selectedMonth).endOf('month').toDate()
+            $gte: start,
+            $lte: end
           },
           booked_student_id: student._id,
           course_id: student?.details_id?.course_id?._id || student?.details_id?.course_id,
@@ -112,10 +120,7 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
     }
   };
 
-  const monthOptions = Array.from({ length: 12 }, (_, i) => ({
-    label: dayjs().month(i).format('MMMM YYYY'),
-    value: i
-  }));
+
 
   const getStatusTag = (status) => {
     const statusMap = {
@@ -311,12 +316,13 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
 
         <Flex justify="space-between" align="center">
           <Space size="middle" align="center">
-            <Select
+            <DatePicker
+              picker="month"
               style={{ width: 200 }}
               value={selectedMonth}
-              onChange={setSelectedMonth}
-              options={monthOptions}
+              onChange={(date) => setSelectedMonth(date)}
               disabled={loadingSlots}
+              format="MMMM YYYY"
             />
             <Button
               onClick={fetchSlots}
