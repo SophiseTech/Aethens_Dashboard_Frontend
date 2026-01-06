@@ -103,7 +103,7 @@ export const sessionSlotOptionRenderer = (option, user) => {
 
   const { data: session } = option.data;
   if (!session) return null;
-  const { remainingSlots } = session
+  const { remainingSlots, additionalBookings } = session
 
   const weekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][session.weekDay];
   const time = dayjs(session.start_time).format('h:mm A');
@@ -126,7 +126,7 @@ export const sessionSlotOptionRenderer = (option, user) => {
           {time}
         </p>
       </div>
-      <div>
+      <div className='flex gap-2'>
         <Tag
           color={slotColor}
           style={{
@@ -136,6 +136,16 @@ export const sessionSlotOptionRenderer = (option, user) => {
           }}
         >
           {remainingSlots} slot{remainingSlots !== 1 ? 's' : ''} left
+        </Tag>
+        <Tag
+          color='gold'
+          style={{
+            fontWeight: 600,
+            borderRadius: 4,
+            marginRight: 0
+          }}
+        >
+          + {additionalBookings}
         </Tag>
       </div>
     </Flex>
