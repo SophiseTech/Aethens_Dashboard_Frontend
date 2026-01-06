@@ -45,13 +45,13 @@ function EnquiryList() {
         getEnquiries(10, currentPage, { stage: selectedView });
       }
     }
-  }, [searchQuery, getEnquiries, search, currentPage, selectedView]);
+  }, [searchQuery, getEnquiries, search, currentPage, selectedView, selectedCenter]);
 
   useEffect(() => {
     fetchEnquiries();
     // fetchEnquiries depends on searchQuery/currentPage/selectedView
     // include fetchEnquiries to satisfy exhaustive-deps
-  }, [selectedView, currentPage, searchQuery, fetchEnquiries]);
+  }, [selectedView, currentPage, searchQuery, fetchEnquiries, selectedCenter]);
 
   const updateURL = (page, view) => {
     nav(`?page=${page}&view=${view}`, { replace: true });
