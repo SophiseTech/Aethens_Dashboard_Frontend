@@ -7,6 +7,7 @@ import studentStore from "@stores/StudentStore";
 import { ROLES } from "@utils/constants";
 import UserDetailsDrawer from "@components/UserDetailsDrawer";
 import { render } from "@react-pdf/renderer";
+import courseService from "@/services/Course";
 
 function StudentList() {
   const {
@@ -35,11 +36,28 @@ function StudentList() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedView, setSelectedView] = useState(initialView);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [allCourses, setAllCourses] = useState([]);
 
   useEffect(() => {
     fetchStudents();
     console.log(students);
-  }, [selectedView, currentPage, searchQuery]);
+  }, [selectedView, currentPage, searchQuery, selectedCourse]);
+
+  useEffect(() => {
+    // Fetch all courses for filter dropdown
+    const fetchCourses = async () => {
+      try {
+        const response = await courseService.getCourses({}, 0, 100);
+        if (response?.courses) {
+          setAllCourses(response.courses);
+        }
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      }
+    };
+    fetchCourses();
+  }, []);
 
   const fetchStudents = () => {
     if (selectedView === "All Students") {
@@ -50,7 +68,7 @@ function StudentList() {
           currentPage
         );
       } else {
-        getStudentsByCenter(10, currentPage);
+        getStudentsByCenter(10, currentPage, null, selectedCourse);
       }
       setVisitedPages(new Set([1]));
     } else if (selectedView === "Active Students") {
@@ -62,7 +80,7 @@ function StudentList() {
           currentPage
         );
       } else {
-        getStudentsByCenter(10, currentPage, "active");
+        getStudentsByCenter(10, currentPage, "active", selectedCourse);
       }
       setVisitedPages(new Set([1]));
     } else {
@@ -77,14 +95,13 @@ function StudentList() {
 
   const handleSegmentChange = (view) => {
     setSelectedView(view);
-    // setCurrentPage(1); // Reset to page 1 when view changes
+    setSelectedCourse(null); // Clear course filter when view changes
     updateURL(view, 1); // Update URL with new view and reset page to 1
   };
 
   const handlePageChange = (page, pageSize) => {
-    // setCurrentPage(page);
     updateURL(selectedView, page); // Update URL with new page
-    loadMore(page, pageSize); // Fetch data for the new page
+    // Don't call loadMore here - let the onChange handler deal with it
   };
 
   const updateURL = (view, page) => {
@@ -93,19 +110,13 @@ function StudentList() {
   };
 
   const courseFilters = useMemo(() => {
-    const source = searchQuery ? searchResults : students;
-    const set = new Set();
-
-    source.forEach((s) => {
-      const name = s?.details_id?.course?.course_name;
-      if (name) set.add(name);
-    });
-
-    return Array.from(set).map((name) => ({
-      text: name,
-      value: name,
-    }));
-  }, [students, searchResults, searchQuery]);
+    return allCourses
+      .map((course) => ({
+        text: course.course_name,
+        value: course._id,
+      }))
+      .sort((a, b) => a.text.localeCompare(b.text)); // Sort alphabetically by course name
+  }, [allCourses]);
 
   const studentsToDisplay = useMemo(() => {
     if (selectedView === "Current Students") {
@@ -151,9 +162,9 @@ function StudentList() {
     {
       title: "Course",
       dataIndex: ["details_id", "course", "course_name"],
+      key: "course_name",
       filters: courseFilters,
-      onFilter: (value, record) =>
-        record?.details_id?.course?.course_name === value,
+      filteredValue: selectedCourse ? [selectedCourse] : null,
     },
     {
       title: "Email",
@@ -196,7 +207,7 @@ function StudentList() {
           page
         );
       } else {
-        getStudentsByCenter(pageSize, page);
+        getStudentsByCenter(pageSize, page, null, selectedCourse);
       }
       setVisitedPages((prev) => new Set(prev).add(page));
     } else if (selectedView === "Active Students") {
@@ -207,9 +218,27 @@ function StudentList() {
           page
         );
       } else {
-        getStudentsByCenter(pageSize, page, "active");
+        getStudentsByCenter(pageSize, page, "active", selectedCourse);
       }
       setVisitedPages((prev) => new Set(prev).add(page));
+    }
+  };
+
+  const handleTableChange = (pagination, filters, sorter) => {
+    // Handle pagination
+    if (pagination.current !== currentPage) {
+      loadMore(pagination.current, pagination.pageSize);
+    }
+
+    // Handle course filter change
+    const newCourseFilter = filters.course_name && filters.course_name.length > 0 ? filters.course_name[0] : null;
+
+    if (newCourseFilter !== selectedCourse) {
+      setSelectedCourse(newCourseFilter);
+      // Reset to page 1 when filter changes
+      if (newCourseFilter !== selectedCourse) {
+        updateURL(selectedView, 1);
+      }
     }
   };
 
@@ -225,13 +254,14 @@ function StudentList() {
         columns={columns}
         dataSource={studentsToDisplay}
         loading={loading}
+        onChange={handleTableChange}
         pagination={
           selectedView === "All Students" || selectedView === "Active Students"
             ? {
               current: currentPage,
-              onChange: handlePageChange,
               total: searchQuery ? searchTotal : total,
               pageSize: 10,
+              showSizeChanger: false,
             }
             : false
         }

@@ -2,7 +2,7 @@ import handleError from "@utils/handleError"
 import { post, put } from "@utils/Requests"
 
 class UserService {
-  async getByRoleByCenter(role, centerId, lastRefKey = 0, limit = 10, status = null) {
+  async getByRoleByCenter(role, centerId, lastRefKey = 0, limit = 10, status = null, courseId = null) {
     try {
       if (!role || !centerId) throw new Error("Bad Data")
       const payload = {
@@ -13,6 +13,11 @@ class UserService {
       // Add status filter if provided
       if (status) {
         payload.status = status;
+      }
+
+      // Add course filter if provided
+      if (courseId) {
+        payload.course_id = courseId;
       }
 
       const response = await post(`/user/getByRoleByCenter?lastRefKey=${lastRefKey}&limit=${limit}`, payload)
