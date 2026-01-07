@@ -14,51 +14,26 @@ export default function StudentRemarksPage() {
   const { studentId } = useParams();
 
   const [adding, setAdding] = useState(false);
-  const { remarks, loading, page, limit, total, fetchRemarks, addRemark } = useRemarks();
+  const { remarks, loading, page, limit, total, fetchStudentRemarks, addRemark, deleteRemark, student } = useRemarks();
   const modal = useModal();
   const user = useUser()
 
-  // student details
-  const [student, setStudent] = useState(null);
-  const [studentLoading, setStudentLoading] = useState(false);
-
-  useEffect(() => {
-    let mounted = true;
-    const fetchStudent = async () => {
-      if (!studentId) {
-        setStudent(null);
-        return;
-      }
-      try {
-        setStudentLoading(true);
-        // try common user endpoint - be tolerant of different response shapes
-        const res = await get(`/user/getById/${studentId}`);
-        const u = res?.user || res?.data || res;
-        if (mounted) setStudent(u);
-      } catch (err) {
-        // silently ignore - keep UI functional
-        console.warn("Failed to fetch student", err);
-      } finally {
-        if (mounted) setStudentLoading(false);
-      }
-    };
-    fetchStudent();
-    return () => { mounted = false; };
-  }, [studentId]);
 
   useEffect(() => {
     if (studentId) {
-      fetchRemarks(studentId, 1, 10);
+      fetchStudentRemarks(studentId, 1, 10);
     }
-  }, [studentId, fetchRemarks]);
+  }, [studentId, fetchStudentRemarks]);
 
   const handleAdd = async (values) => {
     if (!studentId) return;
     setAdding(true);
     values.role = user?.role
-    await addRemark(studentId, values);
+    values.studentId = studentId
+    await addRemark(values);
+    await fetchStudentRemarks(studentId, 1, 10);
     setAdding(false);
-    modal.close();
+    modal.handleCancel();
   };
 
   return (
@@ -71,7 +46,7 @@ export default function StudentRemarksPage() {
       {/* Student details */}
       <div className="mb-4">
         <div className="flex items-center gap-4 p-3 bg-white rounded border shadow-sm max-w-sm">
-          {studentLoading ? (
+          {loading ? (
             <Skeleton active avatar paragraph={false} />
           ) : (
             <>
@@ -87,7 +62,7 @@ export default function StudentRemarksPage() {
         </div>
       </div>
 
-      <RemarksTimeline remarks={remarks} />
+      <RemarksTimeline remarks={remarks} onDelete={deleteRemark} />
 
       <AddRemarkModal
         visible={modal.isModalOpen}

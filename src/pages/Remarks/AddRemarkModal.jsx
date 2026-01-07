@@ -25,7 +25,7 @@ export default function AddRemarkModal({ visible, onCancel, onAdd, adding }) {
       confirmLoading={adding}
     >
       <Form form={form} layout="vertical">
-        <Form.Item name="text" label="Remark" rules={[{ required: true }]}> 
+        <Form.Item name="message" label="Remark" rules={[{ required: true }]}> 
           <Input.TextArea rows={4} />
         </Form.Item>
       </Form>
