@@ -53,6 +53,18 @@ function StudentList() {
         getStudentsByCenter(10, currentPage);
       }
       setVisitedPages(new Set([1]));
+    } else if (selectedView === "Active Students") {
+      // Fetch only active students from backend
+      if (searchQuery) {
+        search(
+          10,
+          { searchQuery, query: { role: ROLES.STUDENT, status: "active" }, page: currentPage },
+          currentPage
+        );
+      } else {
+        getStudentsByCenter(10, currentPage, "active");
+      }
+      setVisitedPages(new Set([1]));
     } else {
       getCurrentSessionAttendees();
     }
@@ -100,13 +112,8 @@ function StudentList() {
       return currentSessionAttendees;
     }
 
-    const base = searchQuery ? searchResults : students;
-
-    if (selectedView === "Active Students") {
-      return base.filter((student) => student.status === "active");
-    }
-
-    return base;
+    // Return the data directly - filtering now happens at backend
+    return searchQuery ? searchResults : students;
   }, [
     students,
     searchResults,
@@ -157,14 +164,26 @@ function StudentList() {
       dataIndex: "slotType",
     },
     {
-      title: "Joining Date",
+      title: "Enrollment Date",
       dataIndex: ["details_id", "enrollment_date"],
-      render: (name) => <p>{new Date(name).toDateString()}</p>,
+      render: (date, record) => {
+        const displayDate = date || record.createdAt;
+        return displayDate ? <p>{new Date(displayDate).toDateString()}</p> : <p>-</p>;
+      },
     },
     {
       title: "Sessions Attended",
-      dataIndex: "email",
-      render: (name, record) => <p>{"Dummy"}</p>,
+      dataIndex: "sessions_attended",
+      render: (attendedCount, record) => {
+        const totalSessions = record?.details_id?.course?.total_session || 0;
+        const attended = attendedCount || 0;
+
+        return (
+          <p>
+            {attended}/{totalSessions}
+          </p>
+        );
+      },
     },
   ];
 
@@ -178,6 +197,17 @@ function StudentList() {
         );
       } else {
         getStudentsByCenter(pageSize, page);
+      }
+      setVisitedPages((prev) => new Set(prev).add(page));
+    } else if (selectedView === "Active Students") {
+      if (searchQuery) {
+        search(
+          pageSize,
+          { searchQuery, query: { role: ROLES.STUDENT, status: "active" }, page },
+          page
+        );
+      } else {
+        getStudentsByCenter(pageSize, page, "active");
       }
       setVisitedPages((prev) => new Set(prev).add(page));
     }
@@ -196,13 +226,13 @@ function StudentList() {
         dataSource={studentsToDisplay}
         loading={loading}
         pagination={
-          selectedView === "All Students"
+          selectedView === "All Students" || selectedView === "Active Students"
             ? {
-                current: currentPage,
-                onChange: handlePageChange,
-                total: searchQuery ? searchTotal : total,
-                pageSize: 10,
-              }
+              current: currentPage,
+              onChange: handlePageChange,
+              total: searchQuery ? searchTotal : total,
+              pageSize: 10,
+            }
             : false
         }
         rowClassName={(record) => {

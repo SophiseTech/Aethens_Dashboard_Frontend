@@ -2,13 +2,20 @@ import handleError from "@utils/handleError"
 import { post, put } from "@utils/Requests"
 
 class UserService {
-  async getByRoleByCenter(role, centerId, lastRefKey = 0, limit = 10) {
+  async getByRoleByCenter(role, centerId, lastRefKey = 0, limit = 10, status = null) {
     try {
       if (!role || !centerId) throw new Error("Bad Data")
-      const response = await post(`/user/getByRoleByCenter?lastRefKey=${lastRefKey}&limit=${limit}`, {
+      const payload = {
         role: role,
         centerId: centerId
-      })
+      }
+
+      // Add status filter if provided
+      if (status) {
+        payload.status = status;
+      }
+
+      const response = await post(`/user/getByRoleByCenter?lastRefKey=${lastRefKey}&limit=${limit}`, payload)
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {

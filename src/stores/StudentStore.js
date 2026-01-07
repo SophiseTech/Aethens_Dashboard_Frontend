@@ -22,7 +22,7 @@ const studentStore = create((set, get) => ({
   currentSessionAttendees: [],
   activeStudentSessions: {},
   projectOpenedStudents: [],
-  getStudentsByCenter: async (limit = 10, page = 1) => {
+  getStudentsByCenter: async (limit = 10, page = 1, status = null) => {
     try {
       set({ loading: true });
 
@@ -34,12 +34,13 @@ const studentStore = create((set, get) => ({
       // Calculate the offset based on the page number and limit
       const offset = (page - 1) * limit;
 
-      // Fetch users with pagination parameters
+      // Fetch users with pagination and optional status filter
       const { users, total } = await userService.getByRoleByCenter(
         ROLES.STUDENT,
         user.center_id,
         offset, // Pass the offset for pagination
-        limit
+        limit,
+        status // Pass the status filter
       );
 
       if (users) {
@@ -197,7 +198,7 @@ const studentStore = create((set, get) => ({
   },
   getProjectOpenedStudents: async () => {
     try {
-      set({loading: true})
+      set({ loading: true })
       const response = await studentService.getProjectOpenedStudents()
       set({ projectOpenedStudents: response })
     } catch (error) {

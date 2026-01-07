@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Drawer,
   Card,
@@ -25,9 +25,8 @@ import { useStore } from "zustand";
 import { ROLES } from "@utils/constants";
 import DrawerActionButtons from "@components/DrawerActionButtons";
 import userStore from "@stores/UserStore";
-
+import slotStore from "@stores/SlotStore";
 const { Title, Text } = Typography;
-
 const UserDetailsDrawer = ({
   user,
   visible,
@@ -36,13 +35,24 @@ const UserDetailsDrawer = ({
   isStudentDetail = false,
 }) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [attendanceStats, setAttendanceStats] = useState(null);
   const { editUser } = useStore(studentStore);
   const { user: loggedinUser } = useStore(userStore);
+  const { getSlotStats } = useStore(slotStore);
+  useEffect(() => {
+    if (user && user.role === ROLES.STUDENT && user._id) {
+      const courseId = user.details_id?.course_id?._id || user.details_id?.course_id;
+      if (courseId) {
+        getSlotStats(user._id, courseId).then(stats => {
+          setAttendanceStats(stats);
+        });
+      }
+    }
+  }, [user, getSlotStats]);
   // Open the edit modal
   const handleEditClick = () => {
     setIsEditModalVisible(true);
   };
-
   // Handle saving edited user details
   const handleSave = async (values) => {
     console.log("Updated Values:", values);
@@ -51,7 +61,6 @@ const UserDetailsDrawer = ({
     setIsEditModalVisible(false); // Close the modal
     // message.success('User details updated successfully!');
   };
-
   return (
     <>
       <Drawer
@@ -103,9 +112,7 @@ const UserDetailsDrawer = ({
             </Col>
           </Row>
         </Card>
-
         <Divider style={{ margin: "16px 0" }} />
-
         <Card
           bordered={false}
           style={{ boxShadow: "none", background: "transparent" }}
@@ -161,7 +168,6 @@ const UserDetailsDrawer = ({
                     {formatDate(user?.DOB) || "N/A"}
                   </Text>
                 </Col>
-
                 <Col span={24}>
                   <Text strong>Age:</Text>
                   <Text style={{ marginLeft: "8px" }}>
@@ -181,9 +187,7 @@ const UserDetailsDrawer = ({
             </Col>
           </Row>
         </Card>
-
         <Divider style={{ margin: "16px 0" }} />
-
         {user?.role === ROLES.STUDENT && (
           <Card
             bordered={false}
@@ -211,15 +215,18 @@ const UserDetailsDrawer = ({
                   {user?.status}
                 </Text>
               </Col>
-
               {user && (
                 <Col span={24}>
                   <Text strong>Attendance:</Text>
                   <Text style={{ marginLeft: 8 }}>
-                    {10}/{user?.details_id?.course?.total_session} (
-                    {Math.round(
-                      (10 / user?.details_id?.course?.total_session) * 100
-                    )}
+                    {attendanceStats?.totalCounts?.attended || 0}/{attendanceStats?.totalSlots || user?.details_id?.course?.total_session || 0} (
+                    {attendanceStats?.totalSlots || user?.details_id?.course?.total_session
+                      ? Math.round(
+                          ((attendanceStats?.totalCounts?.attended || 0) /
+                            (attendanceStats?.totalSlots || user?.details_id?.course?.total_session)) *
+                            100
+                        )
+                      : 0}
                     %)
                   </Text>
                 </Col>
@@ -227,7 +234,6 @@ const UserDetailsDrawer = ({
             </Row>
           </Card>
         )}
-
         {isStudentDetail && (
           <Card
             bordered={false}
@@ -248,5 +254,4 @@ const UserDetailsDrawer = ({
     </>
   );
 };
-
 export default UserDetailsDrawer;
