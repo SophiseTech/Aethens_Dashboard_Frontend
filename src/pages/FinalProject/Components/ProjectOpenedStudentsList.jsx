@@ -37,10 +37,16 @@ function ProjectOpenedStudentsList({ projectsInfo = [], loading, onView, title =
       render: (date) => formatDate(date),
     },
     {
-      title: 'Status',
+      title: 'Last Completed',
       dataIndex: 'status',
       key: 'status',
-      render: (_, row) => <Tag color={row.statusColor}>{row.statusIcon} {row.statusText}</Tag>,
+      render: (_, row) => row?.approvedPhases <= 0 ? <Tag color={'default'}>Not Started</Tag> : <Tag color={'green'}>Phase {row?.approvedPhases}</Tag>,
+    },
+    {
+      title: 'Current Phase',
+      dataIndex: 'status',
+      key: 'status',
+      render: (_, row) => (row?.approvedPhases + 1) <= row?.totalPhases ? <Tag color={'orange'}>Phase {row?.approvedPhases + 1}</Tag> : null,
     },
     {
       title: 'Action',
