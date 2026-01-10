@@ -107,8 +107,8 @@ const UserDetailsDrawer = ({
               {(!isStudentDetail ||
                 loggedinUser.role === ROLES.MANAGER ||
                 loggedinUser.role === ROLES.STUDENT) && (
-                <Text type="secondary">{user?.email}</Text>
-              )}
+                  <Text type="secondary">{user?.email}</Text>
+                )}
             </Col>
           </Row>
         </Card>
@@ -222,10 +222,10 @@ const UserDetailsDrawer = ({
                     {attendanceStats?.totalCounts?.attended || 0}/{attendanceStats?.totalSlots || user?.details_id?.course?.total_session || 0} (
                     {attendanceStats?.totalSlots || user?.details_id?.course?.total_session
                       ? Math.round(
-                          ((attendanceStats?.totalCounts?.attended || 0) /
-                            (attendanceStats?.totalSlots || user?.details_id?.course?.total_session)) *
-                            100
-                        )
+                        ((attendanceStats?.totalCounts?.attended || 0) /
+                          (attendanceStats?.totalSlots || user?.details_id?.course?.total_session)) *
+                        100
+                      )
                       : 0}
                     %)
                   </Text>
@@ -233,6 +233,42 @@ const UserDetailsDrawer = ({
               )}
             </Row>
           </Card>
+        )}
+        {user?.role === ROLES.STUDENT && user?.details_id?.migrated?.history && user?.details_id?.migrated?.history.length > 0 && (
+          <>
+            <Divider style={{ margin: "16px 0" }} />
+            <Card
+              bordered={false}
+              style={{ boxShadow: "none", background: "transparent" }}
+            >
+              <Title level={5} style={{ marginBottom: "16px" }}>
+                Migration History
+              </Title>
+              <Row gutter={[16, 16]}>
+                {user.details_id.migrated.history.map((migration, index) => (
+                  <Col span={24} key={index}>
+                    <Card
+                      size="small"
+                      style={{ backgroundColor: "#f5f5f5", marginBottom: index < user.details_id.migrated.history.length - 1 ? "8px" : "0" }}
+                    >
+                      <Text strong>Migration {index + 1}</Text>
+                      <div style={{ marginTop: "8px" }}>
+                        <Text>From: {migration.fromBranchName || "N/A"}</Text>
+                      </div>
+                      <div>
+                        <Text>To: {migration.toBranchName || "N/A"}</Text>
+                      </div>
+                      <div>
+                        <Text type="secondary">
+                          Date: {migration.date ? formatDate(migration.date) : "N/A"}
+                        </Text>
+                      </div>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </Card>
+          </>
         )}
         {isStudentDetail && (
           <Card

@@ -22,11 +22,11 @@ const studentStore = create((set, get) => ({
   currentSessionAttendees: [],
   activeStudentSessions: {},
   projectOpenedStudents: [],
-  getStudentsByCenter: async (limit = 10, page = 1, status = null, courseId = null) => {
+  getStudentsByCenter: async (limit = 10, page = 1, status = null, courseId = null, fromBranch = null, toBranch = null) => {
     try {
       set({ loading: true });
 
-      console.log("📤 Fetching students:", { limit, page, status, courseId });
+      console.log("📤 Fetching students:", { limit, page, status, courseId, fromBranch, toBranch });
 
       const { user } = userStore.getState();
       if (user.role !== ROLES.MANAGER && user.role !== ROLES.FACULTY) {
@@ -43,7 +43,9 @@ const studentStore = create((set, get) => ({
         offset, // Pass the offset for pagination
         limit,
         status, // Pass the status filter
-        courseId // Pass the course filter
+        courseId, // Pass the course filter
+        fromBranch, // Pass the fromBranch filter
+        toBranch // Pass the toBranch filter
       );
 
       if (users) {

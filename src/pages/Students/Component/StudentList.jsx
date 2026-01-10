@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Button, Segmented, Space, Table } from "antd";
+import { Button, Segmented, Select, Space, Table } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import AllotSessions from "@pages/Students/Component/AllotSessions";
 import SessionStatus from "@pages/Students/Component/SessionStatus";
@@ -39,10 +39,20 @@ function StudentList() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [allCourses, setAllCourses] = useState([]);
 
+  // Temporary filter states (before Apply is clicked)
+  const [tempFromBranch, setTempFromBranch] = useState(null);
+  const [tempToBranch, setTempToBranch] = useState(null);
+
+  // Applied filter states (after Apply is clicked)
+  const [fromBranch, setFromBranch] = useState(null);
+  const [toBranch, setToBranch] = useState(null);
+
+  const [allCenters, setAllCenters] = useState([]);
+
   useEffect(() => {
     fetchStudents();
     console.log(students);
-  }, [selectedView, currentPage, searchQuery, selectedCourse]);
+  }, [selectedView, currentPage, searchQuery, selectedCourse, fromBranch, toBranch]);
 
   useEffect(() => {
     // Fetch all courses for filter dropdown
@@ -59,6 +69,22 @@ function StudentList() {
     fetchCourses();
   }, []);
 
+  useEffect(() => {
+    // Fetch all centers for migration filter dropdown
+    const fetchCenters = async () => {
+      try {
+        const centersService = await import('@/services/Centers');
+        const response = await centersService.default.getCenters({}, 0, 100);
+        if (response?.centers) {
+          setAllCenters(response.centers);
+        }
+      } catch (error) {
+        console.error("Error fetching centers:", error);
+      }
+    };
+    fetchCenters();
+  }, []);
+
   const fetchStudents = () => {
     if (selectedView === "All Students") {
       if (searchQuery) {
@@ -68,7 +94,7 @@ function StudentList() {
           currentPage
         );
       } else {
-        getStudentsByCenter(10, currentPage, null, selectedCourse);
+        getStudentsByCenter(10, currentPage, null, selectedCourse, fromBranch, toBranch);
       }
       setVisitedPages(new Set([1]));
     } else if (selectedView === "Active Students") {
@@ -80,7 +106,7 @@ function StudentList() {
           currentPage
         );
       } else {
-        getStudentsByCenter(10, currentPage, "active", selectedCourse);
+        getStudentsByCenter(10, currentPage, "active", selectedCourse, fromBranch, toBranch);
       }
       setVisitedPages(new Set([1]));
     } else {
@@ -96,12 +122,32 @@ function StudentList() {
   const handleSegmentChange = (view) => {
     setSelectedView(view);
     setSelectedCourse(null); // Clear course filter when view changes
+    setFromBranch(null); // Clear applied migration filters
+    setToBranch(null);
+    setTempFromBranch(null); // Clear temporary migration filters
+    setTempToBranch(null);
     updateURL(view, 1); // Update URL with new view and reset page to 1
+  };
+
+  const handleApplyFilters = () => {
+    // Apply the temporary filter values
+    setFromBranch(tempFromBranch);
+    setToBranch(tempToBranch);
+    updateURL(selectedView, 1); // Reset to page 1 when applying filters
+  };
+
+  const handleClearFilters = () => {
+    // Clear both temporary and applied filters
+    setTempFromBranch(null);
+    setTempToBranch(null);
+    setFromBranch(null);
+    setToBranch(null);
+    updateURL(selectedView, 1); // Reset to page 1
   };
 
   const handlePageChange = (page, pageSize) => {
     updateURL(selectedView, page); // Update URL with new page
-    // Don't call loadMore here - let the onChange handler deal with it
+    loadMore(page, pageSize); // Fetch data for the new page
   };
 
   const updateURL = (view, page) => {
@@ -119,18 +165,37 @@ function StudentList() {
   }, [allCourses]);
 
   const studentsToDisplay = useMemo(() => {
+    let data = [];
+
     if (selectedView === "Current Students") {
-      return currentSessionAttendees;
+      data = currentSessionAttendees;
+    } else {
+      data = searchQuery ? searchResults : students;
     }
 
-    // Return the data directly - filtering now happens at backend
-    return searchQuery ? searchResults : students;
+    // Apply migration filters client-side for Current Students view
+    // (For other views, filtering happens on backend)
+    if (selectedView === "Current Students" && (fromBranch || toBranch)) {
+      data = data.filter((student) => {
+        const migrated = student?.details_id?.migrated;
+        if (!migrated) return false;
+
+        // Check top-level migration fields (latest migration)
+        const matchesFromBranch = fromBranch ? migrated.fromBranchId === fromBranch : true;
+        const matchesToBranch = toBranch ? migrated.toBranchId === toBranch : true;
+        return matchesFromBranch && matchesToBranch;
+      });
+    }
+
+    return data;
   }, [
     students,
     searchResults,
     searchQuery,
     currentSessionAttendees,
     selectedView,
+    fromBranch,
+    toBranch,
   ]);
 
   console.log("search query: ", searchQuery, searchResults, currentPage);
@@ -178,8 +243,7 @@ function StudentList() {
       title: "Enrollment Date",
       dataIndex: ["details_id", "enrollment_date"],
       render: (date, record) => {
-        const displayDate = date || record.createdAt;
-        return displayDate ? <p>{new Date(displayDate).toDateString()}</p> : <p>-</p>;
+        return date ? <p>{new Date(date).toDateString()}</p> : <p>-</p>;
       },
     },
     {
@@ -207,7 +271,7 @@ function StudentList() {
           page
         );
       } else {
-        getStudentsByCenter(pageSize, page, null, selectedCourse);
+        getStudentsByCenter(pageSize, page, null, selectedCourse, fromBranch, toBranch);
       }
       setVisitedPages((prev) => new Set(prev).add(page));
     } else if (selectedView === "Active Students") {
@@ -218,7 +282,7 @@ function StudentList() {
           page
         );
       } else {
-        getStudentsByCenter(pageSize, page, "active", selectedCourse);
+        getStudentsByCenter(pageSize, page, "active", selectedCourse, fromBranch, toBranch);
       }
       setVisitedPages((prev) => new Set(prev).add(page));
     }
@@ -244,21 +308,60 @@ function StudentList() {
 
   return (
     <>
+      {/* Migration Filters - positioned below search, above view selector */}
+      <div className="flex gap-3 mb-4 items-center flex-wrap">
+        <Select
+          placeholder="From Branch"
+          value={tempFromBranch}
+          onChange={(value) => setTempFromBranch(value)}
+          allowClear
+          style={{ minWidth: 150 }}
+          options={allCenters.map((center) => ({
+            label: center.center_name,
+            value: center._id,
+          }))}
+        />
+        <Select
+          placeholder="To Branch"
+          value={tempToBranch}
+          onChange={(value) => setTempToBranch(value)}
+          allowClear
+          style={{ minWidth: 150 }}
+          options={allCenters.map((center) => ({
+            label: center.center_name,
+            value: center._id,
+          }))}
+        />
+        <Button
+          type="primary"
+          onClick={handleApplyFilters}
+        >
+          Apply Filters
+        </Button>
+        <Button
+          onClick={handleClearFilters}
+        >
+          Clear Filters
+        </Button>
+      </div>
+
+      {/* View Selector */}
       <Segmented
         options={["Current Students", "All Students", "Active Students"]}
-        className="w-fit"
+        className="w-fit mb-4"
         value={selectedView}
         onChange={handleSegmentChange}
       />
+
       <Table
         columns={columns}
         dataSource={studentsToDisplay}
         loading={loading}
-        onChange={handleTableChange}
         pagination={
           selectedView === "All Students" || selectedView === "Active Students"
             ? {
               current: currentPage,
+              onChange: handlePageChange,
               total: searchQuery ? searchTotal : total,
               pageSize: 10,
               showSizeChanger: false,
