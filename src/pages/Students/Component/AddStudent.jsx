@@ -6,6 +6,7 @@ import CustomInput from '@components/form/CustomInput';
 import CustomSelect from '@components/form/CustomSelect';
 import CustomSubmit from '@components/form/CustomSubmit';
 import ProfileImageUploader from '@components/ProfileImageUploader';
+import centersStore from '@stores/CentersStore';
 import courseStore from '@stores/CourseStore';
 import studentStore from '@stores/StudentStore';
 import userStore from '@stores/UserStore';
@@ -21,6 +22,7 @@ function AddStudent() {
   const { enroll, loading } = studentStore()
   const [form] = Form.useForm();
   const { getCourses, courses, total, loading: courseLoading } = useStore(courseStore)
+  const { centers,getCenters } = useStore(centersStore);
 
 
   const initialValues = {
@@ -40,6 +42,9 @@ function AddStudent() {
     if (!courses || total === 0 || courses.length < total) {
       getCourses(0)
     }
+    getCenters();
+    console.log(centers);
+
   }, [])
 
 
@@ -55,13 +60,16 @@ function AddStudent() {
 
   const onSubmit = async (values) => {
     values.role = ROLES.STUDENT
-    values.center_id = user.center_id
+    if(user.role === ROLES.MANAGER){
+      values.center_id = user.center_id
+    }
     console.log(values);
     await enroll(values)
     handleOk()
   }
 
   const options = useMemo(() => courses?.map(course => ({ label: course.course_name, value: course._id })), [courses])
+  const centerOptions = useMemo(() => centers?.map(center => ({ label: center.center_name, value: center._id })), [centers])
 
   return (
     <>
@@ -86,6 +94,7 @@ function AddStudent() {
           <CustomInput label={"Email"} name={"email"} type='email' placeholder={"john@doe.com"} />
           <CustomInput label={"School / University / Company Name"} name={"school_uni_work"} placeholder={"Name of your School / University / Company"} />
           <CustomSelect name={"course_id"} options={options} label={"Select Course"} />
+          {user.role === ROLES.ADMIN && <CustomSelect name={"center_id"} options={centerOptions} label={"Select Center"} />}
           <CustomInput label={"Password"} name={"password"} placeholder={"Password"} type='password' />
           <CustomSubmit className='bg-primary' label='Enroll' loading={loading} />
         </CustomForm>
