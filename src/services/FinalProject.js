@@ -1,4 +1,5 @@
 import handleError from "@utils/handleError";
+import handleInternalError from "@utils/handleInternalError";
 import { del, get, post, put } from "@utils/Requests";
 
 class FinalProjectService {
@@ -8,7 +9,7 @@ class FinalProjectService {
       if (!response) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {
-      handleError(error);
+      handleInternalError(error);
     }
   }
 
@@ -53,7 +54,7 @@ class FinalProjectService {
       if (!response) throw new Error("An error occurred while fetching phases");
       return response.data;
     } catch (error) {
-      handleError(error);
+      handleInternalError(error);
     }
   }
 
@@ -63,7 +64,7 @@ class FinalProjectService {
       if (!response) throw new Error("An error occurred while fetching phase details");
       return response.data;
     } catch (error) {
-      handleError(error);
+      handleInternalError(error);
     }
   }
 
@@ -88,7 +89,7 @@ class FinalProjectService {
       if (!response) throw new Error("An error occurred while fetching submissions");
       return response.data;
     } catch (error) {
-      handleError(error);
+      handleInternalError(error);
     }
   }
 
@@ -98,7 +99,7 @@ class FinalProjectService {
       if (!response) throw new Error("An error occurred while fetching submission details");
       return response.data;
     } catch (error) {
-      handleError(error);
+      handleInternalError(error);
     }
   }
 
@@ -128,7 +129,7 @@ class FinalProjectService {
       if (!response) throw new Error("An error occurred while fetching final project");
       return response.data;
     } catch (error) {
-      handleError(error);
+      handleInternalError(error);
     }
   }
 
@@ -146,7 +147,7 @@ class FinalProjectService {
       if (!response) throw new Error("An error occurred while fetching final projects");
       return response.data;
     } catch (error) {
-      handleError(error);
+      handleInternalError(error);
     }
   }
 
@@ -167,7 +168,7 @@ class FinalProjectService {
       if (!response) throw new Error("An error occurred while fetching latest submission");
       return response.data;
     } catch (error) {
-      handleError(error);
+      handleInternalError(error);
     }
   }
 

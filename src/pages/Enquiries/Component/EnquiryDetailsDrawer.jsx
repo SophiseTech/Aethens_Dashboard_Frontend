@@ -21,7 +21,7 @@ import {
   CalendarOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import { formatDate } from "@utils/helper";
+import { formatDate, formatTime } from "@utils/helper";
 import enquiryStore from "@stores/EnquiryStore";
 import { useStore } from "zustand";
 import EditEnquiryModal from "./EditEnquiryModal";
@@ -257,7 +257,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
               <Card bordered={false}>
                 <Title level={5}>Demo Slot</Title>
                 <Text strong>Scheduled At:</Text>{" "}
-                <Text>{formatDate(enquiry?.demoSlot?.scheduledAt)}</Text>
+                <Text>{formatDate(enquiry?.demoSlot?.scheduledAt)}, {formatTime(enquiry?.demoSlot?.scheduledAt)}</Text>
                 <br />
                 <Text strong>Status:</Text>{" "}
                 <Tag color="cyan">{enquiry?.demoSlot?.status}</Tag>
@@ -278,7 +278,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
                     </Text>
                     {enquiry?.demoSlotHistory?.slice(0, -1).map((item, index) => (
                       <Card key={item._id || index} className="mb-2">
-                        <Text strong>Date : {formatDate(item?.scheduledAt)}</Text>
+                        <Text strong>Date : {formatDate(item?.scheduledAt)}, {formatTime(item?.scheduledAt)}</Text>
                         {item?.reason && (<>
                           <Text strong>Reason:</Text>{" "}
                           <Text>{item?.reason || "-"}</Text>

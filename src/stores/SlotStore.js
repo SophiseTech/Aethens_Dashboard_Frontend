@@ -1,5 +1,7 @@
 import slotService from "@/services/Slot"
+import handleError from "@utils/handleError"
 import handleInternalError from "@utils/handleInternalError"
+import handleSuccess from "@utils/handleSuccess"
 import _ from "lodash"
 import { create } from "zustand"
 
@@ -111,7 +113,7 @@ const slotStore = create((set, get) => ({
         return request
       }
     } catch (error) {
-      handleInternalError(error)
+      handleError(error)
     } finally {
       set({ createLoading: false })
     }
