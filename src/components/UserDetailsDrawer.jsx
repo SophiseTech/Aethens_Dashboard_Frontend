@@ -35,20 +35,13 @@ const UserDetailsDrawer = ({
   isStudentDetail = false,
 }) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [attendanceStats, setAttendanceStats] = useState(null);
   const { editUser } = useStore(studentStore);
   const { user: loggedinUser } = useStore(userStore);
-  const { getSlotStats } = useStore(slotStore);
   useEffect(() => {
     if (user && user.role === ROLES.STUDENT && user._id) {
       const courseId = user.details_id?.course_id?._id || user.details_id?.course_id;
-      if (courseId) {
-        getSlotStats(user._id, courseId).then(stats => {
-          setAttendanceStats(stats);
-        });
-      }
     }
-  }, [user, getSlotStats]);
+  }, [user]);
   // Open the edit modal
   const handleEditClick = () => {
     setIsEditModalVisible(true);
@@ -219,11 +212,11 @@ const UserDetailsDrawer = ({
                 <Col span={24}>
                   <Text strong>Attendance:</Text>
                   <Text style={{ marginLeft: 8 }}>
-                    {attendanceStats?.totalCounts?.attended || 0}/{attendanceStats?.totalSlots || user?.details_id?.course?.total_session || 0} (
-                    {attendanceStats?.totalSlots || user?.details_id?.course?.total_session
+                    {user?.attended || 0}/{user?.details_id?.course?.total_session} (
+                    {user?.attended || user?.details_id?.course?.total_session
                       ? Math.round(
-                        ((attendanceStats?.totalCounts?.attended || 0) /
-                          (attendanceStats?.totalSlots || user?.details_id?.course?.total_session)) *
+                        ((user?.attended) /
+                          (user?.details_id?.course?.total_session)) *
                         100
                       )
                       : 0}

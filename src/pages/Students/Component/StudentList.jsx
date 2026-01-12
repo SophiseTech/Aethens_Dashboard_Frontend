@@ -282,7 +282,7 @@ function StudentList() {
       title: "Attendance",
       dataIndex: "sessions_attended",
       render: (attendedCount, record) => {
-        const totalSessions = record?.sessions_attended || 0;
+        const totalSessions = record?.details_id?.course?.total_session || 0;
         const attended = record?.attended || 0;
 
         return (
