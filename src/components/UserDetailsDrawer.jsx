@@ -227,6 +227,15 @@ const UserDetailsDrawer = ({
             </Row>
           </Card>
         )}
+        
+        {isStudentDetail && (
+          <Card
+            bordered={false}
+            style={{ boxShadow: "none", background: "transparent" }}
+          >
+            <DrawerActionButtons userDetails={user} />
+          </Card>
+        )}
         {user?.role === ROLES.STUDENT && user?.details_id?.migrated?.history && user?.details_id?.migrated?.history.length > 0 && (
           <>
             <Divider style={{ margin: "16px 0" }} />
@@ -262,14 +271,6 @@ const UserDetailsDrawer = ({
               </Row>
             </Card>
           </>
-        )}
-        {isStudentDetail && (
-          <Card
-            bordered={false}
-            style={{ boxShadow: "none", background: "transparent" }}
-          >
-            <DrawerActionButtons userDetails={user} />
-          </Card>
         )}
       </Drawer>
       {(!isStudentDetail || loggedinUser.role !== ROLES.FACULTY) && (
