@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { Button, Segmented, Select, Space, Table } from "antd";
+import { Button, Segmented, Select, Space, Table, Tag } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import AllotSessions from "@pages/Students/Component/AllotSessions";
 import SessionStatus from "@pages/Students/Component/SessionStatus";
@@ -229,20 +229,28 @@ function StudentList() {
       title: "Name",
       dataIndex: "username",
       key: "username",
-      render: (name, record) => (
-        <div
-          className="flex items-center gap-3"
-          onClick={() => handleNameClick(record)}
-          style={{ cursor: "pointer" }}
-        >
-          <img
-            className="rounded-full aspect-square w-8 2xl:w-10 border border-border"
-            src={record?.profile_img}
-            alt="Profile"
-          />
-          <p className="max-2xl:text-xs">{name}</p>
-        </div>
-      ),
+      render: (name, record) => {
+        const isMigrated = record?.details_id?.migrated;
+        return (
+          <div
+            className="flex items-center gap-3"
+            onClick={() => handleNameClick(record)}
+            style={{ cursor: "pointer" }}
+          >
+            <img
+              className="rounded-full aspect-square w-8 2xl:w-10 border border-border"
+              src={record?.profile_img}
+              alt="Profile"
+            />
+            <p className="max-2xl:text-xs">{name}</p>
+            {isMigrated && (
+              <Tag color="blue" className="text-xs ml-1">
+                Transferred
+              </Tag>
+            )}
+          </div>
+        );
+      },
     },
     {
       title: "Adm No",
@@ -271,11 +279,11 @@ function StudentList() {
       },
     },
     {
-      title: "Sessions Attended",
+      title: "Attendance",
       dataIndex: "sessions_attended",
       render: (attendedCount, record) => {
-        const totalSessions = record?.details_id?.course?.total_session || 0;
-        const attended = attendedCount || 0;
+        const totalSessions = record?.sessions_attended || 0;
+        const attended = record?.attended || 0;
 
         return (
           <p>
