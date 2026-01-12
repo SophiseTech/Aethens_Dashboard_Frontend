@@ -26,6 +26,7 @@ function AddEnquiry() {
     ageCategory: "",
     selectedCourses: [],
     phoneNumber: "",
+    place: "",
   }
 
   useEffect(() => {
@@ -100,6 +101,7 @@ function AddEnquiry() {
         >
           <CustomInput label={"Full Name"} name={"name"} placeholder={"John Doe"} />
           <CustomInput label={"Mobile Number"} name={"phoneNumber"} placeholder={"+91 7845784785"} />
+          <CustomInput label={"Place"} name={"place"} placeholder={"Enter place"} required={false} />
           {existence !== null && (
             <div className="mb-3">
               {existence.exists ? (

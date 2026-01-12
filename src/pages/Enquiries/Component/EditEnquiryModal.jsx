@@ -37,6 +37,7 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
           : null,
         demoNotes: enquiry?.demoSlot?.notes || "",
         centerId: enquiry?.centerId?._id || enquiry?.centerId,
+        place: enquiry?.place || "",
       });
     }
   }, [enquiry]);
@@ -72,6 +73,10 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
 
         <Form.Item label="Phone Number" name="phoneNumber">
           <Input placeholder="Enter phone number" />
+        </Form.Item>
+
+        <Form.Item label="Place" name="place">
+          <Input placeholder="Enter place" />
         </Form.Item>
 
         <CustomSelect
