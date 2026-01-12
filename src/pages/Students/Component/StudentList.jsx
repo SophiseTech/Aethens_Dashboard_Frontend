@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import AllotSessions from "@pages/Students/Component/AllotSessions";
 import SessionStatus from "@pages/Students/Component/SessionStatus";
 import studentStore from "@stores/StudentStore";
+import userStore from "@stores/UserStore";
 import { ROLES } from "@utils/constants";
 import UserDetailsDrawer from "@components/UserDetailsDrawer";
 import { render } from "@react-pdf/renderer";
@@ -23,6 +24,8 @@ function StudentList() {
     currentSessionAttendees,
   } = studentStore();
 
+  const { user } = userStore();
+
   const nav = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -41,11 +44,9 @@ function StudentList() {
 
   // Temporary filter states (before Apply is clicked)
   const [tempFromBranch, setTempFromBranch] = useState(null);
-  const [tempToBranch, setTempToBranch] = useState(null);
 
   // Applied filter states (after Apply is clicked)
   const [fromBranch, setFromBranch] = useState(null);
-  const [toBranch, setToBranch] = useState(null);
 
   const [allCenters, setAllCenters] = useState([]);
 
@@ -55,7 +56,7 @@ function StudentList() {
   useEffect(() => {
     fetchStudents();
     console.log(students);
-  }, [selectedView, currentPage, searchQuery, selectedCourses, fromBranch, toBranch]);
+  }, [selectedView, currentPage, searchQuery, selectedCourses, fromBranch]);
 
   useEffect(() => {
     // Fetch all courses for filter dropdown
@@ -99,6 +100,9 @@ function StudentList() {
     console.log("🔄 Starting fetch");
 
     try {
+      // Only pass toBranch (user's center_id) when fromBranch filter is applied
+      const toBranchParam = fromBranch ? user?.center_id : null;
+
       if (selectedView === "All Students") {
         if (searchQuery) {
           search(
@@ -107,7 +111,7 @@ function StudentList() {
             currentPage
           );
         } else {
-          getStudentsByCenter(10, currentPage, null, selectedCourses, fromBranch, toBranch);
+          getStudentsByCenter(10, currentPage, null, selectedCourses, fromBranch, toBranchParam);
         }
         setVisitedPages(new Set([1]));
       } else if (selectedView === "Active Students") {
@@ -119,7 +123,7 @@ function StudentList() {
             currentPage
           );
         } else {
-          getStudentsByCenter(10, currentPage, "active", selectedCourses, fromBranch, toBranch);
+          getStudentsByCenter(10, currentPage, "active", selectedCourses, fromBranch, toBranchParam);
         }
         setVisitedPages(new Set([1]));
       } else {
@@ -143,9 +147,7 @@ function StudentList() {
     setSelectedView(view);
     setSelectedCourses([]); // Clear course filter when view changes
     setFromBranch(null); // Clear applied migration filters
-    setToBranch(null);
     setTempFromBranch(null); // Clear temporary migration filters
-    setTempToBranch(null);
     setCurrentPage(1); // Reset to page 1
     updateURL(view, 1); // Update URL with new view and reset page to 1
   };
@@ -153,7 +155,6 @@ function StudentList() {
   const handleApplyFilters = () => {
     // Apply the temporary filter values
     setFromBranch(tempFromBranch);
-    setToBranch(tempToBranch);
     setCurrentPage(1); // Reset to page 1
     updateURL(selectedView, 1); // Reset to page 1 when applying filters
   };
@@ -161,9 +162,7 @@ function StudentList() {
   const handleClearFilters = () => {
     // Clear both temporary and applied filters
     setTempFromBranch(null);
-    setTempToBranch(null);
     setFromBranch(null);
-    setToBranch(null);
     setCurrentPage(1); // Reset to page 1
     updateURL(selectedView, 1); // Reset to page 1
   };
@@ -199,14 +198,15 @@ function StudentList() {
 
     // Apply migration filters client-side for Current Students view
     // (For other views, filtering happens on backend)
-    if (selectedView === "Current Students" && (fromBranch || toBranch)) {
+    if (selectedView === "Current Students" && fromBranch) {
       data = data.filter((student) => {
         const migrated = student?.details_id?.migrated;
         if (!migrated) return false;
 
         // Check top-level migration fields (latest migration)
         const matchesFromBranch = fromBranch ? migrated.fromBranchId === fromBranch : true;
-        const matchesToBranch = toBranch ? migrated.toBranchId === toBranch : true;
+        // toBranch is always user's center_id
+        const matchesToBranch = user?.center_id ? migrated.toBranchId === user.center_id : true;
         return matchesFromBranch && matchesToBranch;
       });
     }
@@ -219,7 +219,7 @@ function StudentList() {
     currentSessionAttendees,
     selectedView,
     fromBranch,
-    toBranch,
+    user?.center_id,
   ]);
 
   console.log("search query: ", searchQuery, searchResults, currentPage);
@@ -311,21 +311,24 @@ function StudentList() {
           onChange={(value) => setTempFromBranch(value)}
           allowClear
           style={{ minWidth: 150 }}
-          options={allCenters.map((center) => ({
-            label: center.center_name,
-            value: center._id,
-          }))}
+          options={allCenters
+            .filter((center) => center._id !== user?.center_id)
+            .map((center) => ({
+              label: center.center_name,
+              value: center._id,
+            }))}
         />
         <Select
-          placeholder="To Branch"
-          value={tempToBranch}
-          onChange={(value) => setTempToBranch(value)}
-          allowClear
-          style={{ minWidth: 150 }}
-          options={allCenters.map((center) => ({
-            label: center.center_name,
-            value: center._id,
-          }))}
+          placeholder="To Branch (Your Branch)"
+          value={user?.center_id}
+          disabled
+          style={{ minWidth: 200 }}
+          options={allCenters
+            .filter((center) => center._id === user?.center_id)
+            .map((center) => ({
+              label: center.center_name,
+              value: center._id,
+            }))}
         />
         <Button
           type="primary"
