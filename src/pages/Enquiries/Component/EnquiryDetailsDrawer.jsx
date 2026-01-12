@@ -198,6 +198,13 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
             </Col>
 
             <Col span={24}>
+              <Text strong>
+                Place:
+              </Text>{" "}
+              <Text>{enquiry?.place || "N/A"}</Text>
+            </Col>
+
+            <Col span={24}>
               <Text strong>Found Us By:</Text> <Text>{enquiry?.foundUsBy}</Text>
             </Col>
             <Col span={24}>
