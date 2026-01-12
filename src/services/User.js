@@ -2,7 +2,7 @@ import handleError from "@utils/handleError"
 import { post, put } from "@utils/Requests"
 
 class UserService {
-  async getByRoleByCenter(role, centerId, lastRefKey = 0, limit = 10, status = null, courseId = null, fromBranch = null, toBranch = null) {
+  async getByRoleByCenter(role, centerId, lastRefKey = 0, limit = 10, status = null, courseIds = null, fromBranch = null, toBranch = null) {
     try {
       if (!role || !centerId) throw new Error("Bad Data")
       const payload = {
@@ -15,9 +15,9 @@ class UserService {
         payload.status = status;
       }
 
-      // Add course filter if provided
-      if (courseId) {
-        payload.course_id = courseId;
+      // Add course filter if provided (can be array or single value)
+      if (courseIds && (Array.isArray(courseIds) ? courseIds.length > 0 : courseIds)) {
+        payload.course_ids = Array.isArray(courseIds) ? courseIds : [courseIds];
       }
 
       // Add migration filters if provided

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Button, Segmented, Select, Space, Table } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import AllotSessions from "@pages/Students/Component/AllotSessions";
@@ -28,15 +28,15 @@ function StudentList() {
   const queryParams = new URLSearchParams(location.search);
 
   // Get initial view and page from query parameters
-  const initialView = queryParams.get("view") || "Current Students"; // Default to 'Current Students' if no query param
-  const currentPage = parseInt(queryParams.get("page")) || 1; // Default to page 1 if no query param
+  const initialView = queryParams.get("view") || "Current Students";
+  const initialPage = parseInt(queryParams.get("page")) || 1;
 
   const [visitedPages, setVisitedPages] = useState(new Set());
-  // const [currentPage, setCurrentPage] = useState(initialPage);
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedView, setSelectedView] = useState(initialView);
-  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedCourses, setSelectedCourses] = useState([]);
   const [allCourses, setAllCourses] = useState([]);
 
   // Temporary filter states (before Apply is clicked)
@@ -49,10 +49,13 @@ function StudentList() {
 
   const [allCenters, setAllCenters] = useState([]);
 
+  // Ref to prevent concurrent fetches
+  const isFetchingRef = useRef(false);
+
   useEffect(() => {
     fetchStudents();
     console.log(students);
-  }, [selectedView, currentPage, searchQuery, selectedCourse, fromBranch, toBranch]);
+  }, [selectedView, currentPage, searchQuery, selectedCourses, fromBranch, toBranch]);
 
   useEffect(() => {
     // Fetch all courses for filter dropdown
@@ -86,31 +89,48 @@ function StudentList() {
   }, []);
 
   const fetchStudents = () => {
-    if (selectedView === "All Students") {
-      if (searchQuery) {
-        search(
-          10,
-          { searchQuery, query: { role: ROLES.STUDENT }, page: currentPage },
-          currentPage
-        );
+    // Prevent concurrent fetches
+    if (isFetchingRef.current) {
+      console.log("⏭️ Skipping fetch - already in progress");
+      return;
+    }
+
+    isFetchingRef.current = true;
+    console.log("🔄 Starting fetch");
+
+    try {
+      if (selectedView === "All Students") {
+        if (searchQuery) {
+          search(
+            10,
+            { searchQuery, query: { role: ROLES.STUDENT }, page: currentPage },
+            currentPage
+          );
+        } else {
+          getStudentsByCenter(10, currentPage, null, selectedCourses, fromBranch, toBranch);
+        }
+        setVisitedPages(new Set([1]));
+      } else if (selectedView === "Active Students") {
+        // Fetch only active students from backend
+        if (searchQuery) {
+          search(
+            10,
+            { searchQuery, query: { role: ROLES.STUDENT, status: "active" }, page: currentPage },
+            currentPage
+          );
+        } else {
+          getStudentsByCenter(10, currentPage, "active", selectedCourses, fromBranch, toBranch);
+        }
+        setVisitedPages(new Set([1]));
       } else {
-        getStudentsByCenter(10, currentPage, null, selectedCourse, fromBranch, toBranch);
+        getCurrentSessionAttendees();
       }
-      setVisitedPages(new Set([1]));
-    } else if (selectedView === "Active Students") {
-      // Fetch only active students from backend
-      if (searchQuery) {
-        search(
-          10,
-          { searchQuery, query: { role: ROLES.STUDENT, status: "active" }, page: currentPage },
-          currentPage
-        );
-      } else {
-        getStudentsByCenter(10, currentPage, "active", selectedCourse, fromBranch, toBranch);
-      }
-      setVisitedPages(new Set([1]));
-    } else {
-      getCurrentSessionAttendees();
+    } finally {
+      // Reset the flag after a short delay to allow the API call to complete
+      setTimeout(() => {
+        isFetchingRef.current = false;
+        console.log("✅ Fetch completed");
+      }, 100);
     }
   };
 
@@ -121,11 +141,12 @@ function StudentList() {
 
   const handleSegmentChange = (view) => {
     setSelectedView(view);
-    setSelectedCourse(null); // Clear course filter when view changes
+    setSelectedCourses([]); // Clear course filter when view changes
     setFromBranch(null); // Clear applied migration filters
     setToBranch(null);
     setTempFromBranch(null); // Clear temporary migration filters
     setTempToBranch(null);
+    setCurrentPage(1); // Reset to page 1
     updateURL(view, 1); // Update URL with new view and reset page to 1
   };
 
@@ -133,6 +154,7 @@ function StudentList() {
     // Apply the temporary filter values
     setFromBranch(tempFromBranch);
     setToBranch(tempToBranch);
+    setCurrentPage(1); // Reset to page 1
     updateURL(selectedView, 1); // Reset to page 1 when applying filters
   };
 
@@ -142,12 +164,14 @@ function StudentList() {
     setTempToBranch(null);
     setFromBranch(null);
     setToBranch(null);
+    setCurrentPage(1); // Reset to page 1
     updateURL(selectedView, 1); // Reset to page 1
   };
 
   const handlePageChange = (page, pageSize) => {
-    updateURL(selectedView, page); // Update URL with new page
-    loadMore(page, pageSize); // Fetch data for the new page
+    setCurrentPage(page); // Update state
+    updateURL(selectedView, page); // Update URL
+    // No need to call loadMore here - the useEffect will trigger the fetch
   };
 
   const updateURL = (view, page) => {
@@ -229,7 +253,7 @@ function StudentList() {
       dataIndex: ["details_id", "course", "course_name"],
       key: "course_name",
       filters: courseFilters,
-      filteredValue: selectedCourse ? [selectedCourse] : null,
+      filteredValue: selectedCourses.length > 0 ? selectedCourses : null,
     },
     {
       title: "Email",
@@ -262,47 +286,18 @@ function StudentList() {
     },
   ];
 
-  const loadMore = (page, pageSize) => {
-    if (selectedView === "All Students") {
-      if (searchQuery) {
-        search(
-          pageSize,
-          { searchQuery, query: { role: ROLES.STUDENT }, page },
-          page
-        );
-      } else {
-        getStudentsByCenter(pageSize, page, null, selectedCourse, fromBranch, toBranch);
-      }
-      setVisitedPages((prev) => new Set(prev).add(page));
-    } else if (selectedView === "Active Students") {
-      if (searchQuery) {
-        search(
-          pageSize,
-          { searchQuery, query: { role: ROLES.STUDENT, status: "active" }, page },
-          page
-        );
-      } else {
-        getStudentsByCenter(pageSize, page, "active", selectedCourse, fromBranch, toBranch);
-      }
-      setVisitedPages((prev) => new Set(prev).add(page));
-    }
-  };
-
   const handleTableChange = (pagination, filters, sorter) => {
-    // Handle pagination
-    if (pagination.current !== currentPage) {
-      loadMore(pagination.current, pagination.pageSize);
-    }
-
     // Handle course filter change
-    const newCourseFilter = filters.course_name && filters.course_name.length > 0 ? filters.course_name[0] : null;
+    const newCourseFilters = filters.course_name && filters.course_name.length > 0 ? filters.course_name : [];
 
-    if (newCourseFilter !== selectedCourse) {
-      setSelectedCourse(newCourseFilter);
-      // Reset to page 1 when filter changes
-      if (newCourseFilter !== selectedCourse) {
-        updateURL(selectedView, 1);
-      }
+    // Check if the filter has changed by comparing arrays
+    const hasChanged = JSON.stringify(newCourseFilters.sort()) !== JSON.stringify(selectedCourses.sort());
+
+    if (hasChanged) {
+      setSelectedCourses(newCourseFilters);
+      setCurrentPage(1); // Reset to page 1 when filter changes
+      updateURL(selectedView, 1);
+      // No need to call fetch here - the useEffect will handle it
     }
   };
 
@@ -357,6 +352,7 @@ function StudentList() {
         columns={columns}
         dataSource={studentsToDisplay}
         loading={loading}
+        onChange={handleTableChange}
         pagination={
           selectedView === "All Students" || selectedView === "Active Students"
             ? {
