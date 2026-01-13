@@ -1,3 +1,4 @@
+// import handleError from "@utils/handleError"
 import handleError from "@utils/handleError"
 import { get, post } from "@utils/Requests"
 
@@ -20,7 +21,9 @@ class AuthService {
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {
-      handleError(error)
+      // handleError(error)
+      console.error("Auth check failed: ", error)
+      throw error
     }
   }
 

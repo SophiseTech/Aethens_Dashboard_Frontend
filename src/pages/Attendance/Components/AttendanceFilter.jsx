@@ -1,14 +1,14 @@
-import { Select } from "antd";
+import { DatePicker } from "antd";
 
-const AttendanceFilter = ({ selectedFilter, setSelectedFilter, filterOptions, className }) => {
+const AttendanceFilter = ({ selectedFilter, setSelectedFilter, className }) => {
   return (
-    <Select
+    <DatePicker
+      picker="month"
       value={selectedFilter}
-      onChange={setSelectedFilter}
+      onChange={(date) => setSelectedFilter(date)}
       style={{ width: 200, marginBottom: 20 }}
-      options={filterOptions.map(({ label, value }) => ({ label, value }))}
-      variant="filled"
       className={className}
+      format="MMMM YYYY"
     />
   );
 };

@@ -10,39 +10,30 @@ import AttendanceStats from "@pages/Attendance/Components/AttendanceStats";
 import AttendanceTrend from "@pages/Attendance/Components/AttendanceTrend";
 import { useStore } from "zustand";
 import userStore from "@stores/UserStore";
-import { months } from "@utils/constants";
 
 function Attendance() {
-  const { getSlots, loading, slots, getSlotStats, slotStats, createLoading } = slotStore();
-  const [selectedFilter, setSelectedFilter] = useState(months[dayjs().month()]?.toLowerCase());
+  const { getSlots, loading, slots, getSlotStats, slotStats } = slotStore();
+  // selectedFilter will be a dayjs object representing the selected month
+  const [selectedFilter, setSelectedFilter] = useState(dayjs().startOf("month"));
   const { user } = useStore(userStore)
   const { courseId } = useParams()
 
-  const filters = Array.from({ length: 12 }, (_, index) => {
-    const month = dayjs().month(index); // Get the month index (0-11)
-    return {
-      label: month.format("MMMM"), // Full month name (e.g., January, February)
-      value: month.format("MMMM").toLowerCase(), // Lowercase month name for value
-      range: [month.startOf("month"), month.endOf("month")],
-    };
-  });
-
   useEffect(() => {
-    const selectedRange = filters.find(f => f.value === selectedFilter)?.range ||
-      [dayjs().startOf("month"), dayjs()];
+    const start = selectedFilter.startOf("month").toISOString();
+    const end = selectedFilter.endOf("month").toISOString();
 
     getSlots(0, {
       sort: { start_date: -1 },
       query: {
         booked_student_id: user?._id,
         course_id: courseId || user?.details_id?.course_id?._id || user?.details_id?.course_id,
-        start_date: { $gte: selectedRange[0].toISOString(), $lte: selectedRange[1].toISOString() }
+        start_date: { $gte: start, $lte: end }
       },
       populate: "center_id session"
     });
 
     getSlotStats(user?._id, courseId || user?.details_id?.course_id?._id || user?.details_id?.course_id)
-  }, [user, selectedFilter]);
+  }, [user, selectedFilter, courseId]);
 
   return (
     <Title title="Attendance">
@@ -50,14 +41,13 @@ function Attendance() {
         <AttendanceFilter
           selectedFilter={selectedFilter}
           setSelectedFilter={setSelectedFilter}
-          filterOptions={filters}
         />
         <Flex gap={20} className="max-lg:flex-col-reverse">
           <Flex vertical gap={20}>
-            <AttendanceStats stats={slotStats} slots={slots} loading={loading} selectedFilter={selectedFilter} />
+            <AttendanceStats stats={slotStats} slots={slots} loading={loading} selectedFilter={selectedFilter.format("MMMM YYYY")} />
             <AttendanceTrend stats={slotStats} />
           </Flex>
-          <MonthlyReport slots={slots} loading={loading} month={selectedFilter} />
+          <MonthlyReport slots={slots} loading={loading} month={selectedFilter.format("MMMM YYYY")} />
         </Flex>
       </div>
     </Title>

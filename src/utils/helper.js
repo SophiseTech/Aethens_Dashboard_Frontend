@@ -3,15 +3,23 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import _ from "lodash";
 import React from "react";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export const formatDate = (date) => {
   if (!date) return "";
   // Add 5 hours 30 minutes to convert to UTC+5:30, then format
-  return dayjs(date).add(330, 'minute').format("D MMM, YYYY");
+  return dayjs(date)
+    .tz("Asia/Kolkata")
+    .format("D MMM, YYYY");
 };
 
 export const formatTime = (time) => {
   if (!time) return ""
+
   return dayjs(time).format("h:mm A")
 };
 

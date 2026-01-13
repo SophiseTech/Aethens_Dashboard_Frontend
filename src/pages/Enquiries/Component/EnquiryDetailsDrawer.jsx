@@ -21,7 +21,7 @@ import {
   CalendarOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import { formatDate } from "@utils/helper";
+import { formatDate, formatTime } from "@utils/helper";
 import enquiryStore from "@stores/EnquiryStore";
 import { useStore } from "zustand";
 import EditEnquiryModal from "./EditEnquiryModal";
@@ -37,9 +37,9 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isBookSlotModalVisible, setIsBookSlotModalVisible] = useState(false);
   const [isCloseModalVisible, setIsCloseModalVisible] = useState(false);
-  const [isFollowUpVisible,setFollowUpVisible] = useState(false);
-  const [isReschduleSlot,setReschduleSlot] = useState(false);
-  const [isEnrolled,setEnrolled] = useState(false);
+  const [isFollowUpVisible, setFollowUpVisible] = useState(false);
+  const [isReschduleSlot, setReschduleSlot] = useState(false);
+  const [isEnrolled, setEnrolled] = useState(false);
 
   const {
     editEnquiry,
@@ -86,11 +86,11 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
   const handleFollowUp = async () => {
     form.validateFields().then(async (values) => {
       const updatedData = {
-        followUpDate : values.followUpDate.toISOString(),
-        remarks : values.remarks,
-        reason : values.reason
+        followUpDate: values.followUpDate.toISOString(),
+        remarks: values.remarks,
+        reason: values.reason
       };
-      await addfollowUpDate(enquiry._id,updatedData);
+      await addfollowUpDate(enquiry._id, updatedData);
       setFollowUpVisible(false);
       await getEnquiries(10, 1);
       onClose();
@@ -99,13 +99,13 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
 
   // Reschedule Slot
   const handleRescheduleSlot = async () => {
-     form.validateFields().then(async (values) => {
+    form.validateFields().then(async (values) => {
       const updatedData = {
-        scheduledAt : values.scheduledAt.toISOString(),
-        remarks : values.remarks,
-        reason : values.reason
+        scheduledAt: values.scheduledAt.toISOString(),
+        remarks: values.remarks,
+        reason: values.reason
       };
-      await rescheduleSlot(enquiry._id,updatedData);
+      await rescheduleSlot(enquiry._id, updatedData);
       setReschduleSlot(false);
       await getEnquiries(10, 1);
       onClose();
@@ -115,10 +115,10 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
   const handleEnrollSlot = async () => {
     form.validateFields().then(async (values) => {
       const updatedData = {
-        enrollmentDate : values.enrollmentDate.toISOString(),
-        enrollmentCourse : values.enrollmentCourse
+        enrollmentDate: values.enrollmentDate.toISOString(),
+        enrollmentCourse: values.enrollmentCourse
       };
-      await enrollStudent(enquiry._id,updatedData);
+      await enrollStudent(enquiry._id, updatedData);
       setReschduleSlot(false);
       await getEnquiries(10, 1);
       onClose();
@@ -127,7 +127,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
 
   const handleMarkCompleted = async () => {
     await markDemoCompleted(enquiry._id, enquiry?.demoSlot?.notes || "");
-    await getEnquiries(10,1);
+    await getEnquiries(10, 1);
     onClose();
   };
 
@@ -198,6 +198,13 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
             </Col>
 
             <Col span={24}>
+              <Text strong>
+                Place:
+              </Text>{" "}
+              <Text>{enquiry?.place || "N/A"}</Text>
+            </Col>
+
+            <Col span={24}>
               <Text strong>Found Us By:</Text> <Text>{enquiry?.foundUsBy}</Text>
             </Col>
             <Col span={24}>
@@ -218,30 +225,35 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
           </Row>
         </Card>
 
-        <Divider />
 
         {/* Courses */}
-        <Card bordered={false}>
-          <Title level={5}>Courses Interested</Title>
-          {enquiry?.selectedCourses?.map((c) => (
-            <Tag key={c._id} color="purple" style={{ marginBottom: 6 }}>
-              {c.course_name}
-            </Tag>
-          ))}
-        </Card>
+        {enquiry?.selectedCourses?.length > 0 && (
+          <>
+            <Divider />
+
+            <Card bordered={false}>
+              <Title level={5}>Courses Interested</Title>
+              {enquiry?.selectedCourses?.map((c) => (
+                <Tag key={c._id} color="purple" style={{ marginBottom: 6 }}>
+                  {c.course_name}
+                </Tag>
+              ))}
+            </Card>
+          </>
+        )}
 
         <Divider />
 
         {/* Enrolled Student Details */}
         {enquiry?.stage === "Enrolled" && (
           <>
-          <Card>
-            <Title level={5}>Enrolled Details</Title>
-            <Text strong>Enrolled Course : </Text>{" "} <Text>{enquiry?.enrollmentCourse}</Text>
-            <br />
-            <Text strong>Enrolled Date : </Text>{" "}
-            <Text>{(formatDate(enquiry?.enrollmentDate))}</Text>
-          </Card>
+            <Card>
+              <Title level={5}>Enrolled Details</Title>
+              <Text strong>Enrolled Course : </Text>{" "} <Text>{enquiry?.enrollmentCourse}</Text>
+              <br />
+              <Text strong>Enrolled Date : </Text>{" "}
+              <Text>{(formatDate(enquiry?.enrollmentDate))}</Text>
+            </Card>
           </>
         )}
 
@@ -252,24 +264,42 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
               <Card bordered={false}>
                 <Title level={5}>Demo Slot</Title>
                 <Text strong>Scheduled At:</Text>{" "}
-                <Text>{formatDate(enquiry?.demoSlot?.scheduledAt)}</Text>
+                <Text>{formatDate(enquiry?.demoSlot?.scheduledAt)}, {formatTime(enquiry?.demoSlot?.scheduledAt)}</Text>
                 <br />
                 <Text strong>Status:</Text>{" "}
                 <Tag color="cyan">{enquiry?.demoSlot?.status}</Tag>
                 <br />
-                <Text strong>Notes:</Text>{" "}
-                <Text>{enquiry?.demoSlot?.notes}</Text>
+                {
+                  enquiry?.demoSlot?.notes && (
+                    <>
+                      <Text strong>Notes:</Text>{" "}
+                      <Text>{enquiry?.demoSlot?.notes}</Text>
+                    </>
+                  )
+                }
                 <br />
-                {enquiry?.demoSlotHistory.map((item, index) => (
-                  <Card key={item._id || index} className="mb-2">
-                    <Title level={5}>Date : {item?.scheduledAt}</Title>
-                    <Text strong>Reason : </Text>{" "}
-                    <Text>{item?.reason || "-"}</Text>
-                    <br />
-                    <Text strong>Remarks:</Text>{" "}
-                    <Text>{item?.remarks || "-"}</Text>
-                  </Card>
-                ))}
+                {enquiry?.demoSlotHistory?.length > 1 && (
+                  <div className="mt-2">
+                    <Text strong>
+                      History
+                    </Text>
+                    {enquiry?.demoSlotHistory?.slice(0, -1).map((item, index) => (
+                      <Card key={item._id || index} className="mb-2">
+                        <Text strong>Date : {formatDate(item?.scheduledAt)}, {formatTime(item?.scheduledAt)}</Text>
+                        {item?.reason && (<>
+                          <Text strong>Reason:</Text>{" "}
+                          <Text>{item?.reason || "-"}</Text>
+                          <br />
+                        </>)}
+                        {item?.remarks && (<>
+                          <br />
+                          <Text strong>Remarks:</Text>{" "}
+                          <Text>{item?.remarks || "-"}</Text>
+                        </>)}
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </Card>
             )}
           </>
@@ -316,12 +346,26 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
           </>
         )}
 
-        <Divider />
+        {enquiry?.branchTransfers?.length > 0 && (
+          <>
+            <Divider />
 
-        <BranchTransferCard
-          formatDate={formatDate}
-          transfers={enquiry?.centerTransfers}
-        />
+            <BranchTransferCard
+              formatDate={formatDate}
+              transfers={enquiry?.centerTransfers}
+            />
+          </>
+        )}
+
+
+        {enquiry?.remarks && (
+          <>
+            <Divider />
+            <Card className="mb-2">
+              <Title level={5}>Remarks</Title>
+              <Text>{enquiry?.remarks}</Text>
+            </Card>
+          </>)}
 
         <Divider />
 

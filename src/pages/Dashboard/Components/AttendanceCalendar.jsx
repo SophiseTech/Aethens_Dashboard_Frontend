@@ -3,44 +3,52 @@ import { Calendar } from 'antd';
 import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
 
-const monthMap = {
-  January: 0,
-  February: 1,
-  March: 2,
-  April: 3,
-  May: 4,
-  June: 5,
-  July: 6,
-  August: 7,
-  September: 8,
-  October: 9,
-  November: 10,
-  December: 11
-};
-
 function AttendanceCalendar({ slots, month }) {
   const currentYear = dayjs().year(); // Get the current year
   const currentMonthIndex = dayjs().month(); // Get the current month index (0-based)
 
-  // If no month is passed, use the current month
-  const formattedMonth = month
-    ? month.charAt(0).toUpperCase() + month.slice(1).toLowerCase()
-    : dayjs().format("MMMM"); // Default to current month name
+  // Determine month index and year from prop which can be:
+  // - undefined/null => use current month/year
+  // - a dayjs object => use its month/year
+  // - a string like 'January' or 'January 2026'
+  let monthIndex = currentMonthIndex;
+  let year = currentYear;
 
-  // Get month index from the map
-  const monthIndex = month ? monthMap[formattedMonth] : currentMonthIndex;
+  if (!month) {
+    // keep defaults
+  } else if (dayjs.isDayjs(month)) {
+    monthIndex = month.month();
+    year = month.year();
+  } else if (typeof month === 'string') {
+    const normalized = month.trim();
+    // Normalize first token (month name) to Title Case
+    const parts = normalized.split(/\s+/);
+    const monthName = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
+    const yearPart = parts.length > 1 ? Number(parts[1]) : NaN;
 
-  // Ensure a valid month index
-  if (monthIndex === undefined) {
-    console.error("Invalid month name:", month);
-    return null;
+    let parsed = null;
+    if (!Number.isNaN(yearPart)) {
+      const candidate = dayjs(`${monthName} ${yearPart}`, 'MMMM YYYY', true);
+      if (candidate.isValid()) parsed = candidate;
+    }
+    if (!parsed) {
+      const candidate2 = dayjs(monthName, 'MMMM', true);
+      if (candidate2.isValid()) parsed = candidate2;
+    }
+
+    if (parsed && parsed.isValid()) {
+      monthIndex = parsed.month();
+      year = parsed.year() || currentYear;
+    } else {
+      console.error('Invalid month prop for AttendanceCalendar:', month);
+    }
   }
 
-  const selectedDate = dayjs().year(currentYear).month(monthIndex).startOf("month");
+  const selectedDate = dayjs().year(year).month(monthIndex).startOf('month');
 
   const groupedData = useMemo(() => {
     return slots.reduce((acc, session) => {
-      const date = dayjs(session.start_date).format("YYYY-MM-DD"); // Extract only the date part      
+      const date = dayjs(session.start_date).format('YYYY-MM-DD'); // Extract only the date part      
       if (!acc[date]) {
         acc[date] = [];
       }
