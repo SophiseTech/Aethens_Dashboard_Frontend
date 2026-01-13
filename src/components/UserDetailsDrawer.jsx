@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Drawer,
   Card,
@@ -25,23 +25,19 @@ import { useStore } from "zustand";
 import { ROLES } from "@utils/constants";
 import DrawerActionButtons from "@components/DrawerActionButtons";
 import userStore from "@stores/UserStore";
-import slotStore from "@stores/SlotStore";
+import PropTypes from "prop-types";
+
 const { Title, Text } = Typography;
+
 const UserDetailsDrawer = ({
   user,
   visible,
   onClose,
-  showActions = false,
   isStudentDetail = false,
 }) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const { editUser } = useStore(studentStore);
   const { user: loggedinUser } = useStore(userStore);
-  useEffect(() => {
-    if (user && user.role === ROLES.STUDENT && user._id) {
-      const courseId = user.details_id?.course_id?._id || user.details_id?.course_id;
-    }
-  }, [user]);
   // Open the edit modal
   const handleEditClick = () => {
     setIsEditModalVisible(true);
@@ -100,12 +96,14 @@ const UserDetailsDrawer = ({
               {(!isStudentDetail ||
                 loggedinUser.role === ROLES.MANAGER ||
                 loggedinUser.role === ROLES.STUDENT) && (
-                  <Text type="secondary">{user?.email}</Text>
-                )}
+                <Text type="secondary">{user?.email}</Text>
+              )}
             </Col>
           </Row>
         </Card>
+
         <Divider style={{ margin: "16px 0" }} />
+
         <Card
           bordered={false}
           style={{ boxShadow: "none", background: "transparent" }}
@@ -180,7 +178,9 @@ const UserDetailsDrawer = ({
             </Col>
           </Row>
         </Card>
+
         <Divider style={{ margin: "16px 0" }} />
+
         {user?.role === ROLES.STUDENT && (
           <Card
             bordered={false}
@@ -284,4 +284,21 @@ const UserDetailsDrawer = ({
     </>
   );
 };
+
+UserDetailsDrawer.propTypes = {
+  user: PropTypes.object,
+  visible: PropTypes.bool,
+  onClose: PropTypes.func,
+  showActions: PropTypes.bool,
+  isStudentDetail: PropTypes.bool,
+};
+
+UserDetailsDrawer.defaultProps = {
+  user: {},
+  visible: false,
+  onClose: () => {},
+  showActions: false,
+  isStudentDetail: false,
+};
+
 export default UserDetailsDrawer;

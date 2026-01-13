@@ -1,13 +1,10 @@
-import React, { useEffect, useMemo, useState, useRef } from "react";
-import { Button, Segmented, Select, Space, Table, Tag } from "antd";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { Button, Segmented, Select, Table, Tag } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
-import AllotSessions from "@pages/Students/Component/AllotSessions";
-import SessionStatus from "@pages/Students/Component/SessionStatus";
 import studentStore from "@stores/StudentStore";
 import userStore from "@stores/UserStore";
 import { ROLES } from "@utils/constants";
 import UserDetailsDrawer from "@components/UserDetailsDrawer";
-import { render } from "@react-pdf/renderer";
 import courseService from "@/services/Course";
 
 function StudentList() {
@@ -34,7 +31,7 @@ function StudentList() {
   const initialView = queryParams.get("view") || "Current Students";
   const initialPage = parseInt(queryParams.get("page")) || 1;
 
-  const [visitedPages, setVisitedPages] = useState(new Set());
+  // const [visitedPages, setVisitedPages] = useState(new Set());
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -113,7 +110,7 @@ function StudentList() {
         } else {
           getStudentsByCenter(10, currentPage, null, selectedCourses, fromBranch, toBranchParam);
         }
-        setVisitedPages(new Set([1]));
+        // setVisitedPages(new Set([1]));
       } else if (selectedView === "Active Students") {
         // Fetch only active students from backend
         if (searchQuery) {
@@ -125,7 +122,7 @@ function StudentList() {
         } else {
           getStudentsByCenter(10, currentPage, "active", selectedCourses, fromBranch, toBranchParam);
         }
-        setVisitedPages(new Set([1]));
+        // setVisitedPages(new Set([1]));
       } else {
         getCurrentSessionAttendees();
       }
@@ -167,7 +164,7 @@ function StudentList() {
     updateURL(selectedView, 1); // Reset to page 1
   };
 
-  const handlePageChange = (page, pageSize) => {
+  const handlePageChange = (page) => {
     setCurrentPage(page); // Update state
     updateURL(selectedView, page); // Update URL
     // No need to call loadMore here - the useEffect will trigger the fetch
@@ -274,7 +271,7 @@ function StudentList() {
     {
       title: "Enrollment Date",
       dataIndex: ["details_id", "enrollment_date"],
-      render: (date, record) => {
+      render: (date) => {
         return date ? <p>{new Date(date).toDateString()}</p> : <p>-</p>;
       },
     },
@@ -294,7 +291,7 @@ function StudentList() {
     },
   ];
 
-  const handleTableChange = (pagination, filters, sorter) => {
+  const handleTableChange = (pagination, filters) => {
     // Handle course filter change
     const newCourseFilters = filters.course_name && filters.course_name.length > 0 ? filters.course_name : [];
 

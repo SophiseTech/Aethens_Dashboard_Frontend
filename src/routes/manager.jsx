@@ -1,15 +1,16 @@
 import Protected from "@components/layouts/Protected";
 import SidebarLayout from "@components/layouts/Sidebar";
 import FinalProjectPage from "@pages/FinalProject";
-import PhaseListPage from "@pages/FinalProject/PhaseList";
 import { ROLES } from "@utils/constants";
 import { Spin } from "antd";
 import { lazy, Suspense } from "react";
 import { useLocation } from "react-router-dom";
+import PropTypes from "prop-types";
 
 const Students = lazy(() => import("@pages/Students"))
 const Enquiries = lazy(() => import("@pages/Enquiries"))
 const Wallets = lazy(() => import("@pages/Wallets/index.jsx"))
+const Remarks = lazy(() => import("@pages/Remarks/index.jsx"))
 const EnquirySlots = lazy(() => import("@pages/EnquirySlots"))
 const Bills = lazy(() => import("@pages/Bills"));
 const BillDetails = lazy(() => import("@pages/Bills/Components/BillDetails"));
@@ -60,9 +61,14 @@ export const managerRoutes = [
             title: "Enquiries"
           },
           {
-            path: "/manager/wallets",
+            path: "/manager/wallets/s/:studentId",
             element: <LazyLoader element={<Wallets />} />,
             title: "Wallets"
+          },
+          {
+            path: "/manager/remarks/s/:studentId",
+            element: <LazyLoader element={<Remarks />} />,
+            title: "Remarks"
           },
           {
             path: "/manager/enquiry-slots",
@@ -168,3 +174,7 @@ export const managerRoutes = [
     ]
   }
 ]
+
+LazyLoader.propTypes = {
+  element: PropTypes.element.isRequired,
+};
