@@ -1,5 +1,4 @@
 import useModal from '@hooks/useModal'
-import AddStudentRemarks from '@pages/Students/Component/AddStudentRemarks'
 import AllotSessions from '@pages/Students/Component/AllotSessions'
 import DeactivateStudent from '@pages/Students/Component/DeactivateStudent'
 import MigrateCenter from '@pages/Students/Component/MigrateCenter'
@@ -7,7 +6,6 @@ import MigrateCourse from '@pages/Students/Component/MigrateCourse'
 import ProjectDetailModal from '@pages/Students/Component/ProjectDetailModal'
 import ViewStudentSessions from '@pages/Students/Component/SessionDetails'
 import SessionStatus from '@pages/Students/Component/SessionStatus'
-import ViewStudentRemarks from '@pages/Students/Component/ViewStudentRemarks'
 import userStore from '@stores/UserStore'
 import { ROLES } from '@utils/constants'
 import { isUserActive } from '@utils/helper'
@@ -90,8 +88,6 @@ const ManagerActionButtons = ({ userDetails }) => {
         View Remarks
       </Button>
       <MigrateCourse student={userDetails} />
-      <AddStudentRemarks student={userDetails} />
-      <ViewStudentRemarks student={userDetails} />
 
       <MigrateCenter student={userDetails} />
 

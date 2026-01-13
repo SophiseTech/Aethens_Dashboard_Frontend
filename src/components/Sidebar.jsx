@@ -76,12 +76,6 @@ const MENU_CONFIG = [
     roles: [ROLES.MANAGER],
   },
   {
-    label: "Wallets",
-    icon: WalletOutlined,
-    path: "/manager/wallets",
-    roles: [ROLES.MANAGER],
-  },
-  {
     label: "Bills",
     icon: DollarOutlined,
     path: "/manager/bills",
