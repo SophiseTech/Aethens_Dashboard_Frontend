@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Form } from 'antd';
+import { Modal, Button, Form, Typography } from 'antd';
 import CustomForm from '@components/form/CustomForm';
 import CustomInput from '@components/form/CustomInput';
 import CustomDatePicker from '@components/form/CustomDatePicker';
@@ -8,9 +8,13 @@ import ProfileImageUploader from '@components/ProfileImageUploader';
 import { useStore } from 'zustand';
 import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
+import { calculateAge } from '@utils/helper';
+
+const { Text } = Typography;
 
 const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = false }) => {
   const [form] = Form.useForm(); // Initialize form
+  const dobValue = Form.useWatch('DOB', form);
   // Prefill form with user data when modal opens
   const { user: loggedinUser } = useStore(userStore)
 
@@ -65,6 +69,11 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
           placeholder='DOB'
           className='w-full'
         />
+        {dobValue && (
+          <div className='px-2 py-2 mt-2 mb-4 bg-stone-500'>
+            <Text type="secondary">Calculated Age: <strong>{calculateAge(dobValue.toDate())} years</strong></Text>
+          </div>
+        )}
         <CustomDatePicker
           name={"DOJ"}
           label={"Date Of Joining"}

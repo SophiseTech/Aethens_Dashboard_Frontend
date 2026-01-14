@@ -196,6 +196,15 @@ const UserDetailsDrawer = ({
                   {user?.details_id?.course?.course_name}
                 </Text>
               </Col>
+              <Col span={24}>
+                <Text strong>
+                  <CalendarOutlined style={{ marginRight: "8px" }} />
+                  Course Joined Date:
+                </Text>
+                <Text style={{ marginLeft: "8px" }}>
+                  {formatDate(user?.details_id?.enrollment_date) || "N/A"}
+                </Text>
+              </Col>
               {/* <Col span={24}>
               <Text strong>Role:</Text>
               <Text style={{ marginLeft: '8px' }}>{user?.role}</Text>
