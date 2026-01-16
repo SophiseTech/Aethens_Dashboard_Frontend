@@ -10,7 +10,9 @@ import enquiryService from '@/services/Enquiry';
 import { Alert, Form, Modal } from 'antd';
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useStore } from 'zustand';
-import { age_categories, EnquiryModeOptions, foundUsOptions } from '@utils/constants';
+import { age_categories, EnquiryModeOptions, foundUsOptions, ROLES } from '@utils/constants';
+import userStore from '@stores/UserStore';
+import centersStore from '@stores/CentersStore';
 
 function AddEnquiry() {
 
@@ -18,6 +20,8 @@ function AddEnquiry() {
   const { loading, addEnquiry, getEnquiries } = enquiryStore()
   const [form] = Form.useForm();
   const { getCourses, courses, total } = useStore(courseStore)
+  const { user } = useStore(userStore);
+  const { centers,getCenters } = useStore(centersStore);
 
   const initialValues = {
     name: "",
@@ -32,6 +36,7 @@ function AddEnquiry() {
     if (!courses || total === 0 || courses.length < total) {
       getCourses(0)
     }
+    getCenters();
   }, [courses, total, getCourses])
 
 
@@ -81,6 +86,7 @@ function AddEnquiry() {
   }
 
   const options = useMemo(() => courses?.map(course => ({ label: course.course_name, value: course._id })), [courses])
+  const centerOptions = useMemo(() => centers?.map(center => ({ label: center.center_name, value: center._id })), [centers])
 
 
   return (
@@ -127,6 +133,9 @@ function AddEnquiry() {
           />
           {/* <CustomInput label={"Age Category"} name={"ageCategory"} placeholder={"Age Category"} /> */}
           <CustomSelect label={"How they found us"} name={"foundUsBy"} options={foundUsOptions}/>
+          {user.role === ROLES.ADMIN && (
+            <CustomSelect label={"Center"} name={"centerId"} options={centerOptions}/>
+          )}
           <CustomSelect name={"modeOfEnquiry"} options={EnquiryModeOptions} label={"Mode of Enquiry"} />
           {/* <CustomSelect name={"selectedCourses"} options={options} label={"Select Course"} mode="multiple"/> */}
           <CustomSubmit className='bg-primary' label={existence ? 'Proceed' : 'Check'} loading={loading} />
