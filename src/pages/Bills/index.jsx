@@ -72,14 +72,14 @@ function Bills() {
     })
   }
 
-  const loadInitData = async ({ itemType }) => {
-    console.log(itemType);
+  const loadInitData = async ({ itemType,centerId }) => {
+    console.log(itemType,centerId);
 
     if (!invoiceNo || invoiceNo === 0) {
-      getInvoiceNo()
+      user.role === ROLES.ADMIN ? getInvoiceNo(centerId) : getInvoiceNo();
     }
     if (itemType === "materials") {
-      const { items } = await inventoryService.getInventoryItems(0, 10, { query: { type: "materials" } })
+      const { items } = await inventoryService.getInventoryItems(0, 10, { query: { type: "materials" } }, centerId)
       setLineItems(items)
       // setLneItemSearchFunction(searhcItems)
     }
@@ -88,7 +88,7 @@ function Bills() {
       setLineItems([...courses?.map(course => ({ name: course.course_name, _id: course._id, type: "course", rate: course.rate, discount: 0, taxes: 18 })), { name: "Registration Fee", _id: "67c00eb2073609b23054ca01", type: "course", rate: 3500, discount: 0, taxes: 18 }])
     }
     if (itemType === "gallery") {
-      const { items } = await inventoryService.getInventoryItems(0, 10, { query: { type: "gallery" } })
+      const { items } = await inventoryService.getInventoryItems(0, 10, { query: { type: "gallery" } }, centerId)
       setLineItems(items)
       // setLneItemSearchFunction(searhcItems)
     }

@@ -1,25 +1,38 @@
-import CustomDatePicker from '@components/form/CustomDatePicker';
-import CustomForm from '@components/form/CustomForm';
-import CustomInput from '@components/form/CustomInput';
-import CustomSelect from '@components/form/CustomSelect';
-import CustomSubmit from '@components/form/CustomSubmit';
-import ItemsInputTable from '@pages/Bills/Components/ItemsInputTable';
-import { sumFromObjects } from '@utils/helper';
-import { Form, Modal, Table } from 'antd';
-import dayjs from 'dayjs';
-import { useEffect, useMemo, useState } from 'react';
-
+import CustomDatePicker from "@components/form/CustomDatePicker";
+import CustomForm from "@components/form/CustomForm";
+import CustomInput from "@components/form/CustomInput";
+import CustomSelect from "@components/form/CustomSelect";
+import CustomSubmit from "@components/form/CustomSubmit";
+import ItemsInputTable from "@pages/Bills/Components/ItemsInputTable";
+import { sumFromObjects } from "@utils/helper";
+import { Form, Modal, Table } from "antd";
+import dayjs from "dayjs";
+import { useEffect, useMemo, useState } from "react";
+import { useStore } from "zustand";
+import centersStore from "@stores/CentersStore";
+import userStore from "@stores/UserStore";
+import { ROLES } from "@utils/constants";
 
 function GenerateBill({
-  items = [], courses = [], customers = [], customersOptions = [], invoiceNo, loadInitData = () => { }, onSave = async () => { }, handleCancel, isModalOpen, handleOk, onSearch
+  items = [],
+  courses = [],
+  customers = [],
+  customersOptions = [],
+  invoiceNo,
+  loadInitData = () => {},
+  onSave = async () => {},
+  handleCancel,
+  isModalOpen,
+  handleOk,
+  onSearch,
 }) {
-
-
   const [selectedItem, setSelectedItem] = useState({});
   const [totals, setTotals] = useState({});
   const [form] = Form.useForm();
-  const selectedSubject = Form.useWatch("subject", form)
-
+  const selectedSubject = Form.useWatch("subject", form);
+  const selectedFormCenter = Form.useWatch("centerId", form);
+  const { centers, getCenters } = useStore(centersStore);
+  const { user } = useStore(userStore);
 
   const initialValues = {
     invoiceNo: invoiceNo || 0,
@@ -27,79 +40,101 @@ function GenerateBill({
     generated_for: "",
     subject: "",
     generated_on: dayjs(),
-    discountType: "percentage"
-  }
-  const loading = false
+    discountType: "percentage",
+  };
+  const loading = false;
 
   const subjectOptions = [
     {
       label: "Materials",
-      value: "materials"
+      value: "materials",
     },
     {
       label: "Gallery",
-      value: "gallery"
+      value: "gallery",
     },
     {
       label: "Courses",
-      value: "course"
+      value: "course",
     },
-  ]
+  ];
 
   const getItemType = (selectedSubject) => {
     switch (selectedSubject) {
       case "materials":
-        return "InventoryItem"
+        return "InventoryItem";
       case "gallery":
-        return "InventoryItem"
+        return "InventoryItem";
       case "course":
-        return "Course"
+        return "Course";
       default:
         break;
     }
-  }
+  };
 
-  // Loading Initial dropdown data. Function should be passed from parent 
   useEffect(() => {
-    loadInitData({ itemType: selectedSubject })
-  }, [selectedSubject])
+    getCenters();
+  }, []);
+
+  // Loading Initial dropdown data. Function should be passed from parent
+  useEffect(() => {
+    if (user.role === ROLES.ADMIN) {
+      loadInitData({ itemType: selectedSubject, centerId: selectedFormCenter });
+    } else {
+      loadInitData({ itemType: selectedSubject });
+    }
+  }, [selectedSubject, selectedFormCenter]);
 
   // Submit function
   const onSubmit = async (values) => {
     values?.items?.forEach((item, index) => {
-      item.item = selectedItem[index]?._id
-      item.name = selectedItem[index]?.name
-      item.item_type = getItemType(selectedSubject)
-    })
+      item.item = selectedItem[index]?._id;
+      item.name = selectedItem[index]?.name;
+      item.item_type = getItemType(selectedSubject);
+    });
     console.log(values);
-    await onSave({ ...values, ...totals })
-    handleOk()
-  }
-
+    await onSave({ ...values, ...totals });
+    handleOk();
+  };
 
   const columns2 = [
     {
       dataIndex: "name",
-      className: "font-bold text-start"
+      className: "font-bold text-start",
     },
     {
       dataIndex: "value",
       className: "text-end",
-      render: (value, _, index) => (index === 4 ? <p className='font-bold text-lg text-primary'>₹{value}</p> : `₹${value}`)
+      render: (value, _, index) =>
+        index === 4 ? (
+          <p className="font-bold text-lg text-primary">₹{value}</p>
+        ) : (
+          `₹${value}`
+        ),
     },
-  ]
+  ];
   // console.log(items);
 
   const itemsOptionsBySubject = useMemo(() => {
     if (!selectedSubject) {
-      return items?.map(item => ({ label: item.name, value: item._id }))
+      return items?.map((item) => ({ label: item.name, value: item._id }));
     }
-    return items?.filter(item => item.type === selectedSubject)?.map(item => ({ label: item.name, value: item._id }))
-  }, [items, selectedSubject])
+    return items
+      ?.filter((item) => item.type === selectedSubject)
+      ?.map((item) => ({ label: item.name, value: item._id }));
+  }, [items, selectedSubject]);
+
+  const centerOptions = useMemo(
+    () =>
+      centers?.map((center) => ({
+        label: center.center_name,
+        value: center._id,
+      })),
+    [centers]
+  );
 
   return (
     <>
-
       <Modal
         title={"Generate Bill"}
         open={isModalOpen}
@@ -108,18 +143,56 @@ function GenerateBill({
         width={"90%"}
       >
         <CustomForm form={form} initialValues={initialValues} action={onSubmit}>
-          <div className='flex gap-5'>
-            <CustomInput label={"Invoice Number"} name={"invoiceNo"} placeholder={"1"} />
-            <CustomDatePicker label={"Invoice Date"} name={"generated_on"} className='w-full' />
+          <div className="flex gap-5">
+            <CustomInput
+              label={"Invoice Number"}
+              name={"invoiceNo"}
+              placeholder={"1"}
+            />
+            <CustomDatePicker
+              label={"Invoice Date"}
+              name={"generated_on"}
+              className="w-full"
+            />
           </div>
-          <div className='flex gap-5'>
+          <div className="flex gap-5">
             {/* <CustomInput label={"Subject"} name={"subject"} placeholder={"Materials"} /> */}
-            <CustomSelect name={"generated_for"} options={customersOptions} label={"Select Customer"} placeholder='Customer' />
-            <CustomSelect name={"subject"} options={subjectOptions} label={"Subject"} placeholder='Subject' />
+            <CustomSelect
+              name={"generated_for"}
+              options={customersOptions}
+              label={"Select Customer"}
+              placeholder="Customer"
+            />
+            <CustomSelect
+              name={"subject"}
+              options={subjectOptions}
+              label={"Subject"}
+              placeholder="Subject"
+              disabled={user.role === ROLES.ADMIN && !selectedFormCenter}
+            />
           </div>
-          <ItemsInputTable form={form} items={items} itemsOptions={itemsOptionsBySubject} name={"items"} selectedItem={selectedItem} setSelectedItem={setSelectedItem} setTotals={setTotals} itemType={selectedSubject} onSearch={onSearch} />
+          <div className="w-1/2">
+            {user.role === ROLES.ADMIN && (
+              <CustomSelect
+                label={"Center"}
+                name={"centerId"}
+                options={centerOptions}
+              />
+            )}
+          </div>
+          <ItemsInputTable
+            form={form}
+            items={items}
+            itemsOptions={itemsOptionsBySubject}
+            name={"items"}
+            selectedItem={selectedItem}
+            setSelectedItem={setSelectedItem}
+            setTotals={setTotals}
+            itemType={selectedSubject}
+            onSearch={onSearch}
+          />
           <Table
-            className='w-fit ml-auto'
+            className="w-fit ml-auto"
             showHeader={false}
             columns={columns2}
             pagination={false}
@@ -129,13 +202,14 @@ function GenerateBill({
               { name: "Subtotal", value: totals?.subtotal },
               { name: "Total Tax", value: totals?.total_tax },
               { name: "Grand Total", value: totals?.total },
-            ]} />
+            ]}
+          />
 
-          <CustomSubmit className='bg-primary' label='Save' loading={loading} />
+          <CustomSubmit className="bg-primary" label="Save" loading={loading} />
         </CustomForm>
       </Modal>
     </>
-  )
+  );
 }
 
-export default GenerateBill
+export default GenerateBill;

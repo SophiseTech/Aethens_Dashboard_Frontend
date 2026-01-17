@@ -4,24 +4,37 @@ import handleError from "@utils/handleError"
 import { post, put } from "@utils/Requests"
 
 class InventoryService {
-  async getInventoryItems(lastRef = 0, limit = 10, filters) {
-    try {
-      const {user} = userStore.getState();
-      const {selectedCenter} = centersStore.getState();
-      let constructedPath;
+  async getInventoryItems(lastRef = 0, limit = 10, filters, centerId) {
+  try {
+    const { user } = userStore.getState();
+    const { selectedCenter } = centersStore.getState();
 
-      if(user.role === 'admin' && selectedCenter){
-        constructedPath = `/inventoryItems/getItems?lastRef=${lastRef}&limit=${limit}&centerId=${selectedCenter}`;
-      }else{
-        constructedPath = `/inventoryItems/getItems?lastRef=${lastRef}&limit=${limit}`;
-      }
-      const response = await post(constructedPath, { filters })
-      if (!response || !response.data) throw new Error("An error occured. Please try again")
-      return response.data
-    } catch (error) {
-      handleError(error)
+    const effectiveCenterId =
+      user.role === 'admin'
+        ? (centerId ?? selectedCenter)
+        : null;
+
+    const params = new URLSearchParams({
+      lastRef,
+      limit,
+      ...(effectiveCenterId ? { centerId: effectiveCenterId } : {})
+    });
+
+    const response = await post(
+      `/inventoryItems/getItems?${params.toString()}`,
+      { filters }
+    );
+
+    if (!response?.data) {
+      throw new Error("An error occurred. Please try again");
     }
+
+    return response.data;
+  } catch (error) {
+    handleError(error);
   }
+}
+
 
   async getInventory(filters) {
     try {
