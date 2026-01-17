@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Select, Button, Table, message, Space, Typography, Empty, Popconfirm } from 'antd';
+import { Select, Button, Table, message, Space, Typography, Empty, Popconfirm, DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import SessionStore from '@stores/SessionStore';
 import { ROLES, weekDays } from '@utils/constants';
@@ -17,6 +17,7 @@ function ManagerSlots() {
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [deallocatingIds, setDeallocatingIds] = useState([]);
   const [currentPage, setCurrentPage] = useState(1)
+  const [slotDate, setSlotDate] = useState(dayjs())
   const { user } = userStore()
 
   const { getAllSessions } = SessionStore();
@@ -25,7 +26,7 @@ function ManagerSlots() {
     async function loadSessions() {
       try {
         setLoadingSessions(true);
-        const allSessions = await getAllSessions();
+        const allSessions = await getAllSessions(slotDate);
         const options = allSessions.map((session) => {
           const localTime = dayjs(session.start_time).format('hh:mm A');
           return {
@@ -43,7 +44,7 @@ function ManagerSlots() {
       }
     }
     loadSessions();
-  }, [getAllSessions]);
+  }, [getAllSessions, slotDate]);
 
   const loadStudents = async () => {
     if (!selectedSessionId) {
@@ -112,7 +113,7 @@ function ManagerSlots() {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
-      roles: [ROLES.FACULTY,ROLES.MANAGER],
+      roles: [ROLES.FACULTY, ROLES.MANAGER],
       render: (value) => value ? String(value).charAt(0).toUpperCase() + String(value).slice(1) : ''
     },
     // {
@@ -188,6 +189,10 @@ function ManagerSlots() {
           }}
           optionFilterProp="label"
           optionRender={(options) => sessionSlotOptionRenderer(options, user)}
+        />
+        <DatePicker
+          onChange={setSlotDate}
+          value={slotDate}
         />
         <Button
           type="primary"

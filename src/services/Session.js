@@ -2,9 +2,9 @@ import handleError from "@utils/handleError"
 import { get, post } from "@utils/Requests"
 
 class SessionService {
-  async getAvailableSessionByDate() {
+  async getAvailableSessionByDate(date) {
     try {
-      const response = await post("/sessions/availableSessions", {})
+      const response = await post("/sessions/availableSessions", { date })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response
     } catch (error) {
@@ -40,9 +40,9 @@ class SessionService {
     }
   }
 
-  async getAllSessions(userId) {
+  async getAllSessions(date) {
     try {
-      const response = await get("/sessions/getAll")
+      const response = await get(`/sessions/getAll?slotDate=${date || ""}`)
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {

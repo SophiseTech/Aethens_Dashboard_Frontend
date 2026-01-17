@@ -103,7 +103,7 @@ export const sessionSlotOptionRenderer = (option, user) => {
 
   const { data: session } = option.data;
   if (!session) return null;
-  const { remainingSlots, additionalBookings } = session
+  const { remainingSlots, additional } = session
 
   const weekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][session.weekDay];
   const time = dayjs(session.start_time).format('h:mm A');
@@ -145,7 +145,7 @@ export const sessionSlotOptionRenderer = (option, user) => {
             marginRight: 0
           }}
         >
-          + {additionalBookings}
+          + {additional}
         </Tag>
       </div>
     </Flex>
