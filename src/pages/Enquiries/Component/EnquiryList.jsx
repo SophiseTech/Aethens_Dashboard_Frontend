@@ -177,6 +177,7 @@ function EnquiryList() {
             visible={drawerVisible}
             onClose={() => setDrawerVisible(false)}
             parentPage="enquiryList"
+            fetchEnquiries={fetchEnquiries}
           />
         </div>
       }
