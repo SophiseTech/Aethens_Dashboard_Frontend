@@ -141,9 +141,9 @@ class EnquiryService {
     }
   }
 
-  async getDemoSlots() {
+  async getDemoSlots({ selectedView }) {
     try {
-      const response = await get("/v3/enquiry/demo/slots");
+      const response = await get(`/v3/enquiry/demo/slots?selectedView=${selectedView}`);
       if (!response) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {

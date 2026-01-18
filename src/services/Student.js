@@ -15,6 +15,8 @@ class StudentService {
     phone_alt,
     school_uni_work,
     profile_img,
+    start_date,
+    sessions
   }) {
     try {
       if (
@@ -40,6 +42,8 @@ class StudentService {
         phone_alt,
         school_uni_work,
         profile_img,
+        start_date,
+        sessions
       });
       if (!response || !response.data)
         throw new Error("An error occured. Please try again");

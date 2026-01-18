@@ -120,21 +120,21 @@ function MigrateCourse({ student }) {
 
           <Flex justify="end" gap={10} wrap="wrap">
             <Button onClick={handleCancel}>Cancel</Button>
-            <Button
+            {/* <Button
               danger
               onClick={() => handleMigration(false)}
               loading={processing}
               disabled={!selectedCourse || processing}
             >
               Migrate And Delete All Slots
-            </Button>
+            </Button> */}
             <Button
               type="primary"
               onClick={() => handleMigration(true)}
               loading={processing}
               disabled={!selectedCourse || processing}
             >
-              Migrate Slots
+              Migrate Course
             </Button>
           </Flex>
         </Space>

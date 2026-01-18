@@ -6,6 +6,7 @@ import userStore from "@stores/UserStore";
 import { ROLES } from "@utils/constants";
 import UserDetailsDrawer from "@components/UserDetailsDrawer";
 import courseService from "@/services/Course";
+import Chip from "@components/Chips/Chip";
 
 function StudentList() {
   const {
@@ -236,7 +237,7 @@ function StudentList() {
           >
             <img
               className="rounded-full aspect-square w-8 2xl:w-10 border border-border"
-              src={record?.profile_img}
+              src={record?.profile_img || '/images/default.jpg'}
               alt="Profile"
             />
             <p className="max-2xl:text-xs">{name}</p>
@@ -274,8 +275,20 @@ function StudentList() {
       render: (date) => {
         return date ? <p>{new Date(date).toDateString()}</p> : <p>-</p>;
       },
-    },
-    {
+    }
+
+  ];
+
+  if (selectedView === "Current Students") {
+    columns.push(
+      {
+        title: "Status",
+        dataIndex: "isPresent",
+        render: (value) => <Chip type={value ? "success" : "danger"} label={value ? "Present" : "Absent"} glow={false} />
+      }
+    )
+  } else {
+    columns.push({
       title: "Attendance",
       dataIndex: "sessions_attended",
       render: (attendedCount, record) => {
@@ -288,8 +301,8 @@ function StudentList() {
           </p>
         );
       },
-    },
-  ];
+    },)
+  }
 
   const handleTableChange = (pagination, filters) => {
     // Handle course filter change

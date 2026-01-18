@@ -59,15 +59,15 @@ const enquiryStore = create((set, get) => ({
     try {
       set({ loading: true });
 
-      const response = await enquiryService.addFollowUpDate(id,slotData);
+      const response = await enquiryService.addFollowUpDate(id, slotData);
       if (!response) return;
 
       handleSuccess("Followup Date Updated successfully");
     } catch (error) {
       handleInternalError(error);
     }
-    finally{
-      set({loading : false})
+    finally {
+      set({ loading: false })
     }
   },
 
@@ -75,7 +75,7 @@ const enquiryStore = create((set, get) => ({
     try {
       set({ loading: true });
 
-      const response = await enquiryService.rescheduleSlot(id,slotData);
+      const response = await enquiryService.rescheduleSlot(id, slotData);
       if (!response) return;
 
       handleSuccess("Demo Slot rescheduled successfully");
@@ -83,15 +83,15 @@ const enquiryStore = create((set, get) => ({
       handleInternalError(error);
     }
     finally {
-      set({loading : false})
+      set({ loading: false })
     }
   },
 
-  enrollStudent: async (id,payload) => {
+  enrollStudent: async (id, payload) => {
     try {
       set({ loading: true });
 
-      const response = await enquiryService.enrollStudent(id,payload);
+      const response = await enquiryService.enrollStudent(id, payload);
       if (!response) return;
 
       handleSuccess("Student Enrolled Successfully");
@@ -99,7 +99,7 @@ const enquiryStore = create((set, get) => ({
       handleInternalError(error);
     }
     finally {
-      set({loading : false})
+      set({ loading: false })
     }
   },
 
@@ -133,10 +133,10 @@ const enquiryStore = create((set, get) => ({
     }
   },
 
-  getDemoSlots: async () => {
+  getDemoSlots: async ({ selectedView }) => {
     try {
       set({ loading: true });
-      const response = await enquiryService.getDemoSlots();
+      const response = await enquiryService.getDemoSlots({ selectedView });
       if (response) {
         set({ demoSlots: response });
       }

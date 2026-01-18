@@ -37,7 +37,8 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
         }
       }
     };
-    fetchSessions();
+    // fetchSessions();
+    fetchSlots()
   }, [isModalOpen]);
 
   const handleCancel = () => {
@@ -64,7 +65,8 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
             $lte: end
           },
           booked_student_id: student._id,
-          course_id: student?.details_id?.course_id?._id || student?.details_id?.course_id,
+          // course_id: student?.details_id?.course_id?._id || student?.details_id?.course_id,
+          isActive: true
         },
         populate: "session",
         sort: "start_date",
@@ -264,7 +266,7 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
       destroyOnClose
     >
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-        <Flex gap={10} wrap>
+        {/* <Flex gap={10} wrap>
           {loadingSessions ? (
             <Card loading={true} style={{ width: '100%' }} />
           ) :
@@ -312,7 +314,7 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
                 })
               )
           }
-        </Flex>
+        </Flex> */}
 
         <Flex justify="space-between" align="center">
           <Space size="middle" align="center">

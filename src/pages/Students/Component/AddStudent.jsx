@@ -6,11 +6,14 @@ import CustomInput from '@components/form/CustomInput';
 import CustomSelect from '@components/form/CustomSelect';
 import CustomSubmit from '@components/form/CustomSubmit';
 import ProfileImageUploader from '@components/ProfileImageUploader';
+import { sessionSlotOptionRenderer } from '@pages/Students/Component/AllotSessions';
 import courseStore from '@stores/CourseStore';
+import SessionStore from '@stores/SessionStore';
 import studentStore from '@stores/StudentStore';
 import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
 import { Avatar, Form, Modal } from 'antd';
+import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from 'zustand';
 
@@ -21,6 +24,8 @@ function AddStudent() {
   const { enroll, loading } = studentStore()
   const [form] = Form.useForm();
   const { getCourses, courses, total, loading: courseLoading } = useStore(courseStore)
+  const { getAvailableSessions, availableSessions, loading: sessionsLoading } = SessionStore()
+  const date = Form.useWatch("start_date", form)
 
 
   const initialValues = {
@@ -33,7 +38,9 @@ function AddStudent() {
     phone: "",
     phone_alt: "",
     school_uni_work: "",
-    profile_img: "https://app.schoolofathens.art/images/default.jpg"
+    profile_img: "https://app.schoolofathens.art/images/default.jpg",
+    sessions: [],
+    start_date: dayjs()
   }
 
   useEffect(() => {
@@ -42,6 +49,9 @@ function AddStudent() {
     }
   }, [])
 
+  useEffect(() => {
+    getAvailableSessions(date)
+  }, [date])
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -62,6 +72,13 @@ function AddStudent() {
   }
 
   const options = useMemo(() => courses?.map(course => ({ label: course.course_name, value: course._id })), [courses])
+
+  const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const slotOptions = useMemo(() => availableSessions?.map(session => ({
+    label: `${weekDays[session.weekDay]} - ${dayjs(session.start_time).format("h:mm A")}`,
+    value: session._id,
+    data: session,
+  })), [availableSessions, date])
 
   return (
     <>
@@ -86,6 +103,8 @@ function AddStudent() {
           <CustomInput label={"Email"} name={"email"} type='email' placeholder={"john@doe.com"} />
           <CustomInput label={"School / University / Company Name"} name={"school_uni_work"} placeholder={"Name of your School / University / Company"} />
           <CustomSelect name={"course_id"} options={options} label={"Select Course"} />
+          <CustomDatePicker name={"start_date"} label={"Start Date"} time={false} required={false} className='w-full' />
+          <CustomSelect name={"sessions"} label={"Select Slots"} options={slotOptions} mode={"multiple"} maxCount={2} optionRender={sessionSlotOptionRenderer} loading={sessionsLoading} />
           <CustomInput label={"Password"} name={"password"} placeholder={"Password"} type='password' />
           <CustomSubmit className='bg-primary' label='Enroll' loading={loading} />
         </CustomForm>

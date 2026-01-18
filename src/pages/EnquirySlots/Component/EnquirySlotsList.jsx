@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Segmented, Table } from "antd";
 import EnquiryDetailsDrawer from "@pages/Enquiries/Component/EnquiryDetailsDrawer";
 import enquiryStore from "@stores/EnquiryStore";
+import Chip from "@components/Chips/Chip";
 
 function EnquirySlotsList() {
   const {
@@ -13,47 +14,29 @@ function EnquirySlotsList() {
   const [selectedView, setSelectedView] = useState("Scheduled");
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
+  const { slots, today } = demoSlots || {}
 
   useEffect(() => {
-    getDemoSlots();     // fetch once when component loads
-  }, []);
+    getDemoSlots({ selectedView });     // fetch once when component loads
+  }, [selectedView]);
 
   const handleRowClick = (record) => {
     setSelectedEnquiry(record);
     setDrawerVisible(true);
   };
 
-  // Convert backend response to table-ready array
-  const formattedList = useMemo(() => {
-    if (!demoSlots) return [];
-
-    const all = [
-    ...(demoSlots.upcoming?.items || []),
-    ...(demoSlots.completed?.items || []),
-    ...(demoSlots.cancelled?.items || []),
-    ...(demoSlots.rescheduled?.items || []),
-  ];
-
-  if (selectedView === "All") return all;
-
-    switch (selectedView) {
-      case "Scheduled":
-        return demoSlots.upcoming?.items || [];
-      case "Completed":
-        return demoSlots.completed?.items || [];
-      case "Cancelled":
-        return demoSlots.cancelled?.items || [];
-      case "Rescheduled":
-        return demoSlots.rescheduled?.items || [];
-      default:
-        return [];
+  const getStatusTag = (status) => {
+    switch (status) {
+      case "booked":
+        return <Chip glow label="Scheduled" size="xs" type="success" />
     }
-  }, [demoSlots, selectedView]);
+
+  }
 
   const columns = [
     {
       title: "Name",
-      dataIndex: "name",
+      dataIndex: ["demoAttendee", "name"],
       key: "name",
       render: (value, record) => (
         <p
@@ -65,29 +48,26 @@ function EnquirySlotsList() {
       ),
     },
     {
-      title: "Phone",
-      dataIndex: "phoneNumber",
-    },
-    {
       title: "Courses",
-      dataIndex: "selectedCourses",
+      dataIndex: ["enquiry_id", "selectedCourses"],
       render: (courses) => courses?.map(c => c.course_name).join(", "),
     },
     {
       title: "Demo Date",
-      dataIndex: ["demoSlot", "scheduledAt"],
+      dataIndex: ["start_date"],
       render: (date) => (date ? new Date(date).toLocaleString() : "N/A"),
     },
     {
       title: "Status",
-      dataIndex: ["demoSlot", "status"],
+      dataIndex: ["status"],
+      render: (val) => getStatusTag(val) 
     },
   ];
 
   return (
     <>
       <Segmented
-        options={["All","Scheduled", "Completed", "Cancelled", "Rescheduled"]}
+        options={["All", "Scheduled", "Completed", "Cancelled", "Rescheduled"]}
         className="w-fit mb-3"
         value={selectedView}
         onChange={setSelectedView}
@@ -95,7 +75,7 @@ function EnquirySlotsList() {
 
       <Table
         columns={columns}
-        dataSource={formattedList}
+        dataSource={slots || []}
         loading={loading}
         rowKey="_id"
       />
