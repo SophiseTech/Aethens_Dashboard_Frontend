@@ -7,6 +7,7 @@ import ProjectDetailModal from '@pages/Students/Component/ProjectDetailModal'
 import ViewStudentSessions from '@pages/Students/Component/SessionDetails'
 import SessionStatus from '@pages/Students/Component/SessionStatus'
 import userStore from '@stores/UserStore'
+import FeeTracker from '@pages/Students/Component/FeeTracker';
 import { ROLES } from '@utils/constants'
 import { isUserActive } from '@utils/helper'
 import { Button, Flex, Space } from 'antd'
@@ -28,6 +29,7 @@ function DrawerActionButtons({ userDetails }) {
 const ManagerActionButtons = ({ userDetails }) => {
   const nav = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { handleCancel: handleFeeCancel, isModalOpen: isFeeModalOpen, handleOk: handleFeeOk, showModal: showFeeModal } = useModal()
 
   const handleViewBills = (student_id) => {
     nav(`/manager/bills?student_id=${student_id}`);
@@ -46,7 +48,7 @@ const ManagerActionButtons = ({ userDetails }) => {
   };
 
   const handleViewFinalProject = (student_id, course_id) => {
-  nav(`/manager/final-project/student/${student_id}/details`);
+    nav(`/manager/final-project/student/${student_id}/details`);
   };
 
   const handleViewSession = () => {
@@ -54,42 +56,49 @@ const ManagerActionButtons = ({ userDetails }) => {
   };
 
   return (
-    <Flex wrap gap={10}>
-      <AllotSessions student={userDetails} />
-      <Button onClick={() => handleViewBills(userDetails._id)} variant="filled" color="cyan">
-        View Bills
-      </Button>
-      <Button onClick={() => handleViewMaterials(userDetails._id, userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id)} variant="filled" color="blue">
-        View Materials
-      </Button>
-      <Button onClick={() => handleViewAttendance(userDetails._id, userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id)} variant="filled" color="orange">
-        View Attendance
-      </Button>
-      <SessionStatus student={userDetails} />
-      <Button onClick={handleViewSession} disabled={!isUserActive(userDetails)} variant='filled' color='magenta'>
-        View Sessions
-      </Button>
-      <Button onClick={() => handleViewCourseHistory(userDetails?._id)} variant='filled' color='cyan'>
-        View Course History
-      </Button>
-      <MigrateCourse student={userDetails} />
+    <>
+      <Flex wrap gap={10}>
+        <AllotSessions student={userDetails} />
+        <Button onClick={() => handleViewBills(userDetails._id)} variant="filled" color="cyan">
+          View Bills
+        </Button>
+        <Button onClick={() => handleViewMaterials(userDetails._id, userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id)} variant="filled" color="blue">
+          View Materials
+        </Button>
+        <Button onClick={() => handleViewAttendance(userDetails._id, userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id)} variant="filled" color="orange">
+          View Attendance
+        </Button>
+        <SessionStatus student={userDetails} />
+        <Button onClick={handleViewSession} disabled={!isUserActive(userDetails)} variant='filled' color='magenta'>
+          View Sessions
+        </Button>
+        <Button onClick={() => handleViewCourseHistory(userDetails?._id)} variant='filled' color='cyan'>
+          View Course History
+        </Button>
+        <MigrateCourse student={userDetails} />
 
-      <MigrateCenter student={userDetails} />
+        <MigrateCenter student={userDetails} />
 
-      <DeactivateStudent student={userDetails} />
+        <DeactivateStudent student={userDetails} />
 
-      <ViewStudentSessions isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} student={userDetails} />
+        <ViewStudentSessions isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} student={userDetails} />
 
-      <Button onClick={() => handleViewFinalProject(userDetails?._id, userDetails?.details_id?.course_id)} variant='filled' color='orange'>
-        View Final Project
-      </Button>
-    </Flex>
+        <Button onClick={() => handleViewFinalProject(userDetails?._id, userDetails?.details_id?.course_id)} variant='filled' color='orange'>
+          View Final Project
+        </Button>
+        <Button onClick={showFeeModal} variant='filled' color='green'>
+          Fee Tracker
+        </Button>
+      </Flex>
+      <FeeTracker student={userDetails} visible={isFeeModalOpen} onCancel={handleFeeCancel} />
+    </>
   )
 }
 
 const FacultyActionButton = ({ userDetails }) => {
   const nav = useNavigate()
   const { handleCancel, isModalOpen, handleOk, showModal } = useModal()
+  const { handleCancel: handleFeeCancel, isModalOpen: isFeeModalOpen, handleOk: handleFeeOk, showModal: showFeeModal } = useModal()
   const [selectedStudent, setSelectedStudent] = useState(null)
 
   const handleViewAttendance = (student_id, course_id) => {
@@ -132,8 +141,12 @@ const FacultyActionButton = ({ userDetails }) => {
         <Button onClick={() => handleViewCourseHistory(userDetails?._id)} variant='filled' color='cyan'>
           View Course History
         </Button>
+        <Button onClick={showFeeModal} variant='filled' color='green'>
+          Fee Tracker
+        </Button>
       </Flex>
       <ProjectDetailModal handleCancel={handleCancel} handleOk={handleOk} isModalOpen={isModalOpen} student_id={selectedStudent} />
+      <FeeTracker student={userDetails} visible={isFeeModalOpen} onCancel={handleFeeCancel} />
     </>
   )
 }
