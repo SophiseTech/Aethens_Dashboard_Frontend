@@ -3,6 +3,8 @@ import { Segmented, Table } from "antd";
 import EnquiryDetailsDrawer from "@pages/Enquiries/Component/EnquiryDetailsDrawer";
 import enquiryStore from "@stores/EnquiryStore";
 import Chip from "@components/Chips/Chip";
+import userStore from "@stores/UserStore";
+import centersStore from "@stores/CentersStore";
 
 function EnquirySlotsList() {
   const {
@@ -15,9 +17,16 @@ function EnquirySlotsList() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const { slots, today } = demoSlots || {}
+  const {user} = userStore();
+  const {selectedCenter} = centersStore();
 
   useEffect(() => {
     getDemoSlots({ selectedView });     // fetch once when component loads
+     if(user.role === 'admin' && selectedCenter){
+      getDemoSlots({selectedView, centerId: selectedCenter});
+    }else{
+      getDemoSlots({selectedView});     // fetch once when component loads
+    }
   }, [selectedView]);
 
   const handleRowClick = (record) => {

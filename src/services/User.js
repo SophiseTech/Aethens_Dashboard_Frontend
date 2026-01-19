@@ -7,7 +7,7 @@ class UserService {
       if (!role || !centerId) throw new Error("Bad Data")
       const payload = {
         role: role,
-        centerId: centerId
+        centerId: centerId === null ? 'all' : centerId
       }
 
       // Add status filter if provided
@@ -30,6 +30,8 @@ class UserService {
       }
 
       const response = await post(`/user/getByRoleByCenter?lastRefKey=${lastRefKey}&limit=${limit}`, payload)
+      if (!role) throw new Error("Bad Data")
+
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {
@@ -47,9 +49,9 @@ class UserService {
     }
   }
 
-  async getCurrentSessionAttendees() {
+  async getCurrentSessionAttendees(centerId) {
     try {
-      const response = await post(`/user/getCurrentSessionAttendees`,)
+      const response = !centerId ? await post(`/user/getCurrentSessionAttendees`,) : await post(`/user/getCurrentSessionAttendees`, { centerId })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {

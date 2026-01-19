@@ -1,11 +1,18 @@
 import { useEffect, useState } from 'react';
+<<<<<<< HEAD
 import { Select, Button, Table, message, Space, Typography, Empty, Popconfirm, DatePicker } from 'antd';
+=======
+import { Select, Button, Table, message, Space, Typography, Empty, Popconfirm, Row } from 'antd';
+>>>>>>> dev-unni
 import dayjs from 'dayjs';
 import SessionStore from '@stores/SessionStore';
 import { ROLES, weekDays } from '@utils/constants';
 import sessionService from '@/services/Session';
 import { sessionSlotOptionRenderer } from '@pages/Students/Component/AllotSessions';
 import userStore from '@stores/UserStore';
+import AdminCenterSelector from '@components/AdminCenterSelector';
+import { useStore } from 'zustand';
+import centersStore from '@stores/CentersStore';
 
 const { Title } = Typography;
 
@@ -19,6 +26,7 @@ function ManagerSlots() {
   const [currentPage, setCurrentPage] = useState(1)
   const [slotDate, setSlotDate] = useState(dayjs())
   const { user } = userStore()
+  const {selectedCenter} = useStore(centersStore);
 
   const { getAllSessions } = SessionStore();
 
@@ -44,7 +52,11 @@ function ManagerSlots() {
       }
     }
     loadSessions();
+<<<<<<< HEAD
   }, [getAllSessions, slotDate]);
+=======
+  }, [getAllSessions, selectedCenter]);
+>>>>>>> dev-unni
 
   const loadStudents = async () => {
     if (!selectedSessionId) {
@@ -175,7 +187,10 @@ function ManagerSlots() {
 
   return (
     <Space direction="vertical" style={{ padding: 24, width: '100%' }}>
-      <Title level={3}>View Students by Session</Title>
+      <Row justify="space-between">
+        <Title level={3}>View Students by Session</Title>
+        <AdminCenterSelector />
+      </Row>
       <Space wrap>
         <Select
           showSearch

@@ -18,7 +18,7 @@ import PropTypes from 'prop-types'
 function DrawerActionButtons({ userDetails }) {
   const { user } = useStore(userStore)
 
-  if (user.role === ROLES.MANAGER) {
+  if (user.role === ROLES.MANAGER || user.role === ROLES.ADMIN) {
     return <ManagerActionButtons userDetails={userDetails} />
   } else if (user.role === ROLES.FACULTY) {
     return <FacultyActionButton userDetails={userDetails} />

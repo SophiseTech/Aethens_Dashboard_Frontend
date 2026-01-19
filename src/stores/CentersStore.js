@@ -10,6 +10,10 @@ const centersStore = create((set, get) => ({
   createLoading: false,
   lastRefKey: 0,
   total: 0,
+  selectedCenter: "all",
+  setSelectedCenter: (center_id) => {
+    set({ selectedCenter: center_id});
+  },
   getCenters: async (limit = 2, filters = {}) => {
     try {
       set({ loading: true })

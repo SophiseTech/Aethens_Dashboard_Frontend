@@ -5,8 +5,14 @@ import studentStore from "@stores/StudentStore";
 import userStore from "@stores/UserStore";
 import { ROLES } from "@utils/constants";
 import UserDetailsDrawer from "@components/UserDetailsDrawer";
+<<<<<<< HEAD
 import courseService from "@/services/Course";
 import Chip from "@components/Chips/Chip";
+=======
+import { render } from "@react-pdf/renderer";
+import { useStore } from "zustand";
+import centersStore from "@stores/CentersStore";
+>>>>>>> dev-unni
 
 function StudentList() {
   const {
@@ -27,6 +33,7 @@ function StudentList() {
   const nav = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
+  const {selectedCenter} = useStore(centersStore);
 
   // Get initial view and page from query parameters
   const initialView = queryParams.get("view") || "Current Students";
@@ -53,6 +60,7 @@ function StudentList() {
 
   useEffect(() => {
     fetchStudents();
+<<<<<<< HEAD
     console.log(students);
   }, [selectedView, currentPage, searchQuery, selectedCourses, fromBranch]);
 
@@ -86,6 +94,9 @@ function StudentList() {
     };
     fetchCenters();
   }, []);
+=======
+  }, [selectedView, currentPage, searchQuery, selectedCenter]);
+>>>>>>> dev-unni
 
   const fetchStudents = () => {
     // Prevent concurrent fetches

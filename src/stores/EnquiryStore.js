@@ -133,10 +133,10 @@ const enquiryStore = create((set, get) => ({
     }
   },
 
-  getDemoSlots: async ({ selectedView }) => {
+  getDemoSlots: async ({ selectedView, centerId }) => {
     try {
       set({ loading: true });
-      const response = await enquiryService.getDemoSlots({ selectedView });
+      const response = await enquiryService.getDemoSlots({ selectedView, centerId });
       if (response) {
         set({ demoSlots: response });
       }

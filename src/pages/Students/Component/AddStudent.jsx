@@ -1,18 +1,18 @@
-import { EditOutlined, LoadingOutlined, PlusCircleFilled } from '@ant-design/icons';
+import { PlusCircleFilled } from '@ant-design/icons';
 import CustomDatePicker from '@components/form/CustomDatePicker';
 import CustomForm from '@components/form/CustomForm';
-import CustomImageUploadWithCrop from '@components/form/CustomImageUploadWithCrop';
 import CustomInput from '@components/form/CustomInput';
 import CustomSelect from '@components/form/CustomSelect';
 import CustomSubmit from '@components/form/CustomSubmit';
 import ProfileImageUploader from '@components/ProfileImageUploader';
 import { sessionSlotOptionRenderer } from '@pages/Students/Component/AllotSessions';
+import centersStore from '@stores/CentersStore';
 import courseStore from '@stores/CourseStore';
 import SessionStore from '@stores/SessionStore';
 import studentStore from '@stores/StudentStore';
 import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
-import { Avatar, Form, Modal } from 'antd';
+import { Form, Modal } from 'antd';
 import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from 'zustand';
@@ -26,6 +26,7 @@ function AddStudent() {
   const { getCourses, courses, total, loading: courseLoading } = useStore(courseStore)
   const { getAvailableSessions, availableSessions, loading: sessionsLoading } = SessionStore()
   const date = Form.useWatch("start_date", form)
+  const { centers,getCenters } = useStore(centersStore);
 
 
   const initialValues = {
@@ -47,6 +48,9 @@ function AddStudent() {
     if (!courses || total === 0 || courses.length < total) {
       getCourses(0)
     }
+    getCenters();
+    console.log(centers);
+
   }, [])
 
   useEffect(() => {
@@ -65,13 +69,16 @@ function AddStudent() {
 
   const onSubmit = async (values) => {
     values.role = ROLES.STUDENT
-    values.center_id = user.center_id
+    if(user.role === ROLES.MANAGER){
+      values.center_id = user.center_id
+    }
     console.log(values);
     await enroll(values)
     handleOk()
   }
 
   const options = useMemo(() => courses?.map(course => ({ label: course.course_name, value: course._id })), [courses])
+  const centerOptions = useMemo(() => centers?.map(center => ({ label: center.center_name, value: center._id })), [centers])
 
   const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const slotOptions = useMemo(() => availableSessions?.map(session => ({
@@ -105,6 +112,7 @@ function AddStudent() {
           <CustomSelect name={"course_id"} options={options} label={"Select Course"} />
           <CustomDatePicker name={"start_date"} label={"Start Date"} time={false} required={false} className='w-full' />
           <CustomSelect name={"sessions"} label={"Select Slots"} options={slotOptions} mode={"multiple"} maxCount={2} optionRender={sessionSlotOptionRenderer} loading={sessionsLoading} />
+          {user.role === ROLES.ADMIN && <CustomSelect name={"center_id"} options={centerOptions} label={"Select Center"} />}
           <CustomInput label={"Password"} name={"password"} placeholder={"Password"} type='password' />
           <CustomSubmit className='bg-primary' label='Enroll' loading={loading} />
         </CustomForm>

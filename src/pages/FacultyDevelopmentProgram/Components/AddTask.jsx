@@ -3,9 +3,11 @@ import CustomForm from '@components/form/CustomForm'
 import CustomInput from '@components/form/CustomInput'
 import CustomSelect from '@components/form/CustomSelect'
 import CustomSubmit from '@components/form/CustomSubmit'
+import centersStore from '@stores/CentersStore'
 import facultyDevProgramStore from '@stores/FacultyDevelopmentProgramStore'
 import facultyStore from '@stores/FacultyStore'
 import userStore from '@stores/UserStore'
+import { ROLES } from '@utils/constants'
 import { Form, Modal } from 'antd'
 import React, { useEffect } from 'react'
 import { useStore } from 'zustand'
@@ -15,6 +17,7 @@ function AddTask({ isModalOpen, handleOk, handleCancel }) {
   const { getFacultiesByCenter, faculties, total } = useStore(facultyStore)
   const { createProgram, loading } = useStore(facultyDevProgramStore)
   const { user } = useStore(userStore)
+  const {selectedCenter} = useStore(centersStore);
 
   const initialValues = {
     faculty_id: "",
@@ -25,10 +28,10 @@ function AddTask({ isModalOpen, handleOk, handleCancel }) {
   }
 
   useEffect(() => {
-    if (!faculties || total === 0 || faculties.length < total) {
-      getFacultiesByCenter(0)
-    }
-  }, [])
+    getFacultiesByCenter(0)
+    // if (!faculties || total === 0 || faculties.length < total) {
+    // }
+  }, [selectedCenter])
 
   const facultyOptions = faculties?.map(faculty => ({
     label: faculty.username,
@@ -36,6 +39,10 @@ function AddTask({ isModalOpen, handleOk, handleCancel }) {
   })) || []
 
   const onSubmit = async (values) => {
+    if(user.role === ROLES.ADMIN && selectedCenter === "all"){
+      alert("Change center from all to any specific center.")
+      return;
+    }
 
     values.attachments = values?.upload?.map(file => ({
       fileUrl: file.response,
@@ -43,7 +50,11 @@ function AddTask({ isModalOpen, handleOk, handleCancel }) {
       fileType: file.type?.split('/').pop() || "",
       fileSize: file.size
     }))
-    values.center_id = user.center_id
+    if(user.role === ROLES.ADMIN){
+      values.center_id = selectedCenter;
+    }else{
+      values.center_id = user.center_id
+    }
     console.log(values);
     await createProgram(values)
     handleOk()

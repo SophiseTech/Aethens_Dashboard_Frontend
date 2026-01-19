@@ -5,9 +5,14 @@ import { useFinalProject } from '@hooks/useFinalProject';
 import CreateProject from '@pages/FinalProject/Components/CreateProject';
 import ProjectOpenedStudentsList from '@pages/FinalProject/Components/ProjectOpenedStudentsList';
 import { formatDate } from '@utils/helper';
-import { Avatar, Button, Card, Segmented, Space, Spin, Table, Tag, Typography } from 'antd';
+import { Avatar, Button, Card, Segmented, Space, Spin, Table, Tag, Typography,Row } from 'antd';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import AdminCenterSelector from '@components/AdminCenterSelector';
+import { useStore } from 'zustand';
+import centersStore from '@stores/CentersStore';
+import userStore from '@stores/UserStore';
+import { ROLES } from '@utils/constants';
 
 const { Text, Title } = Typography
 
@@ -18,10 +23,16 @@ function FinalProjectManagerView() {
   // const { loading: projectOpenedStudentsLoading } = useStudents()
   const nav = useNavigate()
   const { projectId } = useParams()
+  const { selectedCenter } = useStore(centersStore);
+  const { user } = useStore(userStore);
 
   useEffect(() => {
-    fetchPendingSubmissions({}, projectId)
-  }, [])
+    if(user.role === ROLES.ADMIN && selectedCenter){
+      fetchPendingSubmissions({center_id : selectedCenter}, projectId);
+    }else{
+      fetchPendingSubmissions({}, projectId);
+    }
+  }, [selectedCenter])
 
   useEffect(() => {
     listProjects({
@@ -114,7 +125,11 @@ function FinalProjectManagerView() {
 
   return (
     <div className="p-6">
-      <Title level={2}>Pending Submissions</Title>
+      
+      <Row justify="space-between">
+        <Title level={2}>Pending Submissions</Title>
+        <AdminCenterSelector />
+      </Row>
 
       {/* <FilterBar onFiltersChange={(values) => console.log('Filters:', values)} /> */}
 

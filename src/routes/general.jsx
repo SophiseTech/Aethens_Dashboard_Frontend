@@ -86,7 +86,7 @@ export const generalRoutes = [
     ],
   },
   {
-    element: <Protected roles={[ROLES.FACULTY, ROLES.MANAGER]} />,
+    element: <Protected roles={[ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN]} />,
     children: [
       {
         element: <SidebarLayout />,
