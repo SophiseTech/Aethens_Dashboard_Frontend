@@ -11,6 +11,7 @@ export default defineConfig({
       "@components": "/src/components",
       "@stores": "/src/stores",
       "@hooks": "/src/hooks",
+      "@services": "/src/services",
       '@': '/src'
     }
   }
