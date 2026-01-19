@@ -35,8 +35,14 @@ function FinalProjectManagerView() {
   }, [selectedCenter])
 
   useEffect(() => {
+    let query = { status: selectedView };
+
+    if(user.role === ROLES.ADMIN && selectedCenter){
+      query.centerId = selectedCenter;
+    }
+
     listProjects({
-      query: { status: selectedView },
+      query: query,
       populate: [
         {
           path: "studentId",
@@ -53,7 +59,7 @@ function FinalProjectManagerView() {
       ],
       pagination: projectsInfo.pagination
     })
-  }, [selectedView])
+  }, [selectedView,selectedCenter])
 
   const onViewStudents = (projectId, studentId) => {
     nav(`/manager/final-project/${projectId}/student/${studentId}/phases`);

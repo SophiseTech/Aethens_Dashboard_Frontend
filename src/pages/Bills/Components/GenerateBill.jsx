@@ -31,7 +31,7 @@ function GenerateBill({
   const [form] = Form.useForm();
   const selectedSubject = Form.useWatch("subject", form);
   const selectedFormCenter = Form.useWatch("centerId", form);
-  const { centers, getCenters } = useStore(centersStore);
+  const { centers, getCenters, setSelectedCenter, selectedCenter } = useStore(centersStore);
   const { user } = useStore(userStore);
 
   const initialValues = {
@@ -75,6 +75,10 @@ function GenerateBill({
   useEffect(() => {
     getCenters();
   }, []);
+
+  useEffect(()=>{
+    if(selectedFormCenter && selectedFormCenter !== selectedCenter) setSelectedCenter(selectedFormCenter);
+  },[selectedFormCenter])
 
   // Loading Initial dropdown data. Function should be passed from parent
   useEffect(() => {
