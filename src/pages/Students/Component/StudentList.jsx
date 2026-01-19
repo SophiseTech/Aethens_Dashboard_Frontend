@@ -5,14 +5,10 @@ import studentStore from "@stores/StudentStore";
 import userStore from "@stores/UserStore";
 import { ROLES } from "@utils/constants";
 import UserDetailsDrawer from "@components/UserDetailsDrawer";
-<<<<<<< HEAD
 import courseService from "@/services/Course";
 import Chip from "@components/Chips/Chip";
-=======
-import { render } from "@react-pdf/renderer";
 import { useStore } from "zustand";
 import centersStore from "@stores/CentersStore";
->>>>>>> dev-unni
 
 function StudentList() {
   const {
@@ -33,7 +29,7 @@ function StudentList() {
   const nav = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const {selectedCenter} = useStore(centersStore);
+  const { selectedCenter } = useStore(centersStore);
 
   // Get initial view and page from query parameters
   const initialView = queryParams.get("view") || "Current Students";
@@ -60,9 +56,16 @@ function StudentList() {
 
   useEffect(() => {
     fetchStudents();
-<<<<<<< HEAD
     console.log(students);
-  }, [selectedView, currentPage, searchQuery, selectedCourses, fromBranch]);
+  }, [selectedView, currentPage, searchQuery, selectedCourses, fromBranch, selectedCenter]);
+
+  useEffect(() => {
+    if (selectedCenter === tempFromBranch) {
+      setTempFromBranch(null)
+      setFromBranch(null)
+    }
+  }, [selectedCenter])
+
 
   useEffect(() => {
     // Fetch all courses for filter dropdown
@@ -94,9 +97,6 @@ function StudentList() {
     };
     fetchCenters();
   }, []);
-=======
-  }, [selectedView, currentPage, searchQuery, selectedCenter]);
->>>>>>> dev-unni
 
   const fetchStudents = () => {
     // Prevent concurrent fetches
@@ -116,7 +116,7 @@ function StudentList() {
         if (searchQuery) {
           search(
             10,
-            { searchQuery, query: { role: ROLES.STUDENT }, page: currentPage },
+            { searchQuery, query: { role: ROLES.STUDENT, center_id: selectedCenter }, page: currentPage },
             currentPage
           );
         } else {
@@ -128,7 +128,7 @@ function StudentList() {
         if (searchQuery) {
           search(
             10,
-            { searchQuery, query: { role: ROLES.STUDENT, status: "active" }, page: currentPage },
+            { searchQuery, query: { role: ROLES.STUDENT, status: "active", center_id: selectedCenter }, page: currentPage },
             currentPage
           );
         } else {
@@ -341,7 +341,7 @@ function StudentList() {
           allowClear
           style={{ minWidth: 150 }}
           options={allCenters
-            .filter((center) => center._id !== user?.center_id)
+            .filter((center) => user?.role === ROLES.ADMIN ? center._id !== selectedCenter : center._id !== user?.center_id)
             .map((center) => ({
               label: center.center_name,
               value: center._id,
@@ -349,11 +349,10 @@ function StudentList() {
         />
         <Select
           placeholder="To Branch (Your Branch)"
-          value={user?.center_id}
+          value={user?.role === ROLES.ADMIN ? selectedCenter : user?.center_id}
           disabled
           style={{ minWidth: 200 }}
           options={allCenters
-            .filter((center) => center._id === user?.center_id)
             .map((center) => ({
               label: center.center_name,
               value: center._id,

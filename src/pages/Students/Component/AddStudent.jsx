@@ -14,8 +14,12 @@ import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
 import { Form, Modal } from 'antd';
 import dayjs from 'dayjs';
+import { Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from 'zustand';
+import { calculateAge } from '@utils/helper';
+
+const { Text } = Typography;
 
 function AddStudent() {
 
@@ -23,10 +27,12 @@ function AddStudent() {
   const { user } = userStore()
   const { enroll, loading } = studentStore()
   const [form] = Form.useForm();
+  const dobValue = Form.useWatch('DOB', form);
   const { getCourses, courses, total, loading: courseLoading } = useStore(courseStore)
   const { getAvailableSessions, availableSessions, loading: sessionsLoading } = SessionStore()
   const date = Form.useWatch("start_date", form)
-  const { centers,getCenters } = useStore(centersStore);
+  const { centers, getCenters } = useStore(centersStore);
+  const { selectedCenter } = centersStore()
 
 
   const initialValues = {
@@ -54,7 +60,7 @@ function AddStudent() {
   }, [])
 
   useEffect(() => {
-    getAvailableSessions(date)
+    getAvailableSessions(date, selectedCenter)
   }, [date])
 
   const showModal = () => {
@@ -69,7 +75,7 @@ function AddStudent() {
 
   const onSubmit = async (values) => {
     values.role = ROLES.STUDENT
-    if(user.role === ROLES.MANAGER){
+    if (user.role === ROLES.MANAGER) {
       values.center_id = user.center_id
     }
     console.log(values);
@@ -104,6 +110,11 @@ function AddStudent() {
           />
           <CustomInput label={"Full Name"} name={"username"} placeholder={"John Doe"} />
           <CustomDatePicker name={"DOB"} label={"Date of Birth"} placeholder='13-02-2025' className='w-full' />
+          {dobValue && (
+            <div className='-mt-4 mb-4 p-2 bg-stone-100 rounded-lg'>
+              <Text type="secondary">Calculated Age: <strong>{calculateAge(dobValue.toDate())} years</strong></Text>
+            </div>
+          )}
           <CustomInput label={"Address"} name={"address"} placeholder={"Building No, Street Address"} />
           <CustomInput label={"Mobile Number"} name={"phone"} placeholder={"+91 7845784785"} />
           <CustomInput label={"Alternative Mobile Number"} name={"phone_alt"} placeholder={"+91 7845784785"} />

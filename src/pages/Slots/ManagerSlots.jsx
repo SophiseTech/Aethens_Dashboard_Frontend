@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react';
-<<<<<<< HEAD
-import { Select, Button, Table, message, Space, Typography, Empty, Popconfirm, DatePicker } from 'antd';
-=======
-import { Select, Button, Table, message, Space, Typography, Empty, Popconfirm, Row } from 'antd';
->>>>>>> dev-unni
+import { Select, Button, Table, message, Space, Typography, Empty, Popconfirm, DatePicker, Row } from 'antd';
 import dayjs from 'dayjs';
 import SessionStore from '@stores/SessionStore';
 import { ROLES, weekDays } from '@utils/constants';
@@ -52,11 +48,7 @@ function ManagerSlots() {
       }
     }
     loadSessions();
-<<<<<<< HEAD
-  }, [getAllSessions, slotDate]);
-=======
   }, [getAllSessions, selectedCenter]);
->>>>>>> dev-unni
 
   const loadStudents = async () => {
     if (!selectedSessionId) {

@@ -22,10 +22,10 @@ const SessionStore = create((set, get) => ({
       set({ loading: false })
     }
   },
-  getAvailableSessions: async (date) => {
+  getAvailableSessions: async (date, center_id) => {
     try {
       set({ loading: true })
-      const { data } = await sessionService.getAvailableSessionByDate(date)
+      const { data } = await sessionService.getAvailableSessionByDate(date, center_id)
       set({ availableSessions: data })
     } catch (error) {
       handleInternalError(error)

@@ -19,8 +19,8 @@ function GenerateBill({
   customers = [],
   customersOptions = [],
   invoiceNo,
-  loadInitData = () => {},
-  onSave = async () => {},
+  loadInitData = () => { },
+  onSave = async () => { },
   handleCancel,
   isModalOpen,
   handleOk,
@@ -76,10 +76,17 @@ function GenerateBill({
     getCenters();
   }, []);
 
+  useEffect(() => {
+    form.setFieldValue("invoiceNo", invoiceNo)
+  }, [invoiceNo])
+  
+
   // Loading Initial dropdown data. Function should be passed from parent
   useEffect(() => {
     if (user.role === ROLES.ADMIN) {
-      loadInitData({ itemType: selectedSubject, centerId: selectedFormCenter });
+      if (selectedFormCenter) {
+        loadInitData({ itemType: selectedSubject, centerId: selectedFormCenter });
+      }
     } else {
       loadInitData({ itemType: selectedSubject });
     }

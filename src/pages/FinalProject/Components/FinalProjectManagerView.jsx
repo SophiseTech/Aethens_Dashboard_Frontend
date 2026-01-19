@@ -5,7 +5,7 @@ import { useFinalProject } from '@hooks/useFinalProject';
 import CreateProject from '@pages/FinalProject/Components/CreateProject';
 import ProjectOpenedStudentsList from '@pages/FinalProject/Components/ProjectOpenedStudentsList';
 import { formatDate } from '@utils/helper';
-import { Avatar, Button, Card, Segmented, Space, Spin, Table, Tag, Typography,Row } from 'antd';
+import { Avatar, Button, Card, Segmented, Space, Spin, Table, Tag, Typography, Row } from 'antd';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminCenterSelector from '@components/AdminCenterSelector';
@@ -27,16 +27,19 @@ function FinalProjectManagerView() {
   const { user } = useStore(userStore);
 
   useEffect(() => {
-    if(user.role === ROLES.ADMIN && selectedCenter){
-      fetchPendingSubmissions({center_id : selectedCenter}, projectId);
-    }else{
+    if (user.role === ROLES.ADMIN && selectedCenter) {
+      fetchPendingSubmissions({ center_id: selectedCenter }, projectId);
+    } else {
       fetchPendingSubmissions({}, projectId);
     }
   }, [selectedCenter])
 
   useEffect(() => {
     listProjects({
-      query: { status: selectedView },
+      query: {
+        status: selectedView,
+        centerId: selectedCenter ? selectedCenter : "all"
+      },
       populate: [
         {
           path: "studentId",
@@ -53,7 +56,7 @@ function FinalProjectManagerView() {
       ],
       pagination: projectsInfo.pagination
     })
-  }, [selectedView])
+  }, [selectedView, selectedCenter])
 
   const onViewStudents = (projectId, studentId) => {
     nav(`/manager/final-project/${projectId}/student/${studentId}/phases`);
@@ -125,7 +128,7 @@ function FinalProjectManagerView() {
 
   return (
     <div className="p-6">
-      
+
       <Row justify="space-between">
         <Title level={2}>Pending Submissions</Title>
         <AdminCenterSelector />

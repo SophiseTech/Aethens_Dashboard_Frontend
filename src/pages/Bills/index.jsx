@@ -75,7 +75,7 @@ function Bills() {
   const loadInitData = async ({ itemType,centerId }) => {
     console.log(itemType,centerId);
 
-    if (!invoiceNo || invoiceNo === 0) {
+    if (!invoiceNo || invoiceNo === 0 || user.role === ROLES.ADMIN) {
       user.role === ROLES.ADMIN ? getInvoiceNo(centerId) : getInvoiceNo();
     }
     if (itemType === "materials") {
@@ -92,7 +92,7 @@ function Bills() {
       setLineItems(items)
       // setLneItemSearchFunction(searhcItems)
     }
-    if (studentTotal === 0 || students.length < studentTotal) {
+    if (studentTotal === 0 || students.length < studentTotal || user.role === ROLES.ADMIN) {
       getStudentsByCenter(0)
     }
     // if (courseTotal === 0 || courses.length < courseTotal) {
