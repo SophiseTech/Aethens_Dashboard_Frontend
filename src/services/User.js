@@ -36,6 +36,17 @@ class UserService {
     }
   }
 
+  async getTodaysSessionAttendees(centerId){
+    try {
+      if( !centerId ) throw new Error("Bad Data");
+      const response = await post(`/user/getTodaysSessionAttendees`,{centerId});
+      if (!response || !response.data) throw new Error("An error occured. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
   async edit(id, data) {
     try {
       const response = await put(`/user/edit/${id}`, data)

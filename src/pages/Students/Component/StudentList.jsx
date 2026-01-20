@@ -9,6 +9,7 @@ import UserDetailsDrawer from "@components/UserDetailsDrawer";
 import { render } from "@react-pdf/renderer";
 import { useStore } from "zustand";
 import centersStore from "@stores/CentersStore";
+import userStore from "@stores/UserStore";
 
 function StudentList() {
   const {
@@ -22,12 +23,15 @@ function StudentList() {
     search,
     getCurrentSessionAttendees,
     currentSessionAttendees,
+    getTodaysSessionAttendees,
+    todaysSessionAttendees,
   } = studentStore();
 
   const nav = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const {selectedCenter} = useStore(centersStore);
+  const { selectedCenter } = useStore(centersStore);
+  const { user } = useStore(userStore);
 
   // Get initial view and page from query parameters
   const initialView = queryParams.get("view") || "Current Students"; // Default to 'Current Students' if no query param
@@ -55,6 +59,8 @@ function StudentList() {
         getStudentsByCenter(10, currentPage);
       }
       setVisitedPages(new Set([1]));
+    } else if (selectedView === "Todays Students") {
+      getTodaysSessionAttendees(user, selectedCenter);
     } else {
       getCurrentSessionAttendees();
     }
@@ -102,6 +108,10 @@ function StudentList() {
       return currentSessionAttendees;
     }
 
+    if (selectedView === "Todays Students") {
+      return todaysSessionAttendees;
+    }
+
     const base = searchQuery ? searchResults : students;
 
     if (selectedView === "Active Students") {
@@ -115,6 +125,7 @@ function StudentList() {
     searchQuery,
     currentSessionAttendees,
     selectedView,
+    todaysSessionAttendees,
   ]);
 
   console.log("search query: ", searchQuery, searchResults, currentPage);
@@ -185,10 +196,25 @@ function StudentList() {
     }
   };
 
+  const segmentOptions = useMemo(() => {
+    const base = ["Current Students", "All Students", "Active Students"];
+
+    if (user?.role === ROLES.ADMIN || user?.role === ROLES.FACULTY) {
+      return [
+        "Current Students",
+        "Todays Students",
+        "All Students",
+        "Active Students",
+      ];
+    }
+
+    return base;
+  }, [user?.role]);
+
   return (
     <>
       <Segmented
-        options={["Current Students", "All Students", "Active Students"]}
+        options={segmentOptions}
         className="w-fit"
         value={selectedView}
         onChange={handleSegmentChange}
