@@ -1,51 +1,75 @@
-import React, { useMemo } from 'react'
+import { Tooltip } from 'antd';
+import React, { useMemo } from 'react';
 
-const DateCell = ({ date, groupedData, today, month, ...rest }) => {
+const DateCell = ({ date, groupedData, today, month, holidayDates, getHolidayForDate }) => {
+  const dateStr = date.format('YYYY-MM-DD');
 
-  const currMonth = month
-  
-  const { shouldDisplayMarker, markerColor } = useMemo(() => {
-    const sessions = groupedData[date.format("YYYY-MM-DD")] || null
+  // Check if this date is a holiday
+  const isHoliday = holidayDates?.has(dateStr) ?? false;
 
-    // dont display marker if no sessions are alloted to the user
-    if (!sessions) {
-      return {
-        shouldDisplayMarker: false
-      }
-    }
+  // Get holiday info only if it's a holiday
+  const holidayInfo = useMemo(() => {
+    return isHoliday && getHolidayForDate ? getHolidayForDate(dateStr) : null;
+  }, [isHoliday, getHolidayForDate, dateStr]);
 
-    // display blue marker for upcoming sessions
-    if (date.isAfter(today)) {
-      return {
-        shouldDisplayMarker: true,
-        markerColor: "blue"
-      }
-    }
-
-    // display red marker if any absent session present
-    const isAbsent = sessions.some(session => session.status !== 'attended')
-    if (isAbsent) {
+  // Determine marker display
+  const { shouldDisplayMarker, markerColor, tooltipText } = useMemo(() => {
+    // Holiday takes priority
+    if (isHoliday) {
       return {
         shouldDisplayMarker: true,
-        markerColor: "red"
-      }
+        markerColor: '#F97316', // Orange
+        tooltipText: holidayInfo?.title || 'Holiday'
+      };
     }
+
+    const sessions = groupedData?.[dateStr];
+    if (!sessions?.length) {
+      return { shouldDisplayMarker: false, tooltipText: null };
+    }
+
+    // Upcoming sessions
+    if (today && date.isAfter(today)) {
+      return {
+        shouldDisplayMarker: true,
+        markerColor: 'blue',
+        tooltipText: `${sessions.length} upcoming session${sessions.length > 1 ? 's' : ''}`
+      };
+    }
+
+    // Absent check
+    const hasAbsent = sessions.some(s => s.status !== 'attended');
     return {
       shouldDisplayMarker: true,
-      markerColor: "green"
-    }
-  }, [date])
+      markerColor: hasAbsent ? 'red' : 'green',
+      tooltipText: hasAbsent ? 'Absent' : 'Attended'
+    };
+  }, [date, dateStr, isHoliday, holidayInfo, groupedData, today]);
 
-  return (
-    <div className={`flex flex-col gap-2 items-center justify-center rounded-full aspect-square ${today.isSame(date, 'day') && "border border-secondary"}`}>
-      <p className='| max-2xl:text-xs'>{date.date()}</p>
-      {shouldDisplayMarker && <div
-        className={`w-1.5 h-1.5 rounded-full bg-green-500`}
-        style={{ background: markerColor }}
-      >
-      </div>}
+  const isToday = today?.isSame(date, 'day');
+
+  const cellContent = (
+    <div className={`flex flex-col gap-2 items-center justify-center rounded-full aspect-square 
+      ${isToday ? 'border border-secondary' : ''} 
+      ${isHoliday ? 'bg-orange-50' : ''}`}
+    >
+      <p className={`max-2xl:text-xs ${isHoliday ? 'text-orange-600 font-semibold' : ''}`}>
+        {date.date()}
+      </p>
+      {shouldDisplayMarker && (
+        <div
+          className="w-1.5 h-1.5 rounded-full"
+          style={{ background: markerColor }}
+        />
+      )}
     </div>
-  )
-}
+  );
 
-export default DateCell
+  return tooltipText ? (
+    <Tooltip title={tooltipText} placement="top">
+      {cellContent}
+    </Tooltip>
+  ) : cellContent;
+};
+
+export default DateCell;

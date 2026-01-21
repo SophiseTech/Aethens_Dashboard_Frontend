@@ -5,9 +5,13 @@ import _ from "lodash";
 import React from "react";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 export const formatDate = (date) => {
   if (!date) return "";
@@ -24,23 +28,23 @@ export const formatTime = (time) => {
 };
 
 export const calculateAge = (dob) => {
-    if (!dob) return null;
+  if (!dob) return null;
 
-    const birthDate = new Date(dob);
-    const today = new Date();
+  const birthDate = new Date(dob);
+  const today = new Date();
 
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
 
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
 
-    return age;
-  };
+  return age;
+};
 
 export const groupActivities = (activities) => {
   if (!activities) return {}
@@ -261,3 +265,84 @@ export function formatText(raw) {
     .replace(/(?<=[A-Za-z])\.(?=[A-Za-z])/g, ".\n")
     .trim();
 }
+
+// ============================================
+// HOLIDAY HELPER FUNCTIONS
+// ============================================
+
+/**
+ * Generate a Set of holiday date strings for quick lookup
+ * @param {Array} holidays - Array of holiday objects from API
+ * @param {number} displayYear - Year to use for recurring holidays
+ * @returns {Set<string>} - Set of date strings in 'YYYY-MM-DD' format
+ */
+export const generateHolidayDates = (holidays, displayYear) => {
+  const dates = new Set();
+  if (!holidays?.length) return dates;
+
+  for (const holiday of holidays) {
+    try {
+      if (holiday.isRecurring) {
+        // Recurring: MM-DD format
+        const [startMonth, startDay] = holiday.startDate.split('-').map(Number);
+        const [endMonth, endDay] = holiday.endDate.split('-').map(Number);
+
+        let current = dayjs().year(displayYear).month(startMonth - 1).date(startDay);
+        const end = dayjs().year(displayYear).month(endMonth - 1).date(endDay);
+
+        while (current.isSameOrBefore(end, 'day')) {
+          dates.add(current.format('YYYY-MM-DD'));
+          current = current.add(1, 'day');
+        }
+      } else {
+        // One-time: YYYY-MM-DD format
+        let current = dayjs(holiday.startDate);
+        const end = dayjs(holiday.endDate);
+
+        while (current.isSameOrBefore(end, 'day')) {
+          dates.add(current.format('YYYY-MM-DD'));
+          current = current.add(1, 'day');
+        }
+      }
+    } catch (e) {
+      // Skip invalid entries
+    }
+  }
+  return dates;
+};
+
+/**
+ * Get holiday info for a specific date
+ * @param {string} dateStr - Date string in 'YYYY-MM-DD' format
+ * @param {Array} holidays - Array of holiday objects
+ * @param {number} displayYear - Year to use for recurring holidays
+ * @returns {Object|null} - Holiday object or null
+ */
+export const getHolidayInfo = (dateStr, holidays, displayYear) => {
+  if (!holidays?.length || !dateStr) return null;
+
+  const checkDate = dayjs(dateStr);
+
+  for (const holiday of holidays) {
+    try {
+      let start, end;
+
+      if (holiday.isRecurring) {
+        const [startMonth, startDay] = holiday.startDate.split('-').map(Number);
+        const [endMonth, endDay] = holiday.endDate.split('-').map(Number);
+        start = dayjs().year(displayYear).month(startMonth - 1).date(startDay);
+        end = dayjs().year(displayYear).month(endMonth - 1).date(endDay);
+      } else {
+        start = dayjs(holiday.startDate);
+        end = dayjs(holiday.endDate);
+      }
+
+      if (checkDate.isSameOrAfter(start, 'day') && checkDate.isSameOrBefore(end, 'day')) {
+        return holiday;
+      }
+    } catch (e) {
+      // Skip invalid entries
+    }
+  }
+  return null;
+};
