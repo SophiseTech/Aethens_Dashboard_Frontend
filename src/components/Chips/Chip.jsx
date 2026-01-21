@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority'
 import React from 'react'
 
-function Chip({size = "small", type = "success", label = "Label", glow = true}) {
+function Chip({ size = "small", type = "success", label = "Label", glow = true }) {
 
   const styles = cva(
     "rounded-md w-fit flex gap-2 items-center font-bold",
@@ -15,7 +15,9 @@ function Chip({size = "small", type = "success", label = "Label", glow = true}) 
         type: {
           success: "bg-[#AFEAB3] text-[#3F9200]",
           danger: "bg-[#FFBBA7] text-[#C22F02]",
-          draft: "bg-[#b4daff] text-[#1976d2]"
+          draft: "bg-[#b4daff] text-[#1976d2]",
+          warning: "bg-[#FFF3CD] text-[#856404]",
+          archived: "bg-[#D7CCC8] text-[#5D4037]"
         }
       },
       defaultVariants: {
@@ -28,7 +30,7 @@ function Chip({size = "small", type = "success", label = "Label", glow = true}) 
   const glowStyles = cva(
     "blur-sm",
     {
-      variants:{
+      variants: {
         size: {
           large: "w-3 h-3",
           small: "w-2 h-2",
@@ -37,7 +39,9 @@ function Chip({size = "small", type = "success", label = "Label", glow = true}) 
         type: {
           success: "bg-[#3F9200]",
           danger: "bg-[#C22F02]",
-          draft: "bg-[#1976d2]"
+          draft: "bg-[#1976d2]",
+          warning: "bg-[#856404]",
+          archived: "bg-[#5D4037]"
         }
       },
       defaultVariants: {
@@ -47,8 +51,8 @@ function Chip({size = "small", type = "success", label = "Label", glow = true}) 
     }
   )
   return (
-    <div className={styles({size, type})}>
-      {glow && <div className={glowStyles({size, type})} />}
+    <div className={styles({ size, type })}>
+      {glow && <div className={glowStyles({ size, type })} />}
       <p>{label}</p>
     </div>
   )

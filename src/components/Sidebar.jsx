@@ -159,6 +159,12 @@ const MENU_CONFIG = [
     roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
+    label: "Holidays",
+    icon: CalendarOutlined,
+    path: "/manager/holidays",
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
+  },
+  {
     label: "Announcements",
     icon: ClockCircleOutlined,
     path: "/student/announcements",
