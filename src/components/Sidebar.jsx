@@ -15,6 +15,7 @@ import {
   ShopOutlined,
   SolutionOutlined,
   MessageOutlined,
+  CheckSquareOutlined,
 } from "@ant-design/icons";
 
 import Book from "@/assets/Book";
@@ -176,6 +177,12 @@ const MENU_CONFIG = [
     path: "/manager/final-project",
     roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
+  {
+    label: "Tasks",
+    icon: CheckSquareOutlined,
+    path: "/manager/tasks",
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
+  },
 ];
 
 // Utility function for dynamic paths
@@ -208,7 +215,7 @@ const MenuItem = ({ item, isActive, user }) => {
         <div
           className={`rounded-r-xl bg-secondary transition-opacity duration-200 w-1 h-9 2xl:w-1.5 2xl:h-12 ${
             isActive ? "opacity-100" : "opacity-0"
-          }`}
+            }`}
         />
         <div className="flex items-center gap-3 2xl:gap-5 py-2">
           <IconComponent
@@ -218,7 +225,7 @@ const MenuItem = ({ item, isActive, user }) => {
           <p
             className={`transition-all duration-200 text-sm 2xl:text-lg ${
               isActive ? "font-bold text-primary" : "font-normal text-gray-700"
-            }`}
+              }`}
           >
             {item.label}
           </p>

@@ -27,6 +27,7 @@ const ReviewSubmission = lazy(() => import("@pages/FinalProject/ReviewSubmission
 const StudentProjectDetails = lazy(() => import("@pages/FinalProject/StudentProjectDetails"))
 const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"))
 const FinalProjectStudentView = lazy(() => import("@pages/FinalProject/Components/FinalProjectStudentView"))
+const Tasks = lazy(() => import("@pages/Tasks"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -168,6 +169,11 @@ export const managerRoutes = [
             path: "/manager/final-project/student/:studentId/details",
             element: <LazyLoader element={<FinalProjectStudentView /> } />,
             title: "Slots",
+          },
+          {
+            path: "/manager/tasks",
+            element: <LazyLoader element={<Tasks />} />,
+            title: "Tasks",
           },
         ]
       }
