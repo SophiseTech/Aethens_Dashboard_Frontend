@@ -14,10 +14,10 @@ const feeStore = create((set) => ({
       set({ error: error.message, loading: false });
     }
   },
-  markAsPaid: async (billId) => {
+  markAsPaid: async (billId, payload = {}) => {
     set({ loading: true, error: null });
     try {
-      await FeeService.markAsPaid(billId);
+      await FeeService.markAsPaid(billId, payload);
     } catch (error) {
       set({ error: error.message, loading: false });
     }

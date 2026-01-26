@@ -6,9 +6,10 @@ import { formatDate } from '@utils/helper';
 
 const FeeTracker = ({ student, visible, onCancel }) => {
   const { feeDetails, loading, error, getFeeDetailsByStudent, markAsPaid, markPartialPayment } = useStore(feeStore);
-  const [partialPaymentModal, setPartialPaymentModal] = useState(false);
+  const [paymentModal, setPaymentModal] = useState(false);
   const [selectedBill, setSelectedBill] = useState(null);
   const [form] = Form.useForm();
+  const isPartialPayment = feeDetails?.feeAccount?.type === 'partial';
 
   useEffect(() => {
     if (student?._id) {
@@ -17,40 +18,39 @@ const FeeTracker = ({ student, visible, onCancel }) => {
   }, [student, getFeeDetailsByStudent]);
 
   const handleMarkAsPaid = async (bill) => {
-    // Check if fee type is "partial"
-    if (feeDetails?.feeAccount?.type === 'partial') {
-      setSelectedBill(bill);
-      form.resetFields();
-      setPartialPaymentModal(true);
-    } else {
-      await markAsPaid(bill._id);
-      getFeeDetailsByStudent(student._id);
-    }
+    setSelectedBill(bill);
+    form.resetFields();
+    setPaymentModal(true);
   };
 
-  const handlePartialPaymentSubmit = async () => {
+  const handlePaymentSubmit = async () => {
     try {
       const values = await form.validateFields();
       
-      const payload = {
-        paidAmount: values.paidAmount,
-        bill_id: selectedBill._id,
-      };
-      
-      if (values.payment_method) {
-        payload.payment_method = values.payment_method;
-      }
-      
-      if (values.payment_date) {
-        payload.payment_date = values.payment_date.toISOString();
+      if (isPartialPayment) {
+        // Partial payment: custom amount
+        const payload = {
+          paidAmount: values.paidAmount,
+          bill_id: selectedBill._id,
+          payment_method: values.payment_method,
+          payment_date: values.payment_date?.toISOString(),
+        };
+        await markPartialPayment(feeDetails.feeAccount._id, payload);
+      } else {
+        // Full payment: standard mark as paid with payment details
+        const payload = {
+          payment_method: values.payment_method,
+          payment_date: values.payment_date?.toISOString(),
+        };
+        await markAsPaid(selectedBill._id, payload);
       }
 
-      await markPartialPayment(feeDetails.feeAccount._id, payload);
-      setPartialPaymentModal(false);
+      setPaymentModal(false);
       getFeeDetailsByStudent(student._id);
       form.resetFields();
+      setSelectedBill(null);
     } catch (error) {
-      console.error('Error marking partial payment:', error);
+      console.error('Error processing payment:', error);
     }
   };
 
@@ -176,13 +176,14 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       </Modal>
 
       <Modal
-        title={`Mark Partial Payment - Invoice ${selectedBill?.invoiceNo}`}
-        visible={partialPaymentModal}
+        title={`Payment - Invoice ${selectedBill?.invoiceNo}`}
+        visible={paymentModal}
         onCancel={() => {
-          setPartialPaymentModal(false);
+          setPaymentModal(false);
           form.resetFields();
+          setSelectedBill(null);
         }}
-        onOk={handlePartialPaymentSubmit}
+        onOk={handlePaymentSubmit}
         okText="Submit Payment"
         loading={loading}
       >
@@ -193,29 +194,31 @@ const FeeTracker = ({ student, visible, onCancel }) => {
             paidAmount: selectedBill?.total,
           }}
         >
-          <Form.Item
-            label="Paid Amount"
-            name="paidAmount"
-            rules={[
-              { required: true, message: 'Please enter paid amount' },
-              {
-                validator: (_, value) => {
-                  if (value > selectedBill?.total) {
-                    return Promise.reject(new Error(`Amount cannot exceed balance of ${selectedBill?.total}`));
+          {isPartialPayment && (
+            <Form.Item
+              label="Paid Amount"
+              name="paidAmount"
+              rules={[
+                { required: true, message: 'Please enter paid amount' },
+                {
+                  validator: (_, value) => {
+                    if (value > selectedBill?.total) {
+                      return Promise.reject(new Error(`Amount cannot exceed balance of ${selectedBill?.total}`));
+                    }
+                    return Promise.resolve();
                   }
-                  return Promise.resolve();
                 }
-              }
-            ]}
-          >
-            <InputNumber
-              min={0}
-              max={selectedBill?.total}
-              step={0.01}
-              precision={2}
-              style={{ width: '100%' }}
-            />
-          </Form.Item>
+              ]}
+            >
+              <InputNumber
+                min={0}
+                max={selectedBill?.total}
+                step={0.01}
+                precision={2}
+                style={{ width: '100%' }}
+              />
+            </Form.Item>
+          )}
 
           <Form.Item
             label="Payment Method"
