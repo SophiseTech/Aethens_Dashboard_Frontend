@@ -1,4 +1,4 @@
-import { get, put } from "@utils/Requests";
+import { get, put, post } from "@utils/Requests";
 
 export const FeeService = {
   getFeeDetailsByStudent: (studentId) => {
@@ -6,5 +6,8 @@ export const FeeService = {
   },
   markAsPaid: (billId) => {
     return put(`/bills/${billId}/mark-as-paid`);
+  },
+  markPartialPayment: (feeAccountId, payload) => {
+    return post(`/fees/${feeAccountId}/mark-payment`, payload);
   },
 };

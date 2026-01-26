@@ -21,6 +21,16 @@ const feeStore = create((set) => ({
     } catch (error) {
       set({ error: error.message, loading: false });
     }
+  },
+  markPartialPayment: async (feeAccountId, payload) => {
+    set({ loading: true, error: null });
+    try {
+      await FeeService.markPartialPayment(feeAccountId, payload);
+      set({ loading: false });
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
   }
 }));
 

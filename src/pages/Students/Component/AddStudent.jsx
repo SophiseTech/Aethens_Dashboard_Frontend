@@ -11,13 +11,15 @@ import courseStore from '@stores/CourseStore';
 import SessionStore from '@stores/SessionStore';
 import studentStore from '@stores/StudentStore';
 import userStore from '@stores/UserStore';
-import { ROLES } from '@utils/constants';
-import { Form, Modal } from 'antd';
+import { feeOptions, ROLES } from '@utils/constants';
+import { Divider, Form, Modal } from 'antd';
 import dayjs from 'dayjs';
 import { Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from 'zustand';
 import { calculateAge } from '@utils/helper';
+import CustomCheckbox from '@components/form/CustomCheckBox';
+import handleError from '@utils/handleError';
 
 const { Text } = Typography;
 
@@ -28,12 +30,14 @@ function AddStudent() {
   const { enroll, loading } = studentStore()
   const [form] = Form.useForm();
   const dobValue = Form.useWatch('DOB', form);
-  const { getCourses, courses, total, loading: courseLoading } = useStore(courseStore)
+  const { getCourses, courses, total } = useStore(courseStore)
   const { getAvailableSessions, availableSessions, loading: sessionsLoading } = SessionStore()
   const date = Form.useWatch("start_date", form)
   const { centers, getCenters } = useStore(centersStore);
   const { selectedCenter } = centersStore()
-
+  const isFeeEnabled = Form.useWatch("isFeeEnabled", form)
+  const feeType = Form.useWatch("type", form)
+  const selectedCourse = Form.useWatch("course_id", form)
 
   const initialValues = {
     username: "",
@@ -47,7 +51,12 @@ function AddStudent() {
     school_uni_work: "",
     profile_img: "https://app.schoolofathens.art/images/default.jpg",
     sessions: [],
-    start_date: dayjs()
+    start_date: dayjs(),
+    total_course_fee: 0,
+    type: "single",
+    paidAmount: 0,
+    numberOfInstallments: 6,
+    isFeeEnabled: false
   }
 
   useEffect(() => {
@@ -55,13 +64,25 @@ function AddStudent() {
       getCourses(0)
     }
     getCenters();
-    console.log(centers);
-
   }, [])
 
   useEffect(() => {
     getAvailableSessions(date, selectedCenter)
   }, [date])
+
+  useEffect(() => {
+    if (selectedCourse) {
+      const courseDetails = courses.find(course => course._id === selectedCourse)
+      if (!courseDetails) {
+        handleError("No Course Found")
+      }
+      form.setFieldValue("total_course_fee", courseDetails?.rate || 0)
+      if (feeType === 'partial') {
+        form.setFieldValue("paidAmount", courseDetails?.rate || 0)
+      }
+    }
+  }, [selectedCourse])
+
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -78,6 +99,9 @@ function AddStudent() {
     if (user.role === ROLES.MANAGER) {
       values.center_id = user.center_id
     }
+    if(values.type === "single"){
+      values.paidAmount = values.total_course_fee
+    }
     console.log(values);
     await enroll(values)
     handleOk()
@@ -92,6 +116,25 @@ function AddStudent() {
     value: session._id,
     data: session,
   })), [availableSessions, date])
+
+  const getFieldsByFeeType = (feeType) => {
+    switch (feeType) {
+      // case "partial":
+      //   return (
+      //     <>
+      //       <CustomInput name={"paidAmount"} label={"Amount Paid"} />
+      //     </>
+      //   )
+      case "monthly":
+        return (
+          <>
+            <CustomInput name={"numberOfInstallments"} label={"Number of installments"} />
+          </>
+        )
+      default:
+        break;
+    }
+  }
 
   return (
     <>
@@ -125,6 +168,17 @@ function AddStudent() {
           <CustomSelect name={"sessions"} label={"Select Slots"} options={slotOptions} mode={"multiple"} maxCount={2} optionRender={sessionSlotOptionRenderer} loading={sessionsLoading} />
           {user.role === ROLES.ADMIN && <CustomSelect name={"center_id"} options={centerOptions} label={"Select Center"} />}
           <CustomInput label={"Password"} name={"password"} placeholder={"Password"} type='password' />
+
+          <Divider />
+
+          <CustomCheckbox name={"isFeeEnabled"} label={"Add Fee Record"} />
+          {isFeeEnabled && (
+            <>
+              <CustomInput name={"total_course_fee"} label={"Total Course Fee"} />
+              <CustomSelect name={"type"} options={feeOptions} label={"Payment Method"} />
+              {getFieldsByFeeType(feeType)}
+            </>
+          )}
           <CustomSubmit className='bg-primary' label='Enroll' loading={loading} />
         </CustomForm>
       </Modal>

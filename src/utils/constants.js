@@ -214,3 +214,9 @@ export const demoStatuses = [
   { label: "Cancelled", value: "Cancelled" },
   { label: "Rescheduled", value: "Rescheduled" },
 ];
+
+export const feeOptions = [
+  { label: "One Time", value: "single" },
+  { label: "Partial", value: "partial" },
+  { label: "Installments", value: "monthly" },
+]

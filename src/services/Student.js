@@ -16,7 +16,12 @@ class StudentService {
     school_uni_work,
     profile_img,
     start_date,
-    sessions
+    sessions,
+    paidAmount,
+    total_course_fee,
+    numberOfInstallments,
+    type,
+    isFeeEnabled
   }) {
     try {
       if (
@@ -43,7 +48,12 @@ class StudentService {
         school_uni_work,
         profile_img,
         start_date,
-        sessions
+        sessions,
+        isFeeEnabled,
+        numberOfInstallments,
+        type,
+        paidAmount,
+        total_course_fee
       });
       if (!response || !response.data)
         throw new Error("An error occured. Please try again");
