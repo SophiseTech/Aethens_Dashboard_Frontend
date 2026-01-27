@@ -24,7 +24,8 @@ function FacultyAttendance() {
       query: {
         booked_student_id: id,
         course_id: course_id,
-        start_date: { $gte: start, $lte: end }
+        start_date: { $gte: start, $lte: end },
+        isActive: true
       },
       populate: "center_id session"
     });

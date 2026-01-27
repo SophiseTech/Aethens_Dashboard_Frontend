@@ -27,7 +27,8 @@ function Attendance() {
       query: {
         booked_student_id: user?._id,
         course_id: courseId || user?.details_id?.course_id?._id || user?.details_id?.course_id,
-        start_date: { $gte: start, $lte: end }
+        start_date: { $gte: start, $lte: end },
+        isActive: true
       },
       populate: "center_id session"
     });
