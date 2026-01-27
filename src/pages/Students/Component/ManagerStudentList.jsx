@@ -22,6 +22,8 @@ function StudentList() {
     search,
     getCurrentSessionAttendees,
     currentSessionAttendees,
+    getTodaysSessionAttendees,
+    todaysSessionAttendees,
   } = useStore(studentStore);
 
   const { user } = useStore(userStore);
@@ -52,7 +54,10 @@ function StudentList() {
         getStudentsByCenter(10, currentPage);
       }
       setVisitedPages(new Set([1]));
-    } else {
+    }else if (selectedView === "Todays Students") {
+      getTodaysSessionAttendees(user, user.center_id);
+    }
+     else {
       getCurrentSessionAttendees();
     }
   };
@@ -81,8 +86,13 @@ function StudentList() {
 
   const studentsToDisplay = useMemo(() => {
     if (selectedView === "Current Students") return currentSessionAttendees;
+
+    if (selectedView === "Todays Students") {
+      return todaysSessionAttendees;
+    }
+
     return searchQuery ? searchResults : students;
-  }, [students, searchResults, searchQuery, currentSessionAttendees, selectedView]);
+  }, [students, searchResults, searchQuery, currentSessionAttendees, selectedView, todaysSessionAttendees]);
 
   const columns = [
     {
@@ -125,7 +135,7 @@ function StudentList() {
   return (
     <>
       <Segmented
-        options={["Current Students", "All Students"]}
+        options={["Current Students", "All Students","Todays Students"]}
         className='w-fit'
         value={selectedView}
         onChange={handleSegmentChange}
