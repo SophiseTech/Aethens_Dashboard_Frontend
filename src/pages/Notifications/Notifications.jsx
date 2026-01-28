@@ -5,6 +5,7 @@ import notificationStore from "@stores/notificationStore";
 import userStore from "@stores/UserStore";
 import userService from "@services/User";
 import NotificationList from "./components/NotificationList";
+import Title from "@components/layouts/Title";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -73,10 +74,8 @@ export default function Notifications() {
 
   return (
     <div className="mx-auto p-4">
+      <Title title="Notifications" />
       <Row justify="space-between" align="middle" className="mb-4">
-        <Col>
-          <h1 className="text-2xl font-bold">Notifications</h1>
-        </Col>
         <Col>
           <div className="flex gap-2">
             {/* Only show manager filter for admins */}

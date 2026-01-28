@@ -10,8 +10,8 @@ import TaskList from "./components/TaskList";
 import TaskForm from "./components/TaskForm";
 import ManagersPendingList from "./components/ManagersPendingList";
 import { TASK_PRIORITY, TASK_STATUS } from "@utils/constants";
+import Title from "@components/layouts/Title";
 
-const { Title } = Typography;
 const { Search } = Input;
 const { RangePicker } = DatePicker;
 
@@ -98,28 +98,20 @@ export default function TasksPage() {
     return (
         <div className="p-4 md:p-6">
             {/* Header */}
-            <Row justify="space-between" align="middle" className="mb-6">
-                <Col>
-                    <Title level={2} className="!mb-0">
-                        Tasks
-                    </Title>
-                </Col>
-                <Col>
-                    <Row gutter={12} align="middle">
-                        {isAdmin && <AdminCenterSelector />}
-                        {isAdmin && (
-                            <Button
-                                type="primary"
-                                icon={<PlusOutlined />}
-                                onClick={handleCreateTask}
-                                className="ml-3"
-                            >
-                                Create Task
-                            </Button>
-                        )}
-                    </Row>
-                </Col>
-            </Row>
+            <Title title="Tasks" 
+                level={1}
+                button={
+                    (
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={handleCreateTask}
+                        >
+                            Create Task
+                        </Button>
+                    )
+                }
+            />
 
             {/* Filters */}
             <Card className="mb-4">
