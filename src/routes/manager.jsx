@@ -29,6 +29,7 @@ const StudentProjectDetails = lazy(() => import("@pages/FinalProject/StudentProj
 const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"))
 const FinalProjectStudentView = lazy(() => import("@pages/FinalProject/Components/FinalProjectStudentView"))
 const Tasks = lazy(() => import("@pages/Tasks"))
+const Holidays = lazy(() => import("@pages/Holidays"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -150,6 +151,11 @@ export const managerRoutes = [
             title: "Notifications",
           },
           {
+            path: "/manager/holidays",
+            element: <LazyLoader element={<Holidays />} />,
+            title: "Holidays"
+          },
+          {
             path: "/manager/final-project",
             element: (
               <FinalProjectPage />
@@ -175,7 +181,7 @@ export const managerRoutes = [
           },
           {
             path: "/manager/final-project/student/:studentId/details",
-            element: <LazyLoader element={<FinalProjectStudentView /> } />,
+            element: <LazyLoader element={<FinalProjectStudentView />} />,
             title: "Slots",
           },
           {
