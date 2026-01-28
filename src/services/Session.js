@@ -61,7 +61,7 @@ class SessionService {
     }
   }
 
-  async getStudentsBySessionId(sessionId) {
+  async getStudentsBySessionId(sessionId, slotDate) {
     try {
       const { user } = userStore.getState();
       const { selectedCenter } = centersStore.getState();
@@ -72,7 +72,7 @@ class SessionService {
       } else {
         constructedPath = `/sessions/getStudentsBySessionId`;
       }
-      const response = await post(constructedPath, { sessionId })
+      const response = await post(constructedPath, { sessionId, slotDate })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {

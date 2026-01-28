@@ -5,6 +5,7 @@ import notificationStore from "@stores/notificationStore";
 import userStore from "@stores/UserStore";
 import userService from "@services/User";
 import NotificationList from "./components/NotificationList";
+import Title from "@components/layouts/Title";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -72,60 +73,59 @@ export default function Notifications() {
   };
 
   return (
-    <div className="mx-auto p-4">
-      <Row justify="space-between" align="middle" className="mb-4">
-        <Col>
-          <h1 className="text-2xl font-bold">Notifications</h1>
-        </Col>
-        <Col>
-          <div className="flex gap-2">
-            {/* Only show manager filter for admins */}
-            {isAdmin && (
+    <Title title="Notifications">
+      <div className="">
+        <Row justify="space-between" align="middle" className="mb-4">
+          <Col>
+            <div className="flex gap-2">
+              {/* Only show manager filter for admins */}
+              {isAdmin && (
+                <Select
+                  placeholder="Filter by Manager"
+                  style={{ width: 200 }}
+                  allowClear
+                  onChange={handleManagerChange}
+                >
+                  {managers.map((manager) => (
+                    <Option key={manager._id} value={manager._id}>
+                      {manager.username}
+                    </Option>
+                  ))}
+                </Select>
+              )}
               <Select
-                placeholder="Filter by Manager"
-                style={{ width: 200 }}
-                allowClear
-                onChange={handleManagerChange}
+                defaultValue="all"
+                style={{ width: 150 }}
+                onChange={handleTypeChange}
               >
-                {managers.map((manager) => (
-                  <Option key={manager._id} value={manager._id}>
-                    {manager.username}
-                  </Option>
-                ))}
+                <Option value="all">All Types</Option>
+                <Option value="fee_payment">Fee Payment</Option>
+                <Option value="slot_request">Slot Request</Option>
+                <Option value="enquiry">Enquiry</Option>
               </Select>
-            )}
-            <Select
-              defaultValue="all"
-              style={{ width: 150 }}
-              onChange={handleTypeChange}
-            >
-              <Option value="all">All Types</Option>
-              <Option value="fee_payment">Fee Payment</Option>
-              <Option value="slot_request">Slot Request</Option>
-              <Option value="enquiry">Enquiry</Option>
-            </Select>
-            <Search
-              placeholder="Search message..."
-              onSearch={handleSearch}
-              style={{ width: 250 }}
-              allowClear
-            />
-          </div>
-        </Col>
-      </Row>
+              <Search
+                placeholder="Search message..."
+                onSearch={handleSearch}
+                style={{ width: 250 }}
+                allowClear
+              />
+            </div>
+          </Col>
+        </Row>
 
-      <NotificationList
-        notifications={allNotifications}
-        loading={loadingAll}
-        pagination={{
-          current: filters.page,
-          pageSize: filters.limit,
-          total: totalNotifications,
-          showSizeChanger: true,
-        }}
-        handleTableChange={handleTableChange}
-        onToggleReadStatus={toggleReadStatus}
-      />
-    </div>
+        <NotificationList
+          notifications={allNotifications}
+          loading={loadingAll}
+          pagination={{
+            current: filters.page,
+            pageSize: filters.limit,
+            total: totalNotifications,
+            showSizeChanger: true,
+          }}
+          handleTableChange={handleTableChange}
+          onToggleReadStatus={toggleReadStatus}
+        />
+      </div>
+    </Title>
   );
 }

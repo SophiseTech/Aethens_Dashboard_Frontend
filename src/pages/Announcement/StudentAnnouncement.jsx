@@ -54,7 +54,7 @@ const StudentAnnouncement = () => {
 
   return (
     <TitleLayout title="Announcements">
-      <Space direction="vertical" style={{ padding: 24, width: "100%" }}>
+      <Space direction="vertical" style={{ width: "100%" }}>
         {loading ? (
           <div
             style={{
