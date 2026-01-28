@@ -96,109 +96,109 @@ export default function TasksPage() {
     };
 
     return (
-        <div className="">
-            {/* Header */}
-            <Title title="Tasks" 
-                level={1}
-                button={
-                    (
-                        <Button
-                            type="primary"
-                            icon={<PlusOutlined />}
-                            onClick={handleCreateTask}
-                        >
-                            Create Task
-                        </Button>
-                    )
-                }
-            />
 
-            {/* Filters */}
-            <Card className="mb-4">
-                <Row gutter={[16, 16]} align="middle">
-                    <Col xs={24} sm={12} md={6}>
-                        <Search
-                            placeholder="Search tasks..."
-                            allowClear
-                            onSearch={handleSearch}
-                            defaultValue={filters.search}
-                        />
-                    </Col>
-                    <Col xs={12} sm={6} md={4}>
-                        <Select
-                            placeholder="Priority"
-                            allowClear
-                            className="w-full"
-                            value={filters.priority}
-                            onChange={handlePriorityFilter}
-                            options={TASK_PRIORITY}
-                        />
-                    </Col>
-                    <Col xs={12} sm={6} md={4}>
-                        <Select
-                            placeholder="Status"
-                            allowClear
-                            className="w-full"
-                            value={filters.status}
-                            onChange={handleStatusFilter}
-                            options={TASK_STATUS}
-                        />
-                    </Col>
-                    <Col xs={24} sm={12} md={6}>
-                        <RangePicker
-                            className="w-full"
-                            placeholder={["Deadline From", "Deadline To"]}
-                            onChange={handleDateRangeChange}
-                            disabled={filters.dueToday}
-                        />
-                    </Col>
-                    {/* Due Today filter - available for all users but especially useful for managers */}
-                    <Col>
-                        <Button
-                            icon={<CalendarOutlined />}
-                            type={filters.dueToday ? "primary" : "default"}
-                            onClick={handleDueTodayToggle}
-                        >
-                            Due Today
-                        </Button>
-                    </Col>
-                    <Col>
-                        <Button icon={<ReloadOutlined />} onClick={handleRefresh}>
-                            Refresh
-                        </Button>
-                    </Col>
-                    <Col>
-                        <Button onClick={handleResetFilters}>Reset Filters</Button>
-                    </Col>
-                </Row>
-            </Card>
+        < Title title="Tasks"
+            level={1}
+            button={
+                (
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={handleCreateTask}
+                    >
+                        Create Task
+                    </Button>
+                )
+            }
+        >
+            <div className="">
+                {/* Filters */}
+                <Card className="mb-4">
+                    <Row gutter={[16, 16]} align="middle">
+                        <Col xs={24} sm={12} md={6}>
+                            <Search
+                                placeholder="Search tasks..."
+                                allowClear
+                                onSearch={handleSearch}
+                                defaultValue={filters.search}
+                            />
+                        </Col>
+                        <Col xs={12} sm={6} md={4}>
+                            <Select
+                                placeholder="Priority"
+                                allowClear
+                                className="w-full"
+                                value={filters.priority}
+                                onChange={handlePriorityFilter}
+                                options={TASK_PRIORITY}
+                            />
+                        </Col>
+                        <Col xs={12} sm={6} md={4}>
+                            <Select
+                                placeholder="Status"
+                                allowClear
+                                className="w-full"
+                                value={filters.status}
+                                onChange={handleStatusFilter}
+                                options={TASK_STATUS}
+                            />
+                        </Col>
+                        <Col xs={24} sm={12} md={6}>
+                            <RangePicker
+                                className="w-full"
+                                placeholder={["Deadline From", "Deadline To"]}
+                                onChange={handleDateRangeChange}
+                                disabled={filters.dueToday}
+                            />
+                        </Col>
+                        {/* Due Today filter - available for all users but especially useful for managers */}
+                        <Col>
+                            <Button
+                                icon={<CalendarOutlined />}
+                                type={filters.dueToday ? "primary" : "default"}
+                                onClick={handleDueTodayToggle}
+                            >
+                                Due Today
+                            </Button>
+                        </Col>
+                        <Col>
+                            <Button icon={<ReloadOutlined />} onClick={handleRefresh}>
+                                Refresh
+                            </Button>
+                        </Col>
+                        <Col>
+                            <Button onClick={handleResetFilters}>Reset Filters</Button>
+                        </Col>
+                    </Row>
+                </Card>
 
-            {/* Main Content */}
-            <Row gutter={[16, 16]}>
-                <Col xs={24} lg={isAdmin ? 16 : 24}>
-                    {loading && tasks.length === 0 ? (
-                        <div className="flex justify-center items-center h-64">
-                            <Spin size="large" />
-                        </div>
-                    ) : tasks.length === 0 ? (
-                        <Card>
-                            <Empty description="No tasks found" />
-                        </Card>
-                    ) : (
-                        <TaskList />
+                {/* Main Content */}
+                <Row gutter={[16, 16]}>
+                    <Col xs={24} lg={isAdmin ? 16 : 24}>
+                        {loading && tasks.length === 0 ? (
+                            <div className="flex justify-center items-center h-64">
+                                <Spin size="large" />
+                            </div>
+                        ) : tasks.length === 0 ? (
+                            <Card>
+                                <Empty description="No tasks found" />
+                            </Card>
+                        ) : (
+                            <TaskList />
+                        )}
+                    </Col>
+
+                    {/* Managers with Pending Tasks (Admin only) */}
+                    {isAdmin && (
+                        <Col xs={24} lg={8}>
+                            <ManagersPendingList />
+                        </Col>
                     )}
-                </Col>
+                </Row>
 
-                {/* Managers with Pending Tasks (Admin only) */}
-                {isAdmin && (
-                    <Col xs={24} lg={8}>
-                        <ManagersPendingList />
-                    </Col>
-                )}
-            </Row>
-
-            {/* Modals */}
-            <TaskForm />
-        </div>
+                {/* Modals */}
+                <TaskForm />
+            </div>
+        </Title >
     );
 }
