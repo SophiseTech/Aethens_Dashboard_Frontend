@@ -35,7 +35,7 @@ import EnquiryDemoRescheduleModal from "@pages/Enquiries/Component/EnquiryDemoRe
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
-const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
+const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnquiries }) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isBookSlotModalVisible, setIsBookSlotModalVisible] = useState(false);
   const [isCloseModalVisible, setIsCloseModalVisible] = useState(false);
@@ -65,13 +65,26 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
       selectedCourses: values.selectedCourses,
     };
     await editEnquiry(enquiry._id, updateData);
-    await getEnquiries(10, 1);
+    // await getEnquiries(10, 1);
+    await fetchEnquiries()
     setIsEditModalVisible(false);
     onClose();
   };
 
   // Book Demo Slot Submit
-
+  const handleBookSlot = async () => {
+    form.validateFields().then(async (values) => {
+      const updateData = {
+        scheduledAt: values.scheduledAt.toISOString(),
+        notes: values.notes,
+      };
+      await bookDemoSlot(enquiry._id, updateData);
+      setIsBookSlotModalVisible(false);
+      // await getEnquiries(10, 1);
+      await fetchEnquiries()
+      onClose();
+    });
+  };
 
   //Change Follow Up Date
   const handleFollowUp = async () => {
@@ -83,13 +96,27 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
       };
       await addfollowUpDate(enquiry._id, updatedData);
       setFollowUpVisible(false);
-      await getEnquiries(10, 1);
+      // await getEnquiries(10, 1);
+      await fetchEnquiries()
       onClose();
     })
   }
 
   // Reschedule Slot
-
+  const handleRescheduleSlot = async () => {
+    form.validateFields().then(async (values) => {
+      const updatedData = {
+        scheduledAt: values.scheduledAt.toISOString(),
+        remarks: values.remarks,
+        reason: values.reason
+      };
+      await rescheduleSlot(enquiry._id, updatedData);
+      setReschduleSlot(false);
+      // await getEnquiries(10, 1);
+      await fetchEnquiries()
+      onClose();
+    })
+  }
 
   const handleEnrollSlot = async () => {
     form.validateFields().then(async (values) => {
@@ -99,14 +126,16 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
       };
       await enrollStudent(enquiry._id, updatedData);
       setReschduleSlot(false);
-      await getEnquiries(10, 1);
+      // await getEnquiries(10, 1);
+      await fetchEnquiries()
       onClose();
     })
   }
 
   const handleMarkCompleted = async () => {
     await markDemoCompleted(enquiry._id, enquiry?.demoSlot?.notes || "");
-    await getEnquiries(10, 1);
+    // await getEnquiries(10, 1);
+    await fetchEnquiries()
     onClose();
   };
 
@@ -285,7 +314,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
         )}
 
         {/* Follow Up Details for new state */}
-        {parentPage === "enquiryList" && enquiry?.stage === "New" && (
+        {parentPage === "enquiryList" && (enquiry?.stage === "New" || enquiry?.stage === "Demo") && (
           <>
             {enquiry?.followUpHistory?.length > 0 && (
               <Card>
@@ -350,21 +379,25 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage }) => {
 
         {/* Action Buttons Based on Parent Page */}
         {/* Case where enquiry is in new and not changed to demo */}
-        {parentPage === "enquiryList" && enquiry?.stage === "New" && (
-          <div className="flex gap-2 items-center">
-            <Button
-              type="primary"
-              danger
+        {parentPage === "enquiryList" && (
+          <div className="flex gap-2 items-center mb-2">
+            {(enquiry?.stage === "New" || enquiry?.stage === "Demo") &&
+              <Button
+              variant="filled"
+              color="orange"
               onClick={() => setFollowUpVisible(true)}
             >
               Change Follow Up Date
             </Button>
-            <Button
-              type="primary"
-              onClick={() => setIsBookSlotModalVisible(true)}
-            >
-              Book Demo Slot
-            </Button>
+            }
+            {enquiry?.stage === "New" &&
+              <Button
+                type="primary"
+                onClick={() => setIsBookSlotModalVisible(true)}
+              >
+                Book Demo Slot
+              </Button>
+            }
           </div>
         )}
 
