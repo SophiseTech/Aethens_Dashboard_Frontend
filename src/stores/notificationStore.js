@@ -21,10 +21,10 @@ const notificationStore = create((set, get) => ({
     set({ loadingAll: true, error: null });
     try {
       const response = await notificationService.getAllNotifications(params);
-      set({ 
-        allNotifications: response.data.notifications, 
+      set({
+        allNotifications: response.data.notifications,
         totalNotifications: response.data.total,
-        loadingAll: false 
+        loadingAll: false
       });
     } catch (error) {
       set({ error: error.message, loadingAll: false });
@@ -33,9 +33,11 @@ const notificationStore = create((set, get) => ({
   markAsRead: async (notificationId) => {
     try {
       await notificationService.markAsRead(notificationId);
-      // Update the state locally to avoid a refetch
+      // Remove from notifications list (for bell popover) since we only show unread
+      // Update allNotifications to reflect the change
       set(state => ({
-        notifications: state.notifications.map(n => 
+        notifications: state.notifications.filter(n => n._id !== notificationId),
+        allNotifications: state.allNotifications.map(n =>
           n._id === notificationId ? { ...n, is_read: true } : n
         )
       }));
@@ -44,6 +46,24 @@ const notificationStore = create((set, get) => ({
       console.error("Failed to mark notification as read", error);
     }
   },
+  toggleReadStatus: async (notificationId) => {
+    try {
+      const response = await notificationService.toggleReadStatus(notificationId);
+      const updatedNotification = response.data;
+      // Update both notifications (for bell popover) and allNotifications (for listing)
+      set(state => ({
+        notifications: state.notifications.map(n =>
+          n._id === notificationId ? { ...n, is_read: updatedNotification.is_read } : n
+        ),
+        allNotifications: state.allNotifications.map(n =>
+          n._id === notificationId ? { ...n, is_read: updatedNotification.is_read } : n
+        )
+      }));
+    } catch (error) {
+      console.error("Failed to toggle notification status", error);
+    }
+  },
 }));
 
 export default notificationStore;
+

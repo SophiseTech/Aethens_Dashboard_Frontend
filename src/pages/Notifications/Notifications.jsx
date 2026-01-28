@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Input, Select, Row, Col } from "antd";
+import { useStore } from "zustand";
 import notificationStore from "@stores/notificationStore";
+import userStore from "@stores/UserStore";
 import userService from "@services/User";
 import NotificationList from "./components/NotificationList";
 
@@ -8,12 +10,16 @@ const { Search } = Input;
 const { Option } = Select;
 
 export default function Notifications() {
-  const { 
-    allNotifications, 
-    totalNotifications, 
-    loadingAll, 
-    fetchAllNotifications 
+  const {
+    allNotifications,
+    totalNotifications,
+    loadingAll,
+    fetchAllNotifications,
+    toggleReadStatus
   } = notificationStore();
+
+  const { user } = useStore(userStore);
+  const isAdmin = user?.role === "admin";
 
   const [managers, setManagers] = useState([]);
   const [filters, setFilters] = useState({
@@ -29,6 +35,9 @@ export default function Notifications() {
   }, [filters, fetchAllNotifications]);
 
   useEffect(() => {
+    // Only fetch managers list if user is admin
+    if (!isAdmin) return;
+
     async function fetchManagers() {
       try {
         const response = await userService.getByRoleByCenter('manager', 'all', 0, 100);
@@ -40,7 +49,7 @@ export default function Notifications() {
       }
     }
     fetchManagers();
-  }, []);
+  }, [isAdmin]);
 
   const handleTableChange = (pagination) => {
     setFilters((prev) => ({
@@ -70,18 +79,21 @@ export default function Notifications() {
         </Col>
         <Col>
           <div className="flex gap-2">
-            <Select
-              placeholder="Filter by Manager"
-              style={{ width: 200 }}
-              allowClear
-              onChange={handleManagerChange}
-            >
-              {managers.map((manager) => (
-                <Option key={manager._id} value={manager._id}>
-                  {manager.username}
-                </Option>
-              ))}
-            </Select>
+            {/* Only show manager filter for admins */}
+            {isAdmin && (
+              <Select
+                placeholder="Filter by Manager"
+                style={{ width: 200 }}
+                allowClear
+                onChange={handleManagerChange}
+              >
+                {managers.map((manager) => (
+                  <Option key={manager._id} value={manager._id}>
+                    {manager.username}
+                  </Option>
+                ))}
+              </Select>
+            )}
             <Select
               defaultValue="all"
               style={{ width: 150 }}
@@ -112,6 +124,7 @@ export default function Notifications() {
           showSizeChanger: true,
         }}
         handleTableChange={handleTableChange}
+        onToggleReadStatus={toggleReadStatus}
       />
     </div>
   );
