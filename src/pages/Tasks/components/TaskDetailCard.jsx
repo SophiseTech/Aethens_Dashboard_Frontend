@@ -22,11 +22,13 @@ import {
     EditOutlined,
     PlusOutlined,
     CommentOutlined,
+    RightOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import useManagerTaskStore from "@/stores/ManagerTaskStore";
 import userStore from "@stores/UserStore";
+import { useNavigate } from "react-router-dom";
 
 dayjs.extend(relativeTime);
 
@@ -38,6 +40,7 @@ export default function TaskDetailCard({ task, onClose }) {
     const { updateStatus, addComment, loading, setSelectedTask, setModalOpen } = useManagerTaskStore();
     const [commentText, setCommentText] = useState("");
     const [submitting, setSubmitting] = useState(false);
+    const navigate = useNavigate();
 
     const isAdmin = user?.role === "admin";
     const hasMultipleAssignees = task.assignedTo?.length > 1;
@@ -203,8 +206,21 @@ export default function TaskDetailCard({ task, onClose }) {
 
                 {/* Linked Enquiry Info */}
                 {task.linkedEnquiry && (
-                    <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <Text strong className="block mb-2 text-blue-700">Linked Enquiry</Text>
+                    <div
+                        className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 cursor-pointer hover:bg-blue-100 hover:border-blue-300 transition-colors"
+                        onClick={() => {
+                            // Navigate to enquiry page with enquiryId to auto-open drawer
+                            const basePath = user?.role === 'admin' ? '/admin/enquiries' : '/manager/enquiries';
+                            navigate(`${basePath}?enquiryId=${task.linkedEnquiry._id}`);
+                            if (onClose) onClose();
+                        }}
+                    >
+                        <div className="flex justify-between items-center mb-2">
+                            <Text strong className="text-blue-700">Linked Enquiry</Text>
+                            <Tooltip title="View enquiry details">
+                                <RightOutlined className="text-blue-500" />
+                            </Tooltip>
+                        </div>
                         <div className="flex flex-wrap gap-3 text-sm">
                             <span className="text-blue-600">
                                 #{task.linkedEnquiry.enquiryNumber}

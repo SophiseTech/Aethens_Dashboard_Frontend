@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Segmented, Table } from "antd";
+import { Segmented, Table, message } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import enquiryStore from "@stores/EnquiryStore";
 import EnquiryDetailsDrawer from "@pages/Enquiries/Component/EnquiryDetailsDrawer";
@@ -9,6 +9,7 @@ import Chip from "@components/Chips/Chip";
 import EnquiryDashboard from "@pages/Enquiries/Component/EnquiryDashboard";
 import userStore from "@stores/UserStore";
 import centersStore from "@stores/CentersStore";
+import enquiryService from "@services/Enquiry";
 
 function EnquiryList() {
   const {
@@ -30,6 +31,7 @@ function EnquiryList() {
   // default view / page from URL params
   const currentPage = parseInt(queryParams.get("page")) || 1;
   const selectedView = queryParams.get("view") || 'All';
+  const enquiryIdFromUrl = queryParams.get("enquiryId");
 
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
@@ -39,9 +41,9 @@ function EnquiryList() {
     if (searchQuery) {
       search(10, { searchQuery }, currentPage);
     } else {
-      if(user.role === 'admin' && selectedCenter !== null){
-        getEnquiries(10, currentPage, { stage: selectedView,centerId: selectedCenter });
-      }else{
+      if (user.role === 'admin' && selectedCenter !== null) {
+        getEnquiries(10, currentPage, { stage: selectedView, centerId: selectedCenter });
+      } else {
         getEnquiries(10, currentPage, { stage: selectedView });
       }
     }
@@ -52,6 +54,29 @@ function EnquiryList() {
     // fetchEnquiries depends on searchQuery/currentPage/selectedView
     // include fetchEnquiries to satisfy exhaustive-deps
   }, [selectedView, currentPage, searchQuery, fetchEnquiries, selectedCenter]);
+
+  // Handle enquiryId from URL to auto-open drawer
+  useEffect(() => {
+    const openEnquiryFromUrl = async () => {
+      if (enquiryIdFromUrl) {
+        try {
+          const enquiry = await enquiryService.getEnquiryDetails(enquiryIdFromUrl);
+          if (enquiry) {
+            setSelectedEnquiry(enquiry);
+            setDrawerVisible(true);
+            // Clear the enquiryId from URL after opening
+            const newParams = new URLSearchParams(location.search);
+            newParams.delete("enquiryId");
+            nav(`?${newParams.toString()}`, { replace: true });
+          }
+        } catch (error) {
+          console.error("Error fetching enquiry:", error);
+          message.error("Failed to load enquiry details");
+        }
+      }
+    };
+    openEnquiryFromUrl();
+  }, [enquiryIdFromUrl]);
 
   const updateURL = (page, view) => {
     nav(`?page=${page}&view=${view}`, { replace: true });
@@ -140,7 +165,7 @@ function EnquiryList() {
   return (
     <>
       <Segmented
-        options={["Dashboard","All", "New", "Demo", "Enrolled", "Closed"]}
+        options={["Dashboard", "All", "New", "Demo", "Enrolled", "Closed"]}
         className="w-fit"
         value={selectedView}
         onChange={(view) => { updateURL(1, view) }}
