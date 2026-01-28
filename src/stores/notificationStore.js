@@ -3,7 +3,10 @@ import { notificationService } from '@services/Notification'; // I will create t
 
 const notificationStore = create((set, get) => ({
   notifications: [],
+  allNotifications: [],
+  totalNotifications: 0,
   loading: false,
+  loadingAll: false,
   error: null,
   getNotifications: async () => {
     set({ loading: true, error: null });
@@ -12,6 +15,19 @@ const notificationStore = create((set, get) => ({
       set({ notifications: response.data, loading: false });
     } catch (error) {
       set({ error: error.message, loading: false });
+    }
+  },
+  fetchAllNotifications: async (params = {}) => {
+    set({ loadingAll: true, error: null });
+    try {
+      const response = await notificationService.getAllNotifications(params);
+      set({ 
+        allNotifications: response.data.notifications, 
+        totalNotifications: response.data.total,
+        loadingAll: false 
+      });
+    } catch (error) {
+      set({ error: error.message, loadingAll: false });
     }
   },
   markAsRead: async (notificationId) => {
