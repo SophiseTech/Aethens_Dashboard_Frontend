@@ -2,18 +2,25 @@ import AdminCenterSelector from '@components/AdminCenterSelector'
 import NotificationBell from '@components/NotificationBell'
 import centersStore from '@stores/CentersStore'
 import userStore from '@stores/UserStore'
+import { ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES } from '@utils/constants'
+import { useLocation } from 'react-router-dom'
 import { useStore } from 'zustand'
 
 function Title({ title, button, children }) {
   const { user } = userStore()
   const { selectedCenter } = useStore(centersStore);
+  const { pathname } = useLocation()
 
   const renderButtons = () => {
-    if (user.role === "admin" && selectedCenter && selectedCenter !== 'all') {
-      return button;
-    } else if (user.role !== "admin") {
+    if (user.role !== "admin") return button;
+
+    if (
+      ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES.includes(pathname) ||
+      (selectedCenter && selectedCenter !== "all")
+    ) {
       return button;
     }
+
     return null;
   }
 

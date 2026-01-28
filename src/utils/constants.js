@@ -239,5 +239,10 @@ export const TASK_STATUS = [
 ];
 
 export const ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES = [
-  "/manager/tasks"
+  "/manager/tasks",
+  "/manager/holidays"
+]
+
+export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
+  "/manager/holidays"
 ]

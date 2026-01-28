@@ -30,9 +30,9 @@ import PropTypes from "prop-types";
 const { Title, Text } = Typography;
 
 const UserDetailsDrawer = ({
-  user,
-  visible,
-  onClose,
+  user = {},
+  visible = false,
+  onClose = () => { },
   isStudentDetail = false,
 }) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -56,14 +56,18 @@ const UserDetailsDrawer = ({
         title="User Details"
         placement="right"
         onClose={onClose}
-        visible={visible}
+        open={visible}
         width={400}
         closable={true}
-        headerStyle={{
-          background: "#f0f2f5",
-          borderBottom: "1px solid #e8e8e8",
+        styles={{
+          header: {
+            background: "#f0f2f5",
+            borderBottom: "1px solid #e8e8e8",
+          },
+          body: {
+            padding: "20px"
+          }
         }}
-        bodyStyle={{ padding: "20px" }}
         extra={
           (!isStudentDetail || loggedinUser.role !== ROLES.FACULTY) && (
             <Button
@@ -96,8 +100,8 @@ const UserDetailsDrawer = ({
               {(!isStudentDetail ||
                 loggedinUser.role === ROLES.MANAGER ||
                 loggedinUser.role === ROLES.STUDENT) && (
-                <Text type="secondary">{user?.email}</Text>
-              )}
+                  <Text type="secondary">{user?.email}</Text>
+                )}
             </Col>
           </Row>
         </Card>
@@ -236,7 +240,7 @@ const UserDetailsDrawer = ({
             </Row>
           </Card>
         )}
-        
+
         {isStudentDetail && (
           <Card
             bordered={false}
@@ -300,14 +304,6 @@ UserDetailsDrawer.propTypes = {
   onClose: PropTypes.func,
   showActions: PropTypes.bool,
   isStudentDetail: PropTypes.bool,
-};
-
-UserDetailsDrawer.defaultProps = {
-  user: {},
-  visible: false,
-  onClose: () => {},
-  showActions: false,
-  isStudentDetail: false,
 };
 
 export default UserDetailsDrawer;

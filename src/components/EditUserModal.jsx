@@ -47,7 +47,7 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
   return (
     <Modal
       title="Edit User Details"
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       footer={null}
       width={600}
