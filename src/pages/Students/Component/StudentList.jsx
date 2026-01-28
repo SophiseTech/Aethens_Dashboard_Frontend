@@ -252,7 +252,7 @@ function StudentList() {
       dataIndex: "username",
       key: "username",
       render: (name, record) => {
-        const isMigrated = record?.details_id?.migrated;
+        const isMigrated = record?.details_id?.migrated?.fromBranchId;
         return (
           <div
             className="flex items-center gap-3"
