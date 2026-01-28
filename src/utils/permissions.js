@@ -25,6 +25,12 @@ const permissions = {
   },
   fda: {
     mark_don: [ROLES.MANAGER]
+  },
+  holidays: {
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.STUDENT],
+    add: [ROLES.MANAGER, ROLES.ADMIN],
+    edit: [ROLES.MANAGER, ROLES.ADMIN],
+    delete: [ROLES.MANAGER, ROLES.ADMIN]
   }
 }
 

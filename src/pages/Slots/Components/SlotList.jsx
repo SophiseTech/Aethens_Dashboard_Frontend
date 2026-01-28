@@ -1,15 +1,20 @@
 import useModal from '@hooks/useModal'
 import SlotItem from '@pages/Slots/Components/SlotItem'
 import SlotRescheduleModal from '@pages/Slots/Components/SlotRescheduleModal'
+import holidayService from '@services/Holiday'
 import slotStore from '@stores/SlotStore'
+import userStore from '@stores/UserStore'
+import { generateHolidayDates, getHolidayInfo } from '@utils/helper'
 import _ from 'lodash'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useStore } from 'zustand'
 import { Select } from 'antd'
 import dayjs from 'dayjs'
 
 function SlotList({ groupedSlots, slots = [] }) {
   const { reschedulingSlot, reshceduleSlot } = useStore(slotStore)
+  const { user } = useStore(userStore)
+  const [holidays, setHolidays] = useState([])
   const months = Object.keys(groupedSlots)
 
   // Determine default selected month
@@ -21,6 +26,21 @@ function SlotList({ groupedSlots, slots = [] }) {
   useEffect(() => {
     setSelectedMonth(defaultMonth)
   }, [groupedSlots])
+
+  // Fetch holidays
+  useEffect(() => {
+    if (!user?.center_id) return
+    holidayService.fetchHolidays({
+      skip: 0,
+      limit: 100,
+      centerId: user.center_id,
+      status: 'published'
+    }).then(res => res?.holidays && setHolidays(res.holidays)).catch(() => { })
+  }, [user?.center_id])
+
+  // Holiday lookup
+  const currentYear = dayjs().year()
+  const holidayDates = useMemo(() => generateHolidayDates(holidays, currentYear), [holidays, currentYear])
 
   const now = dayjs();
 
@@ -72,15 +92,21 @@ function SlotList({ groupedSlots, slots = [] }) {
         <div>
           <h1 className='font-bold text-gray-500 mb-2 | text-sm 2xl:text-lg'>{selectedMonth}</h1>
           <div className='flex flex-col gap-3'>
-            {groupedSlots[selectedMonth]?.map((slot, slotIndex) => (
-              <SlotItem
-                {...slot}
-                key={slotIndex}
-                type={getType(slot.status, slotIndex)}
-                showModal={showModal}
-                slotType={slot.type}
-              />
-            ))}
+            {groupedSlots[selectedMonth]?.map((slot, slotIndex) => {
+              const dateStr = dayjs(slot.start_date).format('YYYY-MM-DD')
+              const holidayInfo = holidayDates.has(dateStr) ? getHolidayInfo(dateStr, holidays, currentYear) : null
+
+              return (
+                <SlotItem
+                  {...slot}
+                  key={slotIndex}
+                  type={getType(slot.status, slotIndex)}
+                  showModal={showModal}
+                  slotType={slot.type}
+                  holidayInfo={holidayInfo}
+                />
+              )
+            })}
           </div>
         </div>
       ) : (
