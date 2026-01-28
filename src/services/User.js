@@ -108,6 +108,18 @@ class UserService {
     }
   }
 
+  async getUsers(filters = {}) {
+    try {
+      // Use dedicated getManagers endpoint
+      const response = await post(`/user/getManagers`, {
+        centerId: filters.center_id || "all"
+      })
+      if (!response || !response.data) throw new Error("An error occurred. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
 }
 
 const userService = new UserService()

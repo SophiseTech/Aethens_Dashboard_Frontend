@@ -17,20 +17,21 @@ function EnquirySlotsList() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const { slots, today } = demoSlots || {}
-  const {user} = userStore();
-  const {selectedCenter} = centersStore();
+  const { user } = userStore();
+  const { selectedCenter } = centersStore();
 
   useEffect(() => {
     getDemoSlots({ selectedView });     // fetch once when component loads
-     if(user.role === 'admin' && selectedCenter){
-      getDemoSlots({selectedView, centerId: selectedCenter});
-    }else{
-      getDemoSlots({selectedView});     // fetch once when component loads
+    if (user.role === 'admin' && selectedCenter) {
+      getDemoSlots({ selectedView, centerId: selectedCenter });
+    } else {
+      getDemoSlots({ selectedView });     // fetch once when component loads
     }
   }, [selectedView]);
 
   const handleRowClick = (record) => {
-    setSelectedEnquiry(record);
+    // Pass the populated enquiry data, not the slot record
+    setSelectedEnquiry(record.enquiry_id);
     setDrawerVisible(true);
   };
 
@@ -69,7 +70,7 @@ function EnquirySlotsList() {
     {
       title: "Status",
       dataIndex: ["status"],
-      render: (val) => getStatusTag(val) 
+      render: (val) => getStatusTag(val)
     },
   ];
 

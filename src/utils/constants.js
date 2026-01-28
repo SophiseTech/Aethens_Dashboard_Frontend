@@ -228,3 +228,16 @@ export const paymentMethods = [
   { label: 'Cheque', value: 'cheque' },
   { label: 'Wallet', value: 'wallet' },
 ] 
+export const TASK_PRIORITY = [
+  { label: "Urgent", value: "Urgent" },
+  { label: "Normal", value: "Normal" },
+];
+
+export const TASK_STATUS = [
+  { label: "Pending", value: "Pending" },
+  { label: "Completed", value: "Completed" },
+];
+
+export const ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES = [
+  "/manager/tasks"
+]
