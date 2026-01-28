@@ -19,12 +19,18 @@ const permissions = {
     view_bill: [ROLES.MANAGER, ROLES.STUDENT]
   },
   bills: {
-    add: [ROLES.MANAGER],
-    record_payment: [ROLES.MANAGER],
+    add: [ROLES.MANAGER, ROLES.ADMIN],
+    record_payment: [ROLES.MANAGER, ROLES.ADMIN],
     delete: [ROLES.ADMIN]
   },
   fda: {
     mark_don: [ROLES.MANAGER]
+  },
+  holidays: {
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.STUDENT],
+    add: [ROLES.MANAGER, ROLES.ADMIN],
+    edit: [ROLES.MANAGER, ROLES.ADMIN],
+    delete: [ROLES.MANAGER, ROLES.ADMIN]
   }
 }
 

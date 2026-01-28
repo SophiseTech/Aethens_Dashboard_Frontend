@@ -1,6 +1,8 @@
 import MasonryLayout from '@components/MasonryLayout'
 import GalleryItem from '@pages/Gallery/components/GalleryItem'
+import centersStore from '@stores/CentersStore'
 import inventoryStore from '@stores/InventoryStore'
+import userStore from '@stores/UserStore'
 import { Descriptions, Image, Modal, QRCode, Skeleton, Tag } from 'antd'
 import React, { useEffect, useMemo, useState } from 'react'
 import { isMobile, isTablet } from 'react-device-detect'
@@ -11,6 +13,8 @@ function GalleryList() {
   const { getItems, items, loading, searchLoading, searchResults, searchQuery } = useStore(inventoryStore)
   const [selectedItem, setselectedItem] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const {selectedCenter} = useStore(centersStore);
+  const {user} = useStore(userStore);
 
   const showModal = (item) => {
     setselectedItem(item)
@@ -25,10 +29,10 @@ function GalleryList() {
   };
 
   useEffect(() => {
-    if (!items || items.length <= 0) {
+    if (!items || items.length <= 0 || user.role === 'admin') {
       fetchItems(10)
     }
-  }, [])
+  }, [selectedCenter])
 
   const itemsToDisplay = useMemo(() => {
     return searchResults.length > 0 ? searchResults : items;

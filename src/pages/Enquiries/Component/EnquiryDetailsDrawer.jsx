@@ -29,6 +29,8 @@ import CloseEnquiryModal from './CloseEnquiryModal';
 import { age_categories } from "@utils/constants";
 import BranchTransferCard from "@pages/Enquiries/Component/BranchTranserCard";
 import CustomSelect from "@components/form/CustomSelect";
+import EnquiryDemoBookModal from "@pages/Enquiries/Component/EnquiryDemoBookModal";
+import EnquiryDemoRescheduleModal from "@pages/Enquiries/Component/EnquiryDemoRescheduleModal";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -458,32 +460,11 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
         </Form>
       </Modal>
 
-      {/* Reschedule Slot Modal */}
-      <Modal
-        title="Reschedule Enquiry Slot"
-        open={isReschduleSlot}
-        onCancel={() => setReschduleSlot(false)}
-        onOk={handleRescheduleSlot}
-        okText="Confirm"
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="scheduledAt"
-            label="Reschedule Date & Time"
-            rules={[{ required: true }]}
-          >
-            <DatePicker showTime className="w-full" />
-          </Form.Item>
-
-          <Form.Item name="reason" label="Reason" rules={[{ required: true }]}>
-            <TextArea rows={3} placeholder="Reason to reschedule" />
-          </Form.Item>
-
-          <Form.Item name="remarks" label="Remarks">
-            <TextArea rows={3} placeholder="Extra remarks if any" />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <EnquiryDemoRescheduleModal
+        isRescheduleSlotModalVisible={isReschduleSlot}
+        setIsRescheduleSlotModalVisible={setReschduleSlot}
+        enquiry={enquiry}
+      />
 
       {/* Enroll Slot Modal */}
       <Modal
@@ -518,27 +499,13 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
       </Modal>
 
       {/* Book Demo Slot Modal */}
-      <Modal
-        title="Book Demo Slot"
-        open={isBookSlotModalVisible}
-        onCancel={() => setIsBookSlotModalVisible(false)}
-        onOk={handleBookSlot}
-        okText="Confirm"
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="scheduledAt"
-            label="Schedule Date & Time"
-            rules={[{ required: true }]}
-          >
-            <DatePicker showTime className="w-full" />
-          </Form.Item>
-
-          <Form.Item name="notes" label="Notes">
-            <TextArea rows={3} placeholder="Extra notes if any" />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <EnquiryDemoBookModal
+        isBookSlotModalVisible={isBookSlotModalVisible}
+        setIsBookSlotModalVisible={setIsBookSlotModalVisible}
+        enquiry={enquiry}
+      // form={form}
+      // handleBookSlot={handleBookSlot}
+      />
 
       {/* Close Enquiry Modal */}
       <CloseEnquiryModal

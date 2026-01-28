@@ -102,7 +102,15 @@ class SlotService {
     }
   }
 
-
+  async getAvailableSlotCountByDate(data) {
+    try {
+      const response = await post(`/sessions/availableSlotCount`, { data })
+      if (!response) throw new Error("An error occured. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
 }
 
 const slotService = new SlotService()

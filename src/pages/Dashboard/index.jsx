@@ -7,6 +7,7 @@ import { lazy, Suspense } from 'react';
 // ✅ Define lazy imports ONCE here
 const Student = lazy(() => import('@pages/Dashboard/Student'));
 const Manager = lazy(() => import('@pages/Dashboard/Manager'));
+const Admin = lazy(() => import('@pages/Dashboard/Admin'));
 const ManagerStudents = lazy(() => import('@pages/Students/ManagerStudents'));
 
 function Dashboard() {
@@ -18,6 +19,8 @@ function Dashboard() {
         return <Student />;
       case ROLES.MANAGER:
         return <Manager />;
+      case ROLES.ADMIN:
+        return <Admin />;
       case ROLES.FACULTY:
         return <ManagerStudents />;
       default:

@@ -1,14 +1,14 @@
-import { ClockCircleFilled, CloseOutlined, EllipsisOutlined, EnvironmentFilled } from '@ant-design/icons'
+import { ClockCircleFilled, CloseOutlined, EnvironmentFilled } from '@ant-design/icons'
 import SubMenu from '@components/SubMenu'
 import slotStore from '@stores/SlotStore'
 import { formatTime } from '@utils/helper'
-import { Avatar, Modal, Popover } from 'antd'
+import { Avatar, Modal, Popover, Tag } from 'antd'
 import { cva } from 'class-variance-authority'
 import dayjs from 'dayjs'
 import React from 'react'
 import { useStore } from 'zustand'
 
-function SlotItem({ _id, session, center_id: { location }, type, slotType, start_date: sessionDate, showModal }) {
+function SlotItem({ _id, session, center_id: { location }, type, slotType, start_date: sessionDate, showModal, holidayInfo }) {
   const day = dayjs(sessionDate).format("ddd")
   const date = dayjs(sessionDate).format("DD")
   const { setReschedulingSlot, markAbsent, createLoading } = useStore(slotStore)
@@ -33,7 +33,7 @@ function SlotItem({ _id, session, center_id: { location }, type, slotType, start
   )
 
   const tagStyles = cva(
-    "rounded-full absolute text-xs z-10 | top-2 right-2 px-2 py-1 max-2xl:text-[0.6rem] 2xl:right-5 2xl:top-5 2xl:px-3 2xl:py-1.5",
+    "rounded-full text-xs z-10 | px-2 py-1 max-2xl:text-[0.6rem] 2xl:px-3 2xl:py-1.5",
     {
       variants: {
         type: {
@@ -54,8 +54,6 @@ function SlotItem({ _id, session, center_id: { location }, type, slotType, start
   const isRequest = () => type === "requested" || type === "completed"
 
   const getOptions = (type) => {
-    console.log(type);
-    
     return [
       {
         label: 'Request reschedule',
@@ -83,7 +81,7 @@ function SlotItem({ _id, session, center_id: { location }, type, slotType, start
             okText: 'Yes',
             cancelText: 'No',
             onOk: () => {
-              markAbsent(_id, "cancelled"); // Or whatever logic marks the student absent
+              markAbsent(_id, "cancelled");
             }
           });
         },
@@ -95,7 +93,16 @@ function SlotItem({ _id, session, center_id: { location }, type, slotType, start
   return (
     <div className={containerStyle({ type })}>
 
-      <div className={tagStyles({ type })}>{type === "requested" ? "Requested" : type === "cancelled" ? "Cancelled" : type === "absent" ? "Absent" : "Upcoming"}</div>
+      <div className="flex gap-2 absolute top-2 right-2 z-10 2xl:right-5 2xl:top-5">
+        <div className={tagStyles({ type })}>{type === "requested" ? "Requested" : type === "cancelled" ? "Cancelled" : type === "absent" ? "Absent" : "Upcoming"}</div>
+
+        {/* Holiday Tag */}
+        {holidayInfo && (
+          <Tag color="red" className="">
+            🎉 {holidayInfo.title}
+          </Tag>
+        )}
+      </div>
 
       <div className='text-center'>
         <p className={`${isRequest() ? "text-gray-400" : "text-primary"} | text-lg 2xl:text-3xl`}>{day}</p>
@@ -118,18 +125,6 @@ function SlotItem({ _id, session, center_id: { location }, type, slotType, start
 
         <div className='flex flex-col gap-2 flex-1'>
           <h1 className={`font-bold tracking-wider ${isRequest() ? "text-gray-400" : "text-gray-600"} capitalize | text-xm 2xl:text-xl`}>{slotType} Session</h1>
-          {/* <Avatar.Group
-            size="default"
-            max={{
-              count: 3,
-              style: { color: '#f56a00', backgroundColor: '#fde3cf' },
-            }}
-          >
-            <Avatar className='| max-2xl:w-8 max-2xl:h-8' src="/images/user1.jpg" />
-            <Avatar className='| max-2xl:w-8 max-2xl:h-8' src="/images/user2.jpg" />
-            <Avatar className='| max-2xl:w-8 max-2xl:h-8' src="/images/user3.jpg" />
-            <Avatar className='| max-2xl:w-8 max-2xl:h-8' src="/images/user4.jpg" />
-          </Avatar.Group> */}
         </div>
       </div>
 

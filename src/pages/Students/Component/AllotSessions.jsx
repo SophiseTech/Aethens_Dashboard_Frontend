@@ -21,13 +21,18 @@ function AllotSessions({ student }) {
   const getActiveSessions = studentStore((state) => state.getActiveSessions)
   const activeStudentSessions = studentStore((state) => state.activeStudentSessions)
   const studentActiveSession = activeStudentSessions[student._id]
+  const date = Form.useWatch("customStartDate", form)
 
   useEffect(() => {
     if (isModalOpen) {
-      getAvailableSessions()
       getActiveSessions(student._id)
     }
   }, [isModalOpen])
+
+  useEffect(() => {
+    getAvailableSessions(date)
+  }, [date])
+
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -54,14 +59,14 @@ function AllotSessions({ student }) {
 
   const initialValues = {
     sessions: [],
-    type: studentActiveSession?.length > 0 ? "additional" : "regular",
-    customStartDate: "",
+    type: (!studentActiveSession || studentActiveSession?.slotCount > 0) ? "additional" : "regular",
+    customStartDate: dayjs(),
     customSessionCount: 0
   }
 
   const slotTypeOptions = [
-    { label: "Regular", value: "regular", disabled: studentActiveSession?.length > 0 },
     { label: "Additional", value: "additional" },
+    { label: "Regular", value: "regular", disabled: studentActiveSession?.slotCount > 0 },
   ]
 
   const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -70,6 +75,14 @@ function AllotSessions({ student }) {
     value: session._id,
     data: session,
   })), [availableSessions])
+
+  const today = dayjs();
+  const disabledDate = (value) => {
+    // ⛔ Disable past dates
+    if(sessionType === "regular") return false
+    if (value.isBefore(today, "day")) return true;
+
+  };
 
 
   return (
@@ -85,8 +98,8 @@ function AllotSessions({ student }) {
       >
         <CustomForm form={form} initialValues={initialValues} action={onSubmit}>
           <CustomSelect name="type" label="Select Slot Type" options={slotTypeOptions} />
+          <CustomDatePicker name={"customStartDate"} label={"Start Date"} time={false} required={false} className='w-full' inputProps={{ disabledDate: disabledDate }} />
           <CustomSelect name={"sessions"} label={"Select Slots"} options={slotOptions} mode={"multiple"} maxCount={sessionType === "regular" ? 2 : 1} optionRender={sessionSlotOptionRenderer} />
-          <CustomDatePicker name={"customStartDate"} label={"Custom Start Date"} time={false} required={false} className='w-full' disabled={sessionType === "additional"} />
           <CustomInput type='number' name={"customSessionCount"} label={"Number of sessions to allot"} placeholder={10} className='w-full' required={false} />
           <CustomSubmit className='bg-primary' label='Submit' loading={loading} />
         </CustomForm>
@@ -103,7 +116,7 @@ export const sessionSlotOptionRenderer = (option, user) => {
 
   const { data: session } = option.data;
   if (!session) return null;
-  const { remainingSlots, additionalBookings } = session
+  const { remainingSlots, additional } = session
 
   const weekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][session.weekDay];
   const time = dayjs(session.start_time).format('h:mm A');
@@ -145,7 +158,7 @@ export const sessionSlotOptionRenderer = (option, user) => {
             marginRight: 0
           }}
         >
-          + {additionalBookings}
+          + {additional}
         </Tag>
       </div>
     </Flex>

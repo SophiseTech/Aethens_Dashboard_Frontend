@@ -1,5 +1,7 @@
 import handleError from "@utils/handleError"
 import { del, get, post, put } from "@utils/Requests"
+import centersStore from "@stores/CentersStore";
+import userStore from "@stores/UserStore";
 
 class BillServices {
   async getBills(filters = {}, lastRefKey = 0, limit = 10) {

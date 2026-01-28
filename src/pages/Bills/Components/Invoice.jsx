@@ -138,6 +138,10 @@ const InvoicePdf = ({ bill }) => {
   const tax = bill?.total_tax || 0;
   const total = bill?.total || 0;
   const undiscountedTotal = bill?.undiscountedTotal || 0;
+  const applyWallet = bill?.applyWallet || false;
+  const walletAmountDeducted = bill?.walletAmountDeducted || 0;
+  const finalTotal = bill?.finalTotal || 0;
+  const walletCreditAmount = bill?.walletCreditAmount || 0;
 
   console.log(items);
 
@@ -275,9 +279,27 @@ const InvoicePdf = ({ bill }) => {
                     <Text>{tax.toFixed(2)}</Text>
                   </View>
                   <View style={[styles.summaryRow, styles.summaryGrandTotal]}>
-                    <Text>Grand Total:</Text>
+                    <Text>{applyWallet ? "Total" : "Grand Total"}:</Text>
                     <Text>{total.toFixed(2)}</Text>
                   </View>
+                  {!applyWallet && walletCreditAmount > 0 && (
+                    <View style={[styles.summaryRow, styles.summaryGrandTotal]}>
+                      <Text>Wallet Amount (+):</Text>
+                      <Text>{walletCreditAmount.toFixed(2)}</Text>
+                    </View>
+                  )}
+                  {applyWallet && (
+                    <>
+                      <View style={[styles.summaryRow, styles.summaryGrandTotal]}>
+                        <Text>Wallent Amount (-):</Text>
+                        <Text>{walletAmountDeducted.toFixed(2)}</Text>
+                      </View>
+                      <View style={[styles.summaryRow, styles.summaryGrandTotal]}>
+                        <Text>Grand Total:</Text>
+                        <Text>{finalTotal.toFixed(2)}</Text>
+                      </View>
+                    </>
+                  )}
                 </View>
 
               </View>

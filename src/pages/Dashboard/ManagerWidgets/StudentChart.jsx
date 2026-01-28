@@ -1,5 +1,6 @@
 import attendanceService from '@/services/Attendance'
 import EChart from '@pages/Dashboard/Chart/EChart'
+import centersStore from '@stores/CentersStore'
 import userStore from '@stores/UserStore'
 import { Card } from 'antd'
 import dayjs from 'dayjs'
@@ -11,14 +12,16 @@ function StudentChart({ dateRange }) {
   const { firstDay, lastDay } = dateRange;
   const [data, setData] = useState([])
 
+  const {selectedCenter} = useStore(centersStore);
+
   const fetchData = async () => {
-    const report  = await attendanceService.getGraphSummary(user.center_id, firstDay, lastDay) || []
+    const report  = await attendanceService.getGraphSummary(user.role !== 'admin' ? user.center_id : selectedCenter, firstDay, lastDay) || []
     setData(report)
   }
 
   useEffect(() => {
     fetchData()
-  }, [dateRange])
+  }, [dateRange, selectedCenter])
   
   // Sort data chronologically and extract required values
   const sortedData = useMemo(() => {
@@ -28,7 +31,7 @@ function StudentChart({ dateRange }) {
   const dates = useMemo(() => sortedData.map(item => item.date), [sortedData])
   const presentCounts = useMemo(() => sortedData.map(item => item.presentCount), [sortedData])
 
-  console.log(dates, presentCounts, sortedData);
+  // console.log(dates, presentCounts, sortedData);
 
   const options = {
     chart: {

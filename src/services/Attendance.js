@@ -1,7 +1,25 @@
+import centersStore from "@stores/CentersStore";
+import userStore from "@stores/UserStore"
+import { ROLES } from "@utils/constants";
 import handleError from "@utils/handleError"
 import { get, post } from "@utils/Requests"
 
 class AttendanceService {
+
+  constructPath(path, centerVariable) {
+    const {user} = userStore.getState();
+    const {selectedCenter} = centersStore.getState();
+
+    if( user.role === 'admin' && selectedCenter){
+      return `${path}?${centerVariable}=${selectedCenter}&`
+    }else if( user.role === ROLES.MANAGER){
+      return `${path}?${centerVariable}=${user.center_id}&`
+    }
+    else{
+      return `${path}?`;
+    }
+  }
+
   async getHistory(query = {}, recordQuery = {}, lastRef = 0, limit = 10) {
     try {
       const response = await post(`/attendance/get?lastRef=${lastRef}&limit=${limit}`, { query, recordQuery })
@@ -43,7 +61,8 @@ class AttendanceService {
 
   async getGraphSummary(center_id, startDate, endDate) {
     try {
-      const response = await get(`/open/attendance-summary?center_id=${center_id}&startDate=${startDate}&endDate=${endDate}`)
+      const path = this.constructPath("/open/attendance-summary", "center_id");
+      const response = await get(`${path}startDate=${startDate}&endDate=${endDate}`)
       if (!response) throw new Error("An error occured. Please try again")
       return response?.report
     } catch (error) {

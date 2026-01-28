@@ -7,6 +7,7 @@ import { formatDate } from '@utils/helper';
 import { use } from 'react';
 import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
+import TitleLayout from '@components/layouts/Title'
 
 const { Title, Text } = Typography;
 
@@ -103,7 +104,7 @@ function ManagerCourseHistory() {
       } else if (user.role === ROLES.FACULTY) {
         return nav(`/faculty/attendance/${studentId}/c/${course.course_id}`);
       }
-    } else if(actionKey === 'remove') {
+    } else if (actionKey === 'remove') {
       return studentService.deleteCourseHistory(course._id)
         .then(() => {
           message.success('Course removed successfully');
@@ -117,39 +118,41 @@ function ManagerCourseHistory() {
   };
 
   return (
-    <Space direction="vertical" style={{ padding: 32, width: '100%' }} size="large">
-      <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-        <Title level={3} style={{ marginBottom: 0 }}>
-          Previous Courses
-        </Title>
-        <Tooltip title="Refresh course list">
-          <Button icon={<ReloadOutlined />} onClick={fetchCourses} loading={loading} />
-        </Tooltip>
-      </Space>
+    <TitleLayout title={"Previous Courses"}>
+      <Space direction="vertical" style={{ width: '100%' }} size="large">
+        {/* <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+          <Title level={3} style={{ marginBottom: 0 }}>
+            Previous Courses
+          </Title>
+          <Tooltip title="Refresh course list">
+            <Button icon={<ReloadOutlined />} onClick={fetchCourses} loading={loading} />
+          </Tooltip>
+        </Space> */}
 
-      {loading ? (
-        <Spin tip="Loading previous courses..." size="large" style={{ marginTop: 40 }} />
-      ) : previousCourses.length > 0 ? (
-        <List
-          grid={{ gutter: 24, xs: 1, sm: 1, md: 2, lg: 3, xl: 4 }}
-          dataSource={previousCourses}
-          renderItem={(course) => (
-            <List.Item>
-              <CourseCard course={course} onAction={handleAction} />
-            </List.Item>
-          )}
-        />
-      ) : (
-        <Empty
-          description={
-            <span style={{ color: '#888' }}>
-              No previous courses found for this student.
-            </span>
-          }
-          style={{ marginTop: 80 }}
-        />
-      )}
-    </Space>
+        {loading ? (
+          <Spin tip="Loading previous courses..." size="large" style={{ marginTop: 40 }} />
+        ) : previousCourses.length > 0 ? (
+          <List
+            grid={{ gutter: 24, xs: 1, sm: 1, md: 2, lg: 3, xl: 4 }}
+            dataSource={previousCourses}
+            renderItem={(course) => (
+              <List.Item>
+                <CourseCard course={course} onAction={handleAction} />
+              </List.Item>
+            )}
+          />
+        ) : (
+          <Empty
+            description={
+              <span style={{ color: '#888' }}>
+                No previous courses found for this student.
+              </span>
+            }
+            style={{ marginTop: 80 }}
+          />
+        )}
+      </Space>
+    </TitleLayout>
   );
 }
 

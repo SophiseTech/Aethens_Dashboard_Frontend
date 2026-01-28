@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { projectStatusConfig, statusConfig } from "@pages/FinalProject";
+import centersStore from "@stores/CentersStore";
 import { useFinalProjectStore } from "@stores/FinalProjectV2";
 import { PHASE_STATUS } from "@utils/constants";
 import { useCallback, useMemo } from "react";
@@ -35,6 +36,8 @@ export const useFinalProject = () => {
     getLatestSubmission,
     projectFetchLoading
   } = useFinalProjectStore();
+  const { selectedCenter } =
+    centersStore();
 
 
   const findNextPhaseToSubmit = (phases) => {
@@ -275,7 +278,10 @@ export const useFinalProject = () => {
 
   const fetchProjects = useCallback((page = 1, pageSize = 10, view = 'pending') => {
     listProjects({
-      query: { status: view },
+      query: { 
+        status: view,
+        centerId: selectedCenter ? selectedCenter : "all"
+      },
       populate: [
         {
           path: "studentId",

@@ -5,6 +5,7 @@ import handleInternalError from "@utils/handleInternalError"
 import handleSuccess from "@utils/handleSuccess"
 import _ from "lodash"
 import { create } from "zustand"
+import centersStore from "./CentersStore"
 
 const billStore = create((set, get) => ({
   bills: [],
@@ -98,11 +99,12 @@ const billStore = create((set, get) => ({
       set({ createLoading: false })
     }
   },
-  getInvoiceNo: async () => {
+  getInvoiceNo: async (centerId) => {
     try {
       set({ loading: true })
       const { user } = userStore.getState()
-      const invoiceDoc = await billService.getInvoiceNumber(user.center_id)
+      const effectiveCenterId = centerId ?? user.center_id;
+      const invoiceDoc = await billService.getInvoiceNumber(effectiveCenterId)
       if (invoiceDoc && invoiceDoc.invoiceNo) {
         set({ invoiceNo: invoiceDoc.invoiceNo })
         return invoiceDoc.invoiceNo

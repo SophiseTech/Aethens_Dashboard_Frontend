@@ -1,14 +1,16 @@
 import Protected from "@components/layouts/Protected";
 import SidebarLayout from "@components/layouts/Sidebar";
 import FinalProjectPage from "@pages/FinalProject";
-import PhaseListPage from "@pages/FinalProject/PhaseList";
 import { ROLES } from "@utils/constants";
 import { Spin } from "antd";
 import { lazy, Suspense } from "react";
 import { useLocation } from "react-router-dom";
+import PropTypes from "prop-types";
 
 const Students = lazy(() => import("@pages/Students"))
 const Enquiries = lazy(() => import("@pages/Enquiries"))
+const Wallets = lazy(() => import("@pages/Wallets/index.jsx"))
+const Remarks = lazy(() => import("@pages/Remarks/index.jsx"))
 const EnquirySlots = lazy(() => import("@pages/EnquirySlots"))
 const Bills = lazy(() => import("@pages/Bills"));
 const BillDetails = lazy(() => import("@pages/Bills/Components/BillDetails"));
@@ -21,10 +23,13 @@ const FacultyAttendance = lazy(() => import("@pages/Attendance/FacultyAttendance
 const ManagerSlots = lazy(() => import("@pages/Slots/ManagerSlots"))
 const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCourseHistory"))
 const ManagerAnnouncementPage = lazy(() => import("@pages/Announcement/ManagerAnnouncement"))
+const Notifications = lazy(() => import("@pages/Notifications/Notifications"))
 const ReviewSubmission = lazy(() => import("@pages/FinalProject/ReviewSubmission"))
 const StudentProjectDetails = lazy(() => import("@pages/FinalProject/StudentProjectDetails"))
 const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"))
 const FinalProjectStudentView = lazy(() => import("@pages/FinalProject/Components/FinalProjectStudentView"))
+const Tasks = lazy(() => import("@pages/Tasks"))
+const Holidays = lazy(() => import("@pages/Holidays"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -43,7 +48,7 @@ export const LazyLoader = ({ element }) => {
 
 export const managerRoutes = [
   {
-    element: <Protected roles={[ROLES.MANAGER]} />,
+    element: <Protected roles={[ROLES.MANAGER, ROLES.ADMIN]} />,
     children: [
       {
         element: <SidebarLayout />,
@@ -57,6 +62,16 @@ export const managerRoutes = [
             path: "/manager/enquiries",
             element: <LazyLoader element={<Enquiries />} />,
             title: "Enquiries"
+          },
+          {
+            path: "/manager/wallets/s/:studentId",
+            element: <LazyLoader element={<Wallets />} />,
+            title: "Wallets"
+          },
+          {
+            path: "/manager/remarks/s/:studentId",
+            element: <LazyLoader element={<Remarks />} />,
+            title: "Remarks"
           },
           {
             path: "/manager/enquiry-slots",
@@ -129,6 +144,18 @@ export const managerRoutes = [
             title: "Slots",
           },
           {
+            path: "/manager/notifications",
+            element: (
+              <LazyLoader element={<Notifications />} />
+            ),
+            title: "Notifications",
+          },
+          {
+            path: "/manager/holidays",
+            element: <LazyLoader element={<Holidays />} />,
+            title: "Holidays"
+          },
+          {
             path: "/manager/final-project",
             element: (
               <FinalProjectPage />
@@ -154,11 +181,20 @@ export const managerRoutes = [
           },
           {
             path: "/manager/final-project/student/:studentId/details",
-            element: <LazyLoader element={<FinalProjectStudentView /> } />,
+            element: <LazyLoader element={<FinalProjectStudentView />} />,
             title: "Slots",
+          },
+          {
+            path: "/manager/tasks",
+            element: <LazyLoader element={<Tasks />} />,
+            title: "Tasks",
           },
         ]
       }
     ]
   }
 ]
+
+LazyLoader.propTypes = {
+  element: PropTypes.element.isRequired,
+};

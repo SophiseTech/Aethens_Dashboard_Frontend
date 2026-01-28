@@ -3,6 +3,7 @@ import Title from '@components/layouts/Title'
 import useModal from '@hooks/useModal'
 import AddTask from '@pages/FacultyDevelopmentProgram/Components/AddTask'
 import TaskList from '@pages/FacultyDevelopmentProgram/Components/TaskList'
+import centersStore from '@stores/CentersStore'
 import facultyDevProgramStore from '@stores/FacultyDevelopmentProgramStore'
 import userStore from '@stores/UserStore'
 import { Flex } from 'antd'
@@ -15,14 +16,16 @@ function ManagerFacultyDevelopmentProgram() {
 
   const { getPrograms, programs } = useStore(facultyDevProgramStore)
   const { user } = useStore(userStore)
+  const { selectedCenter } = useStore(centersStore);
+  const centerId = (user.role === "admin" && selectedCenter) ? selectedCenter : user.center_id;
 
   useEffect(() => {
     getPrograms(10, {
-      query: { center_id: user.center_id },
+      query: { center_id: centerId },
       populate: "faculty_id",
-      srot: "-createdAt"
+      sort: "-createdAt"
     })
-  }, [])
+  }, [selectedCenter])
 
   return (
     <Title

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Table, Spin, Empty, Space, Typography } from "antd";
 import { listAnnouncements, listLatestAnnouncements } from "@/services/Announcement";
 import { formatDate } from "@utils/helper";
+import TitleLayout from "@components/layouts/Title";
 
 const { Title } = Typography;
 
@@ -52,36 +53,35 @@ const StudentAnnouncement = () => {
   }, []);
 
   return (
-    <Space direction="vertical" style={{ padding: 24, width: "100%" }}>
-      <Title level={3} style={{ textAlign: "left" }}>
-        Student Announcements
-      </Title>
-      {loading ? (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: 200,
-          }}
-        >
-          <Spin size="large" />
-        </div>
-      ) : announcements.length === 0 ? (
-        <Empty
-          description="No active announcements"
-          style={{ margin: "32px auto" }}
-        />
-      ) : (
-        <Table
-          dataSource={announcements}
-          columns={columns}
-          rowKey={(record) => record.id || record._id}
-          pagination={{ pageSize: 10 }}
-          bordered
-        />
-      )}
-    </Space>
+    <TitleLayout title="Announcements">
+      <Space direction="vertical" style={{ padding: 24, width: "100%" }}>
+        {loading ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: 200,
+            }}
+          >
+            <Spin size="large" />
+          </div>
+        ) : announcements.length === 0 ? (
+          <Empty
+            description="No active announcements"
+            style={{ margin: "32px auto" }}
+          />
+        ) : (
+          <Table
+            dataSource={announcements}
+            columns={columns}
+            rowKey={(record) => record.id || record._id}
+            pagination={{ pageSize: 10 }}
+            bordered
+          />
+        )}
+      </Space>
+    </TitleLayout>
   );
 };
 

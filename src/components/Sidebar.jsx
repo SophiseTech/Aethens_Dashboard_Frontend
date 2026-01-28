@@ -15,6 +15,8 @@ import {
   ShopOutlined,
   SolutionOutlined,
   MessageOutlined,
+  CheckSquareOutlined,
+  BellOutlined,
 } from "@ant-design/icons";
 
 import Book from "@/assets/Book";
@@ -30,7 +32,7 @@ const MENU_CONFIG = [
     label: "Dashboard",
     icon: AppstoreOutlined,
     path: "/",
-    roles: [ROLES.STUDENT, ROLES.MANAGER],
+    roles: [ROLES.STUDENT, ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Students",
@@ -42,13 +44,13 @@ const MENU_CONFIG = [
     label: "Enquiries",
     icon: MessageOutlined,
     path: "/manager/enquiries",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Enquiry Slots",
     icon: MessageOutlined,
     path: "/manager/enquiry-slots",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Materials",
@@ -72,13 +74,13 @@ const MENU_CONFIG = [
     label: "Students",
     icon: SolutionOutlined,
     path: "/manager/students",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Bills",
     icon: DollarOutlined,
     path: "/manager/bills",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Bills",
@@ -90,13 +92,13 @@ const MENU_CONFIG = [
     label: "Inventory",
     icon: ShopOutlined,
     path: "/manager/inventory",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Payslips",
     icon: MoneyCollectOutlined,
     path: "/manager/payslips",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Courses",
@@ -114,7 +116,7 @@ const MENU_CONFIG = [
     label: "FDP",
     icon: FundProjectionScreenOutlined,
     path: "/manager/faculty-development-program",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "FDP",
@@ -132,13 +134,13 @@ const MENU_CONFIG = [
     label: "Gallery",
     icon: PictureOutlined,
     path: "/gallery",
-    roles: [ROLES.MANAGER, ROLES.FACULTY],
+    roles: [ROLES.MANAGER, ROLES.FACULTY, ROLES.ADMIN],
   },
   {
     label: "Slots",
     icon: ClockCircleOutlined,
     path: "/manager/slots",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Slots",
@@ -156,7 +158,19 @@ const MENU_CONFIG = [
     label: "Announcements",
     icon: ClockCircleOutlined,
     path: "/manager/announcements",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
+  },
+  {
+    label: "Notifications",
+    icon: BellOutlined,
+    path: "/manager/notifications",
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
+  },
+  {
+    label: "Holidays",
+    icon: CalendarOutlined,
+    path: "/manager/holidays",
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Announcements",
@@ -174,7 +188,13 @@ const MENU_CONFIG = [
     label: "Final Project",
     icon: ClockCircleOutlined,
     path: "/manager/final-project",
-    roles: [ROLES.MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
+  },
+  {
+    label: "Tasks",
+    icon: CheckSquareOutlined,
+    path: "/manager/tasks",
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
 ];
 
@@ -194,7 +214,7 @@ const SidebarLogo = () => (
   <img
     src="/images/logo.png"
     alt="Logo"
-    className="self-center p-5 px-0 max-2xl:w-3/4 2xl:p-10"
+    className="self-center p-5 px-0 max-2xl:w-3/4 max-2xl:mx-auto 2xl:p-10"
   />
 );
 
@@ -206,9 +226,8 @@ const MenuItem = ({ item, isActive, user }) => {
     <Link to={dynamicPath} className="block">
       <div className="flex gap-10 items-center group hover:bg-gray-50 transition-colors duration-200 rounded-r-xl">
         <div
-          className={`rounded-r-xl bg-secondary transition-opacity duration-200 w-1 h-9 2xl:w-1.5 2xl:h-12 ${
-            isActive ? "opacity-100" : "opacity-0"
-          }`}
+          className={`rounded-r-xl bg-secondary transition-opacity duration-200 w-1 h-9 2xl:w-1.5 2xl:h-12 ${isActive ? "opacity-100" : "opacity-0"
+            }`}
         />
         <div className="flex items-center gap-3 2xl:gap-5 py-2">
           <IconComponent
@@ -216,9 +235,8 @@ const MenuItem = ({ item, isActive, user }) => {
             style={{ strokeWidth: isActive ? 3 : 2 }}
           />
           <p
-            className={`transition-all duration-200 text-sm 2xl:text-lg ${
-              isActive ? "font-bold text-primary" : "font-normal text-gray-700"
-            }`}
+            className={`transition-all duration-200 text-sm 2xl:text-lg ${isActive ? "font-bold text-primary" : "font-normal text-gray-700"
+              }`}
           >
             {item.label}
           </p>
@@ -323,30 +341,32 @@ function Sidebar({ children }) {
       <div className="drawer-side z-20 no-scrollbar">
         <label htmlFor="my-drawer" className="drawer-overlay" />
 
-        <aside className="h-full flex flex-col justify-between bg-white max-sm:w-80 w-96 shadow-lg">
-          {/* Header */}
-          <div className="flex flex-col gap-0 2xl:gap-5">
+        <aside className="h-full flex flex-col bg-white max-sm:w-80 w-96 shadow-lg">
+          {/* Fixed Header - Logo */}
+          <div className="flex-shrink-0 border-b border-gray-100">
             <SidebarLogo />
-
-            {/* Navigation Menu */}
-            <nav className="flex flex-col 2xl:gap-3 px-2">
-              {menuItems.map((item, index) => (
-                <MenuItem
-                  key={`${item.path}-${index}`}
-                  item={item}
-                  isActive={isActive(item.path)}
-                  user={user}
-                />
-              ))}
-            </nav>
           </div>
 
-          {/* User Profile */}
-          <UserProfile
-            user={user}
-            onProfileClick={handleProfileClick}
-            onLogout={handleLogout}
-          />
+          {/* Scrollable Navigation Menu */}
+          <nav className="flex-1 overflow-y-auto no-scrollbar flex flex-col 2xl:gap-3 px-2 py-4">
+            {menuItems.map((item, index) => (
+              <MenuItem
+                key={`${item.path}-${index}`}
+                item={item}
+                isActive={isActive(item.path)}
+                user={user}
+              />
+            ))}
+          </nav>
+
+          {/* Fixed Footer - User Profile */}
+          <div className="flex-shrink-0 border-t border-gray-100">
+            <UserProfile
+              user={user}
+              onProfileClick={handleProfileClick}
+              onLogout={handleLogout}
+            />
+          </div>
         </aside>
       </div>
 

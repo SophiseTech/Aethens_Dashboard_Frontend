@@ -1,10 +1,12 @@
+import centersStore from "@stores/CentersStore"
+import userStore from "@stores/UserStore"
 import handleError from "@utils/handleError"
 import { get, post } from "@utils/Requests"
 
 class SessionService {
-  async getAvailableSessionByDate() {
+  async getAvailableSessionByDate(date, center_id) {
     try {
-      const response = await post("/sessions/availableSessions", {})
+      const response = await post("/sessions/availableSessions", { date, center_id })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response
     } catch (error) {
@@ -40,9 +42,18 @@ class SessionService {
     }
   }
 
-  async getAllSessions(userId) {
+  async getAllSessions(date) {
     try {
-      const response = await get("/sessions/getAll")
+      const { user } = userStore.getState();
+      const { selectedCenter } = centersStore.getState();
+
+      let constructedPath;
+      if (user.role === 'admin' && selectedCenter) {
+        constructedPath = `/sessions/getAll?centerId=${selectedCenter}&slotDate=${date || ""}`;
+      } else {
+        constructedPath = `/sessions/getAll?slotDate=${date || ""}`;
+      }
+      const response = await get(constructedPath);
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {
@@ -52,7 +63,16 @@ class SessionService {
 
   async getStudentsBySessionId(sessionId) {
     try {
-      const response = await post("/sessions/getStudentsBySessionId", { sessionId })
+      const { user } = userStore.getState();
+      const { selectedCenter } = centersStore.getState();
+
+      let constructedPath;
+      if (user.role === 'admin' && selectedCenter) {
+        constructedPath = `/sessions/getStudentsBySessionId?centerId=${selectedCenter}`;
+      } else {
+        constructedPath = `/sessions/getStudentsBySessionId`;
+      }
+      const response = await post(constructedPath, { sessionId })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {

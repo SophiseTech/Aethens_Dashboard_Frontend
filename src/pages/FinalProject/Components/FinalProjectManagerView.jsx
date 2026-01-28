@@ -8,6 +8,11 @@ import { formatDate } from '@utils/helper';
 import { Avatar, Button, Card, Segmented, Space, Spin, Table, Tag, Typography } from 'antd';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useStore } from 'zustand';
+import centersStore from '@stores/CentersStore';
+import userStore from '@stores/UserStore';
+import { ROLES } from '@utils/constants';
+import TitleLayout from '@components/layouts/Title'
 
 const { Text, Title } = Typography
 
@@ -18,14 +23,26 @@ function FinalProjectManagerView() {
   // const { loading: projectOpenedStudentsLoading } = useStudents()
   const nav = useNavigate()
   const { projectId } = useParams()
+  const { selectedCenter } = useStore(centersStore);
+  const { user } = useStore(userStore);
 
   useEffect(() => {
-    fetchPendingSubmissions({}, projectId)
-  }, [])
+    if (user.role === ROLES.ADMIN && selectedCenter) {
+      fetchPendingSubmissions({ center_id: selectedCenter }, projectId);
+    } else {
+      fetchPendingSubmissions({}, projectId);
+    }
+  }, [selectedCenter])
 
   useEffect(() => {
+    let query = { status: selectedView };
+
+    if (user.role === ROLES.ADMIN && selectedCenter) {
+      query.centerId = selectedCenter;
+    }
+
     listProjects({
-      query: { status: selectedView },
+      query: query,
       populate: [
         {
           path: "studentId",
@@ -42,7 +59,7 @@ function FinalProjectManagerView() {
       ],
       pagination: projectsInfo.pagination
     })
-  }, [selectedView])
+  }, [selectedView, selectedCenter])
 
   const onViewStudents = (projectId, studentId) => {
     nav(`/manager/final-project/${projectId}/student/${studentId}/phases`);
@@ -113,43 +130,43 @@ function FinalProjectManagerView() {
   }
 
   return (
-    <div className="p-6">
-      <Title level={2}>Pending Submissions</Title>
+    <TitleLayout title="Pending Submissions" >
+      <div className="p-6">
+        {/* <FilterBar onFiltersChange={(values) => console.log('Filters:', values)} /> */}
 
-      {/* <FilterBar onFiltersChange={(values) => console.log('Filters:', values)} /> */}
+        {/* <StudentSearchBar students={students} onSelect={onSelectStudent} /> */}
 
-      {/* <StudentSearchBar students={students} onSelect={onSelectStudent} /> */}
+        <CreateProject />
 
-      <CreateProject />
+        <Card className='mb-4'>
+          <Title level={4}>Submissions</Title>
+          <Table
+            columns={columns}
+            dataSource={pendingSubmissions}
+            rowKey="id"
+            pagination={true}
+            className="mb-4"
+          />
+        </Card>
 
-      <Card className='mb-4'>
-        <Title level={4}>Submissions</Title>
-        <Table
-          columns={columns}
-          dataSource={pendingSubmissions}
-          rowKey="id"
-          pagination={true}
-          className="mb-4"
+        <Segmented
+          options={[{ label: 'Completed Students', value: 'completed' }, { label: 'Opened Students', value: 'pending' }]}
+          value={selectedView}
+          onChange={setView}
+          className='mb-2'
         />
-      </Card>
 
-      <Segmented
-        options={[{ label: 'Completed Students', value: 'completed' }, { label: 'Opened Students', value: 'pending' }]}
-        value={selectedView}
-        onChange={setView}
-        className='mb-2'
-      />
-
-      <ProjectOpenedStudentsList
-        projectsInfo={{
-          ...projectsInfo,
-          handlePaginationChange: handlePaginationChange
-        }}
-        loading={projectFetchLoading}
-        onView={onViewStudents}
-        title={selectedView === 'completed' ? 'Completed Students' : 'Opened Students'}
-      />
-    </div>
+        <ProjectOpenedStudentsList
+          projectsInfo={{
+            ...projectsInfo,
+            handlePaginationChange: handlePaginationChange
+          }}
+          loading={projectFetchLoading}
+          onView={onViewStudents}
+          title={selectedView === 'completed' ? 'Completed Students' : 'Opened Students'}
+        />
+      </div>
+    </TitleLayout>
   );
 };
 

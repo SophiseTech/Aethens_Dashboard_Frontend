@@ -3,7 +3,7 @@ import { Modal, Button, Select, Typography, Space, Flex, Card, message } from 'a
 import { useEffect, useState } from 'react';
 import courseService from '@/services/Course';
 import studentService from '@/services/Student';
-import { isUserActive } from '@utils/helper';
+import { isUserActive, calculateAge, formatDate } from '@utils/helper';
 import PropTypes from 'prop-types';
 
 const { Title, Text } = Typography;
@@ -97,8 +97,16 @@ function MigrateCourse({ student }) {
                 <Text>{student.username}</Text>
               </div>
               <div>
+                <Text strong>Age: </Text>
+                <Text>{calculateAge(student?.DOB) ?? "N/A"} years</Text>
+              </div>
+              <div>
                 <Text strong>Current Course: </Text>
                 <Text>{student.details_id?.course?.course_name || 'N/A'}</Text>
+              </div>
+              <div>
+                <Text strong>Course Joined Date: </Text>
+                <Text>{formatDate(student?.details_id?.enrollment_date) || 'N/A'}</Text>
               </div>
             </Space>
           </Card>
@@ -120,21 +128,21 @@ function MigrateCourse({ student }) {
 
           <Flex justify="end" gap={10} wrap="wrap">
             <Button onClick={handleCancel}>Cancel</Button>
-            <Button
+            {/* <Button
               danger
               onClick={() => handleMigration(false)}
               loading={processing}
               disabled={!selectedCourse || processing}
             >
               Migrate And Delete All Slots
-            </Button>
+            </Button> */}
             <Button
               type="primary"
               onClick={() => handleMigration(true)}
               loading={processing}
               disabled={!selectedCourse || processing}
             >
-              Migrate Slots
+              Migrate Course
             </Button>
           </Flex>
         </Space>

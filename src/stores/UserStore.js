@@ -1,6 +1,7 @@
 import authService from "@/services/Auth";
 import userService from "@/services/User";
 import { create } from "zustand";
+import handleInternalError from "@utils/handleInternalError";
 
 const userStore = create((set, get) => ({
   user: null,

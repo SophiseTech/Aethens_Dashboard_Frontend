@@ -76,7 +76,7 @@ class EnquiryService {
   async getEnquiryDetails(id) {
     try {
       if (!id) throw new Error("Invalid enquiry ID");
-      const response = await get(`/enquiries/${id}`);
+      const response = await get(`/v3/enquiry/${id}`);
       if (!response || !response.data)
         throw new Error("An error occurred. Please try again");
       return response.data;
@@ -141,9 +141,9 @@ class EnquiryService {
     }
   }
 
-  async getDemoSlots() {
+  async getDemoSlots({ selectedView, centerId }) {
     try {
-      const response = await get("/v3/enquiry/demo/slots");
+      const response = await get(`/v3/enquiry/demo/slots?selectedView=${selectedView}&centerId=${centerId}`);
       if (!response) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {

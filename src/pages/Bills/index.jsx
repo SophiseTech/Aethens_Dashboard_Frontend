@@ -1,9 +1,11 @@
+import centersService from '@/services/Centers'
 import courseService from '@/services/Course'
 import inventoryService from '@/services/Inventory'
 import Title from '@components/layouts/Title'
 import BillsLayot from '@pages/Bills/Components/BillsLayot'
 import GenerateBillButton from '@pages/Bills/Components/GenerateBillButton'
 import billStore from '@stores/BillStore'
+import centersStore from '@stores/CentersStore'
 import courseStore from '@stores/CourseStore'
 import inventoryStore from '@stores/InventoryStore'
 import studentStore from '@stores/StudentStore'
@@ -24,6 +26,7 @@ function Bills() {
   const [searchParams, setSearchParams] = useSearchParams();
   const student_id = searchParams.get("student_id")
   const { user } = useStore(userStore)
+  const {selectedCenter} = useStore(centersStore);
   const { courses, getCourses, total: courseTotal } = useStore(courseStore)
   const [lineItems, setLineItems] = useState([])
   const urlStatus = searchParams.get("status")
@@ -32,7 +35,7 @@ function Bills() {
   useEffect(() => {
     console.log(stateFilters?.query?.generated_for != student_id, stateFilters?.query?.generated_for, student_id);
 
-    if (!bills || stateFilters?.query?.generated_for != student_id || bills.length <= 0) {
+    if (!bills || stateFilters?.query?.generated_for != student_id || bills.length <= 0 || user.role === 'admin') {
       let filters = _.cloneDeep(stateFilters);
       filters.query = filters.query || {};
 
@@ -44,6 +47,10 @@ function Bills() {
         delete filters.query.generated_for
       }
 
+      if(user.role === ROLES.ADMIN){
+        filters.query.center_id = selectedCenter;
+      }
+
       if( urlStatus && ['paid', 'unpaid'].includes(urlStatus)) {
         filters.query.status = urlStatus
       }
@@ -51,8 +58,9 @@ function Bills() {
 
       // filters = { ...filters, query: { ...filters.query, ...stateFilters.query } }
       fetchBills(10, filters)
+
     }
-  }, [student_id, urlStatus])
+  }, [student_id, urlStatus,selectedCenter])
 
   const fetchBills = (limit = 10, filters = {}) => {
     getBills(limit, {
@@ -64,14 +72,18 @@ function Bills() {
     })
   }
 
-  const loadInitData = async ({ itemType }) => {
-    console.log(itemType);
+  useEffect(()=>{
+    getStudentsByCenter(0);
+  },[selectedCenter])
 
-    if (!invoiceNo || invoiceNo === 0) {
-      getInvoiceNo()
+  const loadInitData = async ({ itemType,centerId }) => {
+    console.log(itemType,centerId);
+
+    if (!invoiceNo || invoiceNo === 0 || user.role === ROLES.ADMIN) {
+      user.role === ROLES.ADMIN ? getInvoiceNo(centerId) : getInvoiceNo();
     }
     if (itemType === "materials") {
-      const { items } = await inventoryService.getInventoryItems(0, 10, { query: { type: "materials" } })
+      const { items } = await inventoryService.getInventoryItems(0, 10, { query: { type: "materials" } }, centerId)
       setLineItems(items)
       // setLneItemSearchFunction(searhcItems)
     }
@@ -80,11 +92,11 @@ function Bills() {
       setLineItems([...courses?.map(course => ({ name: course.course_name, _id: course._id, type: "course", rate: course.rate, discount: 0, taxes: 18 })), { name: "Registration Fee", _id: "67c00eb2073609b23054ca01", type: "course", rate: 3500, discount: 0, taxes: 18 }])
     }
     if (itemType === "gallery") {
-      const { items } = await inventoryService.getInventoryItems(0, 10, { query: { type: "gallery" } })
+      const { items } = await inventoryService.getInventoryItems(0, 10, { query: { type: "gallery" } }, centerId)
       setLineItems(items)
       // setLneItemSearchFunction(searhcItems)
     }
-    if (studentTotal === 0 || students.length < studentTotal) {
+    if (studentTotal === 0 || students.length < studentTotal || user.role === ROLES.ADMIN) {
       getStudentsByCenter(0)
     }
     // if (courseTotal === 0 || courses.length < courseTotal) {
@@ -92,7 +104,7 @@ function Bills() {
     // }
   }
 
-  const customerOptions = useMemo(() => students?.map(item => ({ label: item.username, value: item._id })), [students])
+  const customerOptions = useMemo(() => students?.map(item => ({ label: item.username, value: item._id, data: item?.wallet })), [students])
 
   const handleOnSave = async (values) => {
     values.generated_on = values.generated_on.toISOString()

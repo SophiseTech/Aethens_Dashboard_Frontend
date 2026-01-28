@@ -3,6 +3,10 @@ import { Button, Flex, Input, Segmented, Table } from 'antd';
 import EditInventoryItem from '@pages/Inventory/Components/EditInventoryItem';
 import inventoryStore from '@stores/InventoryStore';
 import { groupByField } from '@utils/helper';
+import centersStore from '@stores/CentersStore';
+import { useStore } from 'zustand';
+import userStore from '@stores/UserStore';
+import { ROLES } from '@utils/constants';
 
 const { Search } = Input
 
@@ -11,6 +15,8 @@ function InventoryList() {
   const [selectedTab, setSelectedTab] = useState('materials');
   const [editItem, setEditItem] = useState({});
   const [searchTerm, setSearchTerm] = useState("")
+  const { selectedCenter } = centersStore();
+  const {user} = useStore(userStore);
 
   const columns = [
     {
@@ -68,10 +74,10 @@ function InventoryList() {
   useEffect(() => {
     setSearchQuery("")
     setSearchTerm("")
-    if (!items.length || !categorizedItems[selectedTab]?.length) {
+    if (!items.length || !categorizedItems[selectedTab]?.length || user.role === ROLES.ADMIN) {
       getItems(10, { sort: '-createdAt', query: { type: selectedTab } }, 1);
     }
-  }, [selectedTab]);
+  }, [selectedTab, selectedCenter]);
 
   const handlePageChange = (page, pageSize) => {
     if (searchQuery) {
