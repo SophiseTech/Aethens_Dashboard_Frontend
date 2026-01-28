@@ -20,6 +20,7 @@ const studentStore = create((set, get) => ({
   syllabus: [],
   searchQuery: "",
   currentSessionAttendees: [],
+  todaysSessionAttendees: [],
   activeStudentSessions: {},
   projectOpenedStudents: [],
   getStudentsByCenter: async (limit = 10, page = 1, status = null, courseId = null, fromBranch = null, toBranch = null) => {
@@ -97,6 +98,37 @@ const studentStore = create((set, get) => ({
       set({ loading: false });
     }
   },
+
+  getTodaysSessionAttendees: async (user, selectedCenter) => {
+    try {
+      set({ loading: true });
+      console.log(user);
+
+      if (user.role !== ROLES.ADMIN && user.role !== ROLES.FACULTY)
+        throw new Error("Unauthorized access!");
+
+      let effectiveCenterId;
+
+      if (user.role === ROLES.ADMIN && selectedCenter) {
+        effectiveCenterId = selectedCenter;
+      } else {
+        effectiveCenterId = user.center_id;
+      }
+
+      const users = await userService.getTodaysSessionAttendees(effectiveCenterId);
+
+      if (users) {
+        users.sort((a, b) => b.isPresent - a.isPresent);
+        set({ todaysSessionAttendees: users });
+      }
+
+    } catch (error) {
+      handleInternalError(error);
+    } finally {
+      set({ loading: false });
+    }
+  },
+
   enroll: async (data) => {
     try {
       set({ loading: true });

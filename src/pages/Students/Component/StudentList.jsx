@@ -9,6 +9,7 @@ import courseService from "@/services/Course";
 import Chip from "@components/Chips/Chip";
 import { useStore } from "zustand";
 import centersStore from "@stores/CentersStore";
+import userStore from "@stores/UserStore";
 
 function StudentList() {
   const {
@@ -22,6 +23,8 @@ function StudentList() {
     search,
     getCurrentSessionAttendees,
     currentSessionAttendees,
+    getTodaysSessionAttendees,
+    todaysSessionAttendees,
   } = studentStore();
 
   const { user } = userStore();
@@ -135,6 +138,9 @@ function StudentList() {
           getStudentsByCenter(10, currentPage, "active", selectedCourses, fromBranch, toBranchParam);
         }
         // setVisitedPages(new Set([1]));
+
+      } else if (selectedView === "Todays Students") {
+        getTodaysSessionAttendees(user, selectedCenter);
       } else {
         getCurrentSessionAttendees();
       }
@@ -205,12 +211,19 @@ function StudentList() {
       data = searchQuery ? searchResults : students;
     }
 
+    if (selectedView === "Todays Students") {
+      return todaysSessionAttendees;
+    }
+
     // Apply migration filters client-side for Current Students view
     // (For other views, filtering happens on backend)
     if (selectedView === "Current Students" && fromBranch) {
       data = data.filter((student) => {
         const migrated = student?.details_id?.migrated;
         if (!migrated) return false;
+
+
+        const base = searchQuery ? searchResults : students;
 
         // Check top-level migration fields (latest migration)
         const matchesFromBranch = fromBranch ? migrated.fromBranchId === fromBranch : true;
@@ -229,6 +242,7 @@ function StudentList() {
     selectedView,
     fromBranch,
     user?.center_id,
+    todaysSessionAttendees,
   ]);
 
   console.log("search query: ", searchQuery, searchResults, currentPage);
@@ -330,6 +344,21 @@ function StudentList() {
     }
   };
 
+  const segmentOptions = useMemo(() => {
+    const base = ["Current Students", "All Students", "Active Students"];
+
+    if (user?.role === ROLES.ADMIN || user?.role === ROLES.FACULTY) {
+      return [
+        "Current Students",
+        "Todays Students",
+        "All Students",
+        "Active Students",
+      ];
+    }
+
+    return base;
+  }, [user?.role]);
+
   return (
     <>
       {/* Migration Filters - positioned below search, above view selector */}
@@ -373,7 +402,7 @@ function StudentList() {
 
       {/* View Selector */}
       <Segmented
-        options={["Current Students", "All Students", "Active Students"]}
+        options={segmentOptions}
         className="w-fit mb-4"
         value={selectedView}
         onChange={handleSegmentChange}

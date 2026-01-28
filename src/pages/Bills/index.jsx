@@ -72,6 +72,10 @@ function Bills() {
     })
   }
 
+  useEffect(()=>{
+    getStudentsByCenter(0);
+  },[selectedCenter])
+
   const loadInitData = async ({ itemType,centerId }) => {
     console.log(itemType,centerId);
 

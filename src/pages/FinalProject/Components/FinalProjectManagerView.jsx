@@ -35,11 +35,14 @@ function FinalProjectManagerView() {
   }, [selectedCenter])
 
   useEffect(() => {
+    let query = { status: selectedView };
+
+    if(user.role === ROLES.ADMIN && selectedCenter){
+      query.centerId = selectedCenter;
+    }
+
     listProjects({
-      query: {
-        status: selectedView,
-        centerId: selectedCenter ? selectedCenter : "all"
-      },
+      query: query,
       populate: [
         {
           path: "studentId",
