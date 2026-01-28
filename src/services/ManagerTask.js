@@ -97,3 +97,16 @@ export async function getManagersWithPendingTasks(centerId) {
         throw error;
     }
 }
+
+/**
+ * Get dashboard tasks due today
+ */
+export async function getDashboardTodayTasks() {
+    try {
+        const res = await get("/tasks/dashboard-today");
+        return res.data;
+    } catch (error) {
+        console.log("Error fetching dashboard today tasks:", error);
+        throw error;
+    }
+}

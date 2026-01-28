@@ -40,12 +40,43 @@ export default function TaskDetailCard({ task, onClose }) {
     const [submitting, setSubmitting] = useState(false);
 
     const isAdmin = user?.role === "admin";
+    const hasMultipleAssignees = task.assignedTo?.length > 1;
+
+    // Get current user's completion status for multi-assignee tasks
+    const getUserCompletionStatus = () => {
+        if (!task.completionStatus || !user) return null;
+        return task.completionStatus.find(
+            cs => cs.user?._id === user._id || cs.user === user._id
+        );
+    };
+
+    const userCompletionStatus = getUserCompletionStatus();
+    const isUserCompleted = userCompletionStatus?.completed ?? false;
+
+    // Get completion summary for multi-assignee tasks
+    const getCompletionSummary = () => {
+        if (!task.completionStatus) return { completed: 0, total: 0 };
+        const completed = task.completionStatus.filter(cs => cs.completed).length;
+        return { completed, total: task.completionStatus.length };
+    };
+
+    const completionSummary = getCompletionSummary();
 
     const handleStatusToggle = async () => {
-        const newStatus = task.status === "Pending" ? "Completed" : "Pending";
+        // For multi-assignee tasks with non-admin, toggle individual status
+        let newStatus;
+        if (hasMultipleAssignees && !isAdmin) {
+            newStatus = isUserCompleted ? "Pending" : "Completed";
+        } else {
+            newStatus = task.status === "Pending" ? "Completed" : "Pending";
+        }
         try {
             await updateStatus(task._id, newStatus);
-            message.success(`Task marked as ${newStatus}`);
+            if (hasMultipleAssignees && !isAdmin) {
+                message.success(`Your task marked as ${newStatus}`);
+            } else {
+                message.success(`Task marked as ${newStatus}`);
+            }
         } catch (error) {
             message.error("Failed to update status");
         }
@@ -85,6 +116,7 @@ export default function TaskDetailCard({ task, onClose }) {
             created: "Task Created",
             comment: "Comment Added",
             title: "Title",
+            individualCompletion: "Individual Completion",
         };
         return fieldNames[field] || field;
     };
@@ -164,19 +196,100 @@ export default function TaskDetailCard({ task, onClose }) {
                     {task.createdBy && (
                         <span>Created by: {task.createdBy.username}</span>
                     )}
+                    {task.taskType === "reminder" && (
+                        <Tag color="purple">System (Reminder)</Tag>
+                    )}
                 </div>
+
+                {/* Linked Enquiry Info */}
+                {task.linkedEnquiry && (
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <Text strong className="block mb-2 text-blue-700">Linked Enquiry</Text>
+                        <div className="flex flex-wrap gap-3 text-sm">
+                            <span className="text-blue-600">
+                                #{task.linkedEnquiry.enquiryNumber}
+                            </span>
+                            <span>
+                                {task.linkedEnquiry.name}
+                            </span>
+                            <span className="text-gray-500">
+                                📞 {task.linkedEnquiry.phoneNumber}
+                            </span>
+                            <Tag color={
+                                task.linkedEnquiry.stage === "New" ? "blue" :
+                                    task.linkedEnquiry.stage === "Demo" ? "orange" :
+                                        task.linkedEnquiry.stage === "Enrolled" ? "green" : "default"
+                            }>
+                                {task.linkedEnquiry.stage}
+                            </Tag>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Status Update Button */}
             <div className="mb-6">
+                {/* Show per-assignee completion for multi-manager tasks */}
+                {hasMultipleAssignees && task.completionStatus?.length > 0 && (
+                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                            <Text strong>Assignee Completion Status</Text>
+                            <Tag color={completionSummary.completed === completionSummary.total ? "green" : "orange"}>
+                                {completionSummary.completed}/{completionSummary.total} Completed
+                            </Tag>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {task.completionStatus.map((cs) => (
+                                <Tooltip
+                                    key={cs.user?._id || cs.user}
+                                    title={cs.completed
+                                        ? `Completed ${cs.completedAt ? dayjs(cs.completedAt).fromNow() : ''}`
+                                        : 'Pending'
+                                    }
+                                >
+                                    <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${cs.completed
+                                        ? 'bg-green-100 text-green-700 border border-green-300'
+                                        : 'bg-gray-100 text-gray-600 border border-gray-300'
+                                        }`}>
+                                        <Avatar
+                                            size="small"
+                                            src={cs.user?.profile_img}
+                                            icon={<UserOutlined />}
+                                        >
+                                            {cs.user?.username?.charAt(0)?.toUpperCase()}
+                                        </Avatar>
+                                        <span>{cs.user?.username || 'Unknown'}</span>
+                                        {cs.completed ? (
+                                            <CheckCircleOutlined className="text-green-500" />
+                                        ) : (
+                                            <ClockCircleOutlined className="text-gray-400" />
+                                        )}
+                                    </div>
+                                </Tooltip>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 <Button
-                    type={task.status === "Pending" ? "primary" : "default"}
-                    icon={task.status === "Pending" ? <CheckCircleOutlined /> : <ClockCircleOutlined />}
+                    type={
+                        hasMultipleAssignees && !isAdmin
+                            ? (isUserCompleted ? "default" : "primary")
+                            : (task.status === "Pending" ? "primary" : "default")
+                    }
+                    icon={
+                        hasMultipleAssignees && !isAdmin
+                            ? (isUserCompleted ? <ClockCircleOutlined /> : <CheckCircleOutlined />)
+                            : (task.status === "Pending" ? <CheckCircleOutlined /> : <ClockCircleOutlined />)
+                    }
                     onClick={handleStatusToggle}
                     loading={loading}
                     block
                 >
-                    {task.status === "Pending" ? "Mark as Completed" : "Mark as Pending"}
+                    {hasMultipleAssignees && !isAdmin
+                        ? (isUserCompleted ? "Mark My Task as Pending" : "Mark My Task as Completed")
+                        : (task.status === "Pending" ? "Mark as Completed" : "Mark as Pending")
+                    }
                 </Button>
 
                 {task.status === "Completed" && task.completedAt && (
