@@ -47,9 +47,11 @@ function StudentList() {
 
   // Temporary filter states (before Apply is clicked)
   const [tempFromBranch, setTempFromBranch] = useState(null);
+  const [tempToBranch, setTempToBranch] = useState(null);
 
   // Applied filter states (after Apply is clicked)
   const [fromBranch, setFromBranch] = useState(null);
+  const [toBranch, setToBranch] = useState(null);
 
   const [allCenters, setAllCenters] = useState([]);
 
@@ -59,12 +61,14 @@ function StudentList() {
   useEffect(() => {
     fetchStudents();
     console.log(students);
-  }, [selectedView, currentPage, searchQuery, selectedCourses, fromBranch, selectedCenter]);
+  }, [selectedView, currentPage, searchQuery, selectedCourses, fromBranch, toBranch, selectedCenter]);
 
   useEffect(() => {
-    if (selectedCenter === tempFromBranch) {
+    if (selectedCenter === tempFromBranch || selectedCenter === tempToBranch) {
       setTempFromBranch(null)
+      setTempToBranch(null)
       setFromBranch(null)
+      setToBranch(null)
     }
   }, [selectedCenter])
 
@@ -111,8 +115,12 @@ function StudentList() {
     console.log("🔄 Starting fetch");
 
     try {
-      // Only pass toBranch (user's center_id) when fromBranch filter is applied
-      const toBranchParam = fromBranch ? user?.center_id : null;
+      // Determine toBranch based on role
+      // Admin: use selected toBranch
+      // Manager: use their center_id when fromBranch is set
+      const toBranchParam = user?.role === ROLES.ADMIN
+        ? (toBranch || null)
+        : (fromBranch ? user?.center_id : null);
 
       if (selectedView === "All Students") {
         if (searchQuery) {
@@ -161,7 +169,9 @@ function StudentList() {
     setSelectedView(view);
     setSelectedCourses([]); // Clear course filter when view changes
     setFromBranch(null); // Clear applied migration filters
+    setToBranch(null); // Clear applied migration filters (for admin)
     setTempFromBranch(null); // Clear temporary migration filters
+    setTempToBranch(null); // Clear temporary migration filters (for admin)
     setCurrentPage(1); // Reset to page 1
     updateURL(view, 1); // Update URL with new view and reset page to 1
   };
@@ -169,6 +179,7 @@ function StudentList() {
   const handleApplyFilters = () => {
     // Apply the temporary filter values
     setFromBranch(tempFromBranch);
+    setToBranch(tempToBranch);
     setCurrentPage(1); // Reset to page 1
     updateURL(selectedView, 1); // Reset to page 1 when applying filters
   };
@@ -176,7 +187,9 @@ function StudentList() {
   const handleClearFilters = () => {
     // Clear both temporary and applied filters
     setTempFromBranch(null);
+    setTempToBranch(null);
     setFromBranch(null);
+    setToBranch(null);
     setCurrentPage(1); // Reset to page 1
     updateURL(selectedView, 1); // Reset to page 1
   };
@@ -216,18 +229,17 @@ function StudentList() {
 
     // Apply migration filters client-side for Current Students view
     // (For other views, filtering happens on backend)
-    if (selectedView === "Current Students" && fromBranch) {
+    if (selectedView === "Current Students" && (fromBranch || toBranch)) {
       data = data.filter((student) => {
         const migrated = student?.details_id?.migrated;
         if (!migrated) return false;
 
-
-        const base = searchQuery ? searchResults : students;
-
         // Check top-level migration fields (latest migration)
         const matchesFromBranch = fromBranch ? migrated.fromBranchId === fromBranch : true;
-        // toBranch is always user's center_id
-        const matchesToBranch = user?.center_id ? migrated.toBranchId === user.center_id : true;
+        // For admin: check against selected toBranch, for manager: check against their center_id
+        const matchesToBranch = user?.role === ROLES.ADMIN
+          ? (toBranch ? migrated.toBranchId === toBranch : true)
+          : (user?.center_id ? migrated.toBranchId === user.center_id : true);
         return matchesFromBranch && matchesToBranch;
       });
     }
@@ -240,7 +252,9 @@ function StudentList() {
     currentSessionAttendees,
     selectedView,
     fromBranch,
+    toBranch,
     user?.center_id,
+    user?.role,
     todaysSessionAttendees,
   ]);
 
@@ -369,18 +383,35 @@ function StudentList() {
           allowClear
           style={{ minWidth: 150 }}
           options={allCenters
-            .filter((center) => user?.role === ROLES.ADMIN ? center._id !== selectedCenter : center._id !== user?.center_id)
+            .filter((center) => {
+              // For admin: exclude selected toBranch
+              if (user?.role === ROLES.ADMIN) {
+                return center._id !== tempToBranch;
+              }
+              // For manager: exclude their own center
+              return center._id !== user?.center_id;
+            })
             .map((center) => ({
               label: center.center_name,
               value: center._id,
             }))}
         />
         <Select
-          placeholder="To Branch (Your Branch)"
-          value={user?.role === ROLES.ADMIN ? selectedCenter : user?.center_id}
-          disabled
+          placeholder={user?.role === ROLES.ADMIN ? "To Branch" : "To Branch (Your Branch)"}
+          value={user?.role === ROLES.ADMIN ? tempToBranch : user?.center_id}
+          onChange={(value) => setTempToBranch(value)}
+          allowClear={user?.role === ROLES.ADMIN}
+          disabled={user?.role !== ROLES.ADMIN}
           style={{ minWidth: 200 }}
           options={allCenters
+            .filter((center) => {
+              // For admin: exclude selected fromBranch
+              if (user?.role === ROLES.ADMIN) {
+                return center._id !== tempFromBranch;
+              }
+              // For others: show all
+              return true;
+            })
             .map((center) => ({
               label: center.center_name,
               value: center._id,

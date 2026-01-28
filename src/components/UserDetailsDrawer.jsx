@@ -9,6 +9,7 @@ import {
   Divider,
   Button,
   Flex,
+  Timeline,
 } from "antd";
 import {
   UserOutlined,
@@ -17,6 +18,8 @@ import {
   CalendarOutlined,
   EditOutlined,
   PhoneOutlined,
+  SwapRightOutlined,
+  EnvironmentOutlined,
 } from "@ant-design/icons";
 import { formatDate, calculateAge } from "@utils/helper"; // Your date formatting utility
 import EditUserModal from "./EditUserModal"; // Import the new EditUserModal component
@@ -96,8 +99,8 @@ const UserDetailsDrawer = ({
               {(!isStudentDetail ||
                 loggedinUser.role === ROLES.MANAGER ||
                 loggedinUser.role === ROLES.STUDENT) && (
-                <Text type="secondary">{user?.email}</Text>
-              )}
+                  <Text type="secondary">{user?.email}</Text>
+                )}
             </Col>
           </Row>
         </Card>
@@ -236,7 +239,7 @@ const UserDetailsDrawer = ({
             </Row>
           </Card>
         )}
-        
+
         {isStudentDetail && (
           <Card
             bordered={false}
@@ -255,29 +258,26 @@ const UserDetailsDrawer = ({
               <Title level={5} style={{ marginBottom: "16px" }}>
                 Migration History
               </Title>
-              <Row gutter={[16, 16]}>
-                {user.details_id.migrated.history.map((migration, index) => (
-                  <Col span={24} key={index}>
-                    <Card
-                      size="small"
-                      style={{ backgroundColor: "#f5f5f5", marginBottom: index < user.details_id.migrated.history.length - 1 ? "8px" : "0" }}
-                    >
-                      <Text strong>Migration {index + 1}</Text>
-                      <div style={{ marginTop: "8px" }}>
-                        <Text>From: {migration.fromBranchName || "N/A"}</Text>
+              <Timeline
+                mode="left"
+                items={user.details_id.migrated.history.map((migration, index) => ({
+                  color: index === user.details_id.migrated.history.length - 1 ? "green" : "blue",
+                  dot: <EnvironmentOutlined style={{ fontSize: '16px' }} />,
+                  children: (
+                    <div style={{ padding: "4px 0" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                        <Text strong style={{ color: "#1890ff" }}>{migration.fromBranchName || "N/A"}</Text>
+                        <SwapRightOutlined style={{ color: "#52c41a" }} />
+                        <Text strong style={{ color: "#52c41a" }}>{migration.toBranchName || "N/A"}</Text>
                       </div>
-                      <div>
-                        <Text>To: {migration.toBranchName || "N/A"}</Text>
-                      </div>
-                      <div>
-                        <Text type="secondary">
-                          Date: {migration.date ? formatDate(migration.date) : "N/A"}
-                        </Text>
-                      </div>
-                    </Card>
-                  </Col>
-                ))}
-              </Row>
+                      <Text type="secondary" style={{ fontSize: "12px" }}>
+                        <CalendarOutlined style={{ marginRight: "4px" }} />
+                        {migration.date ? formatDate(migration.date) : "N/A"}
+                      </Text>
+                    </div>
+                  ),
+                }))}
+              />
             </Card>
           </>
         )}
@@ -305,7 +305,7 @@ UserDetailsDrawer.propTypes = {
 UserDetailsDrawer.defaultProps = {
   user: {},
   visible: false,
-  onClose: () => {},
+  onClose: () => { },
   showActions: false,
   isStudentDetail: false,
 };
