@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Select, Button, Table, message, Space, Typography, Empty, Popconfirm, DatePicker, Row } from 'antd';
+import { Select, Button, Table, message, Space, Typography, Empty, Popconfirm, DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import SessionStore from '@stores/SessionStore';
 import { ROLES, weekDays } from '@utils/constants';
 import sessionService from '@/services/Session';
 import { sessionSlotOptionRenderer } from '@pages/Students/Component/AllotSessions';
 import userStore from '@stores/UserStore';
-import AdminCenterSelector from '@components/AdminCenterSelector';
 import { useStore } from 'zustand';
 import centersStore from '@stores/CentersStore';
+import TitleLayout from '@components/layouts/Title';
 
 const { Title } = Typography;
 
@@ -22,7 +22,7 @@ function ManagerSlots() {
   const [currentPage, setCurrentPage] = useState(1)
   const [slotDate, setSlotDate] = useState(dayjs())
   const { user } = userStore()
-  const {selectedCenter} = useStore(centersStore);
+  const { selectedCenter } = useStore(centersStore);
 
   const { getAllSessions } = SessionStore();
 
@@ -48,7 +48,14 @@ function ManagerSlots() {
       }
     }
     loadSessions();
-  }, [getAllSessions, selectedCenter]);
+  }, [getAllSessions, selectedCenter, slotDate]);
+
+  useEffect(() => {
+    // Clear students when slot date changes
+    setStudents([]);
+    setSelectedSessionId(null);
+  }, [slotDate])
+
 
   const loadStudents = async () => {
     if (!selectedSessionId) {
@@ -57,7 +64,7 @@ function ManagerSlots() {
     }
     try {
       setLoadingStudents(true);
-      const studentList = await sessionService.getStudentsBySessionId(selectedSessionId);
+      const studentList = await sessionService.getStudentsBySessionId(selectedSessionId, slotDate);
       const formatted = (studentList || []).map((student, idx) => ({
         key: student._id || idx,
         _id: student._id,
@@ -99,25 +106,25 @@ function ManagerSlots() {
 
         return index + 1 + (currentPage - 1) * pageSize;
       },
-      roles: [ROLES.FACULTY, ROLES.MANAGER]
+      roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN]
     },
     {
       title: 'Student Name',
       dataIndex: 'name',
       key: 'name',
-      roles: [ROLES.FACULTY, ROLES.MANAGER]
+      roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN],
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
-      roles: [ROLES.MANAGER]
+      roles: [ROLES.MANAGER, ROLES.ADMIN],
     },
     {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
-      roles: [ROLES.FACULTY, ROLES.MANAGER],
+      roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN],
       render: (value) => value ? String(value).charAt(0).toUpperCase() + String(value).slice(1) : ''
     },
     // {
@@ -133,7 +140,7 @@ function ManagerSlots() {
       title: 'Course',
       dataIndex: "course_name",
       key: 'course_name',
-      roles: [ROLES.FACULTY, ROLES.MANAGER],
+      roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN],
     },
     {
       title: 'Action',
@@ -178,64 +185,66 @@ function ManagerSlots() {
   });
 
   return (
-    <Space direction="vertical" style={{ padding: 24, width: '100%' }}>
-      <Row justify="space-between">
-        <Title level={3}>View Students by Session</Title>
-        <AdminCenterSelector />
-      </Row>
-      <Space wrap>
-        <Select
-          showSearch
-          placeholder="Select a session"
-          loading={loadingSessions}
-          style={{ width: 300 }}
-          options={sessionOptions}
-          onChange={(value) => {
-            setSelectedSessionId(value);
-            setStudents([]);
-          }}
-          optionFilterProp="label"
-          optionRender={(options) => sessionSlotOptionRenderer(options, user)}
-        />
-        <DatePicker
-          onChange={setSlotDate}
-          value={slotDate}
-        />
-        <Button
-          type="primary"
-          onClick={loadStudents}
-          loading={loadingStudents}
-          disabled={!selectedSessionId}
-        >
-          {students.length > 0 ? 'Reload Students' : 'Load Students'}
-        </Button>
+    <TitleLayout title={"View Students by Session"}>
+      <Space direction="vertical" style={{width: '100%' }}>
+        {/* <Row justify="space-between">
+          <Title level={3}>View Students by Session</Title>
+          <AdminCenterSelector />
+        </Row> */}
+        <Space wrap>
+          <Select
+            showSearch
+            placeholder="Select a session"
+            loading={loadingSessions}
+            style={{ width: 300 }}
+            options={sessionOptions}
+            onChange={(value) => {
+              setSelectedSessionId(value);
+              setStudents([]);
+            }}
+            optionFilterProp="label"
+            optionRender={(options) => sessionSlotOptionRenderer(options, user)}
+          />
+          <DatePicker
+            onChange={setSlotDate}
+            value={slotDate}
+          />
+          <Button
+            type="primary"
+            onClick={loadStudents}
+            loading={loadingStudents}
+            disabled={!selectedSessionId}
+          >
+            {students.length > 0 ? 'Reload Students' : 'Load Students'}
+          </Button>
+        </Space>
+
+        {selectedSessionId && (
+          <Title level={5} style={{ marginTop: 16 }}>
+            Showing students for session:{' '}
+            {sessionOptions.find((opt) => opt.value === selectedSessionId)?.label || ''}
+          </Title>
+        )}
+
+        {students.length > 0 ? (
+          <Table
+            dataSource={students}
+            columns={columnsByRole}
+            pagination={{
+              current: currentPage,
+              pageSize: 10,
+              onChange: (page) => {
+                setCurrentPage(page); // Update your pagination state
+              },
+            }}
+            loading={loadingStudents}
+            bordered
+          />
+        ) : (
+          !loadingStudents && <Empty description="No students found for this session." />
+        )}
       </Space>
-
-      {selectedSessionId && (
-        <Title level={5} style={{ marginTop: 16 }}>
-          Showing students for session:{' '}
-          {sessionOptions.find((opt) => opt.value === selectedSessionId)?.label || ''}
-        </Title>
-      )}
-
-      {students.length > 0 ? (
-        <Table
-          dataSource={students}
-          columns={columnsByRole}
-          pagination={{
-            current: currentPage,
-            pageSize: 10,
-            onChange: (page, pageSize) => {
-              setCurrentPage(page); // Update your pagination state
-            },
-          }}
-          loading={loadingStudents}
-          bordered
-        />
-      ) : (
-        !loadingStudents && <Empty description="No students found for this session." />
-      )}
-    </Space>
+    </TitleLayout>
   );
 }
 

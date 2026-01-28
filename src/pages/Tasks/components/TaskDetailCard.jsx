@@ -210,7 +210,7 @@ export default function TaskDetailCard({ task, onClose }) {
                         className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 cursor-pointer hover:bg-blue-100 hover:border-blue-300 transition-colors"
                         onClick={() => {
                             // Navigate to enquiry page with enquiryId to auto-open drawer
-                            const basePath = user?.role === 'admin' ? '/admin/enquiries' : '/manager/enquiries';
+                            const basePath = '/manager/enquiries';
                             navigate(`${basePath}?enquiryId=${task.linkedEnquiry._id}`);
                             if (onClose) onClose();
                         }}
