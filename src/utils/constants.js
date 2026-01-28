@@ -225,3 +225,6 @@ export const TASK_STATUS = [
   { label: "Completed", value: "Completed" },
 ];
 
+export const ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES = [
+  "/manager/tasks"
+]

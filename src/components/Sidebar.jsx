@@ -201,7 +201,7 @@ const SidebarLogo = () => (
   <img
     src="/images/logo.png"
     alt="Logo"
-    className="self-center p-5 px-0 max-2xl:w-3/4 2xl:p-10"
+    className="self-center p-5 px-0 max-2xl:w-3/4 max-2xl:mx-auto 2xl:p-10"
   />
 );
 
