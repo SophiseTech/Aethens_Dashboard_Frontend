@@ -53,7 +53,7 @@ const NotificationBell = () => {
   return (
     <Popover content={notificationContent} title="Notifications" trigger="click" placement="bottomRight">
       <Badge count={unreadCount}>
-        <BellOutlined style={{ fontSize: '24px', cursor: 'pointer' }} />
+        <BellOutlined style={{ fontSize: '24px', cursor: 'pointer' }} className='border border-stone-200 p-3 rounded-full' />
       </Badge>
     </Popover>
   );

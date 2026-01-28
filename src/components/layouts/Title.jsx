@@ -10,9 +10,9 @@ function Title({ title, button, children }) {
           <h1 className='font-bold | text-xl 2xl:text-3xl'>{title}</h1>
           <AdminCenterSelector />
         </div>
-        <NotificationBell />
-        <div className='max-lg:pr-10 | lg:w-1/2 lg:flex lg:justify-end'>
+        <div className='max-lg:pr-10 | lg:w-1/2 lg:flex lg:justify-end lg:gap-4 lg:items-center'>
           {button}
+          <NotificationBell />
         </div>
       </div>
       {children}
