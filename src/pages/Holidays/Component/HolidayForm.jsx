@@ -1,7 +1,6 @@
 import CustomInput from '@components/form/CustomInput'
 import CustomSelect from '@components/form/CustomSelect'
 import useHoliday from '@hooks/useHoliday'
-import centersStore from '@stores/CentersStore'
 import userStore from '@stores/UserStore'
 import { ROLES } from '@utils/constants'
 import { Button, DatePicker, Flex, Modal, Switch } from 'antd'
@@ -19,7 +18,6 @@ function HolidayForm({ isCreate = false, holiday = null, onClose = null }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isRecurring, setIsRecurring] = useState(holiday?.isRecurring ?? true)
   const { user } = useStore(userStore)
-  const { centers } = useStore(centersStore)
   const { createHoliday, updateHoliday, createLoading, updateLoading, statusOptions } = useHoliday()
 
   // Maximum allowed days between start and end date for one-time holidays (365 days = 1 year)
@@ -40,11 +38,7 @@ function HolidayForm({ isCreate = false, holiday = null, onClose = null }) {
     return `${month}-${day}`
   }
 
-  // Prepare center options for admin
-  const centerOptions = centers.map(center => ({
-    label: center.name,
-    value: center._id
-  }))
+
 
   const handleModalOpen = () => {
     setIsModalOpen(true)
@@ -64,7 +58,6 @@ function HolidayForm({ isCreate = false, holiday = null, onClose = null }) {
         startDate,
         endDate,
         status: holiday.status,
-        ...(user.role === ROLES.ADMIN && { centerId: holiday.centerId })
       })
       setIsRecurring(holiday.isRecurring)
     } else {
@@ -114,11 +107,6 @@ function HolidayForm({ isCreate = false, holiday = null, onClose = null }) {
         status: values.status
       }
 
-      // Add centerId for admin, or validate for manager
-      if (user.role === ROLES.ADMIN) {
-        formattedValues.centerId = values.centerId
-      }
-
       if (isCreate) {
         await createHoliday(formattedValues)
       } else {
@@ -163,7 +151,7 @@ function HolidayForm({ isCreate = false, holiday = null, onClose = null }) {
   return (
     <>
       {isCreate ? (
-        <Button variant='filled' color='orange' onClick={handleModalOpen}>
+        <Button variant='filled' color='green' onClick={handleModalOpen}>
           {buttonLabel}
         </Button>
       ) : (
@@ -199,17 +187,6 @@ function HolidayForm({ isCreate = false, holiday = null, onClose = null }) {
               { min: 1, max: 100, message: 'Title must be between 1 and 100 characters' }
             ]}
           />
-
-          {/* Center Selection (Admin Only) */}
-          {user.role === ROLES.ADMIN && (
-            <CustomSelect
-              name='centerId'
-              label='Center'
-              placeholder='Select a center'
-              options={centerOptions}
-              rules={[{ required: true, message: 'Center is required' }]}
-            />
-          )}
 
           {/* Recurring Toggle */}
           <Form.Item
@@ -356,7 +333,6 @@ function HolidayForm({ isCreate = false, holiday = null, onClose = null }) {
             <Flex gap={10}>
               <Button
                 type='primary'
-                color='orange'
                 variant='solid'
                 loading={isLoading}
                 htmlType='submit'

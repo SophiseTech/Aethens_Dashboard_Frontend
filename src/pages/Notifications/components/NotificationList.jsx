@@ -1,9 +1,9 @@
 import React from "react";
-import { Table, Avatar, Tag, Tooltip } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import { Table, Avatar, Tag, Tooltip, Button } from "antd";
+import { UserOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { formatDate } from "@utils/helper";
 
-export default function NotificationList({ notifications, loading, pagination, handleTableChange }) {
+export default function NotificationList({ notifications, loading, pagination, handleTableChange, onToggleReadStatus }) {
   const columns = [
     {
       title: "Sender",
@@ -57,6 +57,29 @@ export default function NotificationList({ notifications, loading, pagination, h
         <Tag color={isRead ? "green" : "orange"}>
           {isRead ? "Read" : "Unread"}
         </Tag>
+      ),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      width: 100,
+      render: (_, record) => (
+        <Tooltip title={record.is_read ? "Mark as Unread" : "Mark as Read"}>
+          <Button
+            type="text"
+            size="small"
+            onClick={() => onToggleReadStatus(record._id)}
+            icon={
+              record.is_read ? (
+                <EyeInvisibleOutlined style={{ fontSize: '18px', color: '#8c8c8c' }} />
+              ) : (
+                <EyeOutlined style={{ fontSize: '18px', color: '#1890ff' }} />
+              )
+            }
+            className={`hover:bg-gray-100 transition-colors rounded-full p-2 ${record.is_read ? 'hover:text-orange-500' : 'hover:text-green-500'
+              }`}
+          />
+        </Tooltip>
       ),
     },
   ];

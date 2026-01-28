@@ -64,7 +64,7 @@ function HolidaySearch() {
         placeholder={['Start Date', 'End Date']}
       />
 
-      <Button type='primary' color='orange' variant='solid' onClick={handleSearch}>
+      <Button type='primary' variant='solid' onClick={handleSearch}>
         Search
       </Button>
       <Button onClick={handleReset}>

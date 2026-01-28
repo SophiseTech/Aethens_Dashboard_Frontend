@@ -17,4 +17,7 @@ export const notificationService = {
   markAsRead: (notificationId) => {
     return put(`/notifications/${notificationId}/read`);
   },
+  toggleReadStatus: (notificationId) => {
+    return put(`/notifications/${notificationId}/toggle-read`);
+  },
 };
