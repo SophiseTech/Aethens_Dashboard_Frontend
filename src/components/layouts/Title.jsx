@@ -1,17 +1,31 @@
 import AdminCenterSelector from '@components/AdminCenterSelector'
 import NotificationBell from '@components/NotificationBell'
-import React from 'react'
+import centersStore from '@stores/CentersStore'
+import userStore from '@stores/UserStore'
+import { useStore } from 'zustand'
 
 function Title({ title, button, children }) {
+  const { user } = userStore()
+  const { selectedCenter } = useStore(centersStore);
+
+  const renderButtons = () => {
+    if (user.role === "admin" && selectedCenter && selectedCenter !== 'all') {
+      return button;
+    } else if (user.role !== "admin") {
+      return button;
+    }
+    return null;
+  }
+
   return (
-    <div className='flex flex-col pb-5 h-full | pt-5 max-lg:px-5 lg:pr-5 gap-5 2xl:pt-10 2xl:gap-10'>
+    <div className='flex flex-col pb-5 h-full w-full | pt-5 max-lg:px-5 lg:pr-5 gap-5 2xl:pt-10 2xl:gap-10'>
       <div className='flex justify-between items-center'>
         <div className='flex w-full items-center justify-between'>
           <h1 className='font-bold | text-xl 2xl:text-3xl'>{title}</h1>
-          <AdminCenterSelector />
         </div>
         <div className='max-lg:pr-10 | lg:w-1/2 lg:flex lg:justify-end lg:gap-4 lg:items-center'>
-          {button}
+          {renderButtons()}
+          <AdminCenterSelector />
           <NotificationBell />
         </div>
       </div>

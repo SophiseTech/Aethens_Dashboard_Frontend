@@ -7,6 +7,7 @@ import { Row } from "antd";
 import AdminCenterSelector from "@components/AdminCenterSelector";
 import { useStore } from "zustand";
 import centersStore from "@stores/CentersStore";
+import Title from "@components/layouts/Title";
 
 export default function ManagerAnnouncementPage() {
   const { fetch } = useAnnouncementStore();
@@ -17,14 +18,16 @@ export default function ManagerAnnouncementPage() {
   }, [selectedCenter]);
 
   return (
-    <div className="mx-auto p-4">
-      <Row justify="space-between">
-        <h1 className="text-2xl font-bold mb-4">Announcements</h1>
-        <AdminCenterSelector />
-      </Row>
-      <AnnouncementList />
-      <AnnouncementForm />
-      <DeleteModal />
-    </div>
+    <Title title={"Announcements"}>
+      <div className="mx-auto p-4">
+        {/* <Row justify="space-between">
+          <h1 className="text-2xl font-bold mb-4"></h1>
+          <AdminCenterSelector />
+        </Row> */}
+        <AnnouncementList />
+        <AnnouncementForm />
+        <DeleteModal />
+      </div>
+    </Title>
   );
 }

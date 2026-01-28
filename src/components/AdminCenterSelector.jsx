@@ -33,7 +33,7 @@ const AdminCenterSelector = () => {
           onChange={(value) =>
             handleCenterChange(value)
           }
-          className="w-1/3"
+          className="w-[200px]"
           placeholder="Select Center"
           allowClear={false}
         >

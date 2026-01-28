@@ -5,14 +5,14 @@ import { useFinalProject } from '@hooks/useFinalProject';
 import CreateProject from '@pages/FinalProject/Components/CreateProject';
 import ProjectOpenedStudentsList from '@pages/FinalProject/Components/ProjectOpenedStudentsList';
 import { formatDate } from '@utils/helper';
-import { Avatar, Button, Card, Segmented, Space, Spin, Table, Tag, Typography, Row } from 'antd';
+import { Avatar, Button, Card, Segmented, Space, Spin, Table, Tag, Typography } from 'antd';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import AdminCenterSelector from '@components/AdminCenterSelector';
 import { useStore } from 'zustand';
 import centersStore from '@stores/CentersStore';
 import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
+import TitleLayout from '@components/layouts/Title'
 
 const { Text, Title } = Typography
 
@@ -37,7 +37,7 @@ function FinalProjectManagerView() {
   useEffect(() => {
     let query = { status: selectedView };
 
-    if(user.role === ROLES.ADMIN && selectedCenter){
+    if (user.role === ROLES.ADMIN && selectedCenter) {
       query.centerId = selectedCenter;
     }
 
@@ -130,47 +130,43 @@ function FinalProjectManagerView() {
   }
 
   return (
-    <div className="p-6">
+    <TitleLayout title="Pending Submissions" >
+      <div className="p-6">
+        {/* <FilterBar onFiltersChange={(values) => console.log('Filters:', values)} /> */}
 
-      <Row justify="space-between">
-        <Title level={2}>Pending Submissions</Title>
-        <AdminCenterSelector />
-      </Row>
+        {/* <StudentSearchBar students={students} onSelect={onSelectStudent} /> */}
 
-      {/* <FilterBar onFiltersChange={(values) => console.log('Filters:', values)} /> */}
+        <CreateProject />
 
-      {/* <StudentSearchBar students={students} onSelect={onSelectStudent} /> */}
+        <Card className='mb-4'>
+          <Title level={4}>Submissions</Title>
+          <Table
+            columns={columns}
+            dataSource={pendingSubmissions}
+            rowKey="id"
+            pagination={true}
+            className="mb-4"
+          />
+        </Card>
 
-      <CreateProject />
-
-      <Card className='mb-4'>
-        <Title level={4}>Submissions</Title>
-        <Table
-          columns={columns}
-          dataSource={pendingSubmissions}
-          rowKey="id"
-          pagination={true}
-          className="mb-4"
+        <Segmented
+          options={[{ label: 'Completed Students', value: 'completed' }, { label: 'Opened Students', value: 'pending' }]}
+          value={selectedView}
+          onChange={setView}
+          className='mb-2'
         />
-      </Card>
 
-      <Segmented
-        options={[{ label: 'Completed Students', value: 'completed' }, { label: 'Opened Students', value: 'pending' }]}
-        value={selectedView}
-        onChange={setView}
-        className='mb-2'
-      />
-
-      <ProjectOpenedStudentsList
-        projectsInfo={{
-          ...projectsInfo,
-          handlePaginationChange: handlePaginationChange
-        }}
-        loading={projectFetchLoading}
-        onView={onViewStudents}
-        title={selectedView === 'completed' ? 'Completed Students' : 'Opened Students'}
-      />
-    </div>
+        <ProjectOpenedStudentsList
+          projectsInfo={{
+            ...projectsInfo,
+            handlePaginationChange: handlePaginationChange
+          }}
+          loading={projectFetchLoading}
+          onView={onViewStudents}
+          title={selectedView === 'completed' ? 'Completed Students' : 'Opened Students'}
+        />
+      </div>
+    </TitleLayout>
   );
 };
 
