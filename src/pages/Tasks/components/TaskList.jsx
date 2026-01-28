@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Card, Tag, Avatar, Typography, Button, Tooltip, Pagination, Row, Drawer } from "antd";
+import React, { useState, useEffect } from "react";
+import { Card, Tag, Avatar, Typography, Button, Tooltip, Pagination, Row, Drawer, message } from "antd";
 import {
     ClockCircleOutlined,
     CheckCircleOutlined,
@@ -13,6 +13,8 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import useManagerTaskStore from "@/stores/ManagerTaskStore";
 import userStore from "@stores/UserStore";
 import TaskDetailCard from "./TaskDetailCard";
+import { useLocation, useNavigate } from "react-router-dom";
+import { getTaskById } from "@services/ManagerTask";
 
 dayjs.extend(relativeTime);
 
@@ -27,10 +29,39 @@ export default function TaskList() {
         fetch,
     } = useManagerTaskStore();
 
+    const location = useLocation();
+    const navigate = useNavigate();
+    const queryParams = new URLSearchParams(location.search);
+    const taskIdFromUrl = queryParams.get("taskId");
+
     const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
     const [selectedDetailTask, setSelectedDetailTask] = useState(null);
 
     const isAdmin = user?.role === "admin";
+
+    // Handle taskId from URL to auto-open drawer
+    useEffect(() => {
+        const openTaskFromUrl = async () => {
+            if (taskIdFromUrl) {
+                try {
+                    const task = await getTaskById(taskIdFromUrl);
+                    if (task) {
+                        setSelectedDetailTask(task);
+                        setDetailDrawerOpen(true);
+                        // Clear the taskId from URL after opening
+                        const newParams = new URLSearchParams(location.search);
+                        newParams.delete("taskId");
+                        const newSearch = newParams.toString();
+                        navigate(newSearch ? `?${newSearch}` : location.pathname, { replace: true });
+                    }
+                } catch (error) {
+                    console.error("Error fetching task:", error);
+                    message.error("Failed to load task details");
+                }
+            }
+        };
+        openTaskFromUrl();
+    }, [taskIdFromUrl]);
 
     const handlePageChange = (page) => {
         fetch(page);

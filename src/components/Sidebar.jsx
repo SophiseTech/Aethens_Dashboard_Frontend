@@ -213,8 +213,7 @@ const MenuItem = ({ item, isActive, user }) => {
     <Link to={dynamicPath} className="block">
       <div className="flex gap-10 items-center group hover:bg-gray-50 transition-colors duration-200 rounded-r-xl">
         <div
-          className={`rounded-r-xl bg-secondary transition-opacity duration-200 w-1 h-9 2xl:w-1.5 2xl:h-12 ${
-            isActive ? "opacity-100" : "opacity-0"
+          className={`rounded-r-xl bg-secondary transition-opacity duration-200 w-1 h-9 2xl:w-1.5 2xl:h-12 ${isActive ? "opacity-100" : "opacity-0"
             }`}
         />
         <div className="flex items-center gap-3 2xl:gap-5 py-2">
@@ -223,8 +222,7 @@ const MenuItem = ({ item, isActive, user }) => {
             style={{ strokeWidth: isActive ? 3 : 2 }}
           />
           <p
-            className={`transition-all duration-200 text-sm 2xl:text-lg ${
-              isActive ? "font-bold text-primary" : "font-normal text-gray-700"
+            className={`transition-all duration-200 text-sm 2xl:text-lg ${isActive ? "font-bold text-primary" : "font-normal text-gray-700"
               }`}
           >
             {item.label}
@@ -330,30 +328,32 @@ function Sidebar({ children }) {
       <div className="drawer-side z-20 no-scrollbar">
         <label htmlFor="my-drawer" className="drawer-overlay" />
 
-        <aside className="h-full flex flex-col justify-between bg-white max-sm:w-80 w-96 shadow-lg">
-          {/* Header */}
-          <div className="flex flex-col gap-0 2xl:gap-5">
+        <aside className="h-full flex flex-col bg-white max-sm:w-80 w-96 shadow-lg">
+          {/* Fixed Header - Logo */}
+          <div className="flex-shrink-0 border-b border-gray-100">
             <SidebarLogo />
-
-            {/* Navigation Menu */}
-            <nav className="flex flex-col 2xl:gap-3 px-2">
-              {menuItems.map((item, index) => (
-                <MenuItem
-                  key={`${item.path}-${index}`}
-                  item={item}
-                  isActive={isActive(item.path)}
-                  user={user}
-                />
-              ))}
-            </nav>
           </div>
 
-          {/* User Profile */}
-          <UserProfile
-            user={user}
-            onProfileClick={handleProfileClick}
-            onLogout={handleLogout}
-          />
+          {/* Scrollable Navigation Menu */}
+          <nav className="flex-1 overflow-y-auto no-scrollbar flex flex-col 2xl:gap-3 px-2 py-4">
+            {menuItems.map((item, index) => (
+              <MenuItem
+                key={`${item.path}-${index}`}
+                item={item}
+                isActive={isActive(item.path)}
+                user={user}
+              />
+            ))}
+          </nav>
+
+          {/* Fixed Footer - User Profile */}
+          <div className="flex-shrink-0 border-t border-gray-100">
+            <UserProfile
+              user={user}
+              onProfileClick={handleProfileClick}
+              onLogout={handleLogout}
+            />
+          </div>
         </aside>
       </div>
 

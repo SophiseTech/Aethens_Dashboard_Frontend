@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Card, List, Tag, Button, Typography, Empty, Spin, message, Tooltip } from 'antd';
-import { CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined, RightOutlined } from '@ant-design/icons';
 import { getDashboardTodayTasks, updateTaskStatus } from '@services/ManagerTask';
+import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 
 const { Text, Paragraph } = Typography;
@@ -10,6 +11,7 @@ function TodayTasks() {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [updatingTaskId, setUpdatingTaskId] = useState(null);
+    const navigate = useNavigate();
 
     const fetchTasks = async () => {
         try {
@@ -28,7 +30,8 @@ function TodayTasks() {
         fetchTasks();
     }, []);
 
-    const handleToggleStatus = async (task) => {
+    const handleToggleStatus = async (e, task) => {
+        e.stopPropagation(); // Prevent navigation when clicking the button
         const newStatus = task.status === 'Completed' ? 'Pending' : 'Completed';
         try {
             setUpdatingTaskId(task._id);
@@ -42,6 +45,11 @@ function TodayTasks() {
         } finally {
             setUpdatingTaskId(null);
         }
+    };
+
+    const handleTaskClick = (task) => {
+        // Navigate to tasks page with taskId to auto-open drawer
+        navigate(`/manager/tasks?taskId=${task._id}`);
     };
 
     const getPriorityColor = (priority) => {
@@ -82,7 +90,8 @@ function TodayTasks() {
                     renderItem={(task) => (
                         <List.Item
                             key={task._id}
-                            className="hover:bg-gray-50 transition-colors rounded-lg px-2"
+                            className="hover:bg-gray-50 transition-colors rounded-lg px-2 cursor-pointer"
+                            onClick={() => handleTaskClick(task)}
                             actions={[
                                 <Tooltip
                                     key="toggle"
@@ -93,10 +102,13 @@ function TodayTasks() {
                                         size="small"
                                         icon={task.status === 'Completed' ? <ClockCircleOutlined /> : <CheckCircleOutlined />}
                                         loading={updatingTaskId === task._id}
-                                        onClick={() => handleToggleStatus(task)}
+                                        onClick={(e) => handleToggleStatus(e, task)}
                                     >
                                         {task.status === 'Completed' ? 'Pending' : 'Complete'}
                                     </Button>
+                                </Tooltip>,
+                                <Tooltip key="view" title="View Details">
+                                    <RightOutlined className="text-gray-400" />
                                 </Tooltip>
                             ]}
                         >
@@ -136,3 +148,4 @@ function TodayTasks() {
 }
 
 export default TodayTasks;
+
