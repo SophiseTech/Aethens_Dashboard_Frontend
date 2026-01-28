@@ -239,5 +239,6 @@ export const TASK_STATUS = [
 ];
 
 export const ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES = [
-  "/manager/tasks"
+  "/manager/tasks",
+  "/manager/notifications",
 ]

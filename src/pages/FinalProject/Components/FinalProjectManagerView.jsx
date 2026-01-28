@@ -13,8 +13,9 @@ import { useStore } from 'zustand';
 import centersStore from '@stores/CentersStore';
 import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
+import Title from '@components/layouts/Title';
 
-const { Text, Title } = Typography
+const { Text } = Typography
 
 function FinalProjectManagerView() {
   const { getStatusConfig, fetchPendingSubmissions, pendingSubmissions, loading, listProjects, projectsInfo, handlePaginationChange,
@@ -132,10 +133,8 @@ function FinalProjectManagerView() {
   return (
     <div className="p-6">
 
-      <Row justify="space-between">
-        <Title level={2}>Pending Submissions</Title>
-        <AdminCenterSelector />
-      </Row>
+        <Title title="Pending Submissions" level={3} />
+      
 
       {/* <FilterBar onFiltersChange={(values) => console.log('Filters:', values)} /> */}
 

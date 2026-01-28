@@ -114,12 +114,15 @@ function StudentList() {
       title: 'Course',
       dataIndex: ["details_id", "course", "course_name"],
     },
-    {
+  ];
+
+  if(selectedView === "Current Students"){
+    columns.push({
       title: "Status",
       dataIndex: "isPresent",
       render: (value) => <Chip type={value ? "success" : "danger"} label={value ? "Present" : "Absent"} glow={false} />
-    }
-  ];
+    })
+  }
 
   const loadMore = (page, pageSize) => {
     if (selectedView === "All Students") {
