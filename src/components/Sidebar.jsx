@@ -16,6 +16,7 @@ import {
   SolutionOutlined,
   MessageOutlined,
   CheckSquareOutlined,
+  BellOutlined,
 } from "@ant-design/icons";
 
 import Book from "@/assets/Book";
@@ -157,6 +158,12 @@ const MENU_CONFIG = [
     label: "Announcements",
     icon: ClockCircleOutlined,
     path: "/manager/announcements",
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
+  },
+  {
+    label: "Notifications",
+    icon: BellOutlined,
+    path: "/manager/notifications",
     roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {

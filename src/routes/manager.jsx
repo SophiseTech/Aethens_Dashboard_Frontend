@@ -23,6 +23,7 @@ const FacultyAttendance = lazy(() => import("@pages/Attendance/FacultyAttendance
 const ManagerSlots = lazy(() => import("@pages/Slots/ManagerSlots"))
 const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCourseHistory"))
 const ManagerAnnouncementPage = lazy(() => import("@pages/Announcement/ManagerAnnouncement"))
+const Notifications = lazy(() => import("@pages/Notifications/Notifications"))
 const ReviewSubmission = lazy(() => import("@pages/FinalProject/ReviewSubmission"))
 const StudentProjectDetails = lazy(() => import("@pages/FinalProject/StudentProjectDetails"))
 const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"))
@@ -140,6 +141,13 @@ export const managerRoutes = [
               <LazyLoader element={<ManagerAnnouncementPage />} />
             ),
             title: "Slots",
+          },
+          {
+            path: "/manager/notifications",
+            element: (
+              <LazyLoader element={<Notifications />} />
+            ),
+            title: "Notifications",
           },
           {
             path: "/manager/final-project",

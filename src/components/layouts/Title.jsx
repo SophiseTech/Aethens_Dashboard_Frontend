@@ -1,4 +1,5 @@
 import AdminCenterSelector from '@components/AdminCenterSelector'
+import NotificationBell from '@components/NotificationBell'
 import React from 'react'
 
 function Title({ title, button, children }) {
@@ -9,6 +10,7 @@ function Title({ title, button, children }) {
           <h1 className='font-bold | text-xl 2xl:text-3xl'>{title}</h1>
           <AdminCenterSelector />
         </div>
+        <NotificationBell />
         <div className='max-lg:pr-10 | lg:w-1/2 lg:flex lg:justify-end'>
           {button}
         </div>
