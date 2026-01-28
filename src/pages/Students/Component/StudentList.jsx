@@ -9,7 +9,6 @@ import courseService from "@/services/Course";
 import Chip from "@components/Chips/Chip";
 import { useStore } from "zustand";
 import centersStore from "@stores/CentersStore";
-import userStore from "@stores/UserStore";
 
 function StudentList() {
   const {
