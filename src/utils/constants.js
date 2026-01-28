@@ -186,11 +186,11 @@ export const PHASE_STATUS = {
 };
 
 export const age_categories = [
-  {label:"5 - 7 Years",value:"5_7_years"},
-  {label:"8 - 14 Years",value:"7_8_years"},
-  {label:"15+ Years",value:"15+_years"},
-  {label:"Professional",value:"professional"},
-  {label:"Diploma",value:"dimploma"},
+  { label: "5 - 7 Years", value: "5_7_years" },
+  { label: "8 - 14 Years", value: "7_8_years" },
+  { label: "15+ Years", value: "15+_years" },
+  { label: "Professional", value: "professional" },
+  { label: "Diploma", value: "dimploma" },
 ]
 
 export const closing_remarks = [
@@ -206,7 +206,7 @@ export const foundUsOptions = [{ label: "Social Media", value: "Social Media" },
 { label: "Walk-in", value: "Walk-in" },
 { label: "Referral", value: "Referral" },
 { label: "Google Maps", value: "Google Maps" }];
-export const EnquiryModeOptions = [{label:"Walk-in",value:"Walk-in"},{label:"Call",value:"Call"},{label:"Online",value:"Online"}];
+export const EnquiryModeOptions = [{ label: "Walk-in", value: "Walk-in" }, { label: "Call", value: "Call" }, { label: "Online", value: "Online" }];
 
 export const demoStatuses = [
   { label: "Scheduled", value: "Scheduled" },
@@ -220,3 +220,11 @@ export const feeOptions = [
   { label: "Partial", value: "partial" },
   { label: "Installments", value: "monthly" },
 ]
+
+export const paymentMethods = [
+  { label: 'Cash', value: 'cash' },
+  { label: 'Bank Transfer', value: 'bank_transfer' },
+  { label: 'Card', value: 'card' },
+  { label: 'Cheque', value: 'cheque' },
+  { label: 'Wallet', value: 'wallet' },
+] 

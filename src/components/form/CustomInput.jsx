@@ -1,6 +1,6 @@
 import { Form, Input } from 'antd'
 
-function CustomInput({ name, label, placeholder, type = "text", selectAfter, className = "", required = true, inputProps = {} }) {
+function CustomInput({ name, label, placeholder, type = "text", selectAfter, className = "", required = true, rules = [], inputProps = {} }) {
   return (
     <Form.Item
       name={name}
@@ -8,6 +8,7 @@ function CustomInput({ name, label, placeholder, type = "text", selectAfter, cla
       className='w-full'
       rules={[
         { required: required, message: `Please input the ${label}!` },
+        ...rules
         // { max: 200, message: `${label} cannot exceed 50 characters` }
       ]}
     >

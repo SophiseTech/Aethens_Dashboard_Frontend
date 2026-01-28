@@ -100,7 +100,7 @@ function Bills() {
     // }
   }
 
-  const customerOptions = useMemo(() => students?.map(item => ({ label: item.username, value: item._id })), [students])
+  const customerOptions = useMemo(() => students?.map(item => ({ label: item.username, value: item._id, data: item?.wallet })), [students])
 
   const handleOnSave = async (values) => {
     values.generated_on = values.generated_on.toISOString()

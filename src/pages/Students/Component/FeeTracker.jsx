@@ -1,15 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, Table, Spin, Alert, Row, Col, Statistic, Tag, Button, InputNumber, Form, DatePicker, Select } from 'antd';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Modal, Table, Spin, Alert, Row, Col, Statistic, Tag, Button, InputNumber, Form, DatePicker, Select, Card, Checkbox, Space, Divider, Flex } from 'antd';
+import { WalletOutlined, DollarOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { useStore } from 'zustand';
 import feeStore from '@stores/FeeStore';
 import { formatDate } from '@utils/helper';
+import CustomInput from '@components/form/CustomInput';
+import { paymentMethods } from '@utils/constants';
 
 const FeeTracker = ({ student, visible, onCancel }) => {
   const { feeDetails, loading, error, getFeeDetailsByStudent, markAsPaid, markPartialPayment } = useStore(feeStore);
   const [paymentModal, setPaymentModal] = useState(false);
   const [selectedBill, setSelectedBill] = useState(null);
   const [form] = Form.useForm();
+  const [useWallet, setUseWallet] = useState(false);
+  const paidAmount = Form.useWatch('paidAmount', form);
   const isPartialPayment = feeDetails?.feeAccount?.type === 'partial';
+
+  const walletBalance = useMemo(() => {
+    return student?.wallet?.balance || 0;
+  }, [student?.wallet?.balance]);
+
+  const excessPayment = useMemo(() => {
+    return Math.max(0, paidAmount - (selectedBill?.total || 0));
+  }, [paidAmount, selectedBill?.total]);
+
+  const walletDeduction = useMemo(() => {
+    return useWallet && walletBalance > 0 ? Math.min(walletBalance, selectedBill?.total || 0) : 0;
+  }, [useWallet, walletBalance, selectedBill?.total]);
 
   useEffect(() => {
     if (student?._id) {
@@ -19,6 +36,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
 
   const handleMarkAsPaid = async (bill) => {
     setSelectedBill(bill);
+    setUseWallet(false);
     form.resetFields();
     setPaymentModal(true);
   };
@@ -26,7 +44,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
   const handlePaymentSubmit = async () => {
     try {
       const values = await form.validateFields();
-      
+
       if (isPartialPayment) {
         // Partial payment: custom amount
         const payload = {
@@ -34,6 +52,11 @@ const FeeTracker = ({ student, visible, onCancel }) => {
           bill_id: selectedBill._id,
           payment_method: values.payment_method,
           payment_date: values.payment_date?.toISOString(),
+          useWallet: useWallet,
+          walletDeduction: walletDeduction,
+          excessPayment: excessPayment,
+          newWalletBalance: walletBalance + excessPayment - walletDeduction,
+          walletId: student?.wallet?._id || null,
         };
         await markPartialPayment(feeDetails.feeAccount._id, payload);
       } else {
@@ -41,6 +64,11 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         const payload = {
           payment_method: values.payment_method,
           payment_date: values.payment_date?.toISOString(),
+          useWallet: useWallet,
+          walletDeduction: walletDeduction,
+          excessPayment: excessPayment,
+          newWalletBalance: walletBalance + excessPayment - walletDeduction,
+          walletId: student?.wallet?._id || null,
         };
         await markAsPaid(selectedBill._id, payload);
       }
@@ -49,6 +77,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       getFeeDetailsByStudent(student._id);
       form.resetFields();
       setSelectedBill(null);
+      setUseWallet(false);
     } catch (error) {
       console.error('Error processing payment:', error);
     }
@@ -131,17 +160,17 @@ const FeeTracker = ({ student, visible, onCancel }) => {
             <Row gutter={16} style={{ marginBottom: 20 }}>
               <Col span={8}>
                 <div style={{ background: '#fff7d6', padding: 12, borderRadius: 8, textAlign: 'center' }}>
-                  <Statistic title="Total Fees" value={feeDetails.summary.totalFees} />
+                  <Statistic title="Total Fees" value={feeDetails.summary.totalFees?.toFixed(2)} />
                 </div>
               </Col>
               <Col span={8}>
                 <div style={{ background: '#e6ffed', padding: 12, borderRadius: 8, textAlign: 'center' }}>
-                  <Statistic title="Amount Paid" value={feeDetails.summary.amountPaid} />
+                  <Statistic title="Amount Paid" value={feeDetails.summary.amountPaid?.toFixed(2)} />
                 </div>
               </Col>
               <Col span={8}>
                 <div style={{ background: '#fff1f0', padding: 12, borderRadius: 8, textAlign: 'center' }}>
-                  <Statistic title="Balance" value={feeDetails.summary.balance} />
+                  <Statistic title="Balance" value={feeDetails.summary.balance?.toFixed(2)} />
                 </div>
               </Col>
             </Row>
@@ -163,7 +192,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
 
             <Table columns={columns} dataSource={feeDetails.bills} rowKey="_id" />
 
-            <h3 style={{ }}>Installment Status</h3>
+            <h3 style={{}}>Installment Status</h3>
             {feeDetails.feeAccount?.isInstallment ? (
               <Alert message="This fee is an installment." type="success" showIcon />
             ) : (
@@ -182,10 +211,12 @@ const FeeTracker = ({ student, visible, onCancel }) => {
           setPaymentModal(false);
           form.resetFields();
           setSelectedBill(null);
+          setUseWallet(false);
         }}
         onOk={handlePaymentSubmit}
         okText="Submit Payment"
         loading={loading}
+        width={800}
       >
         <Form
           form={form}
@@ -195,29 +226,109 @@ const FeeTracker = ({ student, visible, onCancel }) => {
           }}
         >
           {isPartialPayment && (
-            <Form.Item
-              label="Paid Amount"
-              name="paidAmount"
-              rules={[
-                { required: true, message: 'Please enter paid amount' },
-                {
-                  validator: (_, value) => {
-                    if (value > selectedBill?.total) {
-                      return Promise.reject(new Error(`Amount cannot exceed balance of ${selectedBill?.total}`));
-                    }
-                    return Promise.resolve();
+            <CustomInput name={"paidAmount"} label={"Paid Amount"} rules={[
+              { required: true, message: 'Please enter paid amount' },
+              {
+                validator: (_, value) => {
+                  if (value > selectedBill?.total) {
+                    return Promise.reject(new Error(`Amount cannot exceed balance of ${selectedBill?.total}`));
                   }
+                  return Promise.resolve();
                 }
-              ]}
-            >
-              <InputNumber
-                min={0}
-                max={selectedBill?.total}
-                step={0.01}
-                precision={2}
-                style={{ width: '100%' }}
+              }
+            ]}
+              type='number'
+            />
+          )}
+
+          <CustomInput name={"paidAmount"} label={"Paid Amount"} rules={[
+            { required: true, message: 'Please enter paid amount' },
+            {
+              validator: (_, value) => {
+                if (!value || value <= 0) {
+                  return Promise.reject(new Error('Please enter a valid payment amount'));
+                }
+                return Promise.resolve();
+              }
+            }
+          ]}
+            type='number'
+          />
+
+          {paidAmount > 0 && (
+            <div className="space-y-3 mb-4">
+              <Alert
+                message={
+                  paidAmount < (selectedBill?.total || 0) ? "Insufficient Payment" :
+                    paidAmount === (selectedBill?.total || 0) ? "Exact Payment" :
+                      `Excess Payment: ₹${excessPayment.toFixed(2)}`
+                }
+                description={
+                  paidAmount < (selectedBill?.total || 0)
+                    ? `Amount due: ₹${((selectedBill?.total || 0) - paidAmount).toFixed(2)}`
+                    : paidAmount > (selectedBill?.total || 0)
+                      ? `This amount will be credited to the wallet`
+                      : ""
+                }
+                type={paidAmount < (selectedBill?.total || 0) ? "error" : paidAmount > (selectedBill?.total || 0) ? "warning" : "success"}
+                showIcon
+                icon={paidAmount > (selectedBill?.total || 0) ? <WalletOutlined /> : undefined}
+                style={{ fontSize: "12px" }}
               />
-            </Form.Item>
+            </div>
+          )}
+
+          {walletBalance > 0 && paidAmount > 0 && paidAmount <= (selectedBill?.total || 0) && (
+            <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 mb-4" style={{ borderLeft: "4px solid #1890ff" }}>
+              <Space direction="vertical" className="w-full" size="middle">
+                <div className="flex items-center justify-between">
+                  <Flex vertical>
+                    <p className="text-sm text-gray-600 mb-1">Available Wallet Balance</p>
+                    <div className='flex gap-2 items-center'>
+                      <WalletOutlined className="text-2xl text-blue-600" />
+                      <p className="text-2xl font-bold text-blue-600">₹{walletBalance.toFixed(2)}</p>
+                    </div>
+                  </Flex>
+                  {useWallet && (
+                    <Tag color="success" icon={<CheckCircleOutlined />}>
+                      Applied
+                    </Tag>
+                  )}
+                </div>
+
+                <Divider className="my-0" />
+
+                <Checkbox
+                  checked={useWallet}
+                  onChange={(e) => {
+                    setUseWallet(e.target.checked)
+                    if(e.target.checked){
+                      form.setFieldValue("payment_method", "wallet");
+                    }
+                  }}
+                  className="text-base"
+                >
+                  <span className="font-medium text-sm">Use wallet balance to reduce bill amount</span>
+                </Checkbox>
+
+                {useWallet && walletBalance > 0 && (
+                  <Alert
+                    message={`₹${walletDeduction.toFixed(2)} will be deducted from wallet`}
+                    description={`Remaining payment required: ₹${((selectedBill?.total || 0) - walletDeduction).toFixed(2)} (Remaining wallet: ₹${(walletBalance - walletDeduction).toFixed(2)})`}
+                    type="success"
+                    showIcon
+                    icon={<DollarOutlined />}
+                    style={{ fontSize: "12px" }}
+                  />
+                )}
+
+                {walletBalance < (selectedBill?.total || 0) && walletBalance > 0 && (
+                  <p className="text-xs text-gray-500 italic">
+                    💡 Wallet balance is less than bill total. Remaining amount: ₹{((selectedBill?.total || 0) - walletBalance).toFixed(2)}
+                  </p>
+                )}
+              </Space>
+            </Card>
           )}
 
           <Form.Item
@@ -227,12 +338,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
             <Select
               placeholder="Select payment method (optional)"
               allowClear
-              options={[
-                { label: 'Cash', value: 'cash' },
-                { label: 'Bank Transfer', value: 'bank_transfer' },
-                { label: 'Card', value: 'card' },
-                { label: 'Cheque', value: 'cheque' },
-              ]}
+              options={paymentMethods}
             />
           </Form.Item>
 
