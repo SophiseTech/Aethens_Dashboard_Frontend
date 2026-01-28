@@ -12,13 +12,9 @@ import { useStore } from 'zustand';
 import centersStore from '@stores/CentersStore';
 import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
-<<<<<<< HEAD
 import TitleLayout from '@components/layouts/Title'
-=======
-import Title from '@components/layouts/Title';
->>>>>>> d828161e2092628fe4453081e98094df774beb2f
 
-const { Text } = Typography
+const { Text, Title } = Typography
 
 function FinalProjectManagerView() {
   const { getStatusConfig, fetchPendingSubmissions, pendingSubmissions, loading, listProjects, projectsInfo, handlePaginationChange,

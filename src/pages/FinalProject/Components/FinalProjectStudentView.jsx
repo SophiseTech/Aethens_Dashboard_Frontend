@@ -1,9 +1,9 @@
 import useProjectsView from '@hooks/business/useProjectsView';
 import ProjectCard from '@pages/FinalProject/Components/ProjectCard';
-import { Card, List, Typography, Button, Empty, Skeleton } from 'antd';
+import { Card, List, Typography, Empty, Skeleton } from 'antd';
 import TitleLayout from '@components/layouts/Title'
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 
 
