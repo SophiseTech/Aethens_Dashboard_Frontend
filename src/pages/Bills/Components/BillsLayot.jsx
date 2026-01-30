@@ -34,7 +34,7 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
   const formattedBills = useMemo(() => bills?.map(bill => ({
     ...bill,
     description: <div>
-      <p>{`${bill.invoiceNo} | ${dayjs(bill.generated_on).format("D MMM, YYYY")}`}</p>
+      <p>{`${bill.center_initial || ''}${bill.invoiceNo} | ${dayjs(bill.generated_on).format("D MMM, YYYY")}`}</p>
       <p>Paid On: <strong>{formatDate(bill.payment_date)}</strong></p>
       <p className='capitalize'>Mode: <strong>{bill.payment_method?.replace("_", " ")}</strong></p>
     </div>,
@@ -43,6 +43,7 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
   })), [bills])
 
   const customFilters = [
+    { key: 'invoice_search', type: 'input', placeholder: 'Search Invoice (e.g., WFD1001)' },
     {
       key: 'payment_method', type: 'select', placeholder: 'Select Payment Method', options: [
         { value: '', label: 'Select' },

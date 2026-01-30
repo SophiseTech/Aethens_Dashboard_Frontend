@@ -20,6 +20,7 @@ function GenerateBill({
   customers = [],
   customersOptions = [],
   invoiceNo,
+  center_initial = '',
   loadInitData = () => { },
   onSave = async () => { },
   handleCancel,
@@ -37,6 +38,9 @@ function GenerateBill({
   const selectedCustomer = Form.useWatch("generated_for", form);
   const { centers, getCenters, setSelectedCenter, selectedCenter } = useStore(centersStore);
   const { user } = useStore(userStore);
+
+  // Format invoice number for display (e.g., "WFD1001")
+  const formattedInvoiceNo = `${center_initial}${invoiceNo}`;
 
   const initialValues = {
     invoiceNo: invoiceNo || 0,
@@ -84,9 +88,9 @@ function GenerateBill({
     form.setFieldValue("invoiceNo", invoiceNo)
   }, [invoiceNo])
 
-  useEffect(()=>{
-    if(selectedFormCenter && selectedFormCenter !== selectedCenter) setSelectedCenter(selectedFormCenter);
-  },[selectedFormCenter])
+  useEffect(() => {
+    if (selectedFormCenter && selectedFormCenter !== selectedCenter) setSelectedCenter(selectedFormCenter);
+  }, [selectedFormCenter])
 
   // Loading Initial dropdown data. Function should be passed from parent
   useEffect(() => {
@@ -102,7 +106,7 @@ function GenerateBill({
   useEffect(() => {
     setPaymentAmount(totals?.total || 0);
   }, [totals])
-  
+
 
   // Submit function
   const onSubmit = async (values) => {
@@ -115,6 +119,7 @@ function GenerateBill({
     await onSave({
       ...values,
       ...totals,
+      center_initial: center_initial,  // Include center initial for storage
       walletBalance: walletBalance,
       applyWallet: applyWallet,
       walletAmountDeducted: walletAmountDeducted,
@@ -204,9 +209,9 @@ function GenerateBill({
         <CustomForm form={form} initialValues={initialValues} action={onSubmit}>
           <div className="flex gap-5">
             <CustomInput
-              label={"Invoice Number"}
+              label={center_initial ? `Invoice Number (${formattedInvoiceNo})` : "Invoice Number"}
               name={"invoiceNo"}
-              placeholder={"1"}
+              placeholder={"1001"}
             />
             <CustomDatePicker
               label={"Invoice Date"}
@@ -251,74 +256,74 @@ function GenerateBill({
             onSearch={onSearch}
           />
           <div className="flex flex-row-reverse items-start gap-6">
-              <Table
-                className="w-fit ml-auto"
-                showHeader={false}
-                columns={columns2}
-                pagination={false}
-                dataSource={[
-                  { name: "Gross Total", value: totals?.undiscountedTotal },
-                  { name: "Discount", value: totals?.total_discount },
-                  { name: "Subtotal", value: totals?.subtotal },
-                  { name: "Total Tax", value: totals?.total_tax },
-                  { name: "Grand Total", value: totals?.total },
-                  ...(walletBalance > 0 ? [
-                    // { name: "Wallet Balance", value: walletBalance },
-                    ...(applyWallet ? [{ name: "Amount Deducted (Wallet)", value: walletAmountDeducted }] : []),
-                  ] : []),
-                  ...(applyWallet && walletBalance > 0 ? [{ name: "Final Total", value: finalGrandTotal }] : []),
-                  ...(paymentAmount > 0 ? [{ name: "Payment Amount", value: paymentAmount }] : []),
-                  ...(walletCreditAmount > 0 ? [{ name: "Wallet Credit", value: walletCreditAmount }] : []),
-                ]}
-              />
-              
-              {finalGrandTotal > 0 && (
-                <Card className="border-green-200 bg-gradient-to-r from-green-50 to-emerald-50" style={{ borderLeft: "4px solid #52c41a" }}>
-                  <Space direction="vertical" className="w-full" size="small">
-                    <p className="text-sm text-gray-600">Payment Amount</p>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={paymentAmount}
-                      onChange={(e) => setPaymentAmount(parseFloat(e.target.value) || 0)}
-                      placeholder={`Enter amount (min: ₹${finalGrandTotal.toFixed(2)})`}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 text-base font-semibold bg-white"
-                    />
-                    
-                    {paymentAmount > 0 && (
-                      <div className="space-y-2">
-                        {paymentAmount < finalGrandTotal && (
-                          <Alert
-                            message={`Insufficient payment`}
-                            description={`Amount due: ₹${(finalGrandTotal - paymentAmount).toFixed(2)}`}
-                            type="error"
-                            showIcon
-                            style={{ fontSize: "12px" }}
-                          />
-                        )}
-                        {paymentAmount === finalGrandTotal && (
-                          <Alert
-                            message="Exact payment"
-                            type="success"
-                            showIcon
-                          />
-                        )}
-                        {paymentAmount > finalGrandTotal && (
-                          <Alert
-                            message={`Excess payment: ₹${walletCreditAmount.toFixed(2)}`}
-                            description={`This amount will be credited to the wallet`}
-                            type="warning"
-                            showIcon
-                            icon={<WalletOutlined />}
-                            style={{ fontSize: "12px" }}
-                          />
-                        )}
-                      </div>
-                    )}
-                  </Space>
-                </Card>
-              )}
+            <Table
+              className="w-fit ml-auto"
+              showHeader={false}
+              columns={columns2}
+              pagination={false}
+              dataSource={[
+                { name: "Gross Total", value: totals?.undiscountedTotal },
+                { name: "Discount", value: totals?.total_discount },
+                { name: "Subtotal", value: totals?.subtotal },
+                { name: "Total Tax", value: totals?.total_tax },
+                { name: "Grand Total", value: totals?.total },
+                ...(walletBalance > 0 ? [
+                  // { name: "Wallet Balance", value: walletBalance },
+                  ...(applyWallet ? [{ name: "Amount Deducted (Wallet)", value: walletAmountDeducted }] : []),
+                ] : []),
+                ...(applyWallet && walletBalance > 0 ? [{ name: "Final Total", value: finalGrandTotal }] : []),
+                ...(paymentAmount > 0 ? [{ name: "Payment Amount", value: paymentAmount }] : []),
+                ...(walletCreditAmount > 0 ? [{ name: "Wallet Credit", value: walletCreditAmount }] : []),
+              ]}
+            />
+
+            {finalGrandTotal > 0 && (
+              <Card className="border-green-200 bg-gradient-to-r from-green-50 to-emerald-50" style={{ borderLeft: "4px solid #52c41a" }}>
+                <Space direction="vertical" className="w-full" size="small">
+                  <p className="text-sm text-gray-600">Payment Amount</p>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(parseFloat(e.target.value) || 0)}
+                    placeholder={`Enter amount (min: ₹${finalGrandTotal.toFixed(2)})`}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 text-base font-semibold bg-white"
+                  />
+
+                  {paymentAmount > 0 && (
+                    <div className="space-y-2">
+                      {paymentAmount < finalGrandTotal && (
+                        <Alert
+                          message={`Insufficient payment`}
+                          description={`Amount due: ₹${(finalGrandTotal - paymentAmount).toFixed(2)}`}
+                          type="error"
+                          showIcon
+                          style={{ fontSize: "12px" }}
+                        />
+                      )}
+                      {paymentAmount === finalGrandTotal && (
+                        <Alert
+                          message="Exact payment"
+                          type="success"
+                          showIcon
+                        />
+                      )}
+                      {paymentAmount > finalGrandTotal && (
+                        <Alert
+                          message={`Excess payment: ₹${walletCreditAmount.toFixed(2)}`}
+                          description={`This amount will be credited to the wallet`}
+                          type="warning"
+                          showIcon
+                          icon={<WalletOutlined />}
+                          style={{ fontSize: "12px" }}
+                        />
+                      )}
+                    </div>
+                  )}
+                </Space>
+              </Card>
+            )}
 
             {walletBalance >= 0 ? (
               <Card
