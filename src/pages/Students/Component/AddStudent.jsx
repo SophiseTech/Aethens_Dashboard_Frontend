@@ -4,8 +4,8 @@ import CustomForm from '@components/form/CustomForm';
 import CustomInput from '@components/form/CustomInput';
 import CustomSelect from '@components/form/CustomSelect';
 import CustomSubmit from '@components/form/CustomSubmit';
+import SessionDateSelector from '@components/form/SessionDateSelector';
 import ProfileImageUploader from '@components/ProfileImageUploader';
-import { sessionSlotOptionRenderer } from '@pages/Students/Component/AllotSessions';
 import centersStore from '@stores/CentersStore';
 import courseStore from '@stores/CourseStore';
 import SessionStore from '@stores/SessionStore';
@@ -31,10 +31,8 @@ function AddStudent() {
   const [form] = Form.useForm();
   const dobValue = Form.useWatch('DOB', form);
   const { getCourses, courses, total } = useStore(courseStore)
-  const { getAvailableSessions, availableSessions, loading: sessionsLoading } = SessionStore()
-  const date = Form.useWatch("start_date", form)
+  const { getAvailableSessions, loading: sessionsLoading, availableSessions } = SessionStore()
   const { centers, getCenters } = useStore(centersStore);
-  const { selectedCenter } = centersStore()
   const isFeeEnabled = Form.useWatch("isFeeEnabled", form)
   const feeType = Form.useWatch("type", form)
   const selectedCourse = Form.useWatch("course_id", form)
@@ -50,8 +48,7 @@ function AddStudent() {
     phone_alt: "",
     school_uni_work: "",
     profile_img: "https://app.schoolofathens.art/images/default.jpg",
-    sessions: [],
-    start_date: dayjs(),
+    sessionSchedule: [{ date: dayjs(), session_id: null }],
     total_course_fee: 0,
     type: "single",
     paidAmount: 0,
@@ -65,10 +62,6 @@ function AddStudent() {
     }
     getCenters();
   }, [])
-
-  useEffect(() => {
-    getAvailableSessions(date, selectedCenter)
-  }, [date])
 
   useEffect(() => {
     if (selectedCourse) {
@@ -102,6 +95,16 @@ function AddStudent() {
     if(values.type === "single"){
       values.paidAmount = values.total_course_fee
     }
+    
+    // Transform sessionSchedule array to sessions format for backend
+    if (values.sessionSchedule && Array.isArray(values.sessionSchedule)) {
+      values.sessions = values.sessionSchedule.map(item => ({
+        date: dayjs(item.date).format('YYYY-MM-DD'),
+        session_id: item.session_id
+      }));
+      delete values.sessionSchedule; // Remove the intermediate field
+    }
+    
     console.log(values);
     await enroll(values)
     handleOk()
@@ -109,13 +112,6 @@ function AddStudent() {
 
   const options = useMemo(() => courses?.map(course => ({ label: course.course_name, value: course._id })), [courses])
   const centerOptions = useMemo(() => centers?.map(center => ({ label: center.center_name, value: center._id })), [centers])
-
-  const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  const slotOptions = useMemo(() => availableSessions?.map(session => ({
-    label: `${weekDays[session.weekDay]} - ${dayjs(session.start_time).format("h:mm A")}`,
-    value: session._id,
-    data: session,
-  })), [availableSessions, date])
 
   const getFieldsByFeeType = (feeType) => {
     switch (feeType) {
@@ -144,6 +140,7 @@ function AddStudent() {
         open={isModalOpen}
         footer={null}
         onCancel={handleCancel}
+        width={'50%'}
       >
         <CustomForm form={form} initialValues={initialValues} action={onSubmit}>
           <ProfileImageUploader
@@ -164,8 +161,15 @@ function AddStudent() {
           <CustomInput label={"Email"} name={"email"} type='email' placeholder={"john@doe.com"} />
           <CustomInput label={"School / University / Company Name"} name={"school_uni_work"} placeholder={"Name of your School / University / Company"} />
           <CustomSelect name={"course_id"} options={options} label={"Select Course"} />
-          <CustomDatePicker name={"start_date"} label={"Start Date"} time={false} required={false} className='w-full' />
-          <CustomSelect name={"sessions"} label={"Select Slots"} options={slotOptions} mode={"multiple"} maxCount={2} optionRender={sessionSlotOptionRenderer} loading={sessionsLoading} />
+          <SessionDateSelector
+            name="sessionSchedule"
+            label="Session Schedule"
+            getAvailableSessions={getAvailableSessions}
+            availableSessions={availableSessions}
+            loading={sessionsLoading}
+            minItems={1}
+            maxItems={10}
+          />
           {user.role === ROLES.ADMIN && <CustomSelect name={"center_id"} options={centerOptions} label={"Select Center"} />}
           <CustomInput label={"Password"} name={"password"} placeholder={"Password"} type='password' />
 
