@@ -20,13 +20,13 @@ import { useStore } from 'zustand'
 
 function Bills() {
 
-  const { getBills, bills, loading, createBill, total, getInvoiceNo, invoiceNo, filters: stateFilters } = billStore()
+  const { getBills, bills, loading, createBill, total, getInvoiceNo, invoiceNo, center_initial, filters: stateFilters } = billStore()
   const { getItems, searhcItems } = inventoryStore()
   const { getStudentsByCenter, total: studentTotal, students } = studentStore()
   const [searchParams, setSearchParams] = useSearchParams();
   const student_id = searchParams.get("student_id")
   const { user } = useStore(userStore)
-  const {selectedCenter} = useStore(centersStore);
+  const { selectedCenter } = useStore(centersStore);
   const { courses, getCourses, total: courseTotal } = useStore(courseStore)
   const [lineItems, setLineItems] = useState([])
   const urlStatus = searchParams.get("status")
@@ -47,11 +47,11 @@ function Bills() {
         delete filters.query.generated_for
       }
 
-      if(user.role === ROLES.ADMIN){
+      if (user.role === ROLES.ADMIN) {
         filters.query.center_id = selectedCenter;
       }
 
-      if( urlStatus && ['paid', 'unpaid'].includes(urlStatus)) {
+      if (urlStatus && ['paid', 'unpaid'].includes(urlStatus)) {
         filters.query.status = urlStatus
       }
       console.log("useeffect filters: ", filters.query);
@@ -60,7 +60,7 @@ function Bills() {
       fetchBills(10, filters)
 
     }
-  }, [student_id, urlStatus,selectedCenter])
+  }, [student_id, urlStatus, selectedCenter])
 
   const fetchBills = (limit = 10, filters = {}) => {
     getBills(limit, {
@@ -72,12 +72,12 @@ function Bills() {
     })
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     getStudentsByCenter(0);
-  },[selectedCenter])
+  }, [selectedCenter])
 
-  const loadInitData = async ({ itemType,centerId }) => {
-    console.log(itemType,centerId);
+  const loadInitData = async ({ itemType, centerId }) => {
+    console.log(itemType, centerId);
 
     if (!invoiceNo || invoiceNo === 0 || user.role === ROLES.ADMIN) {
       user.role === ROLES.ADMIN ? getInvoiceNo(centerId) : getInvoiceNo();
@@ -143,6 +143,7 @@ function Bills() {
         customers={students}
         onSave={handleOnSave}
         invoiceNo={invoiceNo}
+        center_initial={center_initial}
         onSearch={handleSearch}
       />
     }>

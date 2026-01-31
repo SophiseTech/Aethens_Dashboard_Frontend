@@ -194,7 +194,7 @@ const InvoicePdf = ({ bill }) => {
               </View>
 
               <View style={styles.row}>
-                <Text style={[styles.fontBold]}>Invoice: SOA{bill?.invoiceNo}/{year}</Text>
+                <Text style={[styles.fontBold]}>Invoice: {bill?.center_initial || 'SOA'}{bill?.invoiceNo}/{year}</Text>
                 <Text>Date: {dayjs(bill?.generated_on).format("DD/MM/YYYY")}</Text>
               </View>
 
