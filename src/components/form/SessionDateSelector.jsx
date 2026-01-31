@@ -19,7 +19,7 @@ const formatSessionLabel = (session) => {
  * Render session option with availability details
  * Shows remaining slots and additional slots with color coding
  */
-const sessionSlotOptionRenderer = (option) => {
+export const sessionSlotOptionRenderer = (option) => {
   const { data: session } = option.data;
   if (!session) return null;
 

@@ -4,11 +4,11 @@ import dayjs from 'dayjs';
 import SessionStore from '@stores/SessionStore';
 import { ROLES, weekDays } from '@utils/constants';
 import sessionService from '@/services/Session';
-import { sessionSlotOptionRenderer } from '@pages/Students/Component/AllotSessions';
 import userStore from '@stores/UserStore';
 import { useStore } from 'zustand';
 import centersStore from '@stores/CentersStore';
 import TitleLayout from '@components/layouts/Title';
+import { sessionSlotOptionRenderer } from '@components/form/SessionDateSelector';
 
 const { Title } = Typography;
 
