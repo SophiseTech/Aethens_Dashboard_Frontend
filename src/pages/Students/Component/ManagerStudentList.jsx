@@ -1,8 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Button, Segmented, Space, Table } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
+import { Segmented, Table } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
-import AllotSessions from '@pages/Students/Component/AllotSessions';
-import SessionStatus from '@pages/Students/Component/SessionStatus';
 import studentStore from '@stores/StudentStore';
 import { ROLES } from '@utils/constants';
 import UserDetailsDrawer from '@components/UserDetailsDrawer';

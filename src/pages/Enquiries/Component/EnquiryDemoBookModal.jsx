@@ -3,7 +3,7 @@ import CustomForm from '@components/form/CustomForm';
 import CustomSelect from '@components/form/CustomSelect';
 import CustomSubmit from '@components/form/CustomSubmit';
 import CustomTextArea from '@components/form/CustomTextArea';
-import { sessionSlotOptionRenderer } from '@pages/Students/Component/AllotSessions';
+import { sessionSlotOptionRenderer } from '@components/form/SessionDateSelector';
 import enquiryStore from '@stores/EnquiryStore';
 import SessionStore from '@stores/SessionStore';
 import { Form, Modal } from 'antd'
