@@ -15,6 +15,7 @@ const billStore = create((set, get) => ({
   total: 0,
   filters: {},
   invoiceNo: 0,
+  center_initial: '',
   summary: {},
   getBills: async (limit = 2, customFilters = {}) => {
     try {
@@ -106,8 +107,17 @@ const billStore = create((set, get) => ({
       const effectiveCenterId = centerId ?? user.center_id;
       const invoiceDoc = await billService.getInvoiceNumber(effectiveCenterId)
       if (invoiceDoc && invoiceDoc.invoiceNo) {
-        set({ invoiceNo: invoiceDoc.invoiceNo })
-        return invoiceDoc.invoiceNo
+        const center_initial = invoiceDoc.center_initial || ''
+        set({
+          invoiceNo: invoiceDoc.invoiceNo,
+          center_initial: center_initial
+        })
+        // Return both values - format for display where needed
+        return {
+          invoiceNo: invoiceDoc.invoiceNo,
+          center_initial: center_initial,
+          formatted: `${center_initial}${invoiceDoc.invoiceNo}`  // e.g., "WFD1001"
+        }
       }
     } catch (error) {
       handleInternalError(error)

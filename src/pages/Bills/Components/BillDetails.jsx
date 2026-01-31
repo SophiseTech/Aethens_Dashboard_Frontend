@@ -59,7 +59,7 @@ function BillDetails() {
 
           <PDFDownloadLink
             document={<InvoicePdf bill={bill} />}
-            fileName={`INV-${bill?.invoiceNo || 'Untitled'}.pdf`}
+            fileName={`INV-${bill?.center_initial || ''}${bill?.invoiceNo || 'Untitled'}.pdf`}
           >
             {({ loading, url, error }) => (
               <Button
