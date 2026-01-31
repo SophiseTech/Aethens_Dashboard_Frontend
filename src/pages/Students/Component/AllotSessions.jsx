@@ -1,17 +1,17 @@
-import CustomDatePicker from '@components/form/CustomDatePicker';
 import CustomForm from '@components/form/CustomForm';
 import CustomInput from '@components/form/CustomInput';
 import CustomSelect from '@components/form/CustomSelect';
 import CustomSubmit from '@components/form/CustomSubmit';
+import SessionDateSelector from '@components/form/SessionDateSelector';
 import SessionStore from '@stores/SessionStore';
 import studentStore from '@stores/StudentStore';
 import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
 import handleError from '@utils/handleError';
 import { isUserActive } from '@utils/helper';
-import { Button, Flex, Form, Modal, Space, Tag } from 'antd';
+import { Button, Form, Modal } from 'antd';
 import dayjs from 'dayjs';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function AllotSessions({ student }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,18 +21,12 @@ function AllotSessions({ student }) {
   const getActiveSessions = studentStore((state) => state.getActiveSessions)
   const activeStudentSessions = studentStore((state) => state.activeStudentSessions)
   const studentActiveSession = activeStudentSessions[student._id]
-  const date = Form.useWatch("customStartDate", form)
 
   useEffect(() => {
     if (isModalOpen) {
       getActiveSessions(student._id)
     }
   }, [isModalOpen])
-
-  useEffect(() => {
-    getAvailableSessions(date)
-  }, [date])
-
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -48,6 +42,16 @@ function AllotSessions({ student }) {
     if (values.type === "regular" && studentActiveSession?.length > 0) return handleError("Student already has an active session")
     values.booked_student_id = student._id
     values.course_id = student.details_id?.course_id?._id || student?.details_id?.course_id
+    
+    // Transform sessionSchedule array to sessions format
+    if (values.sessionSchedule && Array.isArray(values.sessionSchedule)) {
+      values.sessions = values.sessionSchedule.map(item => ({
+        date: dayjs(item.date).format('YYYY-MM-DD'),
+        session_id: item.session_id
+      }));
+      delete values.sessionSchedule; // Remove intermediate field
+    }
+    
     console.log(values);
     if (sessionType === "regular") {
       await bookSession(values)
@@ -58,32 +62,15 @@ function AllotSessions({ student }) {
   }
 
   const initialValues = {
-    sessions: [],
+    sessionSchedule: [{ date: dayjs(), session_id: null }],
     type: (!studentActiveSession || studentActiveSession?.slotCount > 0) ? "additional" : "regular",
-    customStartDate: dayjs(),
     customSessionCount: 0
   }
 
   const slotTypeOptions = [
     { label: "Additional", value: "additional" },
-    { label: "Regular", value: "regular", disabled: studentActiveSession?.slotCount > 0 },
+    { label: "Regular", value: "regular", },
   ]
-
-  const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  const slotOptions = useMemo(() => availableSessions?.map(session => ({
-    label: `${weekDays[session.weekDay]} - ${dayjs(session.start_time).format("h:mm A")}`,
-    value: session._id,
-    data: session,
-  })), [availableSessions])
-
-  const today = dayjs();
-  const disabledDate = (value) => {
-    // ⛔ Disable past dates
-    if(sessionType === "regular") return false
-    if (value.isBefore(today, "day")) return true;
-
-  };
-
 
   return (
     <>
@@ -98,8 +85,15 @@ function AllotSessions({ student }) {
       >
         <CustomForm form={form} initialValues={initialValues} action={onSubmit}>
           <CustomSelect name="type" label="Select Slot Type" options={slotTypeOptions} />
-          <CustomDatePicker name={"customStartDate"} label={"Start Date"} time={false} required={false} className='w-full' inputProps={{ disabledDate: disabledDate }} />
-          <CustomSelect name={"sessions"} label={"Select Slots"} options={slotOptions} mode={"multiple"} maxCount={sessionType === "regular" ? 2 : 1} optionRender={sessionSlotOptionRenderer} />
+          <SessionDateSelector
+            name="sessionSchedule"
+            label="Session Schedule"
+            getAvailableSessions={getAvailableSessions}
+            availableSessions={availableSessions}
+            loading={loading}
+            minItems={1}
+            maxItems={sessionType === "regular" ? 2 : 1}
+          />
           <CustomInput type='number' name={"customSessionCount"} label={"Number of sessions to allot"} placeholder={10} className='w-full' required={false} />
           <CustomSubmit className='bg-primary' label='Submit' loading={loading} />
         </CustomForm>
@@ -107,62 +101,5 @@ function AllotSessions({ student }) {
     </>
   )
 }
-
-export const sessionSlotOptionRenderer = (option, user) => {
-  // Assuming your option data has these properties:
-  // - session: contains start_time and weekDay
-  // - remainingSlots: number of available slots
-
-
-  const { data: session } = option.data;
-  if (!session) return null;
-  const { remainingSlots, additional } = session
-
-  const weekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][session.weekDay];
-  const time = dayjs(session.start_time).format('h:mm A');
-
-  // Determine color based on remaining slots
-  let slotColor;
-  if (remainingSlots > 5) {
-    slotColor = 'green';
-  } else if (remainingSlots > 2) {
-    slotColor = 'orange';
-  } else {
-    slotColor = 'red';
-  }
-
-  return (
-    <Flex direction="vertical" justify='space-between' align='center' size={2} style={{ width: '100%' }}>
-      <div>
-        <p strong style={{ fontSize: '1.05em' }}>{weekday}</p>
-        <p type="secondary" style={{ fontWeight: "bold" }}>
-          {time}
-        </p>
-      </div>
-      <div className='flex gap-2'>
-        <Tag
-          color={slotColor}
-          style={{
-            fontWeight: 600,
-            borderRadius: 4,
-            marginRight: 0
-          }}
-        >
-          {remainingSlots} slot{remainingSlots !== 1 ? 's' : ''} left
-        </Tag>
-        <Tag
-          color='gold'
-          style={{
-            fontWeight: 600,
-            borderRadius: 4,
-            marginRight: 0
-          }}
-        >
-          + {additional}
-        </Tag>
-      </div>
-    </Flex>
-  );
-};
 
 export default AllotSessions

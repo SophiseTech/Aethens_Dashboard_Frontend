@@ -358,14 +358,14 @@ function StudentList() {
   };
 
   const segmentOptions = useMemo(() => {
-    const base = ["Current Students", "All Students", "Active Students"];
+    const base = ["Current Students", "Active Students", "All Students"];
 
     if (user?.role === ROLES.ADMIN || user?.role === ROLES.FACULTY) {
       return [
         "Current Students",
-        "Todays Students",
-        "All Students",
         "Active Students",
+        "All Students",
+        "Todays Students",
       ];
     }
 

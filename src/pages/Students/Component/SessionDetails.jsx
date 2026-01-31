@@ -336,24 +336,14 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
           </Space>
 
           <Space size="middle">
-            {studentActiveSession.length > 0 && (
-              <Button
-                danger
-                type="primary"
-                onClick={handleDeallocateSessions}
-                loading={deallocating}
-                disabled={deallocating || loadingSessions}
-              >
-                Deallocate Sessions
-              </Button>
-            )}
             <Button
-              type="default"
+              variant='solid'
+              color='danger'
               onClick={handleSyncSlots}
               loading={syncing}
               disabled={syncing || loadingSessions}
             >
-              Sync Slots
+              Deallocate Session
             </Button>
           </Space>
         </Flex>

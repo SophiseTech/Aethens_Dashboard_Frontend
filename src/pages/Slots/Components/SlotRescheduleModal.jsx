@@ -2,7 +2,7 @@ import CustomDatePicker from '@components/form/CustomDatePicker';
 import CustomForm from '@components/form/CustomForm';
 import CustomSelect from '@components/form/CustomSelect';
 import CustomSubmit from '@components/form/CustomSubmit';
-import { sessionSlotOptionRenderer } from '@pages/Students/Component/AllotSessions';
+import { sessionSlotOptionRenderer } from '@components/form/SessionDateSelector';
 import SessionStore from '@stores/SessionStore';
 import slotStore from '@stores/SlotStore';
 import userStore from '@stores/UserStore';
@@ -104,7 +104,7 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
           //   // setStudents([]);
           // }}
           optionFilterProp="label"
-          optionRender={(options) => sessionSlotOptionRenderer(options, user)}
+          optionRender={(options) => sessionSlotOptionRenderer(options, user, false)}
         />
         <CustomSubmit className='bg-primary' label='Submit' loading={loading} />
       </CustomForm>
