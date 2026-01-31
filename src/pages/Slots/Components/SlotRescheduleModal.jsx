@@ -104,7 +104,7 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
           //   // setStudents([]);
           // }}
           optionFilterProp="label"
-          optionRender={(options) => sessionSlotOptionRenderer(options, user)}
+          optionRender={(options) => sessionSlotOptionRenderer(options, user, false)}
         />
         <CustomSubmit className='bg-primary' label='Submit' loading={loading} />
       </CustomForm>
