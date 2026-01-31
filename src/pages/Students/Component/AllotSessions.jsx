@@ -69,7 +69,7 @@ function AllotSessions({ student }) {
 
   const slotTypeOptions = [
     { label: "Additional", value: "additional" },
-    { label: "Regular", value: "regular", disabled: studentActiveSession?.slotCount > 0 },
+    { label: "Regular", value: "regular", },
   ]
 
   return (
