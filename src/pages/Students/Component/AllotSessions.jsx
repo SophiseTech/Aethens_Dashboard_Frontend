@@ -79,7 +79,7 @@ function AllotSessions({ student }) {
   const today = dayjs();
   const disabledDate = (value) => {
     // ⛔ Disable past dates
-    if(sessionType === "regular") return false
+    if (sessionType === "regular") return false
     if (value.isBefore(today, "day")) return true;
 
   };
@@ -108,7 +108,7 @@ function AllotSessions({ student }) {
   )
 }
 
-export const sessionSlotOptionRenderer = (option, user) => {
+export const sessionSlotOptionRenderer = (option, user, displayAvailable = true) => {
   // Assuming your option data has these properties:
   // - session: contains start_time and weekDay
   // - remainingSlots: number of available slots
@@ -139,28 +139,30 @@ export const sessionSlotOptionRenderer = (option, user) => {
           {time}
         </p>
       </div>
-      <div className='flex gap-2'>
-        <Tag
-          color={slotColor}
-          style={{
-            fontWeight: 600,
-            borderRadius: 4,
-            marginRight: 0
-          }}
-        >
-          {remainingSlots} slot{remainingSlots !== 1 ? 's' : ''} left
-        </Tag>
-        <Tag
-          color='gold'
-          style={{
-            fontWeight: 600,
-            borderRadius: 4,
-            marginRight: 0
-          }}
-        >
-          + {additional}
-        </Tag>
-      </div>
+      {displayAvailable && (
+        <div className='flex gap-2'>
+          <Tag
+            color={slotColor}
+            style={{
+              fontWeight: 600,
+              borderRadius: 4,
+              marginRight: 0
+            }}
+          >
+            {remainingSlots} slot{remainingSlots !== 1 ? 's' : ''} left
+          </Tag>
+          <Tag
+            color='gold'
+            style={{
+              fontWeight: 600,
+              borderRadius: 4,
+              marginRight: 0
+            }}
+          >
+            + {additional}
+          </Tag>
+        </div>
+      )}
     </Flex>
   );
 };

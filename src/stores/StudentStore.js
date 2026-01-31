@@ -225,6 +225,8 @@ const studentStore = create((set, get) => ({
       }
     } catch (error) {
       handleInternalError(error);
+    } finally{
+      set({ loading: false });
     }
   },
   activateStudent: async (id) => {
