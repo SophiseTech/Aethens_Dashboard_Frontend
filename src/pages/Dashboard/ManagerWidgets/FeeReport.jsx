@@ -86,48 +86,50 @@ function FeeReport({ dateRange }) {
                     image={Empty.PRESENTED_IMAGE_SIMPLE}
                 />
             ) : (
-                <List
-                    dataSource={unpaidList}
-                    renderItem={(item) => (
-                        <List.Item
-                            key={`${item._id}-${item.dueMonth || 'balance'}`}
-                            className="hover:bg-gray-50 transition-colors rounded-lg px-2 cursor-pointer"
-                            onClick={() => handleItemClick(item)}
-                            actions={[
-                                <Tooltip key="view" title="View Wallet">
-                                    <RightOutlined className="text-gray-400" />
-                                </Tooltip>
-                            ]}
-                        >
-                            <List.Item.Meta
-                                avatar={
-                                    <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                                        <WarningOutlined className="text-red-500" />
-                                    </div>
-                                }
-                                title={
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                        <Text strong>{item.studentName}</Text>
-                                        {getTypeTag(item.type)}
-                                    </div>
-                                }
-                                description={
-                                    <div className="flex items-center justify-between">
-                                        <Text type="secondary" className="text-xs">
-                                            {item.dueMonth
-                                                ? `Due: ${dayjs(item.dueMonth).format('MMM YYYY')}`
-                                                : `Balance of ${formatCurrency(item.totalFee)}`
-                                            }
-                                        </Text>
-                                        <Text strong className="text-red-500">
-                                            {formatCurrency(item.unpaidAmount)}
-                                        </Text>
-                                    </div>
-                                }
-                            />
-                        </List.Item>
-                    )}
-                />
+                <div className="max-h-[400px] overflow-y-auto">
+                    <List
+                        dataSource={unpaidList}
+                        renderItem={(item) => (
+                            <List.Item
+                                key={`${item._id}-${item.dueMonth || 'balance'}`}
+                                className="hover:bg-gray-50 transition-colors rounded-lg px-2 cursor-pointer"
+                                onClick={() => handleItemClick(item)}
+                                actions={[
+                                    <Tooltip key="view" title="View Wallet">
+                                        <RightOutlined className="text-gray-400" />
+                                    </Tooltip>
+                                ]}
+                            >
+                                <List.Item.Meta
+                                    avatar={
+                                        <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                                            <WarningOutlined className="text-red-500" />
+                                        </div>
+                                    }
+                                    title={
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <Text strong>{item.studentName}</Text>
+                                            {getTypeTag(item.type)}
+                                        </div>
+                                    }
+                                    description={
+                                        <div className="flex items-center justify-between">
+                                            <Text type="secondary" className="text-xs">
+                                                {item.dueMonth
+                                                    ? `Due: ${dayjs(item.dueMonth).format('MMM YYYY')}`
+                                                    : `Balance of ${formatCurrency(item.totalFee)}`
+                                                }
+                                            </Text>
+                                            <Text strong className="text-red-500">
+                                                {formatCurrency(item.unpaidAmount)}
+                                            </Text>
+                                        </div>
+                                    }
+                                />
+                            </List.Item>
+                        )}
+                    />
+                </div>
             )}
         </Card>
     );

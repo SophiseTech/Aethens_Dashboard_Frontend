@@ -81,6 +81,9 @@ function IncomeChart() {
         style: {
           colors: "black",
         },
+        formatter: function (value) {
+          return value?.toFixed(2);
+        }
       },
     },
     plotOptions: {
