@@ -4,6 +4,7 @@ import IncomeChart from "@pages/Dashboard/ManagerWidgets/IncomeChart";
 import IncomeStat from "@pages/Dashboard/ManagerWidgets/IncomeStat";
 import StudentChart from "@pages/Dashboard/ManagerWidgets/StudentChart";
 import StudentCounts from "@pages/Dashboard/ManagerWidgets/StudentCounts";
+import FeeReport from "@pages/Dashboard/ManagerWidgets/FeeReport";
 import billStore from "@stores/BillStore";
 import payslipStore from "@stores/PayslipStore";
 import userStore from "@stores/UserStore";
@@ -70,14 +71,14 @@ function Admin() {
     }
   };
 
-  
+
 
   return (
     <Flex vertical gap={20}>
-        <DatePicker.RangePicker
-          onChange={handleDateChange}
-          className="w-1/2 border-primary text-primary"
-        />
+      <DatePicker.RangePicker
+        onChange={handleDateChange}
+        className="w-1/2 border-primary text-primary"
+      />
       <Row gutter={[20, 20]}>
         <Col xxl={{ span: 6 }} span={12}>
           <StudentCounts />
@@ -100,6 +101,7 @@ function Admin() {
         <IncomeChart />
         <StudentChart dateRange={dateRange} />
       </Flex>
+      <FeeReport dateRange={dateRange} />
     </Flex>
   );
 }

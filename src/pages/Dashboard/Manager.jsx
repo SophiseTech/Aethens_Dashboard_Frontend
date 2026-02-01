@@ -5,6 +5,7 @@ import IncomeStat from '@pages/Dashboard/ManagerWidgets/IncomeStat'
 import StudentChart from '@pages/Dashboard/ManagerWidgets/StudentChart'
 import StudentCounts from '@pages/Dashboard/ManagerWidgets/StudentCounts'
 import TodayTasks from '@pages/Dashboard/ManagerWidgets/TodayTasks'
+import FeeReport from '@pages/Dashboard/ManagerWidgets/FeeReport'
 import billStore from '@stores/BillStore'
 import payslipStore from '@stores/PayslipStore'
 import userStore from '@stores/UserStore'
@@ -93,7 +94,10 @@ function Manager() {
         <IncomeChart />
         <StudentChart dateRange={dateRange} />
       </Flex>
-      <TodayTasks />
+      <Flex gap={20}>
+        <TodayTasks />
+        <FeeReport dateRange={dateRange} />
+      </Flex>
     </Flex>
   )
 }
