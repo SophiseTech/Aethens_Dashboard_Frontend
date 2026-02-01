@@ -31,6 +31,12 @@ function IncomeChart() {
     return incomeItem ? incomeItem.totalIncome : null; // Return null if date not found
   }), [allDates, incomeSummary]); // Recompute when allDates or income changes
 
+  // Memoize paid data for Loss Report
+  const paidData = useMemo(() => allDates.map(date => {
+    const paidItem = incomeSummary?.groupedResult?.find(i => new Date(i._id).setHours(0, 0, 0, 0) === date);
+    return paidItem ? paidItem.totalPaid : null;
+  }), [allDates, incomeSummary]);
+
   const expenseData = useMemo(() => allDates.map(date => {
     const expenseItem = expenseSummary?.groupedResult?.find(e => new Date(e._id).setHours(0, 0, 0, 0) === date);
     return expenseItem ? expenseItem.totalExpense : null; // Return null if date not found
@@ -105,10 +111,16 @@ function IncomeChart() {
 
   const series = [
     {
-      name: 'Total Income',
+      name: 'Total Billed',
       type: 'line',
       data: incomeData,
       color: "#59a14f"
+    },
+    {
+      name: 'Total Paid',
+      type: 'line',
+      data: paidData,
+      color: "#f28e2b"
     },
     {
       name: 'Total Expense',
@@ -119,7 +131,7 @@ function IncomeChart() {
   ];
 
   return (
-    <Card className='border border-border w-full' title="Income V Expense">
+    <Card className='border border-border w-full' title="Income vs Paid vs Expense">
       <EChart
         series={series}
         options={options}

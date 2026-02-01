@@ -92,10 +92,15 @@ function AddStudent() {
     if (user.role === ROLES.MANAGER) {
       values.center_id = user.center_id
     }
-    if(values.type === "single"){
+    if (values.type === "single") {
       values.paidAmount = values.total_course_fee
     }
-    
+
+    // Set start_date to first session date for monthly installments
+    if (values.type === "monthly" && values.sessionSchedule?.length > 0) {
+      values.start_date = dayjs(values.sessionSchedule[0].date).toDate();
+    }
+
     // Transform sessionSchedule array to sessions format for backend
     if (values.sessionSchedule && Array.isArray(values.sessionSchedule)) {
       values.sessions = values.sessionSchedule.map(item => ({
@@ -104,7 +109,7 @@ function AddStudent() {
       }));
       delete values.sessionSchedule; // Remove the intermediate field
     }
-    
+
     console.log(values);
     await enroll(values)
     handleOk()

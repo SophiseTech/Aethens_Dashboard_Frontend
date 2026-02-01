@@ -10,4 +10,7 @@ export const FeeService = {
   markPartialPayment: (feeAccountId, payload) => {
     return post(`/fees/${feeAccountId}/mark-payment`, payload);
   },
+  getUnpaidReport: (filters = {}) => {
+    return post(`/fees/unpaid-report`, { filters });
+  },
 };
