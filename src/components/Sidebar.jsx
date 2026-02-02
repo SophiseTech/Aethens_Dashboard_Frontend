@@ -53,6 +53,12 @@ const MENU_CONFIG = [
     roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
+    label: "Targets",
+    icon: Target,
+    path: "/manager/targets",
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
+  },
+  {
     label: "Materials",
     icon: Book,
     path: "/materials",
