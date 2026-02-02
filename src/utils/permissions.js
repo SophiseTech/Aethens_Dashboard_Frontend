@@ -31,6 +31,12 @@ const permissions = {
     add: [ROLES.MANAGER, ROLES.ADMIN],
     edit: [ROLES.MANAGER, ROLES.ADMIN],
     delete: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  targets: {
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN],
+    view: [ROLES.MANAGER, ROLES.ADMIN]
   }
 }
 
