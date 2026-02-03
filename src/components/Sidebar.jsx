@@ -131,6 +131,30 @@ const MENU_CONFIG = [
     roles: [ROLES.FACULTY],
   },
   {
+    label: "My Attendance",
+    icon: CheckSquareOutlined,
+    path: "/faculty/my-attendance",
+    roles: [ROLES.FACULTY],
+  },
+  {
+    label: "My Leaves",
+    icon: CalendarOutlined,
+    path: "/faculty/my-leaves",
+    roles: [ROLES.FACULTY],
+  },
+  {
+    label: "Faculty Attendance",
+    icon: ClockCircleOutlined,
+    path: "/admin/faculty-attendance",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Manage Leaves",
+    icon: CheckSquareOutlined,
+    path: "/admin/manage-leaves",
+    roles: [ROLES.ADMIN],
+  },
+  {
     label: "Attendance",
     icon: FundProjectionScreenOutlined,
     path: "/attendance",

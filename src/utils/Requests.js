@@ -1,5 +1,5 @@
 // src/api/api.js
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL+'/api'; // Base URL for your API
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api'; // Base URL for your API
 
 // Utility function for making API requests
 const request = async (endpoint, method, data = {}, headers = {}) => {
@@ -33,4 +33,5 @@ const request = async (endpoint, method, data = {}, headers = {}) => {
 export const get = (endpoint, headers) => request(endpoint, 'GET', {}, headers);
 export const post = (endpoint, data, headers) => request(endpoint, 'POST', data, headers);
 export const put = (endpoint, data, headers) => request(endpoint, 'PUT', data, headers);
+export const patch = (endpoint, data, headers) => request(endpoint, 'PATCH', data, headers);
 export const del = (endpoint, headers) => request(endpoint, 'DELETE', {}, headers);
