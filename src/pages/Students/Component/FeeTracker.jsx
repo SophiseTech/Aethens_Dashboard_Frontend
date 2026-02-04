@@ -39,6 +39,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
     setUseWallet(false);
     form.resetFields();
     setPaymentModal(true);
+    form.setFieldValue('paidAmount', bill.total);
   };
 
   const handlePaymentSubmit = async () => {
@@ -225,13 +226,13 @@ const FeeTracker = ({ student, visible, onCancel }) => {
             paidAmount: selectedBill?.total,
           }}
         >
-          {isPartialPayment && (
+          {isPartialPayment ? (
             <CustomInput name={"paidAmount"} label={"Paid Amount"} rules={[
               { required: true, message: 'Please enter paid amount' },
               {
                 validator: (_, value) => {
-                  if (value > selectedBill?.total) {
-                    return Promise.reject(new Error(`Amount cannot exceed balance of ${selectedBill?.total}`));
+                  if (!value || value <= 0) {
+                    return Promise.reject(new Error('Please enter a valid payment amount'));
                   }
                   return Promise.resolve();
                 }
@@ -239,40 +240,40 @@ const FeeTracker = ({ student, visible, onCancel }) => {
             ]}
               type='number'
             />
-          )}
+          ) :
 
-          <CustomInput name={"paidAmount"} label={"Paid Amount"} rules={[
-            { required: true, message: 'Please enter paid amount' },
-            {
-              validator: (_, value) => {
-                if (!value || value <= 0) {
-                  return Promise.reject(new Error('Please enter a valid payment amount'));
+            <CustomInput name={"paidAmount"} label={"Paid Amount"} rules={[
+              { required: true, message: 'Please enter paid amount' },
+              {
+                validator: (_, value) => {
+                  if (!value || value <= 0) {
+                    return Promise.reject(new Error('Please enter a valid payment amount'));
+                  }
+                  return Promise.resolve();
                 }
-                return Promise.resolve();
               }
-            }
-          ]}
-            type='number'
-          />
-
-          {paidAmount > 0 && (
+            ]}
+              type='number'
+            />
+          }
+          {(paidAmount > 0) && (
             <div className="space-y-3 mb-4">
               <Alert
                 message={
-                  paidAmount < (selectedBill?.total || 0) ? "Insufficient Payment" :
+                  paidAmount < (selectedBill?.total || 0) && feeDetails?.feeAccount?.type !== 'partial' ? "Insufficient Payment" :
                     paidAmount === (selectedBill?.total || 0) ? "Exact Payment" :
                       `Excess Payment: ₹${excessPayment.toFixed(2)}`
                 }
                 description={
-                  paidAmount < (selectedBill?.total || 0)
+                  paidAmount < (selectedBill?.total || 0) && feeDetails?.feeAccount?.type !== 'partial'
                     ? `Amount due: ₹${((selectedBill?.total || 0) - paidAmount).toFixed(2)}`
                     : paidAmount > (selectedBill?.total || 0)
                       ? `This amount will be credited to the wallet`
                       : ""
                 }
-                type={paidAmount < (selectedBill?.total || 0) ? "error" : paidAmount > (selectedBill?.total || 0) ? "warning" : "success"}
+                type={paidAmount < (selectedBill?.total || 0) && feeDetails?.feeAccount?.type !== 'partial' ? "error" : paidAmount > (selectedBill?.total || 0) ? "warning" : "success"}
                 showIcon
-                icon={paidAmount > (selectedBill?.total || 0) ? <WalletOutlined /> : undefined}
+                icon={paidAmount > (selectedBill?.total || 0) && feeDetails?.feeAccount?.type !== 'partial' ? <WalletOutlined /> : undefined}
                 style={{ fontSize: "12px" }}
               />
             </div>
@@ -302,7 +303,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
                   checked={useWallet}
                   onChange={(e) => {
                     setUseWallet(e.target.checked)
-                    if(e.target.checked){
+                    if (e.target.checked) {
                       form.setFieldValue("payment_method", "wallet");
                     }
                   }}
