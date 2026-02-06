@@ -2,7 +2,7 @@ import { Badge, Calendar, Card, Tag } from "antd";
 import dayjs from "dayjs";
 import { useMemo } from "react";
 
-function AttendanceCalendar({ month, records = [], onDateSelect }) {
+function AttendanceCalendar({ month, records = [], holidays = [], onDateSelect }) {
     // Convert records array to a map for quick lookup
     const recordsMap = useMemo(() => {
         const map = {};
@@ -20,6 +20,8 @@ function AttendanceCalendar({ month, records = [], onDateSelect }) {
                 return "warning";
             case "LEAVE":
                 return "processing";
+            case "HOLIDAY":
+                return "purple";
             case "ABSENT":
             default:
                 return "default";
@@ -34,6 +36,8 @@ function AttendanceCalendar({ month, records = [], onDateSelect }) {
                 return "H";
             case "LEAVE":
                 return "L";
+            case "HOLIDAY":
+                return "H";
             case "ABSENT":
             default:
                 return "A";
@@ -45,17 +49,37 @@ function AttendanceCalendar({ month, records = [], onDateSelect }) {
         const dateStr = date.format("YYYY-MM-DD");
         const record = recordsMap[dateStr];
 
-        if (!record) {
+        // Check if it's a holiday
+        const isHoliday = holidays?.some(holiday => {
+            const startDate = dayjs(holiday.startDate).startOf('day');
+            const endDate = dayjs(holiday.endDate).startOf('day');
+            const currentDate = date.startOf('day');
+            return currentDate.isSameOrAfter(startDate) && currentDate.isSameOrBefore(endDate);
+        });
+
+        if (!record && !isHoliday) {
             return null;
         }
 
+        // Holiday takes priority in display
+        const displayType = isHoliday ? "HOLIDAY" : record?.attendanceType;
+        const displayText = isHoliday ? "H" : getAttendanceText(record?.attendanceType);
+
         return (
             <div className="flex flex-col items-center justify-center h-full">
-                <Badge
-                    status={getAttendanceColor(record.attendanceType)}
-                    text={getAttendanceText(record.attendanceType)}
-                    className="text-xs"
-                />
+                {isHoliday ? (
+                    <Badge
+                        color="#722ed1"
+                        text={displayText}
+                        className="text-xs"
+                    />
+                ) : (
+                    <Badge
+                        status={getAttendanceColor(displayType)}
+                        text={displayText}
+                        className="text-xs"
+                    />
+                )}
             </div>
         );
     };
@@ -87,6 +111,7 @@ function AttendanceCalendar({ month, records = [], onDateSelect }) {
                 <Tag color="success">Full Day (F)</Tag>
                 <Tag color="warning">Half Day (H)</Tag>
                 <Tag color="processing">Leave (L)</Tag>
+                <Tag color="purple">Holiday (H)</Tag>
                 <Tag color="default">Absent (A)</Tag>
             </div>
 
