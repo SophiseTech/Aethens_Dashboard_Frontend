@@ -18,6 +18,7 @@ const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCour
 const Slots = lazy(() => import("@pages/Slots/ManagerSlots"))
 const MyAttendance = lazy(() => import("@pages/FacultyAttendance/MyAttendance"))
 const MyLeaves = lazy(() => import("@pages/FacultyLeaves/MyLeaves"))
+const AddSessionStatus = lazy(() => import("@pages/Students/AddSessionStatus"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -113,6 +114,11 @@ export const facultyRoutes = [
             path: "/faculty/my-leaves",
             element: <LazyLoader element={<MyLeaves />} />,
             title: "My Leaves"
+          },
+          {
+            path: "/faculty/session-status/:studentId",
+            element: <LazyLoader element={<AddSessionStatus />} />,
+            title: "Add Session Status"
           },
         ]
       }
