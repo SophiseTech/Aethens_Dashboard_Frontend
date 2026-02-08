@@ -10,7 +10,7 @@ const TargetList = lazy(() => import('@pages/Targets/Component/TargetList'));
 
 function Targets() {
     const { user } = useStore(userStore);
-    const isAdmin = permissions.targets.add.includes(user?.role);
+    const isAdmin = permissions.targets?.add?.includes(user?.role);
 
     return (
         <Title

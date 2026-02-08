@@ -134,7 +134,7 @@ function Bills() {
 
   return (
     <Title title={"Bills"} button={
-      permissions.bills.add.includes(user.role) &&
+      permissions.bills?.add?.includes(user?.role) &&
       <GenerateBillButton
         // itemsOptions={itemsOptions}
         customersOptions={customerOptions}

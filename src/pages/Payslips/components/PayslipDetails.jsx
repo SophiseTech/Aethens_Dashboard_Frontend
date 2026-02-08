@@ -52,7 +52,7 @@ function PayslipDetails() {
         <h1 className='font-bold | max-2xl:text-xl 2xl:text-2xl'>Preview</h1>
         <div className='flex gap-2'>
 
-          {permissions.payslips.approve.includes(user.role) &&
+          {permissions.payslips?.approve?.includes(user.role) &&
             <Popconfirm
               title="Approve"
               description="Are you sure to approve this payslip?"
@@ -70,7 +70,7 @@ function PayslipDetails() {
             </Popconfirm>
           }
 
-          {permissions.payslips.mark_paid.includes(user.role) &&
+          {permissions.payslips?.mark_paid?.includes(user.role) &&
             <Popconfirm
               title="Record Payment"
               description="Are you sure to record this payslip?"
@@ -101,7 +101,7 @@ function PayslipDetails() {
             Download
           </Button>
 
-          {permissions.payslips.delete.includes(user.role) &&
+          {permissions.payslips?.delete?.includes(user.role) &&
             <Popconfirm
               title="Delete Bill"
               description="Are you sure to delete this payslip?"

@@ -18,7 +18,7 @@ function Audits() {
     const [auditDetailsDrawerOpen, setAuditDetailsDrawerOpen] = useState(false);
     const [selectedAudit, setSelectedAudit] = useState(null);
 
-    const canCreateAudits = permissions.audits.create.includes(user?.role);
+    const canCreateAudits = permissions.audits?.create?.includes(user?.role);
 
     useEffect(() => {
         loadAudits();

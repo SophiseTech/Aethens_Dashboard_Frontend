@@ -11,8 +11,8 @@ function AuditList({ onViewDetails, onConductAudit }) {
     const { audits, loading, deleteAudit } = inventoryAuditStore();
     const { user } = userStore();
 
-    const canDelete = permissions.audits.delete.includes(user?.role);
-    const canViewDiscrepancy = permissions.audits.view_discrepancy.includes(user?.role);
+    const canDelete = permissions.audits?.delete?.includes(user?.role);
+    const canViewDiscrepancy = permissions.audits?.view_discrepancy?.includes(user?.role);
 
     const handleDelete = async (id) => {
         await deleteAudit(id);
