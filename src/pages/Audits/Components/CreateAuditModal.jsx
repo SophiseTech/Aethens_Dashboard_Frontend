@@ -134,7 +134,7 @@ function CreateAuditModal({ open, onClose }) {
                             optionFilterProp="children"
                             maxTagCount="responsive"
                         >
-                            {inventory?.map((item) => (
+                            {inventory?.items?.map((item) => (
                                 <Select.Option key={item._id} value={item.item_id?._id || item._id}>
                                     {item.item_id?.name || item.name} - Qty: {item.quantity || 0}
                                 </Select.Option>

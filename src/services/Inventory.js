@@ -100,6 +100,35 @@ class InventoryService {
   }
 
   /**
+   * Get items in a specific center's inventory (v2)
+   * Used for raise request - shows items that the center currently has
+   */
+  async getCenterInventoryItems(centerId, lastRef = 0, limit = 10, filters = {}) {
+    try {
+      const params = new URLSearchParams({
+        lastRef,
+        limit,
+      });
+
+      const response = await post(
+        `/v2/inventory/items/list?${params.toString()}`,
+        {
+          center_id: centerId,
+          filters: filters
+        }
+      );
+
+      if (!response?.data) {
+        throw new Error("An error occurred. Please try again");
+      }
+
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  /**
    * Delete a global inventory item (v2, admin only)
    */
   async deleteItem(id) {

@@ -1,9 +1,18 @@
-import { Drawer, Descriptions, Table, Tag, Divider } from 'antd';
+import { Drawer, Descriptions, Table, Tag, Divider, Button } from 'antd';
 import dayjs from 'dayjs';
+import inventoryAuditStore from '@stores/InventoryAuditStore';
+import userStore from '@stores/UserStore';
 
 
 function AuditDetails({ open, audit, onClose }) {
     if (!audit) return null;
+    const { updateAudit, createLoading } = inventoryAuditStore();
+    const { user } = userStore();
+
+    const handleComplete = async () => {
+        await updateAudit(audit._id, { status: "completed" });
+        onClose();
+    }
 
     const columns = [
         {
@@ -51,7 +60,21 @@ function AuditDetails({ open, audit, onClose }) {
     };
 
     return (
-        <Drawer title="Audit Details" open={open} onClose={onClose} width={800}>
+        <Drawer
+            title="Audit Details"
+            open={open}
+            onClose={onClose}
+            width={800}
+            footer={
+                (user?.role === "admin" && audit.status === "in-progress") ? (
+                    <div className="flex justify-end">
+                        <Button type="primary" onClick={handleComplete} loading={createLoading}>
+                            Complete Audit
+                        </Button>
+                    </div>
+                ) : null
+            }
+        >
             <Descriptions bordered column={2} size="small">
                 <Descriptions.Item label="Audit Date">
                     {dayjs(audit.audit_date).format('DD/MM/YYYY')}
@@ -59,7 +82,7 @@ function AuditDetails({ open, audit, onClose }) {
                 <Descriptions.Item label="Status">
                     <Tag color={getStatusColor(audit.status)}>{audit.status?.toUpperCase()}</Tag>
                 </Descriptions.Item>
-                <Descriptions.Item label="Center">{audit.center_id?.name || 'N/A'}</Descriptions.Item>
+                <Descriptions.Item label="Center">{audit.center_id?.center_name || 'N/A'}</Descriptions.Item>
                 <Descriptions.Item label="Auditor">
                     {audit.auditor_id?.username || 'N/A'}
                 </Descriptions.Item>

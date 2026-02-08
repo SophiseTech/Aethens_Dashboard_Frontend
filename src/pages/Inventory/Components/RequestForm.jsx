@@ -33,27 +33,47 @@ function RequestForm() {
     if (!centers || total === 0 || centers.length < total) {
       getCenters(0)
     }
-    // if (inventoryTotal === 0 || items.length < inventoryTotal) {
-    //   getItems(0)
-    // }
-    if (lineItems.length === 0) {
-      fetchItems(0, 10, { query: { type: "materials" } })
-    }
-  }, [])
 
-  const fetchItems = async (page = 0, limit = 10, filters = {}) => {
-    const { items } = await inventoryService.getInventoryItems(page, limit, filters)
-    setLineItems(items)
+    // Fetch current center's inventory items (items they have available to send)
+    if (lineItems.length === 0 && user?.center_id) {
+      fetchItems(0, 200, { query: { type: "materials" } })
+    }
+  }, [user?.center_id])
+
+  const fetchItems = async (page = 0, limit = 200, filters = {}) => {
+    try {
+      // Fetch items from the CURRENT center's inventory (what they have to send)
+      const response = await inventoryService.getCenterInventoryItems(
+        user.center_id,
+        page,
+        limit,
+        filters
+      )
+      if (response?.items) {
+        // Map the center inventory items to include quantity info
+        const mappedItems = response.items.map(item => ({
+          ...item.item_id, // Spread the populated item details
+          centerQuantity: item.quantity, // Store center's available quantity
+          centerRate: item.rate,
+          centerTax: item.tax,
+          centerDiscount: item.discount
+        }))
+        setLineItems(mappedItems)
+      }
+    } catch (error) {
+      console.error('[RequestForm fetchItems] Error:', error);
+    }
   }
 
   useEffect(() => {
     const handleChange = async () => {
       if (fieldItems && fieldItems.length > 0) {
         fieldItems.forEach(async (item, index) => {
-          if (Number(item.qty) > Number(selectedItems[index]?.quantity)) {
+          const selectedItem = selectedItems[index]
+          if (selectedItem && Number(item.qty) > Number(selectedItem.centerQuantity)) {
             form.setFields([{
               name: ["items", index, "qty"],
-              errors: [`Quantity cannot exceed ${selectedItems[index].quantity}`],
+              errors: [`Quantity cannot exceed ${selectedItem.centerQuantity} (available in inventory)`],
               touched: true,
               validated: true,
             }])
@@ -62,7 +82,7 @@ function RequestForm() {
       }
     }
     handleChange()
-  }, [fieldItems])
+  }, [fieldItems, selectedItems])
 
 
   const centersOptions = useMemo(() => centers
@@ -92,8 +112,7 @@ function RequestForm() {
   // Called wehn an item is selected in the items dropdown
   const onItemsChange = (value, index, option) => {
     const item = lineItems?.find(item => item._id === value)
-    console.log(item, option);
-    
+
     if (item) {
       const row = form.getFieldValue(["items", index])
       form.setFieldValue(["items", index], {
@@ -114,17 +133,27 @@ function RequestForm() {
     values.raised_by_center = user.center_id
     values.raised_by_user = user._id
     values.status = "pending"
-    console.log(values);
     await createRequest(values)
   }
 
   const handleSearch = async (value) => {
-    const { items } = await inventoryService.getInventoryItems(
+    // Search within the current center's inventory
+    const response = await inventoryService.getCenterInventoryItems(
+      user.center_id,
       0,
-      value === "" ? 10 : 0,
+      value === "" ? 200 : 0,
       { searchQuery: value, query: { type: "materials" } }
     )
-    setLineItems(items)
+    if (response?.items) {
+      const mappedItems = response.items.map(item => ({
+        ...item.item_id,
+        centerQuantity: item.quantity,
+        centerRate: item.rate,
+        centerTax: item.tax,
+        centerDiscount: item.discount
+      }))
+      setLineItems(mappedItems)
+    }
   }
 
   return (

@@ -43,7 +43,7 @@ function AuditList({ onViewDetails, onConductAudit }) {
         },
         {
             title: 'Center',
-            dataIndex: ['center_id', 'name'],
+            dataIndex: ['center_id', 'center_name'],
             key: 'center',
             render: (name) => name || 'N/A',
         },
