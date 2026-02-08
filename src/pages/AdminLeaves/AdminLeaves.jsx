@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Row, Col, Card, Statistic, Table, Tag, Select, message, Spin, Button, Modal } from "antd";
 import {
     CalendarOutlined,
@@ -145,12 +145,14 @@ function AdminLeaves() {
     };
 
     // Calculate stats
-    const stats = {
+    const stats = useMemo(() => {
+        return {
         total: leaves.length,
         pending: leaves.filter(l => l.status === "PENDING").length,
         approved: leaves.filter(l => l.status === "APPROVED").length,
         rejected: leaves.filter(l => l.status === "REJECTED").length,
-    };
+    }
+    }, [leaves]);
 
     const getStatusColor = (status) => {
         switch (status) {

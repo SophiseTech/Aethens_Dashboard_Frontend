@@ -140,7 +140,6 @@ function AdminFacultyAttendance() {
             const attendanceRecords = attendanceData?.records || [];
             const mergedRecords = [...attendanceRecords];
 
-            // Add leave records only if there's no existing attendance for that date
             leaveRecords.forEach(leaveRecord => {
                 const existingRecord = mergedRecords.find(r => r.date === leaveRecord.date);
                 if (!existingRecord) {
@@ -148,9 +147,25 @@ function AdminFacultyAttendance() {
                 }
             });
 
+            // Add leave records only if there's no existing attendance for that date
+            const leaveCount = mergedRecords.filter(r => r.attendanceType === "LEAVE").length;
+            leaveRecords.forEach(leaveRecord => {
+                const existingRecord = mergedRecords.find(r => r.date === leaveRecord.date);
+                if (!existingRecord) {
+                    mergedRecords.push(leaveRecord);
+                }
+            });
+
+            const updatedStats = {
+                ...(attendanceData?.stats || {}),
+                leaves: leaveCount
+            };
+
             setMonthlyData({
                 ...attendanceData,
-                records: mergedRecords
+                records: mergedRecords,
+                stats: updatedStats
+
             });
         } catch (error) {
             message.error("Failed to load monthly attendance data");
@@ -200,6 +215,7 @@ function AdminFacultyAttendance() {
         absents: 0,
         leaves: 0
     };
+    console.log(monthlyData);
 
     const selectedFacultyInfo = faculties.find(f => f._id === selectedFaculty);
 
