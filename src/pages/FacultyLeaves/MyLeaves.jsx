@@ -14,24 +14,34 @@ import leaveService from "@services/LeaveService";
 
 function MyLeaves() {
     const [leaves, setLeaves] = useState([]);
-    const [filteredLeaves, setFilteredLeaves] = useState([]);
     const [loading, setLoading] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [statusFilter, setStatusFilter] = useState("ALL");
     const [typeFilter, setTypeFilter] = useState("ALL");
 
+    // Fetch leaves when filters change
     useEffect(() => {
         fetchLeaves();
-    }, []);
-
-    useEffect(() => {
-        applyFilters();
-    }, [leaves, statusFilter, typeFilter]);
+    }, [statusFilter, typeFilter]);
 
     const fetchLeaves = async () => {
         try {
             setLoading(true);
-            const data = await leaveService.getLeaves();
+
+            // Build filters object for server-side filtering
+            const filters = {};
+
+            // Add status filter
+            if (statusFilter && statusFilter !== "ALL") {
+                filters.status = statusFilter;
+            }
+
+            // Add type filter
+            if (typeFilter && typeFilter !== "ALL") {
+                filters.leaveType = typeFilter;
+            }
+
+            const data = await leaveService.getLeaves(filters);
             setLeaves(data || []);
         } catch (error) {
             message.error("Failed to load leaves");
@@ -39,20 +49,6 @@ function MyLeaves() {
         } finally {
             setLoading(false);
         }
-    };
-
-    const applyFilters = () => {
-        let filtered = [...leaves];
-
-        if (statusFilter !== "ALL") {
-            filtered = filtered.filter(leave => leave.status === statusFilter);
-        }
-
-        if (typeFilter !== "ALL") {
-            filtered = filtered.filter(leave => leave.leaveType === typeFilter);
-        }
-
-        setFilteredLeaves(filtered);
     };
 
     const handleModalClose = () => {
@@ -246,7 +242,7 @@ function MyLeaves() {
                     <Card title="Leave History">
                         <Table
                             columns={columns}
-                            dataSource={filteredLeaves}
+                            dataSource={leaves}
                             rowKey="_id"
                             pagination={{
                                 pageSize: 10,

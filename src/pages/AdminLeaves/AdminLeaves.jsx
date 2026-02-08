@@ -13,13 +13,14 @@ import { useStore } from "zustand";
 import dayjs from "dayjs";
 import Title from "@components/layouts/Title";
 import leaveService from "@services/LeaveService";
+import userService from "@services/User";
 import centerStore from "@stores/CentersStore";
 
 const { confirm } = Modal;
 
 function AdminLeaves() {
     const [leaves, setLeaves] = useState([]);
-    const [filteredLeaves, setFilteredLeaves] = useState([]);
+    const [faculties, setFaculties] = useState([]);
     const [loading, setLoading] = useState(false);
     const [statusFilter, setStatusFilter] = useState("PENDING"); // Default to pending
     const [typeFilter, setTypeFilter] = useState("ALL");
@@ -29,19 +30,63 @@ function AdminLeaves() {
     // Get selected center from store
     const { selectedCenter } = useStore(centerStore);
 
-    // Fetch leaves on mount and when center changes
+    // Fetch faculties when center changes
     useEffect(() => {
-        fetchLeaves();
+        fetchFaculties();
     }, [selectedCenter]);
 
+    // Fetch leaves when filters or center changes
     useEffect(() => {
-        applyFilters();
-    }, [leaves, statusFilter, typeFilter, facultyFilter]);
+        fetchLeaves();
+    }, [selectedCenter, statusFilter, typeFilter, facultyFilter]);
+
+    const fetchFaculties = async () => {
+        try {
+            console.log("Fetching faculties for center:", selectedCenter);
+            if (!selectedCenter) {
+                console.log("No center selected, skipping faculty fetch");
+                return;
+            }
+
+            const response = await userService.getByRoleByCenter('faculty', selectedCenter, 0, 1000);
+            console.log("Faculty response:", response);
+            setFaculties(response?.users || []);
+            // Reset faculty filter when center changes
+            setFacultyFilter("ALL");
+        } catch (error) {
+            console.error("Failed to load faculties:", error);
+            message.error("Failed to load faculties");
+        }
+    };
 
     const fetchLeaves = async () => {
         try {
             setLoading(true);
-            const data = await leaveService.getLeaves();
+
+            // Build filters object for server-side filtering
+            const filters = {};
+
+            // Add center filter
+            if (selectedCenter) {
+                filters.centerId = selectedCenter;
+            }
+
+            // Add faculty filter
+            if (facultyFilter && facultyFilter !== "ALL") {
+                filters.facultyId = facultyFilter;
+            }
+
+            // Add status filter
+            if (statusFilter && statusFilter !== "ALL") {
+                filters.status = statusFilter;
+            }
+
+            // Add type filter
+            if (typeFilter && typeFilter !== "ALL") {
+                filters.leaveType = typeFilter;
+            }
+
+            const data = await leaveService.getLeaves(filters);
             setLeaves(data || []);
         } catch (error) {
             message.error("Failed to load leaves");
@@ -49,29 +94,6 @@ function AdminLeaves() {
         } finally {
             setLoading(false);
         }
-    };
-
-    const applyFilters = () => {
-        let filtered = [...leaves];
-
-        // Filter by selected center
-        if (selectedCenter !== "all") {
-            filtered = filtered.filter(leave => leave.facultyId?.center === selectedCenter);
-        }
-
-        if (statusFilter !== "ALL") {
-            filtered = filtered.filter(leave => leave.status === statusFilter);
-        }
-
-        if (typeFilter !== "ALL") {
-            filtered = filtered.filter(leave => leave.leaveType === typeFilter);
-        }
-
-        if (facultyFilter !== "ALL") {
-            filtered = filtered.filter(leave => leave.facultyId?._id === facultyFilter);
-        }
-
-        setFilteredLeaves(filtered);
     };
 
     const handleApprove = (leaveId) => {
@@ -226,7 +248,7 @@ function AdminLeaves() {
                 }
 
                 return (
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-col">
                         <Button
                             type="primary"
                             size="small"
@@ -309,15 +331,16 @@ function AdminLeaves() {
                                 onChange={setFacultyFilter}
                                 placeholder="Filter by Faculty"
                                 optionFilterProp="children"
+                                filterOption={(input, option) =>
+                                    (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
                             >
                                 <Select.Option value="ALL">All Faculty</Select.Option>
-                                {[...new Map(leaves.map(l => [l.facultyId?._id, l.facultyId])).values()]
-                                    .filter(f => f) // Remove null/undefined
-                                    .map(faculty => (
-                                        <Select.Option key={faculty._id} value={faculty._id}>
-                                            {faculty.username}
-                                        </Select.Option>
-                                    ))}
+                                {faculties.map(faculty => (
+                                    <Select.Option key={faculty._id} value={faculty._id}>
+                                        {faculty.username}
+                                    </Select.Option>
+                                ))}
                             </Select>
 
                             <Select
@@ -350,7 +373,7 @@ function AdminLeaves() {
                     <Card title="Leave Applications">
                         <Table
                             columns={columns}
-                            dataSource={filteredLeaves}
+                            dataSource={leaves}
                             rowKey="_id"
                             pagination={{
                                 pageSize: 10,
