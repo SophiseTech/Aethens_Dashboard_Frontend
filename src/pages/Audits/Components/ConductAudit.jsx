@@ -1,4 +1,4 @@
-import { Drawer, Form, InputNumber, Button, List, Input, Space, Tag, Divider } from 'antd';
+import { Drawer, Form, InputNumber, Button, List, Input, Space, Tag, Divider, Checkbox } from 'antd';
 import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import inventoryAuditStore from '@stores/InventoryAuditStore';
@@ -7,6 +7,7 @@ function ConductAudit({ open, audit, onClose }) {
     const [form] = Form.useForm();
     const { updateAudit, createLoading } = inventoryAuditStore();
     const [formValues, setFormValues] = useState({});
+    const [markAsComplete, setMarkAsComplete] = useState(false);
 
     useEffect(() => {
         if (audit && open) {
@@ -19,6 +20,7 @@ function ConductAudit({ open, audit, onClose }) {
             });
             form.setFieldsValue(initialValues);
             setFormValues(initialValues);
+            setMarkAsComplete(false);
         }
     }, [audit, open, form]);
 
@@ -39,9 +41,12 @@ function ConductAudit({ open, audit, onClose }) {
                 };
             });
 
+            // Determine status based on checkbox
+            const status = markAsComplete ? 'completed' : 'in-progress';
+
             const payload = {
                 items,
-                status: 'in-progress', // Progress status
+                status,
             };
 
             await updateAudit(audit._id, payload);
@@ -60,11 +65,22 @@ function ConductAudit({ open, audit, onClose }) {
             onClose={onClose}
             width={600}
             footer={
-                <div className="flex justify-end gap-2">
-                    <Button onClick={onClose}>Cancel</Button>
-                    <Button type="primary" loading={createLoading} onClick={handleSubmit}>
-                        Submit Audit
-                    </Button>
+                <div className="flex flex-col gap-3">
+                    <Checkbox
+                        checked={markAsComplete}
+                        onChange={(e) => setMarkAsComplete(e.target.checked)}
+                    >
+                        <span className="font-semibold">Mark audit as completed</span>
+                        <p className="text-xs text-gray-500 mt-1">
+                            Check this if all items have been audited and you're ready to finalize
+                        </p>
+                    </Checkbox>
+                    <div className="flex justify-end gap-2">
+                        <Button onClick={onClose}>Cancel</Button>
+                        <Button type="primary" loading={createLoading} onClick={handleSubmit}>
+                            {markAsComplete ? 'Complete Audit' : 'Save Progress'}
+                        </Button>
+                    </div>
                 </div>
             }
         >
@@ -75,7 +91,7 @@ function ConductAudit({ open, audit, onClose }) {
                 <p className="text-sm text-gray-500">
                     <strong>Center:</strong> {audit.center_id?.name}
                 </p>
-                <Tag color={audit.status === 'pending' ? 'default' : 'processing'}>
+                <Tag color={audit.status === 'pending' ? 'default' : audit.status === 'completed' ? 'success' : 'processing'}>
                     {audit.status?.toUpperCase()}
                 </Tag>
             </div>

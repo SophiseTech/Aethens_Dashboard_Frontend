@@ -14,7 +14,7 @@ function CreateAuditModal({ open, onClose }) {
     const { createAudit, createLoading } = inventoryAuditStore();
     const { user } = userStore();
     const { selectedCenter } = centersStore();
-    const { inventory, getInventory } = inventoryStore();
+    const { inventory, getCenterInventory } = inventoryStore();
     const [managers, setManagers] = useState([]);
     const [autoPopulate, setAutoPopulate] = useState(true);
 
@@ -39,7 +39,7 @@ function CreateAuditModal({ open, onClose }) {
     const loadInventory = () => {
         const centerId = selectedCenter === 'all' ? null : selectedCenter || user.center_id;
         if (centerId) {
-            getInventory({ query: { center_id: centerId } });
+            getCenterInventory(centerId);
         }
     };
 
