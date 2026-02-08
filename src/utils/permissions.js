@@ -11,7 +11,7 @@ const permissions = {
     delete: [ROLES.MANAGER]
   },
   activities: {
-    delete: [ROLES.FACULTY],
+    delete: [ROLES.ADMIN],
     add: [ROLES.FACULTY]
   },
   materials: {
@@ -31,6 +31,12 @@ const permissions = {
     add: [ROLES.MANAGER, ROLES.ADMIN],
     edit: [ROLES.MANAGER, ROLES.ADMIN],
     delete: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  session_status: {
+    delete: [ROLES.ADMIN]
+  },
+  fee_tracker: {
+    view: [ROLES.MANAGER, ROLES.ADMIN]
   }
 }
 
