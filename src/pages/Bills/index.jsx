@@ -21,7 +21,7 @@ import { useStore } from 'zustand'
 function Bills() {
 
   const { getBills, bills, loading, createBill, total, getInvoiceNo, invoiceNo, center_initial, filters: stateFilters } = billStore()
-  const { getItems, searhcItems } = inventoryStore()
+  const { getItems } = inventoryStore()
   const { getStudentsByCenter, total: studentTotal, students } = studentStore()
   const [searchParams, setSearchParams] = useSearchParams();
   const student_id = searchParams.get("student_id")

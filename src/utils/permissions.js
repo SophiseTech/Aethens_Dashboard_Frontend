@@ -31,6 +31,9 @@ const permissions = {
     add: [ROLES.MANAGER, ROLES.ADMIN],
     edit: [ROLES.MANAGER, ROLES.ADMIN],
     delete: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  inventory: {
+    create: [ROLES.ADMIN]
   }
 }
 

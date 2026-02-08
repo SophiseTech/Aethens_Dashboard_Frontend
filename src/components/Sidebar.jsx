@@ -95,6 +95,12 @@ const MENU_CONFIG = [
     roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
+    label: "Inventory Items",
+    icon: ShopOutlined,
+    path: "/manager/inventory-items",
+    roles: [ROLES.ADMIN],
+  },
+  {
     label: "Payslips",
     icon: MoneyCollectOutlined,
     path: "/manager/payslips",

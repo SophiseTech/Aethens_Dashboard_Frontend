@@ -1,36 +1,33 @@
-import Title from '@components/layouts/Title'
-import AddInventoryItem from '@pages/Inventory/Components/AddInventoryItem';
+import Title from '@components/layouts/Title';
+import AddToCenterModal from '@pages/Inventory/Components/AddToCenterModal';
+import CenterInventoryList from '@pages/Inventory/Components/CenterInventoryList';
 import RaiseRequest from '@pages/Inventory/Components/RaiseRequest';
 import RequestList from '@pages/Inventory/Components/RequestList';
 import centersStore from '@stores/CentersStore';
-import inventoryStore from '@stores/InventoryStore'
+import inventoryStore from '@stores/InventoryStore';
 import requestsStore from '@stores/RequestsStore';
 import userStore from '@stores/UserStore';
+import { ROLES } from '@utils/constants';
 import { Button, Drawer, Flex, Skeleton, Table } from 'antd';
-import _ from 'lodash';
-import React, { lazy, Suspense, useEffect, useState } from 'react'
-
-const InventoryList = lazy(() => import('@pages/Inventory/Components/InventoryList'));
+import React, { useEffect, useState } from 'react';
 
 function Inventory() {
-
-  const { getInventory, inventory } = inventoryStore()
-  const { user } = userStore()
-  const { selectedCenter } = centersStore()
+  const { getCenterInventory, clearCenterInventory, inventory, loading } = inventoryStore();
+  const { user } = userStore();
+  const { selectedCenter } = centersStore();
   const [drawerState, setDrawerState] = useState(false);
-  const { requests, getRequests, approveRequest, rejectRequest, loading } = requestsStore()
+  const { requests, getRequests, approveRequest, rejectRequest, loading: requestsLoading } = requestsStore();
+
+  const isAdmin = user?.role === ROLES.ADMIN;
+  const centerId = isAdmin ? selectedCenter : user?.center_id;
 
   useEffect(() => {
-    // if (!items || items.length <= 0) {
-    //   getItems(30, {
-    //     sort: "-createdAt"
-    //   })
-    // }
-    if (_.isEmpty(inventory)) {
-      const centerId = (user.role === 'admin' && selectedCenter) ? selectedCenter : user.center_id;
-      getInventory({ query: { center_id: centerId } })
+    if (centerId && centerId !== 'all') {
+      getCenterInventory(centerId);
+    } else if (isAdmin && centerId === 'all') {
+      clearCenterInventory();
     }
-  }, [selectedCenter])
+  }, [centerId, isAdmin]);
 
   const loadRequests = () => {
     if (!requests || requests.length <= 0) {
@@ -61,15 +58,25 @@ function Inventory() {
     }
   ]
 
-  return (
-    <Title title={"Inventory"} button={<Flex gap={20}>
+  const headerButtons = (
+    <Flex gap={20}>
       <RaiseRequest />
-      <Button variant='filled' color='orange' onClick={() => { setDrawerState(true) }}>Requests</Button>
-      <AddInventoryItem />
-    </Flex>}>
-      <Suspense fallback={<Loader />}>
-        <InventoryList />
-      </Suspense>
+      <Button variant="filled" color="orange" onClick={() => setDrawerState(true)}>
+        Requests
+      </Button>
+      {!isAdmin && <AddToCenterModal />}
+    </Flex>
+  );
+
+  return (
+    <Title title="Inventory" button={headerButtons}>
+      {!centerId || centerId === 'all' ? (
+        <div className="text-gray-500">Select a center to view inventory.</div>
+      ) : (
+        <Skeleton loading={loading} active>
+          <CenterInventoryList />
+        </Skeleton>
+      )}
       <Drawer
         title="Requests"
         placement='right'
@@ -85,7 +92,7 @@ function Inventory() {
           rejectAction={handleReject}
           fromField={"location"}
           render={(item) => <Table columns={columns} dataSource={item?.items || []} pagination={false} className='mt-5' />}
-          loading={loading}
+          loading={requestsLoading}
         />
       </Drawer>
     </Title>
