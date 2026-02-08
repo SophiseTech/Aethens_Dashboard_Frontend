@@ -16,6 +16,8 @@ const FacultyDevelopmentProgram = lazy(() => import("@pages/FacultyDevelopmentPr
 const FacultyAttendance = lazy(() => import("@pages/Attendance/FacultyAttendance"))
 const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCourseHistory"))
 const Slots = lazy(() => import("@pages/Slots/ManagerSlots"))
+const MyAttendance = lazy(() => import("@pages/FacultyAttendance/MyAttendance"))
+const MyLeaves = lazy(() => import("@pages/FacultyLeaves/MyLeaves"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -101,6 +103,16 @@ export const facultyRoutes = [
             path: "/faculty/courseHistory/:studentId",
             element: <LazyLoader element={<ManagerCourseHistory />} />,
             title: "Materials"
+          },
+          {
+            path: "/faculty/my-attendance",
+            element: <LazyLoader element={<MyAttendance />} />,
+            title: "My Attendance"
+          },
+          {
+            path: "/faculty/my-leaves",
+            element: <LazyLoader element={<MyLeaves />} />,
+            title: "My Leaves"
           },
         ]
       }

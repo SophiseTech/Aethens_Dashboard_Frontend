@@ -9,6 +9,7 @@ import PropTypes from "prop-types";
 
 const Students = lazy(() => import("@pages/Students"))
 const Enquiries = lazy(() => import("@pages/Enquiries"))
+const Targets = lazy(() => import("@pages/Targets"))
 const Wallets = lazy(() => import("@pages/Wallets/index.jsx"))
 const Remarks = lazy(() => import("@pages/Remarks/index.jsx"))
 const EnquirySlots = lazy(() => import("@pages/EnquirySlots"))
@@ -79,6 +80,11 @@ export const managerRoutes = [
             path: "/manager/enquiry-slots",
             element: <LazyLoader element={<EnquirySlots />} />,
             title: "Enquiry Slots"
+          },
+          {
+            path: "/manager/targets",
+            element: <LazyLoader element={<Targets />} />,
+            title: "Targets"
           },
           {
             path: "/manager/inventory",

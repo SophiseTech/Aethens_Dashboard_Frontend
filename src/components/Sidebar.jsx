@@ -54,6 +54,12 @@ const MENU_CONFIG = [
     roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
+    label: "Targets",
+    icon: Target,
+    path: "/manager/targets",
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
+  },
+  {
     label: "Materials",
     icon: Book,
     path: "/materials",
@@ -134,6 +140,30 @@ const MENU_CONFIG = [
     icon: FundProjectionScreenOutlined,
     path: "/faculty/faculty-development-program",
     roles: [ROLES.FACULTY],
+  },
+  {
+    label: "My Attendance",
+    icon: CheckSquareOutlined,
+    path: "/faculty/my-attendance",
+    roles: [ROLES.FACULTY],
+  },
+  {
+    label: "My Leaves",
+    icon: CalendarOutlined,
+    path: "/faculty/my-leaves",
+    roles: [ROLES.FACULTY],
+  },
+  {
+    label: "Faculty Attendance",
+    icon: ClockCircleOutlined,
+    path: "/admin/faculty-attendance",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Manage Leaves",
+    icon: CheckSquareOutlined,
+    path: "/admin/manage-leaves",
+    roles: [ROLES.ADMIN],
   },
   {
     label: "Attendance",
