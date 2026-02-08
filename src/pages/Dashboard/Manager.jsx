@@ -68,7 +68,6 @@ function Manager() {
         firstDay: start.startOf('day').format('YYYY-MM-DD'),
         lastDay: end.endOf('day').format('YYYY-MM-DD')
       });
-      console.log(end.endOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'))
     } else {
       setDateRange(getMonthRange(new Date()));
     }
@@ -110,7 +109,7 @@ function Manager() {
         <IncomeChart />
         <StudentChart dateRange={dateRange} />
       </Flex>
-      
+
       <OverDurationStudents />
       <IncomeReport dateRange={dateRange} onDateRangeChange={setDateRange} />
       <AttendanceReport dateRange={dateRange} onDateRangeChange={setDateRange} />
