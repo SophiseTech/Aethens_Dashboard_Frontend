@@ -8,7 +8,7 @@ import React from 'react';
 
 function InventoryItems() {
   const { user } = userStore();
-  const canCreate = permissions.inventory?.create?.includes(user?.role);
+  const canCreate = permissions.inventoryItems?.create?.includes(user?.role);
 
   return (
     <Title
