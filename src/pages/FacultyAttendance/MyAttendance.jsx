@@ -11,31 +11,108 @@ import Title from "@components/layouts/Title";
 import DailySwipes from "./Components/DailySwipes";
 import AttendanceCalendar from "./Components/AttendanceCalendar";
 import attendanceService from "@services/AttendanceService";
+import leaveService from "@services/LeaveService";
+import holidayService from "@services/Holiday";
+import userStore from "@stores/UserStore";
+import { useStore } from "zustand";
 
 function MyAttendance() {
     const [loading, setLoading] = useState(false);
     const [selectedDate, setSelectedDate] = useState(dayjs());
     const [selectedMonth, setSelectedMonth] = useState(dayjs().format("YYYY-MM"));
+    const { user } = useStore(userStore);
 
     // Data states
     const [dailyData, setDailyData] = useState(null);
     const [monthlyData, setMonthlyData] = useState(null);
+    const [holidays, setHolidays] = useState([]);
+
+    // Fetch holidays on mount
+    useEffect(() => {
+        const fetchHolidays = async () => {
+            try {
+                const response = await holidayService.fetchHolidays({
+                    skip: 0,
+                    limit: 100,
+                    centerId: user?.center_id,
+                    status: 'published'
+                });
+                setHolidays(response?.holidays || []);
+            } catch (error) {
+                console.error("Failed to load holidays:", error);
+            }
+        };
+
+        if (user?.center_id) {
+            fetchHolidays();
+        }
+    }, [user?.center_id]);
 
     // Fetch monthly attendance data
     useEffect(() => {
         const fetchMonthlyData = async () => {
             try {
                 setLoading(true);
-                const data = await attendanceService.getMonthlyAttendance(selectedMonth);
-                setMonthlyData(data);
+
+                // Fetch attendance data
+                const attendanceData = await attendanceService.getCurrentMonthAttendance();
+
+                // Fetch approved leaves for the selected month
+                const allLeaves = await leaveService.getLeaves();
+                const myApprovedLeaves = allLeaves?.filter(leave => leave.status === "APPROVED") || [];
+
+                // Convert approved leaves to attendance records format
+                const leaveRecords = [];
+                myApprovedLeaves.forEach(leave => {
+                    const fromDate = dayjs(leave.fromDate);
+                    const toDate = dayjs(leave.toDate);
+                    const monthStart = dayjs(selectedMonth + "-01");
+
+                    // Iterate through each day of the leave
+                    let currentDate = fromDate;
+                    while (currentDate.isBefore(toDate) || currentDate.isSame(toDate, 'day')) {
+                        // Only include dates within the selected month
+                        if (currentDate.isSame(monthStart, 'month')) {
+                            leaveRecords.push({
+                                date: currentDate.format("YYYY-MM-DD"),
+                                attendanceType: "LEAVE"
+                            });
+                        }
+                        currentDate = currentDate.add(1, 'day');
+                    }
+                });
+
+                // Merge attendance records with leave records
+                const attendanceRecords = attendanceData?.records || [];
+                const mergedRecords = [...attendanceRecords];
+
+                // Add leave records only if there's no existing attendance for that date
+                leaveRecords.forEach(leaveRecord => {
+                    const existingRecord = mergedRecords.find(r => r.date === leaveRecord.date);
+                    if (!existingRecord) {
+                        mergedRecords.push(leaveRecord);
+                    }
+                });
+
+                // Recalculate stats to include leaves
+                const leaveCount = mergedRecords.filter(r => r.attendanceType === "LEAVE").length;
+                const updatedStats = {
+                    ...(attendanceData?.stats || {}),
+                    leaves: leaveCount
+                };
+
+                setMonthlyData({
+                    ...attendanceData,
+                    records: mergedRecords,
+                    stats: updatedStats
+                });
             } catch (error) {
-                message.error("Failed to load monthly attendance data");
+                message.error("Failed to load attendance data");
                 console.error(error);
             } finally {
                 setLoading(false);
             }
         };
-
         fetchMonthlyData();
     }, [selectedMonth]);
 
@@ -89,7 +166,7 @@ function MyAttendance() {
                 <div className="space-y-6">
                     {/* Statistics Cards */}
                     <Row gutter={[16, 16]}>
-                        <Col xs={24} sm={12} md={6}>
+                        <Col xs={24} sm={12} md={6} lg={4}>
                             <Card>
                                 <Statistic
                                     title="Total Days"
@@ -99,7 +176,7 @@ function MyAttendance() {
                                 />
                             </Card>
                         </Col>
-                        <Col xs={24} sm={12} md={6}>
+                        <Col xs={24} sm={12} md={6} lg={4}>
                             <Card>
                                 <Statistic
                                     title="Full Days"
@@ -109,7 +186,7 @@ function MyAttendance() {
                                 />
                             </Card>
                         </Col>
-                        <Col xs={24} sm={12} md={6}>
+                        <Col xs={24} sm={12} md={6} lg={4}>
                             <Card>
                                 <Statistic
                                     title="Half Days"
@@ -119,7 +196,17 @@ function MyAttendance() {
                                 />
                             </Card>
                         </Col>
-                        <Col xs={24} sm={12} md={6}>
+                        <Col xs={24} sm={12} md={6} lg={4}>
+                            <Card>
+                                <Statistic
+                                    title="Leave Days"
+                                    value={stats.leaves || 0}
+                                    prefix={<CalendarOutlined />}
+                                    valueStyle={{ color: "#1890ff" }}
+                                />
+                            </Card>
+                        </Col>
+                        <Col xs={24} sm={12} md={6} lg={4}>
                             <Card>
                                 <Statistic
                                     title="Absents"
@@ -137,6 +224,7 @@ function MyAttendance() {
                             <AttendanceCalendar
                                 month={selectedMonth}
                                 records={monthlyData?.records || []}
+                                holidays={holidays}
                                 onDateSelect={handleDateSelect}
                                 onMonthChange={handleMonthChange}
                             />

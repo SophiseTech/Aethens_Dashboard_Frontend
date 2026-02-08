@@ -3,16 +3,28 @@ import { get, post, patch } from "@utils/Requests";
 
 class LeaveService {
     /**
-     * Get all leaves for the logged-in faculty
-     * @returns {Promise} Array of leave records
-     */
-    async getLeaves() {
+   * Get leaves for current user (faculty) or all leaves (admin)
+   * @param {Object} filters - Optional filters for admin (centerId, facultyId, status, leaveType)
+   * @returns {Promise<Array>} Array of leave records
+   */
+    async getLeaves(filters = {}) {
         try {
-            const response = await get("/v2/leave/faculty");
-            if (!response || !response.data) throw new Error("An error occurred. Please try again");
-            return response.data;
+            // Build query string from filters
+            const params = new URLSearchParams();
+
+            if (filters.centerId) params.append('centerId', filters.centerId);
+            if (filters.facultyId) params.append('facultyId', filters.facultyId);
+            if (filters.status) params.append('status', filters.status);
+            if (filters.leaveType) params.append('leaveType', filters.leaveType);
+
+            const queryString = params.toString();
+            const endpoint = queryString ? `/v2/leave/faculty?${queryString}` : '/v2/leave/faculty';
+
+            const response = await get(endpoint);
+            return response?.data || [];
         } catch (error) {
             handleError(error);
+            throw error;
         }
     }
 
