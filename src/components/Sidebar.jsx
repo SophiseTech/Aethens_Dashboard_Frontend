@@ -17,6 +17,7 @@ import {
   MessageOutlined,
   CheckSquareOutlined,
   BellOutlined,
+  AuditOutlined,
 } from "@ant-design/icons";
 
 import Book from "@/assets/Book";
@@ -99,6 +100,10 @@ const MENU_CONFIG = [
     icon: ShopOutlined,
     path: "/manager/inventory-items",
     roles: [ROLES.ADMIN],
+    label: "Audits",
+    icon: AuditOutlined,
+    path: "/manager/audits",
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
     label: "Payslips",

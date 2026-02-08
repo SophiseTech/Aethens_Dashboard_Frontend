@@ -23,6 +23,9 @@ const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCour
 const StudentAnnouncement = lazy(() => import("@pages/Announcement/StudentAnnouncement"));
 const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"));
 const PhaseListPage = lazy(() => import("@pages/FinalProject/PhaseList"));
+const AdminFacultyAttendance = lazy(() => import("@pages/AdminAttendance/AdminFacultyAttendance"));
+const AdminLeaves = lazy(() => import("@pages/AdminLeaves/AdminLeaves"));
+const Audits = lazy(() => import("@pages/Audits"));
 
 const LazyLoader = ({ children }) => {
   const location = useLocation()
