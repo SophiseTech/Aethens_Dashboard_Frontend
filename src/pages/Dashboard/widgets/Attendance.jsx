@@ -16,7 +16,7 @@ function Attendance() {
   useEffect(() => {
     if (!slots || slots.length <= 0) {
       // getSlots()
-      getSlots(0, { sort: { start_date: -1 }, query: { booked_student_id: user._id, start_date: { $gte: dayjs().startOf("month").toISOString() }, course_id: user?.details_id?.course_id?._id || user?.details_id?.course_id }, populate: "center_id session" })
+      getSlots(0, { sort: { start_date: -1 }, query: { booked_student_id: user._id, start_date: { $gte: dayjs().startOf("month").toISOString() }, course_id: user?.details_id?.course_id?._id || user?.details_id?.course_id, isActive: true }, populate: "center_id session" })
     }
     if (!records || records.length <= 0) {
       getHistory({ user_id: user._id }, {}, 5)

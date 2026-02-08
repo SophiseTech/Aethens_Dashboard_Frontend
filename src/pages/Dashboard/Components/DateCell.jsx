@@ -15,15 +15,16 @@ const DateCell = ({ date, groupedData, today, month, holidayDates, getHolidayFor
   // Determine marker display
   const { shouldDisplayMarker, markerColor, tooltipText } = useMemo(() => {
     // Holiday takes priority
+    const sessions = groupedData?.[dateStr];
+
     if (isHoliday) {
       return {
-        shouldDisplayMarker: true,
+        shouldDisplayMarker: sessions?.length > 0,
         markerColor: '#F97316', // Orange
-        tooltipText: holidayInfo?.title || 'Holiday'
+        tooltipText: `Holiday - ${holidayInfo?.title}`
       };
     }
 
-    const sessions = groupedData?.[dateStr];
     if (!sessions?.length) {
       return { shouldDisplayMarker: false, tooltipText: null };
     }

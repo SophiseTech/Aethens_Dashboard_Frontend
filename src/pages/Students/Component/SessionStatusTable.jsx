@@ -4,6 +4,9 @@ import courseStore from '@stores/CourseStore'
 import { formatDate } from '@utils/helper'
 import { Button, Image, Input, Select, Space, Table } from 'antd'
 import React, { useEffect, useState, useMemo } from 'react'
+import userStore from '@stores/UserStore'
+import { formatDate, formatTime } from '@utils/helper'
+import permissions from '@utils/permissions'
 import { useStore } from 'zustand'
 
 const { Search } = Input;
@@ -20,6 +23,7 @@ function SessionStatusTable({ student }) {
 
   console.log('Course from store:', course);
   console.log('SyllabusType:', syllabusType);
+  const { user } = userStore()
 
   useEffect(() => {
     if (!student?._id) return;
@@ -38,6 +42,12 @@ function SessionStatusTable({ student }) {
     if (statusFilter && statusFilter !== 'all') {
       filters.status = statusFilter;
     }
+    // getFacultyRemarks({ query: { student_id: student._id, course_id: student?.details_id?.course_id?._id || student?.details_id?.course_id }, populate: "faculty_id" })
+    // if (!facultyRemarks || facultyRemarks.length === 0) {
+    // }
+    // }, [student])
+
+
 
     // Add search filter
     if (searchText) {

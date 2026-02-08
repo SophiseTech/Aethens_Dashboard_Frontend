@@ -155,9 +155,6 @@ const FacultyActionButton = ({ userDetails }) => {
         <Button onClick={() => handleViewCourseHistory(userDetails?._id)} variant='filled' color='cyan'>
           View Course History
         </Button>
-        <Button onClick={showFeeModal} variant='filled' color='green'>
-          Fee Tracker
-        </Button>
       </Flex>
       <ProjectDetailModal handleCancel={handleCancel} handleOk={handleOk} isModalOpen={isModalOpen} student_id={selectedStudent} />
       <FeeTracker student={userDetails} visible={isFeeModalOpen} onCancel={handleFeeCancel} />
