@@ -29,7 +29,7 @@ export const sessionSlotOptionRenderer = (option, user) => {
   const weekday = weekDays[session.weekDay];
   const time = dayjs(session.start_time).format('h:mm A');
   const remainingSlots = user.role === ROLES.STUDENT ? totalRemainingSlots : regularRemainingSLots
-
+  
   // Determine color based on remaining slots
   let slotColor = 'green';
   if (remainingSlots <= 5) slotColor = 'orange';
@@ -170,7 +170,9 @@ function SessionDateRow({
               filterOption={(inputValue, option) =>
                 option.label.toLowerCase().includes(inputValue.toLowerCase())
               }
-              optionRender={(option) => {sessionSlotOptionRenderer(option, user)}}
+              optionRender={(option) => {
+                return sessionSlotOptionRenderer(option, user)
+              }}
               notFoundContent={
                 loading ? (
                   <div className="flex items-center gap-2 p-2">
