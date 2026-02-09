@@ -52,7 +52,7 @@ function BillDetails() {
       <div className='border-b border-border flex justify-between | p-5 2xl:p-10'>
         <h1 className='font-bold | max-2xl:text-xl 2xl:text-2xl'>Preview</h1>
         <div className='flex gap-2'>
-          {permissions.bills.record_payment.includes(user.role) &&
+          {permissions.bills?.record_payment?.includes(user.role) &&
             <RecordPaymentModal handleRecordPayment={handleRecordPayment} bill={bill} />
           }
 
@@ -73,7 +73,7 @@ function BillDetails() {
             )}
           </PDFDownloadLink>
 
-          {permissions.bills.delete.includes(user.role) &&
+          {permissions.bills?.delete?.includes(user.role) &&
             <Popconfirm
               title="Delete Bill"
               description="Are you sure to delete this bill?"

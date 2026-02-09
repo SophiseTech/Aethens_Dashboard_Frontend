@@ -16,6 +16,8 @@ const EnquirySlots = lazy(() => import("@pages/EnquirySlots"))
 const Bills = lazy(() => import("@pages/Bills"));
 const BillDetails = lazy(() => import("@pages/Bills/Components/BillDetails"));
 const Inventory = lazy(() => import("@pages/Inventory"));
+const InventoryItems = lazy(() => import("@pages/InventoryItems"));
+const Audits = lazy(() => import("@pages/Audits"));
 const PayslipDetails = lazy(() => import("@pages/Payslips/components/PayslipDetails"));
 const ManagerPayslips = lazy(() => import("@pages/Payslips/Manager"));
 const ManagerFacultyDevelopmentProgram = lazy(() => import("@pages/FacultyDevelopmentProgram/Manager"));
@@ -89,6 +91,16 @@ export const managerRoutes = [
             path: "/manager/inventory",
             element: <LazyLoader element={<Inventory />} />,
             title: "Inventory"
+          },
+          {
+            path: "/manager/inventory-items",
+            element: <LazyLoader element={<InventoryItems />} />,
+            title: "Inventory Items"
+          },
+          {
+            path: "/manager/audits",
+            element: <LazyLoader element={<Audits />} />,
+            title: "Audits"
           },
           {
             path: "/manager/materials",

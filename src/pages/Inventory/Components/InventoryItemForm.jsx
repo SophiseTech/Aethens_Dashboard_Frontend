@@ -12,16 +12,15 @@ import React, { useEffect } from 'react'
 function InventoryItemForm({ onSubmit, defaultItem }) {
 
   const [form] = Form.useForm();
-  const { inventory, createLoading, loading } = inventoryStore()
+  const { createLoading, loading } = inventoryStore()
   const selectedType = Form.useWatch("type", form)
 
   const initialValues = {
     name: defaultItem?.name || "",
     type: defaultItem?.type || "",
-    quantity: defaultItem?.quantity || "",
-    rate: defaultItem?.rate ?? "",
-    discount: defaultItem?.discount ?? "",
-    taxes: defaultItem?.taxes ?? "",
+    default_rate: defaultItem?.default_rate ?? "",
+    default_discount: defaultItem?.default_discount ?? "",
+    default_tax: defaultItem?.default_tax ?? "",
     tags: defaultItem?.tags || [],
     category: defaultItem?.category || [],
     image: defaultItem?.image || "",
@@ -51,22 +50,18 @@ function InventoryItemForm({ onSubmit, defaultItem }) {
   ]
 
   const handleSubmit = async (values) => {
-    console.log(values, inventory);
+    console.log(values);
 
     if (values?.type === "gallery") {
       if (values?.upload) {
         values.image = values.upload.map(file => file.response)
       } else {
         handleError("Upload atleast one image")
+        return;
       }
     }
 
-    if (inventory?._id) {
-      values.inventory_id = inventory._id
-    } else {
-      handleError("An error occured. Please refresh")
-    }
-
+    // V2: Items are global - no inventory_id needed
     await onSubmit(values)
   }
 
@@ -74,10 +69,9 @@ function InventoryItemForm({ onSubmit, defaultItem }) {
     <CustomForm form={form} initialValues={initialValues} action={handleSubmit}>
       <CustomInput label={"Name"} name={"name"} placeholder={"John Doe"} />
       <CustomSelect name={"type"} options={options} label={"Select Type of Item"} />
-      <CustomInput label={"Quantity"} name={"quantity"} type='number' placeholder={"10"} />
-      <CustomInput label={"Rate (₹)"} name={"rate"} type='number' placeholder={"1000"} />
-      <CustomInput label={"Discount (₹)"} name={"discount"} type='number' placeholder={"100"} />
-      <CustomInput label={"Tax (%)"} name={"taxes"} type='number' placeholder={"18"} />
+      <CustomInput label={"Default Rate (₹)"} name={"default_rate"} type='number' placeholder={"1000"} />
+      <CustomInput label={"Default Discount (₹)"} name={"default_discount"} type='number' placeholder={"100"} />
+      <CustomInput label={"Default Tax (%)"} name={"default_tax"} type='number' placeholder={"18"} />
       {selectedType === "gallery" &&
         <>
           <CustomFileUpload

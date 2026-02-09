@@ -40,7 +40,7 @@ function Activities() {
 
   // const groupedActivities = useMemo(() => groupActivities(activities), [activities]);
   return (
-    <Title title={"Activities"} button={permissions.activities.add.includes(user.role) &&
+    <Title title={"Activities"} button={permissions.activities?.add?.includes(user.role) &&
       <AddActivity />
     }>
       <Suspense fallback={<Loader />}>

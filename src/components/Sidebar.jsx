@@ -17,6 +17,7 @@ import {
   MessageOutlined,
   CheckSquareOutlined,
   BellOutlined,
+  AuditOutlined,
 } from "@ant-design/icons";
 
 import Book from "@/assets/Book";
@@ -98,6 +99,18 @@ const MENU_CONFIG = [
     label: "Inventory",
     icon: ShopOutlined,
     path: "/manager/inventory",
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
+  },
+  {
+    label: "Inventory Items",
+    icon: ShopOutlined,
+    path: "/manager/inventory-items",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Audits",
+    icon: AuditOutlined,
+    path: "/manager/audits",
     roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
@@ -340,7 +353,8 @@ function Sidebar({ children }) {
   const isActive = useCallback(
     (path) => {
       if (path === "/") return pathname === "/";
-      return pathname.startsWith(path);
+      // Exact match or followed by a slash (to avoid /manager/inventory matching /manager/inventory-items)
+      return pathname === path || pathname.startsWith(path + "/");
     },
     [pathname]
   );

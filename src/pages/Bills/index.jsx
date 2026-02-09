@@ -21,7 +21,7 @@ import { useStore } from 'zustand'
 function Bills() {
 
   const { getBills, bills, loading, createBill, total, getInvoiceNo, invoiceNo, center_initial, filters: stateFilters } = billStore()
-  const { getItems, searhcItems } = inventoryStore()
+  const { getItems } = inventoryStore()
   const { getStudentsByCenter, total: studentTotal, students } = studentStore()
   const [searchParams, setSearchParams] = useSearchParams();
   const student_id = searchParams.get("student_id")
@@ -134,7 +134,7 @@ function Bills() {
 
   return (
     <Title title={"Bills"} button={
-      permissions.bills.add.includes(user.role) &&
+      permissions.bills?.add?.includes(user?.role) &&
       <GenerateBillButton
         // itemsOptions={itemsOptions}
         customersOptions={customerOptions}

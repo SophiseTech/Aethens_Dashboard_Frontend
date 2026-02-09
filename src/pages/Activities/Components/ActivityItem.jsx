@@ -23,7 +23,7 @@ function ActivityItem({ name, profile_img, time, isDocument, id, children }) {
       <div className='flex flex-col gap-3 flex-1'>
         <ItemHeader name={name} time={time} isDocument={isDocument} />
         {children}
-        {permissions.activities.delete.includes(user.role) &&
+        {permissions.activities?.delete?.includes(user.role) &&
           <Popconfirm title="Delete Activity" description="Are you sure to delete this activity?" onConfirm={() => handleDelete(id)}>
             <Button icon={<RestOutlined />} color='red' variant='filled' className='w-fit' size='small' loading={createLoading}>Delete</Button>
           </Popconfirm>

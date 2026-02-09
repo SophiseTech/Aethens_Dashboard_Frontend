@@ -242,8 +242,10 @@ export const ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES = [
   "/manager/tasks",
   "/manager/holidays",
   "/manager/notifications",
+  "/manager/inventory-items",
 ]
 
 export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
-  "/manager/holidays"
+  "/manager/holidays",
+  "/manager/inventory-items",
 ]
