@@ -354,7 +354,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
           </>
         )}
 
-        {enquiry?.branchTransfers?.length > 0 && (
+        {enquiry?.centerTransfers?.length > 0 && (
           <>
             <Divider />
 

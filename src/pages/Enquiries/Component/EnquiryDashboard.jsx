@@ -62,7 +62,9 @@ export default function EnquiryDashboard() {
               className="min-w-[150px]"
               size="middle"
               options={[
+                { label: "This Week", value: "this_week" },
                 { label: "Last Week", value: "last_week" },
+                { label: "This Month", value: "this_month" },
                 { label: "Last Month", value: "last_month" },
                 { label: "Last Quarter", value: "last_quarter" },
               ]}
@@ -106,8 +108,8 @@ export default function EnquiryDashboard() {
      AFTER LOADING — SHOW DASHBOARD
   ---------------------------------------------------------- */
 
-  const stageLabels = Object.keys(metrics.executive.stageBreakdown || {});
-  const stageValues = Object.values(metrics.executive.stageBreakdown || {});
+  const stageLabels = Object.keys(metrics.executive?.stageBreakdown || {});
+  const stageValues = Object.values(metrics.executive?.stageBreakdown || {});
 
   const stagePie = {
     series: stageValues,
@@ -238,7 +240,9 @@ export default function EnquiryDashboard() {
             className="min-w-[150px]"
             size="middle"
             options={[
+              { label: "This Week", value: "this_week" },
               { label: "Last Week", value: "last_week" },
+              { label: "This Month", value: "this_month" },
               { label: "Last Month", value: "last_month" },
               { label: "Last Quarter", value: "last_quarter" },
             ]}
@@ -255,7 +259,7 @@ export default function EnquiryDashboard() {
         <Col xs={12} md={6}>
           <Card className="rounded-xl shadow-sm">
             <Text>Total Enquiries</Text>
-            <Title level={3}>{metrics.executive.totalEnquiries}</Title>
+            <Title level={3}>{metrics.executive?.totalEnquiries}</Title>
           </Card>
         </Col>
 
@@ -263,7 +267,7 @@ export default function EnquiryDashboard() {
           <Card className="rounded-xl shadow-sm">
             <Text>Conversion Rate</Text>
             <Title level={3}>
-              {metrics.executive.conversionRate?.toFixed(1)}%
+              {metrics.executive?.conversionRate?.toFixed(1)}%
             </Title>
           </Card>
         </Col>
@@ -278,7 +282,7 @@ export default function EnquiryDashboard() {
         <Col xs={12} md={6}>
           <Card className="rounded-xl shadow-sm">
             <Text>Centers Active</Text>
-            <Title level={3}>{metrics.centerStats.length}</Title>
+            <Title level={3}>{metrics.centerStats?.length}</Title>
           </Card>
         </Col>
 

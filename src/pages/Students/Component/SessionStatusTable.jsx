@@ -1,6 +1,8 @@
 import { RestFilled } from '@ant-design/icons'
 import facultyRemarksStore from '@stores/FacultyRemarksStore'
-import { formatDate } from '@utils/helper'
+import userStore from '@stores/UserStore'
+import { formatDate, formatTime } from '@utils/helper'
+import permissions from '@utils/permissions'
 import { Button, Table } from 'antd'
 import React, { useEffect } from 'react'
 import { useStore } from 'zustand'
@@ -14,6 +16,7 @@ function SessionStatusTable({ student }) {
     // if (!facultyRemarks || facultyRemarks.length === 0) {
     // }
   }, [student])
+  const { user } = userStore()
 
   const columns = [
     {
@@ -43,11 +46,18 @@ function SessionStatusTable({ student }) {
       render: (value, record) => record.isTopicComplete ? formatDate(value) : "Not Completed"
     },
     {
+      title: "Created At",
+      dataIndex: "createdAt",
+      render: (value) => value ? `${formatDate(value)}, ${formatTime(value)}` : ""
+    },
+    {
       title: "Action",
       dataIndex: "action",
       render: (_, record) => (
         <>
-          <Button icon={<RestFilled />} color='red' onClick={() => { deleteFacultyRemark(record._id) }} />
+          {permissions.session_status.delete.includes(user?.role) &&
+            <Button icon={<RestFilled />} color='red' onClick={() => { deleteFacultyRemark(record._id) }} />
+          }
         </>
       ),
     }
