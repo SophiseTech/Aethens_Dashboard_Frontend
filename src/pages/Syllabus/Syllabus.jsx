@@ -25,14 +25,17 @@ function Syllabus() {
     } else if (id) {
 
       getCourse(id)
-      
+
     }
   }, [user, id, getStudentSyllabus, getCourse]); // Ensure stable function dependencies
 
   return (
     <Title title="Syllabus">
       <div className="flex gap-10 | max-lg:flex-col-reverse">
-        <SyllabusList modules={user?.role === ROLES.STUDENT ? syllabus?.modules : course?.modules} loading={user?.role === ROLES.STUDENT ? syllabusLoading : loading} />
+        <SyllabusList
+          syllabusData={user?.role === ROLES.STUDENT ? syllabus : course}
+          loading={user?.role === ROLES.STUDENT ? syllabusLoading : loading}
+        />
         <CourseDetail course={course} />
       </div>
     </Title>

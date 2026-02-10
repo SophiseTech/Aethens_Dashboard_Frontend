@@ -1,17 +1,31 @@
 import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
 import { isValidURL } from '@utils/helper';
-import { Table, Badge, Tag } from 'antd';
-import React, { useEffect, useMemo } from 'react';
+import { Table, Badge, Tag, Select, Input, Space } from 'antd';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore } from 'zustand';
+import CustomSyllabusList from './CustomSyllabusList';
 
-function SyllabusList({ modules, loading }) {
+const { Search } = Input;
+
+function SyllabusList({ syllabusData, loading }) {
   // Get user data
   const { user } = useStore(userStore);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchText, setSearchText] = useState('');
+
+  // Handle general syllabus type (existing logic)
+  const modules = syllabusData?.modules || syllabusData || []; // Backward compatibility
 
   // Transform syllabus data into a flat table format
+  // Call useMemo unconditionally to satisfy React hooks rules
   const tableData = useMemo(() => {
+    // Skip processing for custom syllabus type
+    if (syllabusData?.syllabusType === 'custom') {
+      return [];
+    }
+
     let dataIndex = 0;
     const formattedData = [];
 
@@ -60,7 +74,32 @@ function SyllabusList({ modules, loading }) {
     });
 
     return formattedData;
-  }, [modules]);
+  }, [modules, syllabusData?.syllabusType]);
+
+  // Filter table data
+  const filteredData = useMemo(() => {
+    let filtered = tableData;
+
+    // Filter by status
+    if (statusFilter === 'completed') {
+      filtered = filtered.filter(row => row.completed);
+    } else if (statusFilter === 'ongoing') {
+      filtered = filtered.filter(row => !row.completed && row.sessionCount >= 1);
+    } else if (statusFilter === 'notStarted') {
+      filtered = filtered.filter(row => !row.completed && row.sessionCount === 0);
+    }
+
+    // Filter by search text
+    if (searchText) {
+      filtered = filtered.filter(row =>
+        row.module?.toLowerCase().includes(searchText.toLowerCase()) ||
+        row.unit?.toLowerCase().includes(searchText.toLowerCase()) ||
+        row.topic?.toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
+
+    return filtered;
+  }, [tableData, statusFilter, searchText]);
 
   // Define table columns
   const columns = [
@@ -124,15 +163,47 @@ function SyllabusList({ modules, loading }) {
     );
   }
 
+  // Handle custom syllabus type - return after all hooks have been called
+  if (syllabusData?.syllabusType === 'custom') {
+    return <CustomSyllabusList images={syllabusData.images} loading={loading} />;
+  }
+
   return (
-    <Table
-      columns={columns}
-      dataSource={tableData}
-      rowClassName={(record) => (record.completed ? 'completed-row' : '')}
-      pagination={false}
-      className='flex-1'
-      loading={loading}
-    />
+    <div>
+      {/* Filters - Only show for students */}
+      {user.role === ROLES.STUDENT && (
+        <Space className="mb-4" wrap>
+          <Select
+            style={{ width: 160 }}
+            value={statusFilter}
+            onChange={setStatusFilter}
+            options={[
+              { label: 'All Status', value: 'all' },
+              { label: 'Completed', value: 'completed' },
+              { label: 'Ongoing', value: 'ongoing' },
+              { label: 'Not Started', value: 'notStarted' },
+            ]}
+          />
+          <Search
+            placeholder="Search module, unit, or topic"
+            allowClear
+            style={{ width: 280 }}
+            onSearch={setSearchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+        </Space>
+      )}
+
+      {/* Table */}
+      <Table
+        columns={columns}
+        dataSource={filteredData}
+        rowClassName={(record) => (record.completed ? 'completed-row' : '')}
+        pagination={false}
+        className='flex-1'
+        loading={loading}
+      />
+    </div>
   );
 }
 

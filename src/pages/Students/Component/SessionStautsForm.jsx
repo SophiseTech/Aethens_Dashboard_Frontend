@@ -10,6 +10,7 @@ import userStore from '@stores/UserStore';
 import { Flex, Form } from 'antd';
 import React, { useEffect, useState } from 'react'
 import { useStore } from 'zustand';
+import CustomSyllabusForm from './CustomSyllabusForm';
 
 function SessionStautsForm({ handleOk, student }) {
   const [form] = Form.useForm();
@@ -32,6 +33,13 @@ function SessionStautsForm({ handleOk, student }) {
     // }
   }, [])
 
+  // Check syllabus type - if custom, render CustomSyllabusForm
+  const syllabusType = course?.syllabusType || 'general';
+  if (syllabusType === 'custom') {
+    return <CustomSyllabusForm student={student} course={course} />;
+  }
+
+  // Rest of the component for GENERAL syllabus type
   const onSubmit = async (values) => {
     // const faculty = faculties?.find(faculty => faculty.username === values.faculty_id)
     values.faculty_id = user._id
