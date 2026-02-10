@@ -33,17 +33,8 @@ function MaterialsList({ currentPage, setCurrentPage, total, pageSize = 10 }) {
   const hasSelected = selectedRowKeys.length > 0;
 
   const handleMarkCollected = async () => {
+    // Backend now automatically deducts inventory when marking as collected
     await editMaterials(selectedRowKeys, { status: "collected", collected_on: new Date() });
-
-    const materialMap = new Map(materials.map((m) => [m._id, m]));
-
-    selectedRowKeys.forEach((key) => {
-      const material = materialMap.get(key);
-      if (material && material.status === "pending") {
-        editItem(material.inventory_item_id?._id || material.inventory_item_id, { $inc: { quantity: -(material.qty) } });
-      }
-    });
-
     setSelectedRowKeys([]);
   };
 

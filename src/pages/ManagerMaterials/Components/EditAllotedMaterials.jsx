@@ -112,17 +112,8 @@ function EditAllotedMaterials({ selectedRowKeys, student_id, handleOk }) {
   }
 
   const handleMarkCollected = async (updateData = {}) => {
+    // Backend now automatically deducts inventory when marking as collected
     await editMaterials(selectedRowKeys, { status: "collected", collected_on: new Date(), ...updateData })
-
-    const materialMap = new Map(materials.map((m) => [m._id, m]));
-
-    selectedRowKeys.forEach((key) => {
-      const material = materialMap.get(key);
-      if (material && material.status === "pending" && material?.inventory_item_id?.type !== "default") {
-        editItem(material.inventory_item_id?._id || material.inventory_item_id, { $inc: { quantity: -(material.qty) } });
-      }
-    });
-
   }
 
   const itemsOptions = useMemo(() => items?.filter(item => (item.type === "default" || (item.quantity > 0 && item.type === "materials")))
