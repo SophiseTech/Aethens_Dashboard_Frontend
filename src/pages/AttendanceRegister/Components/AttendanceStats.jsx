@@ -19,14 +19,6 @@ function AttendanceStats({
 
     const allStats = calculateAttendanceStats(attendanceData, students);
     console.log(allStats);
-    
-    // let totalPresent = 0;
-    // let totalMarked = 0;
-
-    // Object.values(allStats).forEach(stat => {
-    //   totalPresent += stat.present;
-    //   totalMarked += stat.total;
-    // });
 
     const averageAttendance = attendanceData?.totalSlots > 0 ? ((attendanceData?.totalAttendedSlots / attendanceData?.totalSlots) * 100).toFixed(1) : 0;
 
