@@ -199,11 +199,20 @@ const EditableCell = ({
     }, 300);
   }, [onSearch, index]);
 
+  // Ensure the currently selected item is always in the options so the label shows instead of the raw _id
+  const effectiveOptions = React.useMemo(() => {
+    if (inputType !== "autocomplete" || !record?.name || !record?.itemName) return options;
+    const currentValue = record.name;
+    const alreadyInOptions = options?.some(opt => opt.value === currentValue);
+    if (alreadyInOptions) return options;
+    return [{ label: record.itemName, value: currentValue }, ...(options || [])];
+  }, [inputType, options, record?.name, record?.itemName]);
+
   const inputNode = inputType === 'number' ?
     <InputNumber />
     : inputType === "autocomplete" ?
       <Select
-        options={options}
+        options={effectiveOptions}
         onSelect={(value, option) => onSelect(value, index, option)}
         filterOption={itemType !== "course" ? false : (input, option) => {
           return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
@@ -211,7 +220,7 @@ const EditableCell = ({
         onSearch={debouncedSearch}
         showSearch
       >
-        {searchLoading ? <Spin className='animate-spin' /> : options?.map((option) => (
+        {searchLoading ? <Spin className='animate-spin' /> : effectiveOptions?.map((option) => (
           <Select.Option key={option.value} value={option.value}>
             {option.label}
           </Select.Option>

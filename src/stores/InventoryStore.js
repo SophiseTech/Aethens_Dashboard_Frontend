@@ -2,6 +2,7 @@
 import inventoryService from "@/services/Inventory"
 import handleInternalError from "@utils/handleInternalError"
 import handleSuccess from "@utils/handleSuccess"
+import userStore from "@stores/UserStore"
 import { create } from "zustand"
 
 const inventoryStore = create((set, get) => ({
@@ -9,7 +10,7 @@ const inventoryStore = create((set, get) => ({
   loading: true,
   lastRefKey: 0,
   total: 0,
-  inventory: {},
+  inventory: [],
   createLoading: false,
   searchResults: [],
   searchLastRefKey: 0,
@@ -78,7 +79,7 @@ const inventoryStore = create((set, get) => ({
     }
   },
 
-  clearCenterInventory: () => set({ inventory: {} }),
+  clearCenterInventory: () => set({ inventory: [] }),
 
   // Create global item (v2) - maps form fields to backend (default_rate, default_tax, default_discount)
   createItem: async (data) => {
@@ -135,7 +136,12 @@ const inventoryStore = create((set, get) => ({
       set({ createLoading: true })
       const inventory = await inventoryService.addItemToCenter(data)
       if (inventory) {
-        set({ inventory })
+        // Refresh center inventory after adding
+        const centerId = data.center_id || userStore.getState().user?.center_id;
+        if (centerId) {
+          const updatedInventory = await inventoryService.getCenterInventory(centerId)
+          if (updatedInventory) set({ inventory: updatedInventory })
+        }
         handleSuccess("Item added to center inventory")
       }
     } catch (error) {
@@ -149,9 +155,14 @@ const inventoryStore = create((set, get) => ({
   updateCenterItem: async (itemId, data) => {
     try {
       set({ createLoading: true })
-      const inventory = await inventoryService.updateCenterItem(itemId, data)
-      if (inventory) {
-        set({ inventory })
+      const result = await inventoryService.updateCenterItem(itemId, data)
+      if (result) {
+        // Refresh center inventory after update
+        const centerId = data.center_id || userStore.getState().user?.center_id;
+        if (centerId) {
+          const updatedInventory = await inventoryService.getCenterInventory(centerId)
+          if (updatedInventory) set({ inventory: updatedInventory })
+        }
         handleSuccess("Center inventory item updated")
       }
     } catch (error) {

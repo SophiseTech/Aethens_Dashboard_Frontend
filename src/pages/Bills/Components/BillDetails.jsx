@@ -1,7 +1,6 @@
 import { DownloadOutlined, RestOutlined } from '@ant-design/icons';
 import Invoice from '@pages/Bills/Components/Invoice';
 import RecordPaymentModal from '@pages/Bills/Components/RecordPaymentModal';
-import inventoryStore from '@stores/InventoryStore';
 import userStore from '@stores/UserStore';
 import permissions from '@utils/permissions';
 import { Button, Popconfirm } from 'antd';
@@ -19,7 +18,6 @@ function BillDetails() {
   const [bill, setBill] = useState({});
   const { user } = useStore(userStore);
   const nav = useNavigate();
-  const { editItem } = useStore(inventoryStore);
   const invoiceRef = useRef(null);
 
   useEffect(() => {
@@ -31,12 +29,8 @@ function BillDetails() {
   const handleRecordPayment = async (values) => {
     if (id && bill) {
       editBill(id, { status: "paid", payment_date: values.payment_date, payment_method: values.payment_method });
+      // Backend automatically deducts inventory when marking materials as collected
       editMaterials(bill._id, { status: "collected", collected_on: new Date() });
-      await Promise.all(bill?.items?.map(async material => {
-        await editItem(material.item?._id, {
-          $inc: { quantity: -(material.qty) }
-        });
-      }));
     }
   };
 
