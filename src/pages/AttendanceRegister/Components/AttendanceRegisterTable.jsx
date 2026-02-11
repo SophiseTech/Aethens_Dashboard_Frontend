@@ -1,15 +1,8 @@
 import React, { useMemo } from 'react';
 import { Table, Tag, Spin, Empty, Pagination } from 'antd';
 import dayjs from 'dayjs';
+import { getConfig } from '@pages/AttendanceRegister/utils';
 
-const StatusColors = {
-  present: { color: '#52c41a', label: 'P' }, // Green
-  absent: { color: '#ff4d4f', label: 'A' }, // Red
-  leave: { color: '#faad14', label: 'L' }, // Orange
-  excused: { color: '#1890ff', label: 'E' }, // Blue
-  holiday: { color: '#999', label: 'H' }, // Gray
-  no_slot: { color: '#999', label: 'NA' } // Gray
-};
 
 function AttendanceRegisterTable({
   students,
@@ -50,7 +43,8 @@ function AttendanceRegisterTable({
         align: 'center',
         render: (value, row) => {
           const status = value?.status || 'no_slot';
-          const config = StatusColors[status] || StatusColors.absent;
+          const type = value?.type || 'no_slot'
+          const config = getConfig(status, type, value.isHoliday);
           return (
             <div
               className="w-full h-full flex items-center justify-center text-white font-bold text-sm rounded"
@@ -58,7 +52,7 @@ function AttendanceRegisterTable({
                 backgroundColor: config.color,
                 minHeight: '32px'
               }}
-              title={status}
+              title={config.tooltip}
             >
               {config.label}
             </div>
@@ -74,6 +68,18 @@ function AttendanceRegisterTable({
       const studentId = student.user_id || student._id;
       const studentAttendance = student?.attendance || {};
 
+      let totalPresent = 0;
+      let totalMarked = 0;
+
+      Object.values(studentAttendance).forEach(record => {
+        if (record?.status) {
+          if (record?.status === 'present') {
+            totalPresent++
+          }
+          totalMarked++;
+        }
+      });
+
       const record = {
         key: studentId,
         index: (pagination.page - 1) * pagination.limit + index + 1,
@@ -81,12 +87,16 @@ function AttendanceRegisterTable({
         username: student.username || 'N/A',
         email: student.email || 'N/A',
         admissionNumber: student.admissionNumber || 'N/A',
+        totalMarked,
+        totalPresent,
         ...studentAttendance
       };
 
       return record;
     });
   }, [students, attendanceData, pagination]);
+  console.log(tableData);
+
 
   const columns = [
     {
@@ -107,6 +117,15 @@ function AttendanceRegisterTable({
           <span className="font-semibold">{record.username}</span>
           <span className="text-xs text-gray-500">{record.admissionNumber}</span>
         </div>
+      )
+    },
+    {
+      title: 'Stat',
+      key: 'totalPresent',
+      width: 50,
+      fixed: 'left',
+      render: (text, record) => (
+          <span className="font-semibold">{record.totalPresent}/{record.totalMarked}</span>
       )
     },
     {
@@ -145,8 +164,12 @@ function AttendanceRegisterTable({
         <h3 className="text-lg font-bold text-gray-800">
           Attendance Register - {monthYear}
         </h3>
-        <p className="text-sm text-gray-600 mt-1">
-          P: Present | A: Absent | L: Leave | E: Excused | H: Holiday
+        <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
+          <span className='flex items-center gap-1'>P: Present <span className='w-3 h-3 rounded-sm block' style={{background: getConfig('present','regular', false).color}}></span>|</span> 
+          <span className='flex items-center gap-1'>A: Absent <span className='w-3 h-3 rounded-sm block' style={{background: getConfig('absent','regular', false).color}}></span>|</span> 
+          <span className='flex items-center gap-1'>H: Holiday <span className='w-3 h-3 rounded-sm block' style={{background: getConfig('present','regular', true).color}}></span>|</span>
+          <span className='flex items-center gap-1'>U: Upcoming <span className='w-3 h-3 rounded-sm block' style={{background: getConfig('upcoming','regular', false).color}}></span>|</span>
+          <span className='flex items-center gap-1'>NA: No Slot <span className='w-3 h-3 rounded-sm block' style={{background: getConfig('no_slot','regular', false).color}}></span></span>
         </p>
       </div>
 

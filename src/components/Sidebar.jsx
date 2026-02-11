@@ -239,6 +239,12 @@ const MENU_CONFIG = [
     path: "/manager/tasks",
     roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
+  {
+    label: "Attendance Register",
+    icon: CheckSquareOutlined,
+    path: "/manager/attendance-register",
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
+  },
 ];
 
 // Utility function for dynamic paths

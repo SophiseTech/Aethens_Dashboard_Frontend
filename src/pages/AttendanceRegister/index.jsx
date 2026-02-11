@@ -49,7 +49,19 @@ function AttendanceRegister() {
   const tableDataForExport = useMemo(() => {
     return students.map((student, index) => {
       const studentId = student.user_id || student._id;
-      const studentAttendance = attendanceData[studentId] || {};
+      const studentAttendance = student.attendance || {};
+
+      let totalPresent = 0;
+      let totalMarked = 0;
+
+      Object.values(studentAttendance).forEach(record => {
+        if (record?.status) {
+          if (record?.status === 'present') {
+            totalPresent++
+          }
+          totalMarked++;
+        }
+      });
 
       const record = {
         index: (pagination.page - 1) * pagination.limit + index + 1,
@@ -57,6 +69,7 @@ function AttendanceRegister() {
         username: student.username || 'N/A',
         email: student.email || 'N/A',
         admissionNumber: student.admissionNumber || 'N/A',
+        stats: `${totalPresent}/${totalMarked}`,
         ...studentAttendance
       };
 
