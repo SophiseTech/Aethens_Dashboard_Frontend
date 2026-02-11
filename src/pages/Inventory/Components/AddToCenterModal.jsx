@@ -19,8 +19,8 @@ function AddToCenterModal() {
   const inventory = inventoryStore((state) => state.inventory);
 
   const existingItemIds = useMemo(
-    () => new Set((inventory?.items || []).map((i) => (i.item_id?._id || i.item_id)?.toString())),
-    [inventory?.items]
+    () => new Set((Array.isArray(inventory) ? inventory : []).map((i) => (i.item_id?._id || i.item_id)?.toString())),
+    [inventory]
   );
 
   const availableItems = useMemo(

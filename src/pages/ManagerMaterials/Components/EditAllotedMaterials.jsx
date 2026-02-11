@@ -40,7 +40,8 @@ function EditAllotedMaterials({ selectedRowKeys, student_id, handleOk }) {
       const material = materialMap.get(key)
       return {
         ...material,
-        name: material?.inventory_item_id?._id
+        name: material?.inventory_item_id?._id,
+        itemName: material?.inventory_item_id?.name
       }
     });
     form.setFieldValue("items", selectedMaterials)
@@ -72,7 +73,10 @@ function EditAllotedMaterials({ selectedRowKeys, student_id, handleOk }) {
   }
 
   const generateInvoice = async ({ status = "unpaid" }) => {
-    const invoiceNo = await getInvoiceNo()
+    const invoiceData = await getInvoiceNo()
+    const invoiceNo = invoiceData?.invoiceNo || 0;
+    const center_initial = invoiceData?.center_initial || '';
+
     const materialMap = new Map(materials.map((m) => [m._id, m]));
 
     const items = selectedRowKeys.map((key, index) => {
@@ -95,10 +99,12 @@ function EditAllotedMaterials({ selectedRowKeys, student_id, handleOk }) {
 
     const data = {
       subtotal: totals.subtotal,
+      undiscountedTotal: totals.undiscountedTotal,
       total_tax: totals.total_tax,
       total: totals.total,
       total_discount: totals.total_discount,
       invoiceNo,
+      center_initial,
       items,
       status: status,
       generated_on: new Date(),

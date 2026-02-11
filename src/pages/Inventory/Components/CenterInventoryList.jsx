@@ -13,7 +13,7 @@ function CenterInventoryList() {
   const [editEntry, setEditEntry] = useState(null);
   const [form] = Form.useForm();
 
-  const items = inventory?.items || [];
+  const items = Array.isArray(inventory) ? inventory : [];
   const flattenedRows = useMemo(
     () =>
       items.map((entry) => ({
