@@ -2,6 +2,7 @@ import SessionStatusTable from '@pages/Students/Component/SessionStatusTable';
 import SessionStautsForm from '@pages/Students/Component/SessionStautsForm';
 import Title from '@components/layouts/Title';
 import facultyRemarksStore from '@stores/FacultyRemarksStore';
+import courseStore from '@stores/CourseStore';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Button, Card, Spin, Tag } from 'antd';
 import React, { useEffect, useState } from 'react';
@@ -17,6 +18,7 @@ function AddSessionStatus() {
     const [student, setStudent] = useState(null);
     const [loading, setLoading] = useState(true);
     const { getFacultyRemarks } = useStore(facultyRemarksStore);
+    const { getCourse } = useStore(courseStore);
 
     useEffect(() => {
         const fetchStudent = async () => {
@@ -26,12 +28,20 @@ function AddSessionStatus() {
                 // Check if student data was passed via navigation state
                 if (location.state?.student) {
                     const studentData = location.state.student;
+
+                    // Fetch full course data to get syllabusType and images
+                    const courseId = studentData?.details_id?.course_id?._id || studentData?.details_id?.course_id;
+                    if (courseId) {
+                        await getCourse(courseId);
+                    }
+
                     setStudent(studentData);
-                    // Fetch faculty remarks for this student (same as drawer logic)
+
+                    // Fetch faculty remarks for this student
                     getFacultyRemarks({
                         query: {
                             student_id: studentData._id,
-                            course_id: studentData?.details_id?.course_id?._id || studentData?.details_id?.course_id
+                            course_id: courseId
                         },
                         populate: "faculty_id"
                     });
@@ -50,7 +60,7 @@ function AddSessionStatus() {
         if (studentId) {
             fetchStudent();
         }
-    }, [studentId, navigate, getFacultyRemarks, location.state]);
+    }, [studentId, navigate, getFacultyRemarks, getCourse, location.state]);
 
     const handleBack = () => {
         navigate('/');

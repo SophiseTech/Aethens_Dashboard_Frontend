@@ -62,8 +62,8 @@ function CustomSyllabusForm({ student, course }) {
                             <Card
                                 hoverable
                                 className={`cursor-pointer ${selectedImage?._id === image._id
-                                        ? 'border-2 border-blue-500'
-                                        : ''
+                                    ? 'border-2 border-blue-500'
+                                    : ''
                                     }`}
                                 onClick={() => setSelectedImage(image)}
                                 cover={
@@ -71,7 +71,7 @@ function CustomSyllabusForm({ student, course }) {
                                         alt={image.name}
                                         src={image.url}
                                         preview={false}
-                                        className="h-40 object-cover"
+                                        style={{ width: '200px', height: '200px', objectFit: 'cover' }}
                                     />
                                 }
                             >

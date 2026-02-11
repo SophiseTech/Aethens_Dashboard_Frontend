@@ -2,24 +2,22 @@ import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
 import { isValidURL } from '@utils/helper';
 import { Table, Badge, Tag, Select, Input, Space } from 'antd';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore } from 'zustand';
 import CustomSyllabusList from './CustomSyllabusList';
 
 const { Search } = Input;
 
-function SyllabusList({ syllabusData, loading }) {
+function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, searchText, setSearchText }) {
   // Get user data
   const { user } = useStore(userStore);
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [searchText, setSearchText] = useState('');
 
   // Handle general syllabus type (existing logic)
   const modules = syllabusData?.modules || syllabusData || []; // Backward compatibility
 
   // Transform syllabus data into a flat table format
-  // Call useMemo unconditionally to satisfy React hooks rules
+  // NO MORE FILTERING - Backend handles it
   const tableData = useMemo(() => {
     // Skip processing for custom syllabus type
     if (syllabusData?.syllabusType === 'custom') {
@@ -76,53 +74,32 @@ function SyllabusList({ syllabusData, loading }) {
     return formattedData;
   }, [modules, syllabusData?.syllabusType]);
 
-  // Filter table data
-  const filteredData = useMemo(() => {
-    let filtered = tableData;
-
-    // Filter by status
-    if (statusFilter === 'completed') {
-      filtered = filtered.filter(row => row.completed);
-    } else if (statusFilter === 'ongoing') {
-      filtered = filtered.filter(row => !row.completed && row.sessionCount >= 1);
-    } else if (statusFilter === 'notStarted') {
-      filtered = filtered.filter(row => !row.completed && row.sessionCount === 0);
-    }
-
-    // Filter by search text
-    if (searchText) {
-      filtered = filtered.filter(row =>
-        row.module?.toLowerCase().includes(searchText.toLowerCase()) ||
-        row.unit?.toLowerCase().includes(searchText.toLowerCase()) ||
-        row.topic?.toLowerCase().includes(searchText.toLowerCase())
-      );
-    }
-
-    return filtered;
-  }, [tableData, statusFilter, searchText]);
-
   // Define table columns
   const columns = [
     {
       title: 'Module',
       dataIndex: 'module',
       key: 'module',
-      render: (text) =>
-        isValidURL(text) ? <Link target='_blank' to={text}>View Image</Link> : <p>{text}</p>,
     },
     {
       title: 'Unit',
       dataIndex: 'unit',
       key: 'unit',
-      render: (text) =>
-        isValidURL(text) ? <Link target='_blank' to={text}>View Image</Link> : <p>{text}</p>,
+      render: (unit) => {
+        if (isValidURL(unit)) {
+          return (
+            <Link to={unit} target='_blank'>
+              <Badge color='blue' text='Click here to access' />
+            </Link>
+          );
+        }
+        return unit;
+      },
     },
     {
       title: 'Topic',
       dataIndex: 'topic',
       key: 'topic',
-      render: (text) =>
-        isValidURL(text) ? <Link target='_blank' to={text}>View Image</Link> : <p>{text}</p>,
     },
   ];
 
@@ -165,7 +142,14 @@ function SyllabusList({ syllabusData, loading }) {
 
   // Handle custom syllabus type - return after all hooks have been called
   if (syllabusData?.syllabusType === 'custom') {
-    return <CustomSyllabusList images={syllabusData.images} loading={loading} />;
+    return <CustomSyllabusList
+      images={syllabusData.images}
+      loading={loading}
+      statusFilter={statusFilter}
+      setStatusFilter={setStatusFilter}
+      searchText={searchText}
+      setSearchText={setSearchText}
+    />;
   }
 
   return (
@@ -188,8 +172,9 @@ function SyllabusList({ syllabusData, loading }) {
             placeholder="Search module, unit, or topic"
             allowClear
             style={{ width: 280 }}
-            onSearch={setSearchText}
+            value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
+            onSearch={setSearchText}
           />
         </Space>
       )}
@@ -197,7 +182,7 @@ function SyllabusList({ syllabusData, loading }) {
       {/* Table */}
       <Table
         columns={columns}
-        dataSource={filteredData}
+        dataSource={tableData}
         rowClassName={(record) => (record.completed ? 'completed-row' : '')}
         pagination={false}
         className='flex-1'

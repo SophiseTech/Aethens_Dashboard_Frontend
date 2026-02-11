@@ -1,38 +1,13 @@
 import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
 import { Image, Table, Tag, Select, Input, Space } from 'antd';
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { useStore } from 'zustand';
 
 const { Search } = Input;
 
-function CustomSyllabusList({ images, loading }) {
+function CustomSyllabusList({ images, loading, statusFilter, setStatusFilter, searchText, setSearchText }) {
     const { user } = useStore(userStore);
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [searchText, setSearchText] = useState('');
-
-    // Filter images based on status and search
-    const filteredImages = useMemo(() => {
-        let filtered = images || [];
-
-        // Filter by status
-        if (statusFilter === 'completed') {
-            filtered = filtered.filter(img => img.completed);
-        } else if (statusFilter === 'ongoing') {
-            filtered = filtered.filter(img => !img.completed && img.sessionCount >= 1);
-        } else if (statusFilter === 'notStarted') {
-            filtered = filtered.filter(img => !img.completed && img.sessionCount === 0);
-        }
-
-        // Filter by search text
-        if (searchText) {
-            filtered = filtered.filter(img =>
-                img.name?.toLowerCase().includes(searchText.toLowerCase())
-            );
-        }
-
-        return filtered;
-    }, [images, statusFilter, searchText]);
 
     // Define table columns
     const columns = [
@@ -94,8 +69,8 @@ function CustomSyllabusList({ images, loading }) {
         );
     }
 
-    // Transform images into table data
-    const tableData = (filteredImages || []).map((image, index) => ({
+    // Transform images into table data - NO MORE FILTERING
+    const tableData = (images || []).map((image, index) => ({
         key: image._id || index,
         ...image,
     }));
@@ -120,8 +95,9 @@ function CustomSyllabusList({ images, loading }) {
                         placeholder="Search by image name"
                         allowClear
                         style={{ width: 250 }}
-                        onSearch={setSearchText}
+                        value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
+                        onSearch={setSearchText}
                     />
                 </Space>
             )}
