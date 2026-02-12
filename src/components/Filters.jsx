@@ -11,10 +11,24 @@ const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defau
   // Convert formatted defaultValues back to dayjs objects
   useEffect(() => {
     const convertedDefaults = _.mapValues(defaultValues, (value) => {
-      if (_.isObject(value) && value.$gte && value.$lte) {
-        return [dayjs(value.$gte), dayjs(value.$lte)]; // Convert to range format
+      if (_.isObject(value)) {
+        const val = []
+        if (value.$gte) {
+          val.push(dayjs(value.$gte))
+        } else {
+          val.push(null)
+        }
+        if (value.$lte) {
+          val.push(dayjs(value.$lte))
+        } else {
+          val.push(null)
+        }
+        return val;
       }
-      return dayjs.isDayjs(value) ? value : value;
+      // if (_.isObject(value) && Object.hasOwn(value, '$gte') && Object.hasOwn(value, '$lte')) {
+      //   return [dayjs(value.$gte), dayjs(value.$lte)]; // Convert to range format
+      // }
+      return dayjs.isDayjs(value) ? dayjs(value) : value;
     });
     setFilterValues(convertedDefaults);
   }, [defaultValues]);
@@ -42,6 +56,7 @@ const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defau
     }
 
     const formattedFilters = _.pickBy(filterValues, (value) => value !== null && value !== undefined && value !== "");
+    console.log("FormattedFilters0::", formattedFilters)
 
     // Format date and range filters
     Object.keys(formattedFilters).forEach((key) => {
@@ -56,16 +71,20 @@ const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defau
       }
 
       // Date Range
-      if (Array.isArray(value) && value.length === 2 && dayjs.isDayjs(value[0]) && dayjs.isDayjs(value[1])) {
-        formattedFilters[key] = {
-          $gte: dayjs(value[0]).startOf('day').toISOString(),
-          $lte: dayjs(value[1]).endOf('day').toISOString()
-        };
+      if (Array.isArray(value) && value.length === 2) {
+        formattedFilters[key] = {}
+        if (value[0] && dayjs.isDayjs(value[0])) {
+          formattedFilters[key].$gte = dayjs(value[0]).startOf('day').toISOString()
+        }
+        if (value[1] && dayjs.isDayjs(value[1])) {
+          formattedFilters[key].$lte = dayjs(value[1]).endOf('day').toISOString()
+        }
       }
     });
-
+    console.log("FormattedFilters::", formattedFilters)
     onApply(formattedFilters);
   };
+  console.log(filterValues);
 
   const renderFilter = ({ key, type, placeholder, options }) => {
     const commonProps = {

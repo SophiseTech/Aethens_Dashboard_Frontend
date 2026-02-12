@@ -21,7 +21,8 @@ class StudentService {
     total_course_fee,
     numberOfInstallments,
     type,
-    isFeeEnabled
+    isFeeEnabled,
+    reg_fee
   }) {
     try {
       if (
@@ -53,7 +54,8 @@ class StudentService {
         numberOfInstallments,
         type,
         paidAmount,
-        total_course_fee
+        total_course_fee,
+        reg_fee
       });
       if (!response || !response.data)
         throw new Error("An error occured. Please try again");
@@ -132,44 +134,55 @@ class StudentService {
   }
 
   async addRemarks(studentId, payload) {
-     return Promise.resolve({ success: true });
+    return Promise.resolve({ success: true });
     // return post(`/students/${studentId}/remarks`, payload);
   }
 
   // services/Student.js
 
-async getRemarks(studentId) {
-  // ❗ TEMPORARY DUMMY DATA — remove once backend is ready
-  return Promise.resolve([
-    {
-      _id: "remark_1",
-      text: "Student is very attentive and shows good progress.",
-      createdAt: "2025-09-05T10:30:00Z",
-      createdBy: {
-        _id: "user_1",
-        name: "Manager John",
+  async getRemarks(studentId) {
+    // ❗ TEMPORARY DUMMY DATA — remove once backend is ready
+    return Promise.resolve([
+      {
+        _id: "remark_1",
+        text: "Student is very attentive and shows good progress.",
+        createdAt: "2025-09-05T10:30:00Z",
+        createdBy: {
+          _id: "user_1",
+          name: "Manager John",
+        },
       },
-    },
-    {
-      _id: "remark_2",
-      text: "Needs improvement in consistency. Parents informed.",
-      createdAt: "2025-09-15T14:45:00Z",
-      createdBy: {
-        _id: "user_2",
-        name: "Faculty Anna",
+      {
+        _id: "remark_2",
+        text: "Needs improvement in consistency. Parents informed.",
+        createdAt: "2025-09-15T14:45:00Z",
+        createdBy: {
+          _id: "user_2",
+          name: "Faculty Anna",
+        },
       },
-    },
-    {
-      _id: "remark_3",
-      text: "Excellent performance in recent sessions.",
-      createdAt: "2025-10-01T09:15:00Z",
-      createdBy: {
-        _id: "user_1",
-        name: "Manager John",
+      {
+        _id: "remark_3",
+        text: "Excellent performance in recent sessions.",
+        createdAt: "2025-10-01T09:15:00Z",
+        createdBy: {
+          _id: "user_1",
+          name: "Manager John",
+        },
       },
-    },
-  ]);
-}
+    ]);
+  }
+
+  async getUserById(userId, filters) {
+    try {
+      const response = await post(`/user/getById/${userId}`, filters);
+      if (!response) throw new Error("An error occured. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
 
 }
 

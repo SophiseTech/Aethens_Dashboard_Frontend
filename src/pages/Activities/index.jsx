@@ -1,6 +1,7 @@
 import Title from '@components/layouts/Title'
 import AddActivity from '@pages/Activities/Components/AddActivity';
 import activitiesStore from '@stores/ActivitiesStore'
+import studentStore from '@stores/StudentStore';
 import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
 import permissions from '@utils/permissions';
@@ -17,6 +18,7 @@ function Activities() {
   const { id } = useParams()
   const { user } = useStore(userStore)
   const [activityType, setActivityType] = useState("Individual")
+  const { activeStudent, getStudentById } = studentStore()
 
   useEffect(() => {
     if (activityType === "Individual") {
@@ -25,6 +27,12 @@ function Activities() {
       fetchActivity({ course_id: user.details_id?.course_id })
     }
   }, [activityType])
+
+  useEffect(() => {
+    if (id && id !== activeStudent?._id) {
+      getStudentById(id, {})
+    }
+  }, [])
 
   const fetchActivity = (query) => {
     getActivities(10, {
@@ -41,7 +49,7 @@ function Activities() {
   // const groupedActivities = useMemo(() => groupActivities(activities), [activities]);
   return (
     <Title title={"Activities"} button={permissions.activities.add.includes(user.role) &&
-      <AddActivity />
+      <AddActivity student={activeStudent} activityType={activityType} />
     }>
       <Suspense fallback={<Loader />}>
         {user.role === ROLES.STUDENT &&
