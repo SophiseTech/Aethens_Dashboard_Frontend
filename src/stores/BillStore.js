@@ -37,7 +37,16 @@ const billStore = create((set, get) => ({
         })
       }
       if (customFilters) {
-        set({ filters: _.cloneDeep({ ...stateFilters, ...customFilters }) })
+        const filters =  _.cloneDeep({ ...stateFilters, ...customFilters })
+        if(filters.generated_on){
+          if(!filters.generated_on.$lte){
+            delete filters.generated_on.$lte
+          }
+          if(!filters.generated_on.$gte){
+            delete filters.generated_on.$gte
+          }
+        }
+        set({ filters })
       }
     } catch (error) {
       handleInternalError(error)

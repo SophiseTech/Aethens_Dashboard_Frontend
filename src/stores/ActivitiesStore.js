@@ -69,7 +69,7 @@ const activitiesStore = create((set, get) => ({
     } finally {
       set({ createLoading: false })
     }
-  },
+  }
 }))
 
 export default activitiesStore

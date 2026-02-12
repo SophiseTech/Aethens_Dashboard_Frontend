@@ -2,6 +2,8 @@ import authService from "@/services/Auth";
 import userService from "@/services/User";
 import { create } from "zustand";
 import handleInternalError from "@utils/handleInternalError";
+import { ROLES } from "@utils/constants";
+import studentStore from "@stores/StudentStore";
 
 const userStore = create((set, get) => ({
   user: null,
@@ -28,6 +30,9 @@ const userStore = create((set, get) => ({
       set({ authLoading: true })
       const { user, loggedIn } = await authService.checkAuth()
       set({ user: user, isAuthenticated: loggedIn })
+      if (user.role === ROLES.STUDENT) {
+        studentStore.getState().setActiveStudent(user)
+      }
     } catch (error) {
       set({ user: null, isAuthenticated: false })
       console.error('Failed to check authentication:', error);

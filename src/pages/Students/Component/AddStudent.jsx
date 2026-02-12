@@ -53,7 +53,8 @@ function AddStudent() {
     type: "single",
     paidAmount: 0,
     numberOfInstallments: 6,
-    isFeeEnabled: false
+    isFeeEnabled: true,
+    reg_fee: 3500
   }
 
   useEffect(() => {
@@ -180,14 +181,15 @@ function AddStudent() {
 
           <Divider />
 
-          <CustomCheckbox name={"isFeeEnabled"} label={"Add Fee Record"} />
-          {isFeeEnabled && (
-            <>
-              <CustomInput name={"total_course_fee"} label={"Total Course Fee"} />
-              <CustomSelect name={"type"} options={feeOptions} label={"Payment Method"} />
-              {getFieldsByFeeType(feeType)}
-            </>
-          )}
+          {/* <CustomCheckbox name={"isFeeEnabled"} label={"Add Fee Record"} /> */}
+          {/* {isFeeEnabled && ( */}
+          {/* <> */}
+          <CustomInput name={"total_course_fee"} label={"Total Course Fee"} />
+          <CustomSelect name={"type"} options={feeOptions} label={"Payment Method"} />
+          {getFieldsByFeeType(feeType)}
+          <CustomInput name={"reg_fee"} label={"Total Registration Fee (Exc. Tax)"} type='number' placeholder={'3500'} />
+          {/* </> */}
+          {/* )} */}
           <CustomSubmit className='bg-primary' label='Enroll' loading={loading} />
         </CustomForm>
       </Modal>

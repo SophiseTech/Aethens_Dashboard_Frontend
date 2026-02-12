@@ -6,7 +6,7 @@ import { Modal } from 'antd';
 import React, { useState } from 'react'
 import { useStore } from 'zustand';
 
-function AddActivity() {
+function AddActivity({ student, activityType }) {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useStore(userStore)
@@ -35,7 +35,7 @@ function AddActivity() {
         footer={null}
         onCancel={handleCancel}
       >
-        <AddActivityForm handleOk={handleOk} />
+        <AddActivityForm handleOk={handleOk} activityType={activityType} student={student} />
       </Modal>
     </>
   )
