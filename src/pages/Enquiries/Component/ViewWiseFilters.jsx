@@ -23,7 +23,7 @@ function ViewWiseFilters({ selectedView = 'All', onApply = () => { }, onClear = 
   // Default view -> fields configuration. Each field: { name, label, type, required?, options? }
   const defaultViewsConfig = {
     All: [
-      { name: 'phoneNumber', label: 'Phone', type: 'input' },
+      { name: 'phoneNumber', label: 'Name or Phone', type: 'input' },
       { name: 'course', label: 'Course', type: 'input' },
       { name: 'startDate', label: 'From', type: 'date' },
       { name: 'endDate', label: 'To', type: 'date' },
