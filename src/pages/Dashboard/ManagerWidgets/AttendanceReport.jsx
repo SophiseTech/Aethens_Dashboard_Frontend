@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Card, Select, DatePicker, Row, Col, Spin, Empty } from 'antd';
+import { Card, Select, DatePicker, Row, Col, Spin, Empty, Flex } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import EChart from '@pages/Dashboard/Chart/EChart';
 import userStore from '@stores/UserStore';
@@ -166,96 +166,96 @@ function AttendanceReport({ dateRange: dashboardDateRange, onDateRangeChange }) 
   }, [summary]);
 
   /* ---------------- Course-wise Bar ---------------- */
-/* ---------------- Course-wise Bar ---------------- */
-const courseChart = useMemo(() => {
-  if (!courses.length) return null;
+  /* ---------------- Course-wise Bar ---------------- */
+  const courseChart = useMemo(() => {
+    if (!courses.length) return null;
 
-  const fullCourseNames = courses.map(
-    (c) => c.course_name || 'Not Specified'
-  );
+    const fullCourseNames = courses.map(
+      (c) => c.course_name || 'Not Specified'
+    );
 
-  return {
-    series: [
-      {
-        name: 'Present',
-        data: courses.map((c) => c.presentCount || 0),
-      },
-      {
-        name: 'Absent',
-        data: courses.map((c) => c.absentCount || 0),
-      },
-    ],
-    options: {
-      chart: {
-        type: 'bar',
-        stacked: true,
-        toolbar: { show: false },
-      },
-
-      grid: {
-        padding: {
-          left: 20,
-          right: 20,
-          bottom: 70,
-          top: 20,
+    return {
+      series: [
+        {
+          name: 'Present',
+          data: courses.map((c) => c.presentCount || 0),
         },
-      },
-
-      plotOptions: {
-        bar: {
-          horizontal: false,
-          columnWidth: '55%',
-          borderRadius: 4,
+        {
+          name: 'Absent',
+          data: courses.map((c) => c.absentCount || 0),
         },
-      },
-
-      xaxis: {
-        categories: fullCourseNames,
-        labels: {
-          rotate: -35,
-          rotateAlways: true,
-          style: { fontSize: '11px' },
-          formatter: (value) =>
-            value.length > 14 ? `${value.slice(0, 14)}…` : value,
+      ],
+      options: {
+        chart: {
+          type: 'bar',
+          stacked: true,
+          toolbar: { show: false },
         },
+
+        grid: {
+          padding: {
+            left: 20,
+            right: 20,
+            bottom: 70,
+            top: 20,
+          },
+        },
+
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: '55%',
+            borderRadius: 4,
+          },
+        },
+
+        xaxis: {
+          categories: fullCourseNames,
+          labels: {
+            rotate: -35,
+            rotateAlways: true,
+            style: { fontSize: '11px' },
+            formatter: (value) =>
+              value.length > 14 ? `${value.slice(0, 14)}…` : value,
+          },
+          tooltip: {
+            enabled: false, // disable broken default tooltip
+          },
+        },
+
+        yaxis: {
+          labels: {
+            style: { fontSize: '11px' },
+          },
+        },
+
+        legend: {
+          position: 'top',
+          horizontalAlign: 'right',
+        },
+
+        colors: ['#00C2A8', '#FF6B6B'],
+
         tooltip: {
-          enabled: false, // disable broken default tooltip
-        },
-      },
+          shared: true,
+          intersect: false,
 
-      yaxis: {
-        labels: {
-          style: { fontSize: '11px' },
-        },
-      },
+          // ✅ THIS fixes full course name visibility
+          custom: ({ dataPointIndex, series }) => {
+            const name = fullCourseNames[dataPointIndex];
 
-      legend: {
-        position: 'top',
-        horizontalAlign: 'right',
-      },
-
-      colors: ['#00C2A8', '#FF6B6B'],
-
-      tooltip: {
-        shared: true,
-        intersect: false,
-
-        // ✅ THIS fixes full course name visibility
-        custom: ({ dataPointIndex, series }) => {
-          const name = fullCourseNames[dataPointIndex];
-
-          return `
+            return `
             <div style="padding:8px 10px">
               <strong>${name}</strong>
               <div>Present: ${series[0][dataPointIndex]}</div>
               <div>Absent: ${series[1][dataPointIndex]}</div>
             </div>
           `;
+          },
         },
       },
-    },
-  };
-}, [courses]);
+    };
+  }, [courses]);
 
 
 
@@ -302,46 +302,46 @@ const courseChart = useMemo(() => {
       ) : (
         <Row gutter={[20, 20]}>
           {/* Summary */}
-          <Col span={24}>
-            <Card>
-              <Row gutter={16}>
-                <Col span={8}>
-                  <div className="text-xs text-gray-500">Total Sessions</div>
-                  <div className="text-lg font-semibold">
-                    {summary.totalSlots}
-                  </div>
-                </Col>
-                <Col span={8}>
-                  <div className="text-xs text-gray-500">Present</div>
-                  <div className="text-lg font-semibold">
-                    {summary.presentCount}
-                  </div>
-                </Col>
-                <Col span={8}>
-                  <div className="text-xs text-gray-500">Absent</div>
-                  <div className="text-lg font-semibold">
-                    {summary.absentCount}
-                  </div>
-                </Col>
-              </Row>
-            </Card>
-          </Col>
+          <Col span={12}>
+            <Flex vertical gap={5}>
+              <Card>
+                <Row gutter={16}>
+                  <Col span={8}>
+                    <div className="text-xs text-gray-500">Total Sessions</div>
+                    <div className="text-lg font-semibold">
+                      {summary.totalSlots}
+                    </div>
+                  </Col>
+                  <Col span={8}>
+                    <div className="text-xs text-gray-500">Present</div>
+                    <div className="text-lg font-semibold">
+                      {summary.presentCount}
+                    </div>
+                  </Col>
+                  <Col span={8}>
+                    <div className="text-xs text-gray-500">Absent</div>
+                    <div className="text-lg font-semibold">
+                      {summary.absentCount}
+                    </div>
+                  </Col>
+                </Row>
+              </Card>
 
-          {/* Overall Pie */}
-          <Col span={24}>
-            <Card title="Overall Attendance">
-              {overallChart && (
-                <EChart
-                  series={overallChart.series}
-                  options={overallChart.options}
-                  height={260}
-                />
-              )}
-            </Card>
+              {/* Overall Pie */}
+              <Card title="Overall Attendance">
+                {overallChart && (
+                  <EChart
+                    series={overallChart.series}
+                    options={overallChart.options}
+                    height={260}
+                  />
+                )}
+              </Card>
+            </Flex>
           </Col>
 
           {/* Course-wise Bar */}
-          <Col span={24}>
+          <Col span={12}>
             <Card title="Course-wise Attendance">
               {courseChart && (
                 <EChart

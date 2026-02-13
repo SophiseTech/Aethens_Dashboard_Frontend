@@ -96,7 +96,7 @@ const useTargetStore = create((set, get) => ({
             // Refresh targets list and analytics
             get().getTargets();
             get().getAnalytics();
-            return response.data;
+            return response;
         } catch (error) {
             set({ error: error.message, loading: false });
             handleInternalError(error);

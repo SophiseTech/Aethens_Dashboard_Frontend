@@ -45,8 +45,8 @@ function IncomeChart() {
   const options = {
     chart: {
       type: "line",
-      width: "100%",
-      height: "auto",
+      // width: "100%",
+      // height: "auto",
       toolbar: {
         show: false,
       },
@@ -106,9 +106,9 @@ function IncomeChart() {
       show: true,
       borderColor: "#ccc",
       strokeDashArray: 2,
-      padding: {
-        right: 90
-      }
+      // padding: {
+      //   right: 90
+      // }
     },
   }
 
