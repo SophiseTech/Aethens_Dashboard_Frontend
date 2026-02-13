@@ -36,8 +36,8 @@ function StudentChart({ dateRange }) {
   const options = {
     chart: {
       type: "line",
-      width: "100%",
-      height: "auto",
+      // width: "100%",
+      // height: "auto",
       toolbar: {
         show: false,
       },
@@ -83,17 +83,17 @@ function StudentChart({ dateRange }) {
       show: true,
       borderColor: "#ccc",
       strokeDashArray: 2,
-      padding: {
-        right: 90
-      }
+      // padding: {
+      //   right: 90
+      // }
     },
-    plotOptions: {
-      bar: {
-        columnWidth: "10%",
-        borderRadius: 10,
-        borderRadiusApplication: 'around'
-      },
-    },
+    // plotOptions: {
+    //   bar: {
+    //     columnWidth: "10%",
+    //     borderRadius: 10,
+    //     borderRadiusApplication: 'around'
+    //   },
+    // },
   }
 
   return (
@@ -111,6 +111,7 @@ function StudentChart({ dateRange }) {
           }
         ]}
         options={options}
+        height={320}
       />
     </Card>
   )

@@ -53,6 +53,8 @@ function AddTarget() {
         };
 
         const created = await createTarget(targetData);
+        console.log(created);
+        
         if (created) {
             handleOk();
             return { reset: true, created };

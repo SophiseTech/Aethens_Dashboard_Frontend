@@ -13,7 +13,7 @@ import payslipStore from "@stores/PayslipStore";
 import userStore from "@stores/UserStore";
 import centerStore from "@stores/CentersStore";
 import { getMonthRange } from "@utils/helper";
-import { Col, Flex, Grid, Row, DatePicker, Select } from "antd";
+import { Col, Flex, Grid, Row, DatePicker, Select, Card } from "antd";
 import _ from "lodash";
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
@@ -105,15 +105,25 @@ function Admin() {
           </Link>
         </Col>
       </Row>
-      <Flex gap={20}>
-        <FeeReport dateRange={dateRange} />
-        <OverDurationStudents />
-      </Flex>
-      <Flex gap={20}>
-        <IncomeChart />
-        <StudentChart dateRange={dateRange} />
-      </Flex>
-      <IncomeReport dateRange={dateRange} onDateRangeChange={setDateRange} />
+      <Row gutter={[20, 20]}>
+        <Col span={14}>
+          <IncomeReport dateRange={dateRange} onDateRangeChange={setDateRange} />
+        </Col>
+        <Col span={10}>
+          <IncomeChart />
+        </Col>
+      </Row>
+      <Row gutter={[20, 20]}>
+        <Col span={8}>
+          <OverDurationStudents />
+        </Col>
+        <Col span={8}>
+          <FeeReport dateRange={dateRange} />
+        </Col>
+        <Col span={8}>
+          <StudentChart dateRange={dateRange} />
+        </Col>
+      </Row>
       <AttendanceReport dateRange={dateRange} onDateRangeChange={setDateRange} />
     </Flex>
   );
