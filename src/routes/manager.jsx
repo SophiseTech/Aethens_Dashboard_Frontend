@@ -34,6 +34,7 @@ const FinalProjectStudentView = lazy(() => import("@pages/FinalProject/Component
 const Tasks = lazy(() => import("@pages/Tasks"))
 const Holidays = lazy(() => import("@pages/Holidays"))
 const AttendanceRegister = lazy(() => import("@pages/AttendanceRegister"))
+const SyllabusGallery = lazy(() => import("@pages/SyllabusGallery"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -212,6 +213,11 @@ export const managerRoutes = [
             path: "/manager/attendance-register",
             element: <LazyLoader element={<AttendanceRegister />} />,
             title: "Attendance Register",
+          },
+          {
+            path: "/admin/syllabus-gallery",
+            element: <LazyLoader element={<SyllabusGallery />} />,
+            title: "Syllabus Gallery",
           },
         ]
       }
