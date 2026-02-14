@@ -266,4 +266,5 @@ export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
   "/admin/art-works",
   "/admin/student-of-the-week",
   "/admin/latest-videos",
+  "/admin/syllabus-gallery",
 ]

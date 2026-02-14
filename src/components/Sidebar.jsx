@@ -270,6 +270,12 @@ const MENU_CONFIG = [
     roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   {
+    label: "Syllabus Gallery",
+    icon: PictureOutlined,
+    path: "/admin/syllabus-gallery",
+    roles: [ROLES.ADMIN],
+  },
+  {
     label: "Announcements",
     icon: ClockCircleOutlined,
     path: "/student/announcements",
