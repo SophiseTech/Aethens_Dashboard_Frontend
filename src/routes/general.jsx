@@ -40,6 +40,14 @@ const AdminStudentOfTheWeek = lazy(() => import("@pages/Admin/StudentOfTheWeek")
 const EditStudentOfTheWeek = lazy(() => import("@pages/Admin/StudentOfTheWeek/EditStudentOfTheWeek"));
 const AdminLatestVideos = lazy(() => import("@pages/Admin/LatestVideos"));
 const AdminCourses = lazy(() => import("@pages/AdminCourses"));
+const AdminUsers = lazy(() => import("@pages/Admin/Users"));
+const AdminCenters = lazy(() => import("@pages/Admin/Centers"));
+const AdminBlogPosts = lazy(() => import("@pages/Admin/BlogPosts"));
+const AdminNewsletters = lazy(() => import("@pages/Admin/Newsletters"));
+const AdminShopItems = lazy(() => import("@pages/Admin/ShopItems"));
+const AdminArtWorks = lazy(() => import("@pages/Admin/ArtWorks"));
+const AdminStudentOfTheWeek = lazy(() => import("@pages/Admin/StudentOfTheWeek"));
+const AdminLatestVideos = lazy(() => import("@pages/Admin/LatestVideos"));
 
 const LazyLoader = ({ children }) => {
   const location = useLocation()
@@ -460,6 +468,76 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Courses",
+            path: "/admin/users",
+            element: (
+              <LazyLoader>
+                <AdminUsers />
+              </LazyLoader>
+            ),
+            title: "Users",
+          },
+          {
+            path: "/admin/centers",
+            element: (
+              <LazyLoader>
+                <AdminCenters />
+              </LazyLoader>
+            ),
+            title: "Centers",
+          },
+          {
+            path: "/admin/blog-posts",
+            element: (
+              <LazyLoader>
+                <AdminBlogPosts />
+              </LazyLoader>
+            ),
+            title: "Blog Posts",
+          },
+          {
+            path: "/admin/newsletters",
+            element: (
+              <LazyLoader>
+                <AdminNewsletters />
+              </LazyLoader>
+            ),
+            title: "Newsletters",
+          },
+          {
+            path: "/admin/shop-items",
+            element: (
+              <LazyLoader>
+                <AdminShopItems />
+              </LazyLoader>
+            ),
+            title: "Shop Items",
+          },
+          {
+            path: "/admin/art-works",
+            element: (
+              <LazyLoader>
+                <AdminArtWorks />
+              </LazyLoader>
+            ),
+            title: "Art Works",
+          },
+          {
+            path: "/admin/student-of-the-week",
+            element: (
+              <LazyLoader>
+                <AdminStudentOfTheWeek />
+              </LazyLoader>
+            ),
+            title: "Student of the Week",
+          },
+          {
+            path: "/admin/latest-videos",
+            element: (
+              <LazyLoader>
+                <AdminLatestVideos />
+              </LazyLoader>
+            ),
+            title: "Latest Videos",
           },
         ],
       },

@@ -254,6 +254,14 @@ export const ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES = [
   "/admin/student-of-the-week",
   "/admin/latest-videos",
   "/admin/courses",
+  "/admin/users",
+  "/admin/centers",
+  "/admin/blog-posts",
+  "/admin/newsletters",
+  "/admin/shop-items",
+  "/admin/art-works",
+  "/admin/student-of-the-week",
+  "/admin/latest-videos",
 ]
 
 export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
@@ -270,5 +278,13 @@ export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
   "/admin/latest-videos",
   "/admin/syllabus-gallery",
   "/admin/courses",
-  "/manager/attendance-register"
+  "/manager/attendance-register",
+  "/admin/users",
+  "/admin/centers",
+  "/admin/blog-posts",
+  "/admin/newsletters",
+  "/admin/shop-items",
+  "/admin/art-works",
+  "/admin/student-of-the-week",
+  "/admin/latest-videos",
 ]
