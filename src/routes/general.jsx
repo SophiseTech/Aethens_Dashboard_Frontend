@@ -39,6 +39,7 @@ const EditArtWork = lazy(() => import("@pages/Admin/ArtWorks/EditArtWork"));
 const AdminStudentOfTheWeek = lazy(() => import("@pages/Admin/StudentOfTheWeek"));
 const EditStudentOfTheWeek = lazy(() => import("@pages/Admin/StudentOfTheWeek/EditStudentOfTheWeek"));
 const AdminLatestVideos = lazy(() => import("@pages/Admin/LatestVideos"));
+const AdminCourses = lazy(() => import("@pages/AdminCourses"));
 
 const LazyLoader = ({ children }) => {
   const location = useLocation()
@@ -450,6 +451,15 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Latest Videos",
+          },
+          {
+            path: "/admin/courses",
+            element: (
+              <LazyLoader>
+                <AdminCourses />
+              </LazyLoader>
+            ),
+            title: "Courses",
           },
         ],
       },

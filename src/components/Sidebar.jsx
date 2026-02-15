@@ -276,6 +276,12 @@ const MENU_CONFIG = [
     roles: [ROLES.ADMIN],
   },
   {
+    label: "Courses",
+    icon: BookOutlined,
+    path: "/admin/courses",
+    roles: [ROLES.ADMIN],
+  },
+  {
     label: "Announcements",
     icon: ClockCircleOutlined,
     path: "/student/announcements",
