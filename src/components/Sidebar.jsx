@@ -18,6 +18,12 @@ import {
   CheckSquareOutlined,
   BellOutlined,
   AuditOutlined,
+  UserOutlined,
+  BankOutlined,
+  FileTextOutlined,
+  MailOutlined,
+  TrophyOutlined,
+  VideoCameraOutlined,
 } from "@ant-design/icons";
 
 import Book from "@/assets/Book";
@@ -165,6 +171,54 @@ const MENU_CONFIG = [
     label: "Manage Leaves",
     icon: CheckSquareOutlined,
     path: "/admin/manage-leaves",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Users",
+    icon: UserOutlined,
+    path: "/admin/users",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Centers",
+    icon: BankOutlined,
+    path: "/admin/centers",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Blog Posts",
+    icon: FileTextOutlined,
+    path: "/admin/blog-posts",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Newsletters",
+    icon: MailOutlined,
+    path: "/admin/newsletters",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Shop Items",
+    icon: ShopOutlined,
+    path: "/admin/shop-items",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Art Works",
+    icon: PictureOutlined,
+    path: "/admin/art-works",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Student of the Week",
+    icon: TrophyOutlined,
+    path: "/admin/student-of-the-week",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Latest Videos",
+    icon: VideoCameraOutlined,
+    path: "/admin/latest-videos",
     roles: [ROLES.ADMIN],
   },
   {

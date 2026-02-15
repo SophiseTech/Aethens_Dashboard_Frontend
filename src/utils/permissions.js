@@ -56,6 +56,52 @@ const permissions = {
     addToCenter: [ROLES.MANAGER],
     request: [ROLES.MANAGER],
     approve: [ROLES.ADMIN]
+  },
+  // Admin-only content management (dashboard frontend)
+  adminUsers: {
+    view: [ROLES.ADMIN],
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN]
+  },
+  adminCenters: {
+    view: [ROLES.ADMIN]
+  },
+  adminBlogPost: {
+    view: [ROLES.ADMIN],
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN]
+  },
+  adminNewsletter: {
+    view: [ROLES.ADMIN],
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN]
+  },
+  adminShopItem: {
+    view: [ROLES.ADMIN],
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN]
+  },
+  adminArtWork: {
+    view: [ROLES.ADMIN],
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN]
+  },
+  adminStudentOfTheWeek: {
+    view: [ROLES.ADMIN],
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN]
+  },
+  adminLatestVideos: {
+    view: [ROLES.ADMIN],
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN]
   }
 }
 
