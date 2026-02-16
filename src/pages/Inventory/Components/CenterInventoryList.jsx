@@ -1,17 +1,47 @@
-import React, { useMemo, useState } from 'react';
-import { Button, Flex, Modal, Segmented, Table } from 'antd';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Button, Flex, Input, Modal, Segmented, Table } from 'antd';
 import inventoryStore from '@stores/InventoryStore';
 import { groupByField } from '@utils/helper';
 import CustomInput from '@components/form/CustomInput';
 import CustomForm from '@components/form/CustomForm';
 import CustomSubmit from '@components/form/CustomSubmit';
 import { Form } from 'antd';
+import centersStore from '@stores/CentersStore';
+import userStore from '@stores/UserStore';
+import { ROLES } from '@utils/constants';
+
+const { Search } = Input;
 
 function CenterInventoryList() {
-  const { inventory, updateCenterItem } = inventoryStore();
+  const { inventory, inventoryTotal, getCenterInventory, updateCenterItem, loading } = inventoryStore();
+  const { selectedCenter } = centersStore();
+  const { user } = userStore();
   const [selectedTab, setSelectedTab] = useState('materials');
   const [editEntry, setEditEntry] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
   const [form] = Form.useForm();
+
+  const isAdmin = user?.role === ROLES.ADMIN;
+  const centerId = isAdmin ? selectedCenter : user?.center_id;
+
+  // Reset search and page when tab changes
+  useEffect(() => {
+    setSearchTerm('');
+    setCurrentPage(1);
+  }, [selectedTab]);
+
+  // Fetch inventory when dependencies change
+  useEffect(() => {
+    // Only fetch if we have a valid centerId
+    if (!centerId || centerId === 'all') {
+      return;
+    }
+
+    getCenterInventory(centerId, searchTerm, selectedTab, pageSize, currentPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [centerId, selectedTab, searchTerm, currentPage, pageSize]);
 
   const items = Array.isArray(inventory) ? inventory : [];
   const flattenedRows = useMemo(
@@ -23,16 +53,6 @@ function CenterInventoryList() {
         key: entry.item_id?._id,
       })),
     [items]
-  );
-
-  const categorizedItems = useMemo(
-    () => groupByField(flattenedRows, 'type', { gallery: [], materials: [], assets: [] }),
-    [flattenedRows]
-  );
-
-  const itemsToDisplay = useMemo(
-    () => categorizedItems[selectedTab] || [],
-    [categorizedItems, selectedTab]
   );
 
   const segmentOptions = [
@@ -66,8 +86,19 @@ function CenterInventoryList() {
       tax: values.tax,
       discount: values.discount,
     });
+    // Refresh the current page after update
+    getCenterInventory(centerId, searchTerm, selectedTab, pageSize, currentPage);
     setEditEntry(null);
     form.resetFields();
+  };
+
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -77,12 +108,25 @@ function CenterInventoryList() {
         value={selectedTab}
         onChange={setSelectedTab}
       />
+      <Search
+        placeholder="Search items by name..."
+        onSearch={handleSearch}
+        className='w-1/4'
+        allowClear
+      />
       <Table
         columns={columns}
-        dataSource={itemsToDisplay}
+        dataSource={flattenedRows}
+        loading={loading}
         className="w-full"
         rowKey={(r) => r.item_id?._id || r._id}
-        pagination={false}
+        pagination={{
+          current: currentPage,
+          pageSize: pageSize,
+          total: inventoryTotal,
+          onChange: handlePageChange,
+          showSizeChanger: false,
+        }}
       />
       <Modal
         title="Edit center inventory item"

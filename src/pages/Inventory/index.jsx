@@ -8,11 +8,11 @@ import inventoryStore from '@stores/InventoryStore';
 import requestsStore from '@stores/RequestsStore';
 import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
-import { Button, Drawer, Flex, Skeleton, Table } from 'antd';
+import { Button, Drawer, Flex, Table } from 'antd';
 import React, { useEffect, useState } from 'react';
 
 function Inventory() {
-  const { getCenterInventory, clearCenterInventory, inventory, loading } = inventoryStore();
+  const { getCenterInventory, clearCenterInventory, inventory } = inventoryStore();
   const { user } = userStore();
   const { selectedCenter } = centersStore();
   const [drawerState, setDrawerState] = useState(false);
@@ -22,11 +22,11 @@ function Inventory() {
   const centerId = isAdmin ? selectedCenter : user?.center_id;
 
   useEffect(() => {
-    if (centerId && centerId !== 'all') {
-      getCenterInventory(centerId);
-    } else if (isAdmin && centerId === 'all') {
+    // Clear inventory when "all" is selected or center changes to invalid value
+    if (isAdmin && centerId === 'all') {
       clearCenterInventory();
     }
+    // Note: CenterInventoryList component handles its own data fetching with search/pagination
   }, [centerId, isAdmin]);
 
   const loadRequests = () => {
@@ -73,9 +73,7 @@ function Inventory() {
       {!centerId || centerId === 'all' ? (
         <div className="text-gray-500">Select a center to view inventory.</div>
       ) : (
-        <Skeleton loading={loading} active>
-          <CenterInventoryList />
-        </Skeleton>
+        <CenterInventoryList />
       )}
       <Drawer
         title="Requests"
