@@ -31,15 +31,26 @@ class InventoryService {
 
   /**
    * Get center-specific inventory (v2 - inventories are per-center)
+   * Supports search and pagination
    */
-  async getCenterInventory(centerId) {
+  async getCenterInventory(centerId, searchQuery = '', type = '', limit = 0, lastRef = 0) {
     try {
       const { selectedCenter } = centersStore.getState();
       const effectiveCenterId = centerId || selectedCenter;
 
       if (effectiveCenterId === 'all') return null;
 
-      const response = await get(`/v2/inventory/${effectiveCenterId}`);
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (searchQuery) params.append('searchQuery', searchQuery);
+      if (type) params.append('type', type);
+      if (limit) params.append('limit', limit.toString());
+      if (lastRef) params.append('lastRef', lastRef.toString());
+
+      const queryString = params.toString();
+      const url = `/v2/inventory/${effectiveCenterId}${queryString ? `?${queryString}` : ''}`;
+
+      const response = await get(url);
       if (!response || !response.data) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {

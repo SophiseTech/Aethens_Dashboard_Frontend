@@ -11,6 +11,7 @@ const inventoryStore = create((set, get) => ({
   lastRefKey: 0,
   total: 0,
   inventory: [],
+  inventoryTotal: 0,
   createLoading: false,
   searchResults: [],
   searchLastRefKey: 0,
@@ -64,13 +65,19 @@ const inventoryStore = create((set, get) => ({
 
   setSearchQuery: (query) => set({ searchQuery: query }),
 
-  // Get center-specific inventory (v2)
-  getCenterInventory: async (centerId) => {
+  // Get center-specific inventory (v2) with search and pagination
+  getCenterInventory: async (centerId, searchQuery = '', type = '', limit = 0, page = 1) => {
     try {
       set({ loading: true })
-      const inventory = await inventoryService.getCenterInventory(centerId)
-      if (inventory) {
-        set({ inventory })
+      const offset = limit > 0 ? (page - 1) * limit : 0;
+      const result = await inventoryService.getCenterInventory(centerId, searchQuery, type, limit, offset)
+      if (result) {
+        // Handle both old format (array) and new format (object with items and total)
+        if (Array.isArray(result)) {
+          set({ inventory: result, inventoryTotal: result.length })
+        } else {
+          set({ inventory: result.items || [], inventoryTotal: result.total || 0 })
+        }
       }
     } catch (error) {
       handleInternalError(error)
