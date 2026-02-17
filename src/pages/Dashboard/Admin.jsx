@@ -85,42 +85,42 @@ function Admin() {
           dateRange?.lastDay ? dayjs(dateRange.lastDay) : null,
         ]}
         onChange={handleDateChange}
-        className="w-1/2 border-primary text-primary"
+        className="w-full tablet:w-2/3 lg:w-1/2 border-primary text-primary"
       />
       <Row gutter={[20, 20]}>
-        <Col xxl={{ span: 6 }} span={12}>
+        <Col xs={24} sm={12} tablet={12} lg={12} xxl={6}>
           <StudentCounts />
         </Col>
-        <Col xxl={{ span: 6 }} span={12}>
+        <Col xs={24} sm={12} tablet={12} lg={12} xxl={6}>
           <Link to={"/manager/bills"}>
             <IncomeStat />
           </Link>
         </Col>
-        <Col xxl={{ span: 6 }} span={12}>
+        <Col xs={24} sm={12} tablet={12} lg={12} xxl={6}>
           <ExpenseStat />
         </Col>
-        <Col xxl={{ span: 6 }} span={12}>
+        <Col xs={24} sm={12} tablet={12} lg={12} xxl={6}>
           <Link to={"/manager/bills?status=unpaid"}>
             <DueStat />
           </Link>
         </Col>
       </Row>
       <Row gutter={[20, 20]}>
-        <Col span={14}>
+        <Col xs={24} tablet={24} lg={14}>
           <IncomeReport dateRange={dateRange} onDateRangeChange={setDateRange} />
         </Col>
-        <Col span={10}>
+        <Col xs={24} tablet={24} lg={10}>
           <IncomeChart />
         </Col>
       </Row>
       <Row gutter={[20, 20]}>
-        <Col span={8}>
+        <Col xs={24} tablet={24} lg={8}>
           <OverDurationStudents />
         </Col>
-        <Col span={8}>
+        <Col xs={24} tablet={24} lg={8}>
           <FeeReport dateRange={dateRange} />
         </Col>
-        <Col span={8}>
+        <Col xs={24} tablet={24} lg={8}>
           <StudentChart dateRange={dateRange} />
         </Col>
       </Row>
