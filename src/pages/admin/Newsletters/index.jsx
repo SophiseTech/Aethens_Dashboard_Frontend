@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Table, Button, Flex, Modal, Form, Input, message } from "antd";
+import { Table, Button, Flex, Modal, Image, Input, message } from "antd";
+import { useNavigate } from "react-router-dom";
 import Title from "@components/layouts/Title";
 import userStore from "@stores/UserStore";
 import permissions from "@utils/permissions";
@@ -8,13 +9,11 @@ import { useStore } from "zustand";
 
 function AdminNewsletters() {
   const { user } = useStore(userStore);
-  const [list, setList] = useState([]);
+  const navigate = useNavigate();
+  const [result, setResult] = useState({ newsletters: [], total: 0, page: 1, totalPages: 0 });
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [eventTypeFilter, setEventTypeFilter] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState(null);
-  const [form] = Form.useForm();
 
   const canView = permissions.adminNewsletter?.view?.includes(user?.role);
   const canAdd = permissions.adminNewsletter?.add?.includes(user?.role);
@@ -23,18 +22,19 @@ function AdminNewsletters() {
 
   useEffect(() => {
     if (canView) fetchList();
-  }, [canView, search, eventTypeFilter]);
+  }, [canView, result.page, search, eventTypeFilter]);
 
   const fetchList = async () => {
     try {
       setLoading(true);
-      const params = { limit: 100 };
+      const params = { page: result.page, limit: 10 };
       if (search?.trim()) params.search = search.trim();
       if (eventTypeFilter?.trim()) params.eventType = eventTypeFilter.trim();
       const res = await newsletterService.getAll(params);
       const data = res?.data ?? res;
       const newsletters = data?.newsletters ?? data?.data ?? (Array.isArray(data) ? data : []);
-      setList(Array.isArray(newsletters) ? newsletters : []);
+      const total = data?.total ?? newsletters?.length ?? 0;
+      setResult((r) => ({ ...r, newsletters, total, totalPages: data?.totalPages ?? Math.ceil(total / 10) }));
     } catch (e) {
       message.error("Failed to load newsletters");
     } finally {
@@ -43,37 +43,11 @@ function AdminNewsletters() {
   };
 
   const openCreate = () => {
-    setEditingRecord(null);
-    form.resetFields();
-    setModalOpen(true);
+    navigate("/admin/newsletters/create");
   };
 
   const openEdit = (record) => {
-    setEditingRecord(record);
-    form.setFieldsValue({
-      title: record.title,
-      author: record.author,
-      eventType: record.eventType,
-    });
-    setModalOpen(true);
-  };
-
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
-      if (editingRecord) {
-        await newsletterService.update(editingRecord._id, values);
-        message.success("Newsletter updated");
-      } else {
-        await newsletterService.create(values);
-        message.success("Newsletter created");
-      }
-      setModalOpen(false);
-      fetchList();
-    } catch (e) {
-      if (e.errorFields) return;
-      message.error(e?.message || "Request failed");
-    }
+    navigate(`/admin/newsletters/edit/${record._id}`);
   };
 
   const handleDelete = (record) => {
@@ -99,22 +73,42 @@ function AdminNewsletters() {
   }
 
   const columns = [
+    {
+      title: "Banner",
+      dataIndex: ["bannerImage", "url"],
+      key: "banner",
+      width: 80,
+      render: (imageUrl) => (
+        imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt="Newsletter banner"
+            width={50}
+            height={50}
+            className="object-cover rounded"
+            preview={{ src: imageUrl }}
+          />
+        ) : (
+          <span className="text-gray-400">No image</span>
+        )
+      ),
+    },
     { title: "Title", dataIndex: "title", key: "title", ellipsis: true },
     { title: "Author", dataIndex: "author", key: "author" },
-    { title: "Event type", dataIndex: "eventType", key: "eventType" },
+    { title: "Event Type", dataIndex: "eventType", key: "eventType" },
     ...(canEdit || canDelete
       ? [
-          {
-            title: "Actions",
-            key: "actions",
-            render: (_, rec) => (
-              <Flex gap={8}>
-                {canEdit && <Button size="small" onClick={() => openEdit(rec)}>Edit</Button>}
-                {canDelete && <Button size="small" danger onClick={() => handleDelete(rec)}>Delete</Button>}
-              </Flex>
-            ),
-          },
-        ]
+        {
+          title: "Actions",
+          key: "actions",
+          render: (_, rec) => (
+            <Flex gap={8}>
+              {canEdit && <Button size="small" onClick={() => openEdit(rec)}>Edit</Button>}
+              {canDelete && <Button size="small" danger onClick={() => handleDelete(rec)}>Delete</Button>}
+            </Flex>
+          ),
+        },
+      ]
       : []),
   ];
 
@@ -125,12 +119,12 @@ function AdminNewsletters() {
     >
       <Flex className="mb-4 gap-3 flex-wrap">
         <Input.Search
-          placeholder="Search by title"
+          placeholder="Search by title or author"
           allowClear
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          onSearch={fetchList}
-          style={{ width: 240 }}
+          onSearch={() => setResult((r) => ({ ...r, page: 1 }))}
+          style={{ width: 280 }}
         />
         <Input
           placeholder="Filter by event type"
@@ -139,28 +133,19 @@ function AdminNewsletters() {
           onChange={(e) => setEventTypeFilter(e.target.value)}
           style={{ width: 200 }}
         />
-        <Button type="primary" onClick={fetchList}>Apply</Button>
       </Flex>
-      <Table rowKey="_id" columns={columns} dataSource={list} loading={loading} pagination={{ pageSize: 10 }} />
-      <Modal
-        title={editingRecord ? "Edit Newsletter" : "Add Newsletter"}
-        open={modalOpen}
-        onOk={handleSubmit}
-        onCancel={() => setModalOpen(false)}
-        okText={editingRecord ? "Update" : "Create"}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="title" label="Title" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="author" label="Author" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="eventType" label="Event type">
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <Table
+        rowKey="_id"
+        columns={columns}
+        dataSource={result.newsletters}
+        loading={loading}
+        pagination={{
+          current: result.page,
+          pageSize: 10,
+          total: result.total,
+          onChange: (p) => setResult((r) => ({ ...r, page: p })),
+        }}
+      />
     </Title>
   );
 }

@@ -31,6 +31,7 @@ const AdminCenters = lazy(() => import("@pages/Admin/Centers"));
 const AdminBlogPosts = lazy(() => import("@pages/Admin/BlogPosts"));
 const EditBlogPost = lazy(() => import("@pages/Admin/BlogPosts/EditBlogPost"));
 const AdminNewsletters = lazy(() => import("@pages/Admin/Newsletters"));
+const EditNewsletter = lazy(() => import("@pages/Admin/Newsletters/EditNewsletter"));
 const AdminShopItems = lazy(() => import("@pages/Admin/ShopItems"));
 const AdminArtWorks = lazy(() => import("@pages/Admin/ArtWorks"));
 const AdminStudentOfTheWeek = lazy(() => import("@pages/Admin/StudentOfTheWeek"));
@@ -338,6 +339,24 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Newsletters",
+          },
+          {
+            path: "/admin/newsletters/create",
+            element: (
+              <LazyLoader>
+                <EditNewsletter />
+              </LazyLoader>
+            ),
+            title: "Create Newsletter",
+          },
+          {
+            path: "/admin/newsletters/edit/:id",
+            element: (
+              <LazyLoader>
+                <EditNewsletter />
+              </LazyLoader>
+            ),
+            title: "Edit Newsletter",
           },
           {
             path: "/admin/shop-items",
