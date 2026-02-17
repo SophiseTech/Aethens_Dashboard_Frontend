@@ -92,7 +92,7 @@ function AuditList({ onViewDetails, onConductAudit }) {
                             icon={<EditOutlined />}
                             onClick={() => onConductAudit(record)}
                             size="small"
-                            disabled={record.status === 'approved'}
+                            disabled={record.status === 'completed'}
                         >
                             Conduct
                         </Button>

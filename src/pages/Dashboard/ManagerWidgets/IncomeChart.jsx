@@ -61,6 +61,7 @@ function IncomeChart() {
         maxWidth: 160,
         style: {
           colors: "black",
+          fontSize: 'clamp(10px, 1.5vw, 12px)',
         },
         formatter: function (value) {
           // Format the label as a date (e.g., 'dd MMM yyyy')
@@ -80,6 +81,7 @@ function IncomeChart() {
         maxWidth: 200,
         style: {
           colors: "black",
+          fontSize: 'clamp(10px, 1.5vw, 12px)',
         },
         formatter: function (value) {
           return value?.toFixed(2);

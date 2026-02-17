@@ -7,11 +7,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 function AddToCenterModal() {
   const [open, setOpen] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [itemOverrides, setItemOverrides] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
   // Use individual selectors to prevent re-render loops
   const items = inventoryStore((state) => state.items);
+  const total = inventoryStore((state) => state.total);
   const getItems = inventoryStore((state) => state.getItems);
   const addItemToCenter = inventoryStore((state) => state.addItemToCenter);
   const loading = inventoryStore((state) => state.loading);
@@ -23,32 +27,62 @@ function AddToCenterModal() {
     [inventory]
   );
 
+  // Filter out items that already exist in the center's inventory
   const availableItems = useMemo(
     () => items.filter((item) => !existingItemIds.has(item._id?.toString())),
     [items, existingItemIds]
   );
 
-  const filteredItems = useMemo(() => {
-    if (!searchTerm?.trim()) return availableItems;
-    const term = searchTerm.toLowerCase();
-    return availableItems.filter(
-      (item) =>
-        item.name?.toLowerCase().includes(term) ||
-        (item.type && item.type.toLowerCase().includes(term))
-    );
-  }, [availableItems, searchTerm]);
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Fetch items when debounced search changes
+  useEffect(() => {
+    if (open) {
+      const filters = { sort: '-createdAt' };
+      if (debouncedSearch.trim()) {
+        filters.searchQuery = debouncedSearch;
+      }
+      // Reset to page 1 when search changes
+      setCurrentPage(1);
+      getItems(pageSize, filters, 1);
+    }
+  }, [debouncedSearch, open, pageSize, getItems]);
 
   useEffect(() => {
     if (open) {
       console.log('[AddToCenterModal] Modal opened, fetching items...');
-      getItems(200, { sort: '-createdAt' }, 1);
+      setCurrentPage(1);
       setSelectedRowKeys([]);
-      setSearchTerm('');
       setItemOverrides({});
+      setSearchQuery('');
+      setDebouncedSearch('');
     }
-  }, [open, getItems]);
+  }, [open]);
 
+  // Handle pagination change
+  const handlePaginationChange = (page, newPageSize) => {
+    setCurrentPage(page);
+    const filters = { sort: '-createdAt' };
+    if (debouncedSearch.trim()) {
+      filters.searchQuery = debouncedSearch;
+    }
 
+    if (newPageSize !== pageSize) {
+      setPageSize(newPageSize);
+      // When page size changes, reset to page 1
+      getItems(newPageSize, filters, 1);
+    } else {
+      // Fetch data for the new page
+      getItems(pageSize, filters, page);
+    }
+  };
 
   // Get the value for an item field (use override if exists, otherwise default)
   const getItemValue = (itemId, field, defaultValue) => {
@@ -68,7 +102,7 @@ function AddToCenterModal() {
 
   const handleAddSelected = async () => {
     if (!selectedRowKeys.length) return;
-    const toAdd = filteredItems.filter((item) => selectedRowKeys.includes(item._id));
+    const toAdd = availableItems.filter((item) => selectedRowKeys.includes(item._id));
     for (const item of toAdd) {
       await addItemToCenter({
         item_id: item._id,
@@ -198,18 +232,27 @@ function AddToCenterModal() {
       >
         <Flex vertical gap={12}>
           <Input.Search
-            placeholder="Search by name or type..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by name, type, category, or tags..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             allowClear
+            loading={loading}
           />
           <Table
             rowSelection={rowSelection}
             columns={columns}
-            dataSource={filteredItems}
+            dataSource={availableItems}
             rowKey="_id"
             loading={loading}
-            pagination={{ pageSize: 10 }}
+            pagination={{
+              current: currentPage,
+              pageSize: pageSize,
+              total: total,
+              showSizeChanger: true,
+              pageSizeOptions: ['10', '20', '50', '100'],
+              onChange: handlePaginationChange,
+              onShowSizeChange: handlePaginationChange,
+            }}
             size="small"
             scroll={{ x: 700 }}
           />

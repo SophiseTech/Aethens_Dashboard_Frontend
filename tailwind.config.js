@@ -6,6 +6,10 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        'tablet': '820px',
+        'tablet-max': { 'max': '1180px' },
+      },
       backgroundImage: {
         login: "url('/images/login_abstract.jpg')",
         cardGradient: "linear-gradient(45deg, #4F651E 0%, #82984E 56%, #B6C589 97%)",
