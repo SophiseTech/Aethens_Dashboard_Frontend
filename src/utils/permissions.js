@@ -11,7 +11,7 @@ const permissions = {
     delete: [ROLES.MANAGER]
   },
   activities: {
-    delete: [ROLES.FACULTY],
+    delete: [ROLES.ADMIN],
     add: [ROLES.FACULTY]
   },
   materials: {
@@ -56,6 +56,12 @@ const permissions = {
     addToCenter: [ROLES.MANAGER],
     request: [ROLES.MANAGER],
     approve: [ROLES.ADMIN]
+  },
+  session_status: {
+    delete: [ROLES.ADMIN]
+  },
+  fee_tracker: {
+    view: [ROLES.MANAGER, ROLES.ADMIN]
   }
 }
 

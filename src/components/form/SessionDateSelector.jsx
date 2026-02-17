@@ -4,6 +4,8 @@ import CustomDatePicker from '@components/form/CustomDatePicker';
 import dayjs from 'dayjs';
 import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { ROLES } from '@utils/constants';
+import userStore from '@stores/UserStore';
 
 const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -19,14 +21,15 @@ const formatSessionLabel = (session) => {
  * Render session option with availability details
  * Shows remaining slots and additional slots with color coding
  */
-export const sessionSlotOptionRenderer = (option) => {
+export const sessionSlotOptionRenderer = (option, user) => {
   const { data: session } = option.data;
   if (!session) return null;
 
-  const { remainingSlots = 0, additional = 0 } = session;
+  const { remainingSlots: regularRemainingSLots = 0, additional = 0, effectiveRemainingSlots: totalRemainingSlots = 0 } = session;
   const weekday = weekDays[session.weekDay];
   const time = dayjs(session.start_time).format('h:mm A');
-
+  const remainingSlots = user.role === ROLES.STUDENT ? totalRemainingSlots : regularRemainingSLots
+  
   // Determine color based on remaining slots
   let slotColor = 'green';
   if (remainingSlots <= 5) slotColor = 'orange';
@@ -49,7 +52,7 @@ export const sessionSlotOptionRenderer = (option) => {
         >
           {remainingSlots} slot{remainingSlots !== 1 ? 's' : ''} left
         </Tag>
-        {additional > 0 && (
+        {(additional > 0 && user.role === ROLES.MANAGER) && (
           <Tag
             color='gold'
             style={{
@@ -114,6 +117,7 @@ function SessionDateRow({
   // Format available sessions for Select component
   const formattedSessions = formatSessions(availableSessions);
   const selectedSessionData = formattedSessions.find(s => s.value === sessionValue);
+  const { user } = userStore()
 
   return (
     <Card
@@ -166,7 +170,9 @@ function SessionDateRow({
               filterOption={(inputValue, option) =>
                 option.label.toLowerCase().includes(inputValue.toLowerCase())
               }
-              optionRender={sessionSlotOptionRenderer}
+              optionRender={(option) => {
+                return sessionSlotOptionRenderer(option, user)
+              }}
               notFoundContent={
                 loading ? (
                   <div className="flex items-center gap-2 p-2">

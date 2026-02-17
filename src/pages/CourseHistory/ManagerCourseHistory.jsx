@@ -19,7 +19,7 @@ function CourseOptions({ course, onAction }) {
       onClick={({ key }) => onAction(key, course)}
       items={[
         { key: 'materials', icon: <FileTextOutlined />, label: 'View Materials', disabled: user.role === ROLES.FACULTY || user.role === ROLES.STUDENT },
-        { key: 'attendance', icon: <CalendarOutlined />, label: 'View Attendance', disabled: user.role === ROLES.MANAGER },
+        { key: 'attendance', icon: <CalendarOutlined />, label: 'View Attendance' },
         { key: 'remove', icon: <DeleteFilled />, label: 'Remove', disabled: user.role !== ROLES.MANAGER },
         // { key: 'certificate', icon: <DownloadOutlined />, label: 'Download Certificate' },
       ]}
@@ -103,6 +103,8 @@ function ManagerCourseHistory() {
         return nav(`/attendance/c/${course.course_id}`);
       } else if (user.role === ROLES.FACULTY) {
         return nav(`/faculty/attendance/${studentId}/c/${course.course_id}`);
+      } else if (user.role === ROLES.MANAGER) {
+        return nav(`/manager/attendance/${studentId}/c/${course.course_id}`);
       }
     } else if (actionKey === 'remove') {
       return studentService.deleteCourseHistory(course._id)

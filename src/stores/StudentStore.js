@@ -23,6 +23,7 @@ const studentStore = create((set, get) => ({
   todaysSessionAttendees: [],
   activeStudentSessions: {},
   projectOpenedStudents: [],
+  activeStudent: null,
   getStudentsByCenter: async (limit = 10, page = 1, status = null, courseId = null, fromBranch = null, toBranch = null) => {
     try {
       set({ loading: true });
@@ -275,6 +276,24 @@ const studentStore = create((set, get) => ({
       set({ loading: false });
     }
   },
+  getStudentById: async (userId, filters) => {
+    try {
+      set({ loading: true });
+      const response = await studentService.getUserById(userId, filters);
+      set({ activeStudent: response });
+    } catch (error) {
+      handleInternalError(error);
+    } finally {
+      set({ loading: false });
+    }
+  },
+  setActiveStudent: (student) => {
+    try {
+      set({ activeStudent: student })
+    } catch (error) {
+      handleInternalError(error)
+    }
+  }
 }));
 
 export default studentStore;

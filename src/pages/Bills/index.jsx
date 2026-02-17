@@ -12,6 +12,7 @@ import studentStore from '@stores/StudentStore'
 import userStore from '@stores/UserStore'
 import { ROLES } from '@utils/constants'
 import permissions from '@utils/permissions'
+import dayjs from 'dayjs'
 import _ from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -38,6 +39,9 @@ function Bills() {
     if (!bills || stateFilters?.query?.generated_for != student_id || bills.length <= 0 || user.role === 'admin') {
       let filters = _.cloneDeep(stateFilters);
       filters.query = filters.query || {};
+
+      // Only display bills generated till today (this will hide post dated installment bills)
+      filters.query.generated_on = {$lte: dayjs().endOf("month")}
 
       if (user.role === ROLES.STUDENT) {
         filters.query.generated_for = user._id

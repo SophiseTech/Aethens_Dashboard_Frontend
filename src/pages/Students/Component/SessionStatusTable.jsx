@@ -2,6 +2,7 @@ import { RestFilled } from '@ant-design/icons'
 import facultyRemarksStore from '@stores/FacultyRemarksStore'
 import courseStore from '@stores/CourseStore'
 import { formatDate } from '@utils/helper'
+import permissions from '@utils/permissions'
 import { Button, Image, Input, Select, Space, Table } from 'antd'
 import React, { useEffect, useState, useMemo } from 'react'
 import { useStore } from 'zustand'
@@ -121,7 +122,11 @@ function SessionStatusTable({ student }) {
         dataIndex: "action",
         key: "action",
         render: (_, record) => (
-          <Button icon={<RestFilled />} color='red' onClick={() => { deleteFacultyRemark(record._id) }} />
+           <>
+          {permissions.session_status.delete.includes(user?.role) &&
+            <Button icon={<RestFilled />} color='red' onClick={() => { deleteFacultyRemark(record._id) }} />
+          }
+          </>
         ),
       }
     );

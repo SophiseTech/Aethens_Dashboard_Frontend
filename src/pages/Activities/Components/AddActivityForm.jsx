@@ -10,13 +10,14 @@ import React from 'react'
 import { useLocation, useParams } from 'react-router-dom';
 import { useStore } from 'zustand';
 
-function AddActivityForm({ handleOk }) {
+function AddActivityForm({ handleOk, student, activityType }) {
   const [form] = Form.useForm();
   const selectedType = Form.useWatch("type", form)
   const { user } = useStore(userStore)
   const { id } = useParams()
   const { createLoading, loading } = useStore(activitiesStore)
   const { pathname } = useLocation()
+  const fileName = (activityType === 'Individual' && student?.username) ? `${student.username}_${new Date().toISOString()}` : null
 
   const initialValues = {
     type: "post",
@@ -35,7 +36,7 @@ function AddActivityForm({ handleOk }) {
     if (selectedType === "attachment" && values?.upload) {
       values.upload.map(file => (values.resource = {
         url: file.response,
-        fileName: file.name,
+        fileName: fileName || file.name,
         fileType: file.type?.split('/').pop() || "",
         fileSize: file.size
       }))
@@ -66,6 +67,7 @@ function AddActivityForm({ handleOk }) {
             maxCount={1}
             form={form}
             path={`uploads/activities/${id}`}
+            fileName={fileName}
             beforeUpload={(file) => {
               // Add custom validation logic here
               // const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';

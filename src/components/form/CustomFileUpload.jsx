@@ -28,7 +28,7 @@ function CustomFileUpload({ form, name, label, path, className = "", maxCount = 
           const fileUrls = await s3Service.uploadFiles({
             files: [{
               data: reader.result,
-              fileName: file.name,
+              fileName: props.fileName || file.name,
               fileType: file.type,
               path
             }]

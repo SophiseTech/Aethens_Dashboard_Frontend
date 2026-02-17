@@ -44,6 +44,7 @@ function StudentList() {
   const [selectedView, setSelectedView] = useState(initialView);
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [allCourses, setAllCourses] = useState([]);
+  const { setActiveStudent } = studentStore()
 
   // Temporary filter states (before Apply is clicked)
   const [tempFromBranch, setTempFromBranch] = useState(null);
@@ -162,6 +163,7 @@ function StudentList() {
 
   const handleNameClick = (record) => {
     setSelectedUser(record);
+    setActiveStudent(record)
     setDrawerVisible(true);
   };
 
@@ -313,20 +315,8 @@ function StudentList() {
       render: (date) => {
         return date ? <p>{new Date(date).toDateString()}</p> : <p>-</p>;
       },
-    }
-
-  ];
-
-  if (selectedView === "Current Students") {
-    columns.push(
-      {
-        title: "Status",
-        dataIndex: "isPresent",
-        render: (value) => <Chip type={value ? "success" : "danger"} label={value ? "Present" : "Absent"} glow={false} />
-      }
-    )
-  } else {
-    columns.push({
+    },
+    {
       title: "Attendance",
       dataIndex: "sessions_attended",
       render: (attendedCount, record) => {
@@ -339,7 +329,18 @@ function StudentList() {
           </p>
         );
       },
-    },)
+    }
+
+  ];
+
+  if (selectedView === "Current Students") {
+    columns.push(
+      {
+        title: "Status",
+        dataIndex: "isPresent",
+        render: (value) => <Chip type={value ? "success" : "danger"} label={value ? "Present" : "Absent"} glow={false} />
+      }
+    )
   }
 
   const handleTableChange = (pagination, filters) => {
