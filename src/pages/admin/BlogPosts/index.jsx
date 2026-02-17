@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Table, Button, Flex, Modal, Form, Input, InputNumber, Switch, message, Tag } from "antd";
+import { Table, Button, Flex, Modal, Image, Input, message, Tag } from "antd";
+import { useNavigate } from "react-router-dom";
 import Title from "@components/layouts/Title";
 import userStore from "@stores/UserStore";
 import permissions from "@utils/permissions";
@@ -8,12 +9,10 @@ import { useStore } from "zustand";
 
 function AdminBlogPosts() {
   const { user } = useStore(userStore);
+  const navigate = useNavigate();
   const [result, setResult] = useState({ posts: [], total: 0, page: 1, totalPages: 0 });
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState(null);
-  const [form] = Form.useForm();
 
   const canView = permissions.adminBlogPost?.view?.includes(user?.role);
   const canAdd = permissions.adminBlogPost?.add?.includes(user?.role);
@@ -42,40 +41,11 @@ function AdminBlogPosts() {
   };
 
   const openCreate = () => {
-    setEditingRecord(null);
-    form.resetFields();
-    setModalOpen(true);
+    navigate("/admin/blog-posts/create");
   };
 
   const openEdit = (record) => {
-    setEditingRecord(record);
-    form.setFieldsValue({
-      title: record.title,
-      author: record.author,
-      slug: record.slug,
-      readTime: record.readTime,
-      is_published: record.is_published,
-      image: record.image,
-    });
-    setModalOpen(true);
-  };
-
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
-      if (editingRecord) {
-        await blogService.update(editingRecord._id, values);
-        message.success("Blog post updated");
-      } else {
-        await blogService.create(values);
-        message.success("Blog post created");
-      }
-      setModalOpen(false);
-      fetchList();
-    } catch (e) {
-      if (e.errorFields) return;
-      message.error(e?.message || "Request failed");
-    }
+    navigate(`/admin/blog-posts/edit/${record._id}`);
   };
 
   const handleDelete = (record) => {
@@ -101,29 +71,43 @@ function AdminBlogPosts() {
   }
 
   const columns = [
+    {
+      title: "Image",
+      dataIndex: "image",
+      key: "image",
+      width: 80,
+      render: (imageUrl) => (
+        imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt="Blog thumbnail"
+            width={50}
+            height={50}
+            className="object-cover rounded"
+            preview={{ src: imageUrl }}
+          />
+        ) : (
+          <span className="text-gray-400">No image</span>
+        )
+      ),
+    },
     { title: "Title", dataIndex: "title", key: "title", ellipsis: true },
     { title: "Author", dataIndex: "author", key: "author" },
-    { title: "Slug", dataIndex: "slug", key: "slug", ellipsis: true },
-    { title: "Read (min)", dataIndex: "readTime", key: "readTime", width: 90 },
-    {
-      title: "Published",
-      dataIndex: "is_published",
-      key: "is_published",
-      render: (v) => <Tag color={v ? "green" : "default"}>{v ? "Yes" : "No"}</Tag>,
-    },
+    { title: "Read Time (min)", dataIndex: "readTime", key: "readTime", width: 120 },
+    { title: "Likes", dataIndex: "likes", key: "likes", width: 80 },
     ...(canEdit || canDelete
       ? [
-          {
-            title: "Actions",
-            key: "actions",
-            render: (_, rec) => (
-              <Flex gap={8}>
-                {canEdit && <Button size="small" onClick={() => openEdit(rec)}>Edit</Button>}
-                {canDelete && <Button size="small" danger onClick={() => handleDelete(rec)}>Delete</Button>}
-              </Flex>
-            ),
-          },
-        ]
+        {
+          title: "Actions",
+          key: "actions",
+          render: (_, rec) => (
+            <Flex gap={8}>
+              {canEdit && <Button size="small" onClick={() => openEdit(rec)}>Edit</Button>}
+              {canDelete && <Button size="small" danger onClick={() => handleDelete(rec)}>Delete</Button>}
+            </Flex>
+          ),
+        },
+      ]
       : []),
   ];
 
@@ -154,35 +138,6 @@ function AdminBlogPosts() {
           onChange: (p) => setResult((r) => ({ ...r, page: p })),
         }}
       />
-      <Modal
-        title={editingRecord ? "Edit Blog Post" : "Add Blog Post"}
-        open={modalOpen}
-        onOk={handleSubmit}
-        onCancel={() => setModalOpen(false)}
-        okText={editingRecord ? "Update" : "Create"}
-        width={520}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="title" label="Title" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="author" label="Author" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="slug" label="Slug" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="readTime" label="Read time (minutes)" rules={[{ required: true }]}>
-            <InputNumber min={1} className="w-full" />
-          </Form.Item>
-          <Form.Item name="image" label="Image URL">
-            <Input />
-          </Form.Item>
-          <Form.Item name="is_published" label="Published" valuePropName="checked">
-            <Switch />
-          </Form.Item>
-        </Form>
-      </Modal>
     </Title>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { Table, Button, Flex, Modal, Form, Input, Select, message, Tag } from "antd";
+import { Table, Button, Flex, Modal, Input, Select, message, Tag } from "antd";
+import { useNavigate } from "react-router-dom";
 import Title from "@components/layouts/Title";
 import userStore from "@stores/UserStore";
 import permissions from "@utils/permissions";
@@ -9,14 +10,12 @@ import { useStore } from "zustand";
 
 function AdminUsers() {
   const { user } = useStore(userStore);
+  const navigate = useNavigate();
   const [centers, setCenters] = useState([]);
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10 });
   const [filters, setFilters] = useState({ search: "", role: "", status: "", center_id: "" });
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState(null);
-  const [form] = Form.useForm();
 
   const canView = permissions.adminUsers?.view?.includes(user?.role);
   const canAdd = permissions.adminUsers?.add?.includes(user?.role);
@@ -59,42 +58,6 @@ function AdminUsers() {
 
   const handlePageChange = (page, pageSize) => {
     setPagination((p) => ({ ...p, page, limit: pageSize || p.limit }));
-  };
-
-  const openCreate = () => {
-    setEditingRecord(null);
-    form.resetFields();
-    setModalOpen(true);
-  };
-
-  const openEdit = (record) => {
-    setEditingRecord(record);
-    form.setFieldsValue({
-      username: record.username,
-      email: record.email,
-      role: record.role,
-      status: record.status,
-      center_id: record.center_id?._id ?? record.center_id,
-    });
-    setModalOpen(true);
-  };
-
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
-      if (editingRecord) {
-        await usersV2Service.update(editingRecord._id, values);
-        message.success("User updated");
-      } else {
-        await usersV2Service.create(values);
-        message.success("User created");
-      }
-      setModalOpen(false);
-      fetchUsers();
-    } catch (e) {
-      if (e.errorFields) return;
-      message.error(e?.message || "Request failed");
-    }
   };
 
   const handleDelete = (record) => {
@@ -143,17 +106,17 @@ function AdminUsers() {
     },
     ...(canEdit || canDelete
       ? [
-          {
-            title: "Actions",
-            key: "actions",
-            render: (_, record) => (
-              <Flex gap={8}>
-                {canEdit && <Button size="small" onClick={() => openEdit(record)}>Edit</Button>}
-                {canDelete && <Button size="small" danger onClick={() => handleDelete(record)}>Delete</Button>}
-              </Flex>
-            ),
-          },
-        ]
+        {
+          title: "Actions",
+          key: "actions",
+          render: (_, record) => (
+            <Flex gap={8}>
+              {canEdit && <Button size="small" onClick={() => navigate(`/admin/users/${record._id}`)}>Edit</Button>}
+              {canDelete && <Button size="small" danger onClick={() => handleDelete(record)}>Delete</Button>}
+            </Flex>
+          ),
+        },
+      ]
       : []),
   ];
 
@@ -162,7 +125,7 @@ function AdminUsers() {
       title="Users (Admin)"
       button={
         canAdd ? (
-          <Button type="primary" onClick={openCreate}>
+          <Button type="primary" onClick={() => navigate("/admin/users/new")}>
             Add User
           </Button>
         ) : null
@@ -227,41 +190,9 @@ function AdminUsers() {
           onChange: handlePageChange,
         }}
       />
-      <Modal
-        title={editingRecord ? "Edit User" : "Add User"}
-        open={modalOpen}
-        onOk={handleSubmit}
-        onCancel={() => setModalOpen(false)}
-        okText={editingRecord ? "Update" : "Create"}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="username" label="Name" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="email" label="Email" rules={[{ required: true, type: "email" }]}>
-            <Input disabled={!!editingRecord} />
-          </Form.Item>
-          {!editingRecord && (
-            <Form.Item name="password" label="Password" rules={[{ required: true, min: 6 }]}>
-              <Input.Password />
-            </Form.Item>
-          )}
-          <Form.Item name="role" label="Role" rules={[{ required: true }]}>
-            <Select options={[{ value: "student", label: "Student" }, { value: "faculty", label: "Faculty" }, { value: "manager", label: "Manager" }, { value: "admin", label: "Admin" }]} />
-          </Form.Item>
-          <Form.Item name="status" label="Status" rules={[{ required: true }]}>
-            <Select options={[{ value: "active", label: "Active" }, { value: "inactive", label: "Inactive" }]} />
-          </Form.Item>
-          <Form.Item name="center_id" label="Center" rules={[{ required: true }]}>
-            <Select
-              allowClear
-              options={centers?.map((c) => ({ value: c._id, label: c.center_name || c.location })) ?? []}
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
     </Title>
   );
 }
 
 export default AdminUsers;
+
