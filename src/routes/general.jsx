@@ -41,8 +41,10 @@ const EditStudentOfTheWeek = lazy(() => import("@pages/Admin/StudentOfTheWeek/Ed
 const AdminLatestVideos = lazy(() => import("@pages/Admin/LatestVideos"));
 const AdminCourses = lazy(() => import("@pages/AdminCourses"));
 const AdminUsers = lazy(() => import("@pages/Admin/Users"));
+const AdminEditUser = lazy(() => import("@pages/Admin/Users/EditUser"));
 const AdminCenters = lazy(() => import("@pages/Admin/Centers"));
 const AdminBlogPosts = lazy(() => import("@pages/Admin/BlogPosts"));
+const EditBlogPost = lazy(() => import("@pages/Admin/BlogPosts/EditBlogPost"));
 const AdminNewsletters = lazy(() => import("@pages/Admin/Newsletters"));
 const AdminShopItems = lazy(() => import("@pages/Admin/ShopItems"));
 const AdminArtWorks = lazy(() => import("@pages/Admin/ArtWorks"));
@@ -477,6 +479,24 @@ export const generalRoutes = [
             title: "Users",
           },
           {
+            path: "/admin/users/new",
+            element: (
+              <LazyLoader>
+                <AdminEditUser />
+              </LazyLoader>
+            ),
+            title: "Add User",
+          },
+          {
+            path: "/admin/users/:id",
+            element: (
+              <LazyLoader>
+                <AdminEditUser />
+              </LazyLoader>
+            ),
+            title: "Edit User",
+          },
+          {
             path: "/admin/centers",
             element: (
               <LazyLoader>
@@ -493,6 +513,24 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Blog Posts",
+          },
+          {
+            path: "/admin/blog-posts/create",
+            element: (
+              <LazyLoader>
+                <EditBlogPost />
+              </LazyLoader>
+            ),
+            title: "Create Blog Post",
+          },
+          {
+            path: "/admin/blog-posts/edit/:id",
+            element: (
+              <LazyLoader>
+                <EditBlogPost />
+              </LazyLoader>
+            ),
+            title: "Edit Blog Post",
           },
           {
             path: "/admin/newsletters",
