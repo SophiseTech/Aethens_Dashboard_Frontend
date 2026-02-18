@@ -33,8 +33,11 @@ const EditBlogPost = lazy(() => import("@pages/Admin/BlogPosts/EditBlogPost"));
 const AdminNewsletters = lazy(() => import("@pages/Admin/Newsletters"));
 const EditNewsletter = lazy(() => import("@pages/Admin/Newsletters/EditNewsletter"));
 const AdminShopItems = lazy(() => import("@pages/Admin/ShopItems"));
+const EditShopItem = lazy(() => import("@pages/Admin/ShopItems/EditShopItem"));
 const AdminArtWorks = lazy(() => import("@pages/Admin/ArtWorks"));
+const EditArtWork = lazy(() => import("@pages/Admin/ArtWorks/EditArtWork"));
 const AdminStudentOfTheWeek = lazy(() => import("@pages/Admin/StudentOfTheWeek"));
+const EditStudentOfTheWeek = lazy(() => import("@pages/Admin/StudentOfTheWeek/EditStudentOfTheWeek"));
 const AdminLatestVideos = lazy(() => import("@pages/Admin/LatestVideos"));
 
 const LazyLoader = ({ children }) => {
@@ -368,6 +371,24 @@ export const generalRoutes = [
             title: "Shop Items",
           },
           {
+            path: "/admin/shop-items/create",
+            element: (
+              <LazyLoader>
+                <EditShopItem />
+              </LazyLoader>
+            ),
+            title: "Create Shop Item",
+          },
+          {
+            path: "/admin/shop-items/edit/:id",
+            element: (
+              <LazyLoader>
+                <EditShopItem />
+              </LazyLoader>
+            ),
+            title: "Edit Shop Item",
+          },
+          {
             path: "/admin/art-works",
             element: (
               <LazyLoader>
@@ -377,6 +398,24 @@ export const generalRoutes = [
             title: "Art Works",
           },
           {
+            path: "/admin/art-works/create",
+            element: (
+              <LazyLoader>
+                <EditArtWork />
+              </LazyLoader>
+            ),
+            title: "Create Art Work",
+          },
+          {
+            path: "/admin/art-works/edit/:id",
+            element: (
+              <LazyLoader>
+                <EditArtWork />
+              </LazyLoader>
+            ),
+            title: "Edit Art Work",
+          },
+          {
             path: "/admin/student-of-the-week",
             element: (
               <LazyLoader>
@@ -384,6 +423,24 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Student of the Week",
+          },
+          {
+            path: "/admin/student-of-the-week/create",
+            element: (
+              <LazyLoader>
+                <EditStudentOfTheWeek />
+              </LazyLoader>
+            ),
+            title: "Add Student of the Week",
+          },
+          {
+            path: "/admin/student-of-the-week/edit/:id",
+            element: (
+              <LazyLoader>
+                <EditStudentOfTheWeek />
+              </LazyLoader>
+            ),
+            title: "Edit Student of the Week",
           },
           {
             path: "/admin/latest-videos",

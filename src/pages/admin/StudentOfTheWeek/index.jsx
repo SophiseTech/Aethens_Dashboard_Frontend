@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Table, Button, Flex, Modal, Form, Input, DatePicker, message } from "antd";
+import { useNavigate } from "react-router-dom";
+import { Table, Button, Flex, Modal, Image, Input, DatePicker, message } from "antd";
 import dayjs from "dayjs";
 import Title from "@components/layouts/Title";
 import userStore from "@stores/UserStore";
@@ -9,13 +10,11 @@ import { useStore } from "zustand";
 
 function AdminStudentOfTheWeek() {
   const { user } = useStore(userStore);
+  const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [dateRange, setDateRange] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState(null);
-  const [form] = Form.useForm();
 
   const canView = permissions.adminStudentOfTheWeek?.view?.includes(user?.role);
   const canAdd = permissions.adminStudentOfTheWeek?.add?.includes(user?.role);
@@ -44,41 +43,6 @@ function AdminStudentOfTheWeek() {
     }
   };
 
-  const openCreate = () => {
-    setEditingRecord(null);
-    form.resetFields();
-    setModalOpen(true);
-  };
-
-  const openEdit = (record) => {
-    setEditingRecord(record);
-    const sid = record.student_id?._id ?? record.student_id;
-    form.setFieldsValue({
-      body: record.body,
-      image: record.image,
-      student_id: sid,
-    });
-    setModalOpen(true);
-  };
-
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
-      if (editingRecord) {
-        await studentOfTheWeekService.update(editingRecord._id, values);
-        message.success("Updated");
-      } else {
-        await studentOfTheWeekService.create(values);
-        message.success("Created");
-      }
-      setModalOpen(false);
-      fetchList();
-    } catch (e) {
-      if (e.errorFields) return;
-      message.error(e?.message || "Request failed");
-    }
-  };
-
   const handleDelete = (record) => {
     Modal.confirm({
       title: "Delete student of the week?",
@@ -101,29 +65,65 @@ function AdminStudentOfTheWeek() {
   }
 
   const columns = [
+    {
+      title: "Image",
+      key: "image",
+      width: 80,
+      render: (_, r) =>
+        r.image ? (
+          <Image
+            src={r.image}
+            alt="Student"
+            width={50}
+            height={50}
+            style={{ objectFit: "cover", borderRadius: 4 }}
+            fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN88P/BfwAJhAPkEl0jSAAAAABJRU5ErkJggg=="
+          />
+        ) : (
+          "—"
+        ),
+    },
     { title: "Body", dataIndex: "body", key: "body", ellipsis: true },
-    { title: "Student ID", dataIndex: "student_id", key: "student_id", render: (v) => (typeof v === "object" ? v?._id ?? "—" : v) },
-    { title: "Awarded at", dataIndex: "awarded_at", key: "awarded_at", render: (v) => v ? new Date(v).toLocaleDateString() : "—" },
+    {
+      title: "Student",
+      dataIndex: "student_id",
+      key: "student_id",
+      render: (v) => (typeof v === "object" ? v?.username || v?.name || "—" : v || "—"),
+    },
+    {
+      title: "Awarded at",
+      dataIndex: "awarded_at",
+      key: "awarded_at",
+      render: (v) => v ? new Date(v).toLocaleDateString() : "—",
+    },
     ...(canEdit || canDelete
       ? [
-          {
-            title: "Actions",
-            key: "actions",
-            render: (_, rec) => (
-              <Flex gap={8}>
-                {canEdit && <Button size="small" onClick={() => openEdit(rec)}>Edit</Button>}
-                {canDelete && <Button size="small" danger onClick={() => handleDelete(rec)}>Delete</Button>}
-              </Flex>
-            ),
-          },
-        ]
+        {
+          title: "Actions",
+          key: "actions",
+          render: (_, rec) => (
+            <Flex gap={8}>
+              {canEdit && (
+                <Button size="small" onClick={() => navigate(`/admin/student-of-the-week/edit/${rec._id}`)}>
+                  Edit
+                </Button>
+              )}
+              {canDelete && (
+                <Button size="small" danger onClick={() => handleDelete(rec)}>
+                  Delete
+                </Button>
+              )}
+            </Flex>
+          ),
+        },
+      ]
       : []),
   ];
 
   return (
     <Title
       title="Student of the Week (Admin)"
-      button={canAdd ? <Button type="primary" onClick={openCreate}>Add</Button> : null}
+      button={canAdd ? <Button type="primary" onClick={() => navigate("/admin/student-of-the-week/create")}>Add</Button> : null}
     >
       <Flex className="mb-4 gap-3 flex-wrap">
         <Input.Search
@@ -142,27 +142,10 @@ function AdminStudentOfTheWeek() {
         <Button type="primary" onClick={fetchList}>Apply</Button>
       </Flex>
       <Table rowKey="_id" columns={columns} dataSource={list} loading={loading} pagination={{ pageSize: 10 }} />
-      <Modal
-        title={editingRecord ? "Edit" : "Add Student of the Week"}
-        open={modalOpen}
-        onOk={handleSubmit}
-        onCancel={() => setModalOpen(false)}
-        okText={editingRecord ? "Update" : "Create"}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="body" label="Body" rules={[{ required: true }]}>
-            <Input.TextArea rows={3} />
-          </Form.Item>
-          <Form.Item name="image" label="Image URL" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="student_id" label="Student ID (Mongo ObjectId)" rules={[{ required: true }]}>
-            <Input placeholder="User _id of the student" />
-          </Form.Item>
-        </Form>
-      </Modal>
     </Title>
   );
 }
 
 export default AdminStudentOfTheWeek;
+
+

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Table, Button, Flex, Modal, Form, Input, message } from "antd";
+import { useNavigate } from "react-router-dom";
+import { Table, Button, Flex, Modal, Image, message } from "antd";
 import Title from "@components/layouts/Title";
 import userStore from "@stores/UserStore";
 import permissions from "@utils/permissions";
@@ -8,11 +9,9 @@ import { useStore } from "zustand";
 
 function AdminArtWorks() {
   const { user } = useStore(userStore);
+  const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState(null);
-  const [form] = Form.useForm();
 
   const canView = permissions.adminArtWork?.view?.includes(user?.role);
   const canAdd = permissions.adminArtWork?.add?.includes(user?.role);
@@ -33,56 +32,6 @@ function AdminArtWorks() {
       message.error("Failed to load art works");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const openCreate = () => {
-    setEditingRecord(null);
-    form.resetFields();
-    setModalOpen(true);
-  };
-
-  const openEdit = (record) => {
-    setEditingRecord(record);
-    const artist = record.artist || {};
-    form.setFieldsValue({
-      subtitle: record.subtitle,
-      shortDescription: record.shortDescription,
-      longDescription: record.longDescription,
-      slug: record.slug,
-      artistName: artist.name,
-      artistAge: artist.age,
-      artistCourse: artist.course,
-    });
-    setModalOpen(true);
-  };
-
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
-      const payload = {
-        subtitle: values.subtitle,
-        shortDescription: values.shortDescription,
-        longDescription: values.longDescription,
-        slug: values.slug,
-        artist: {
-          name: values.artistName,
-          age: values.artistAge,
-          course: values.artistCourse,
-        },
-      };
-      if (editingRecord) {
-        await artWorkService.update(editingRecord._id, payload);
-        message.success("Art work updated");
-      } else {
-        await artWorkService.create(payload);
-        message.success("Art work created");
-      }
-      setModalOpen(false);
-      fetchList();
-    } catch (e) {
-      if (e.errorFields) return;
-      message.error(e?.message || "Request failed");
     }
   };
 
@@ -109,6 +58,24 @@ function AdminArtWorks() {
   }
 
   const columns = [
+    {
+      title: "Image",
+      key: "artImage",
+      width: 80,
+      render: (_, r) =>
+        r.artImage ? (
+          <Image
+            src={r.artImage}
+            alt={r.subtitle || "Art work"}
+            width={50}
+            height={50}
+            style={{ objectFit: "cover", borderRadius: 4 }}
+            fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN88P/BfwAJhAPkEl0jSAAAAABJRU5ErkJggg=="
+          />
+        ) : (
+          "—"
+        ),
+    },
     { title: "Subtitle", dataIndex: "subtitle", key: "subtitle", ellipsis: true },
     {
       title: "Artist",
@@ -118,58 +85,34 @@ function AdminArtWorks() {
     { title: "Slug", dataIndex: "slug", key: "slug", ellipsis: true },
     ...(canEdit || canDelete
       ? [
-          {
-            title: "Actions",
-            key: "actions",
-            render: (_, rec) => (
-              <Flex gap={8}>
-                {canEdit && <Button size="small" onClick={() => openEdit(rec)}>Edit</Button>}
-                {canDelete && <Button size="small" danger onClick={() => handleDelete(rec)}>Delete</Button>}
-              </Flex>
-            ),
-          },
-        ]
+        {
+          title: "Actions",
+          key: "actions",
+          render: (_, rec) => (
+            <Flex gap={8}>
+              {canEdit && (
+                <Button size="small" onClick={() => navigate(`/admin/art-works/edit/${rec._id}`)}>
+                  Edit
+                </Button>
+              )}
+              {canDelete && (
+                <Button size="small" danger onClick={() => handleDelete(rec)}>
+                  Delete
+                </Button>
+              )}
+            </Flex>
+          ),
+        },
+      ]
       : []),
   ];
 
   return (
     <Title
       title="Art Works (Admin)"
-      button={canAdd ? <Button type="primary" onClick={openCreate}>Add Art Work</Button> : null}
+      button={canAdd ? <Button type="primary" onClick={() => navigate("/admin/art-works/create")}>Add Art Work</Button> : null}
     >
       <Table rowKey="_id" columns={columns} dataSource={list} loading={loading} pagination={{ pageSize: 10 }} />
-      <Modal
-        title={editingRecord ? "Edit Art Work" : "Add Art Work"}
-        open={modalOpen}
-        onOk={handleSubmit}
-        onCancel={() => setModalOpen(false)}
-        okText={editingRecord ? "Update" : "Create"}
-        width={560}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="subtitle" label="Subtitle">
-            <Input />
-          </Form.Item>
-          <Form.Item name="slug" label="Slug" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="shortDescription" label="Short description" rules={[{ required: true }]}>
-            <Input.TextArea rows={2} />
-          </Form.Item>
-          <Form.Item name="longDescription" label="Long description" rules={[{ required: true }]}>
-            <Input.TextArea rows={3} />
-          </Form.Item>
-          <Form.Item name="artistName" label="Artist name" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="artistAge" label="Artist age">
-            <Input type="number" />
-          </Form.Item>
-          <Form.Item name="artistCourse" label="Artist course">
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
     </Title>
   );
 }
