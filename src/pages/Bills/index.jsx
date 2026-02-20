@@ -22,7 +22,7 @@ import { useStore } from 'zustand'
 function Bills() {
 
   const { getBills, bills, loading, createBill, total, getInvoiceNo, invoiceNo, center_initial, filters: stateFilters } = billStore()
-  const { getItems, searhcItems } = inventoryStore()
+  const { getItems } = inventoryStore()
   const { getStudentsByCenter, total: studentTotal, students } = studentStore()
   const [searchParams, setSearchParams] = useSearchParams();
   const student_id = searchParams.get("student_id")
@@ -86,26 +86,48 @@ function Bills() {
     if (!invoiceNo || invoiceNo === 0 || user.role === ROLES.ADMIN) {
       user.role === ROLES.ADMIN ? getInvoiceNo(centerId) : getInvoiceNo();
     }
-    if (itemType === "materials") {
-      const { items } = await inventoryService.getInventoryItems(0, 10, { query: { type: "materials" } }, centerId)
-      setLineItems(items)
-      // setLneItemSearchFunction(searhcItems)
+
+    // Determine which center to fetch items from
+    const effectiveCenterId = centerId || user?.center_id;
+
+    if (itemType === "materials" && effectiveCenterId) {
+      // Fetch from center's inventory (only items available in this center)
+      const response = await inventoryService.getCenterInventoryItems(effectiveCenterId, 0, 200, { type: "materials" })
+      if (response?.items) {
+        // Map center inventory records to item format for the bill form
+        const mappedItems = response.items.map(record => ({
+          ...record.item_id,
+          rate: record.rate,
+          discount: record.discount,
+          taxes: record.tax,
+          quantity: record.quantity,
+          type: record.type,
+        }))
+        setLineItems(mappedItems)
+      }
     }
     if (itemType === "course") {
       const { courses } = await courseService.getCourses({}, 0, 0)
       setLineItems([...courses?.map(course => ({ name: course.course_name, _id: course._id, type: "course", rate: course.rate, discount: 0, taxes: 18 })), { name: "Registration Fee", _id: "67c00eb2073609b23054ca01", type: "course", rate: 3500, discount: 0, taxes: 18 }])
     }
-    if (itemType === "gallery") {
-      const { items } = await inventoryService.getInventoryItems(0, 10, { query: { type: "gallery" } }, centerId)
-      setLineItems(items)
-      // setLneItemSearchFunction(searhcItems)
+    if (itemType === "gallery" && effectiveCenterId) {
+      // Fetch from center's inventory (only gallery items available in this center)
+      const response = await inventoryService.getCenterInventoryItems(effectiveCenterId, 0, 200, { type: "gallery" })
+      if (response?.items) {
+        const mappedItems = response.items.map(record => ({
+          ...record.item_id,
+          rate: record.rate,
+          discount: record.discount,
+          taxes: record.tax,
+          quantity: record.quantity,
+          type: record.type,
+        }))
+        setLineItems(mappedItems)
+      }
     }
     if (studentTotal === 0 || students.length < studentTotal || user.role === ROLES.ADMIN) {
       getStudentsByCenter(0)
     }
-    // if (courseTotal === 0 || courses.length < courseTotal) {
-    //   getCourses(0)
-    // }
   }
 
   const customerOptions = useMemo(() => students?.map(item => ({ label: item.username, value: item._id, data: item?.wallet })), [students])
@@ -116,29 +138,54 @@ function Bills() {
   }
 
   const handleSearch = async (value, itemType) => {
+    const effectiveCenterId = selectedCenter || user?.center_id;
+    if (!effectiveCenterId) return;
+
     if (itemType === "materials") {
-      const { items } = await inventoryService.getInventoryItems(
+      const response = await inventoryService.getCenterInventoryItems(
+        effectiveCenterId,
         0,
-        value === "" ? 10 : 0,
-        { searchQuery: value, query: { type: "materials" } }
+        value === "" ? 200 : 0,
+        { searchQuery: value, type: "materials" }
       )
-      setLineItems(items)
+      if (response?.items) {
+        const mappedItems = response.items.map(record => ({
+          ...record.item_id,
+          rate: record.rate,
+          discount: record.discount,
+          taxes: record.tax,
+          quantity: record.quantity,
+          type: record.type,
+        }))
+        setLineItems(mappedItems)
+      }
       return
     }
     if (itemType === "gallery") {
-      const { items } = await inventoryService.getInventoryItems(
+      const response = await inventoryService.getCenterInventoryItems(
+        effectiveCenterId,
         0,
-        value === "" ? 10 : 0,
-        { searchQuery: value, query: { type: "gallery" } }
+        value === "" ? 200 : 0,
+        { searchQuery: value, type: "gallery" }
       )
-      setLineItems(items)
+      if (response?.items) {
+        const mappedItems = response.items.map(record => ({
+          ...record.item_id,
+          rate: record.rate,
+          discount: record.discount,
+          taxes: record.tax,
+          quantity: record.quantity,
+          type: record.type,
+        }))
+        setLineItems(mappedItems)
+      }
       return
     }
   }
 
   return (
     <Title title={"Bills"} button={
-      permissions.bills.add.includes(user.role) &&
+      permissions.bills?.add?.includes(user?.role) &&
       <GenerateBillButton
         // itemsOptions={itemsOptions}
         customersOptions={customerOptions}

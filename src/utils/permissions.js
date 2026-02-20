@@ -32,6 +32,31 @@ const permissions = {
     edit: [ROLES.MANAGER, ROLES.ADMIN],
     delete: [ROLES.MANAGER, ROLES.ADMIN]
   },
+  targets: {
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN],
+    view: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  audits: {
+    create: [ROLES.ADMIN],
+    view: [ROLES.MANAGER, ROLES.ADMIN],
+    update: [ROLES.MANAGER, ROLES.ADMIN],
+    delete: [ROLES.ADMIN],
+    view_discrepancy: [ROLES.ADMIN]
+  },
+  inventoryItems: {
+    create: [ROLES.ADMIN],
+    view: [ROLES.MANAGER, ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN]
+  },
+  inventory: {
+    view: [ROLES.MANAGER, ROLES.ADMIN],
+    addToCenter: [ROLES.MANAGER],
+    request: [ROLES.MANAGER],
+    approve: [ROLES.ADMIN]
+  },
   session_status: {
     delete: [ROLES.ADMIN]
   },

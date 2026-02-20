@@ -133,6 +133,20 @@ class StudentService {
     }
   }
 
+  async getOverDurationStudents({ center_id, limit = 50, skip = 0 } = {}) {
+    try {
+      const response = await post(`/student/over-duration`, {
+        center_id,
+        limit,
+        skip,
+      });
+      if (!response) throw new Error("An error occured. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
   async addRemarks(studentId, payload) {
     return Promise.resolve({ success: true });
     // return post(`/students/${studentId}/remarks`, payload);

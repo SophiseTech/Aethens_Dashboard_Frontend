@@ -7,15 +7,15 @@ import { get, post } from "@utils/Requests"
 class AttendanceService {
 
   constructPath(path, centerVariable) {
-    const {user} = userStore.getState();
-    const {selectedCenter} = centersStore.getState();
+    const { user } = userStore.getState();
+    const { selectedCenter } = centersStore.getState();
 
-    if( user.role === 'admin' && selectedCenter){
+    if (user.role === 'admin' && selectedCenter) {
       return `${path}?${centerVariable}=${selectedCenter}&`
-    }else if( user.role === ROLES.MANAGER){
+    } else if (user.role === ROLES.MANAGER) {
       return `${path}?${centerVariable}=${user.center_id}&`
     }
-    else{
+    else {
       return `${path}?`;
     }
   }
@@ -70,34 +70,24 @@ class AttendanceService {
     }
   }
 
+  async getAttendanceRegister({ center_id, course_id, month, year, page, limit }) {
+    try {
+      const response = await post('/attendance/register', {
+        center_id,
+        course_id,
+        month,
+        year,
+        page,
+        limit
+      })
+      if (!response) throw new Error("An error occured. Please try again")
+      return response?.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
 }
 
 const attendanceService = new AttendanceService()
 export default attendanceService
-
-const dummyRecords = [
-  {
-    date: new Date("2025-01-01T08:00:00.000Z"),
-    status: "present",
-  },
-  {
-    date: new Date("2025-01-02T08:00:00.000Z"),
-    status: "absent",
-  },
-  {
-    date: new Date("2025-01-03T08:00:00.000Z"),
-    status: "excused",
-  },
-  {
-    date: new Date("2025-01-04T08:00:00.000Z"),
-    status: "present",
-  },
-  {
-    date: new Date("2025-01-05T08:00:00.000Z"),
-    status: "absent",
-  },
-  {
-    date: new Date("2025-01-06T08:00:00.000Z"),
-    status: "absent",
-  },
-];

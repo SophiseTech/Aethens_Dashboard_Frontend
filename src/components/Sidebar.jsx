@@ -17,6 +17,7 @@ import {
   MessageOutlined,
   CheckSquareOutlined,
   BellOutlined,
+  AuditOutlined,
 } from "@ant-design/icons";
 
 import Book from "@/assets/Book";
@@ -50,6 +51,12 @@ const MENU_CONFIG = [
     label: "Enquiry Slots",
     icon: MessageOutlined,
     path: "/manager/enquiry-slots",
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
+  },
+  {
+    label: "Targets",
+    icon: Target,
+    path: "/manager/targets",
     roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
@@ -95,6 +102,18 @@ const MENU_CONFIG = [
     roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
+    label: "Inventory Items",
+    icon: ShopOutlined,
+    path: "/manager/inventory-items",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Audits",
+    icon: AuditOutlined,
+    path: "/manager/audits",
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
+  },
+  {
     label: "Payslips",
     icon: MoneyCollectOutlined,
     path: "/manager/payslips",
@@ -123,6 +142,30 @@ const MENU_CONFIG = [
     icon: FundProjectionScreenOutlined,
     path: "/faculty/faculty-development-program",
     roles: [ROLES.FACULTY],
+  },
+  {
+    label: "My Attendance",
+    icon: CheckSquareOutlined,
+    path: "/faculty/my-attendance",
+    roles: [ROLES.FACULTY],
+  },
+  {
+    label: "My Leaves",
+    icon: CalendarOutlined,
+    path: "/faculty/my-leaves",
+    roles: [ROLES.FACULTY],
+  },
+  {
+    label: "Faculty Attendance",
+    icon: ClockCircleOutlined,
+    path: "/admin/faculty-attendance",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Manage Leaves",
+    icon: CheckSquareOutlined,
+    path: "/admin/manage-leaves",
+    roles: [ROLES.ADMIN],
   },
   {
     label: "Attendance",
@@ -173,6 +216,18 @@ const MENU_CONFIG = [
     roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
+    label: "Syllabus Gallery",
+    icon: PictureOutlined,
+    path: "/admin/syllabus-gallery",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Courses",
+    icon: BookOutlined,
+    path: "/admin/courses",
+    roles: [ROLES.ADMIN],
+  },
+  {
     label: "Announcements",
     icon: ClockCircleOutlined,
     path: "/student/announcements",
@@ -194,6 +249,12 @@ const MENU_CONFIG = [
     label: "Tasks",
     icon: CheckSquareOutlined,
     path: "/manager/tasks",
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
+  },
+  {
+    label: "Attendance Register",
+    icon: CheckSquareOutlined,
+    path: "/manager/attendance-register",
     roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
 ];
@@ -310,7 +371,8 @@ function Sidebar({ children }) {
   const isActive = useCallback(
     (path) => {
       if (path === "/") return pathname === "/";
-      return pathname.startsWith(path);
+      // Exact match or followed by a slash (to avoid /manager/inventory matching /manager/inventory-items)
+      return pathname === path || pathname.startsWith(path + "/");
     },
     [pathname]
   );

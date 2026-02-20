@@ -9,12 +9,15 @@ import PropTypes from "prop-types";
 
 const Students = lazy(() => import("@pages/Students"))
 const Enquiries = lazy(() => import("@pages/Enquiries"))
+const Targets = lazy(() => import("@pages/Targets"))
 const Wallets = lazy(() => import("@pages/Wallets/index.jsx"))
 const Remarks = lazy(() => import("@pages/Remarks/index.jsx"))
 const EnquirySlots = lazy(() => import("@pages/EnquirySlots"))
 const Bills = lazy(() => import("@pages/Bills"));
 const BillDetails = lazy(() => import("@pages/Bills/Components/BillDetails"));
 const Inventory = lazy(() => import("@pages/Inventory"));
+const InventoryItems = lazy(() => import("@pages/InventoryItems"));
+const Audits = lazy(() => import("@pages/Audits"));
 const PayslipDetails = lazy(() => import("@pages/Payslips/components/PayslipDetails"));
 const ManagerPayslips = lazy(() => import("@pages/Payslips/Manager"));
 const ManagerFacultyDevelopmentProgram = lazy(() => import("@pages/FacultyDevelopmentProgram/Manager"));
@@ -30,6 +33,8 @@ const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"))
 const FinalProjectStudentView = lazy(() => import("@pages/FinalProject/Components/FinalProjectStudentView"))
 const Tasks = lazy(() => import("@pages/Tasks"))
 const Holidays = lazy(() => import("@pages/Holidays"))
+const AttendanceRegister = lazy(() => import("@pages/AttendanceRegister"))
+const SyllabusGallery = lazy(() => import("@pages/SyllabusGallery"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -79,9 +84,24 @@ export const managerRoutes = [
             title: "Enquiry Slots"
           },
           {
+            path: "/manager/targets",
+            element: <LazyLoader element={<Targets />} />,
+            title: "Targets"
+          },
+          {
             path: "/manager/inventory",
             element: <LazyLoader element={<Inventory />} />,
             title: "Inventory"
+          },
+          {
+            path: "/manager/inventory-items",
+            element: <LazyLoader element={<InventoryItems />} />,
+            title: "Inventory Items"
+          },
+          {
+            path: "/manager/audits",
+            element: <LazyLoader element={<Audits />} />,
+            title: "Audits"
           },
           {
             path: "/manager/materials",
@@ -188,6 +208,16 @@ export const managerRoutes = [
             path: "/manager/tasks",
             element: <LazyLoader element={<Tasks />} />,
             title: "Tasks",
+          },
+          {
+            path: "/manager/attendance-register",
+            element: <LazyLoader element={<AttendanceRegister />} />,
+            title: "Attendance Register",
+          },
+          {
+            path: "/admin/syllabus-gallery",
+            element: <LazyLoader element={<SyllabusGallery />} />,
+            title: "Syllabus Gallery",
           },
         ]
       }

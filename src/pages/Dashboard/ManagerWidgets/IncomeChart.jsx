@@ -45,8 +45,8 @@ function IncomeChart() {
   const options = {
     chart: {
       type: "line",
-      width: "100%",
-      height: "auto",
+      // width: "100%",
+      // height: "auto",
       toolbar: {
         show: false,
       },
@@ -61,6 +61,7 @@ function IncomeChart() {
         maxWidth: 160,
         style: {
           colors: "black",
+          fontSize: 'clamp(10px, 1.5vw, 12px)',
         },
         formatter: function (value) {
           // Format the label as a date (e.g., 'dd MMM yyyy')
@@ -80,6 +81,7 @@ function IncomeChart() {
         maxWidth: 200,
         style: {
           colors: "black",
+          fontSize: 'clamp(10px, 1.5vw, 12px)',
         },
         formatter: function (value) {
           return value?.toFixed(2);
@@ -106,9 +108,9 @@ function IncomeChart() {
       show: true,
       borderColor: "#ccc",
       strokeDashArray: 2,
-      padding: {
-        right: 90
-      }
+      // padding: {
+      //   right: 90
+      // }
     },
   }
 

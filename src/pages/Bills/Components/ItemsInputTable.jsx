@@ -17,7 +17,7 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
       width: '30%',
       editable: true,
       type: "autocomplete",
-      render: (value, record) => record.itemName,
+      render: (value, record) => record.itemName || items?.find(i => i._id === record.name)?.name || value,
       onSearch: (value) => { onSearch(value, itemType) },
       itemType: itemType,
       options: itemsOptions,
@@ -106,7 +106,7 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
   // Called wehn an item is selected in the items dropdown
   const onItemsChange = (value, index, option) => {
     console.log(value, option);
-    
+
     const item = items?.find(item => item._id === value)
     if (item) {
       // Update the dependend field with selected item values
@@ -152,7 +152,7 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
           const unitExTax = taxRate === 0 ? unitAfterDiscount : Number((unitAfterDiscount / (1 + (taxRate / 100))).toFixed(6))
           console.log(unitExTax)
           subtotal = Number((unitExTax * qty).toFixed(2))
-          taxAmnt = Number(( (unitAfterDiscount * qty) - subtotal ).toFixed(2))
+          taxAmnt = Number(((unitAfterDiscount * qty) - subtotal).toFixed(2))
           total = Number((unitAfterDiscount * qty).toFixed(2))
         }
 

@@ -4,19 +4,26 @@ import EditInventoryItem from '@pages/Inventory/Components/EditInventoryItem';
 import inventoryStore from '@stores/InventoryStore';
 import { groupByField } from '@utils/helper';
 import centersStore from '@stores/CentersStore';
-import { useStore } from 'zustand';
 import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
 
 const { Search } = Input
 
 function InventoryList() {
-  const { loading, items, getItems, total, searhcItems, searchResults, searchQuery, setSearchQuery, searchTotal } = inventoryStore();
+  const loading = inventoryStore((state) => state.loading);
+  const items = inventoryStore((state) => state.items);
+  const getItems = inventoryStore((state) => state.getItems);
+  const total = inventoryStore((state) => state.total);
+  const searchItems = inventoryStore((state) => state.searchItems);
+  const searchResults = inventoryStore((state) => state.searchResults);
+  const searchQuery = inventoryStore((state) => state.searchQuery);
+  const setSearchQuery = inventoryStore((state) => state.setSearchQuery);
+  const searchTotal = inventoryStore((state) => state.searchTotal);
   const [selectedTab, setSelectedTab] = useState('materials');
   const [editItem, setEditItem] = useState({});
   const [searchTerm, setSearchTerm] = useState("")
-  const { selectedCenter } = centersStore();
-  const {user} = useStore(userStore);
+  const selectedCenter = centersStore((state) => state.selectedCenter);
+  const user = userStore((state) => state.user);
 
   const columns = [
     {
@@ -25,23 +32,18 @@ function InventoryList() {
       key: 'inventory_name',
     },
     {
-      title: 'Quantity',
-      dataIndex: 'quantity',
-      key: 'inventory_qty',
-    },
-    {
-      title: 'Rate (₹)',
-      dataIndex: 'rate',
+      title: 'Default Rate (₹)',
+      dataIndex: 'default_rate',
       key: 'inventory_rate',
     },
     {
-      title: 'Discount (₹)',
-      dataIndex: 'discount',
+      title: 'Default Discount (₹)',
+      dataIndex: 'default_discount',
       key: 'inventory_discount',
     },
     {
-      title: 'Tax (%)',
-      dataIndex: 'taxes',
+      title: 'Default Tax (%)',
+      dataIndex: 'default_tax',
       key: 'inventory_tax',
     },
     {
@@ -74,14 +76,16 @@ function InventoryList() {
   useEffect(() => {
     setSearchQuery("")
     setSearchTerm("")
-    if (!items.length || !categorizedItems[selectedTab]?.length || user.role === ROLES.ADMIN) {
-      getItems(10, { sort: '-createdAt', query: { type: selectedTab } }, 1);
-    }
+  }, [selectedTab]);
+
+  useEffect(() => {
+    // Fetch items when tab or center changes
+    getItems(10, { sort: '-createdAt', query: { type: selectedTab } }, 1);
   }, [selectedTab, selectedCenter]);
 
   const handlePageChange = (page, pageSize) => {
     if (searchQuery) {
-      searhcItems(pageSize, { searchQuery: searchQuery }, page)
+      searchItems(pageSize, { searchQuery: searchQuery }, page)
     } else {
       getItems(pageSize, { sort: '-createdAt', query: { type: selectedTab } }, page);
     }
@@ -92,7 +96,7 @@ function InventoryList() {
       setSearchQuery(null)
       return
     }
-    searhcItems(10, { searchQuery: value }, 1)
+    searchItems(10, { searchQuery: value }, 1)
     // setSearchQuery(value)
   }
 

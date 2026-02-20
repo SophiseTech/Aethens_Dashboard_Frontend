@@ -23,6 +23,9 @@ const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCour
 const StudentAnnouncement = lazy(() => import("@pages/Announcement/StudentAnnouncement"));
 const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"));
 const PhaseListPage = lazy(() => import("@pages/FinalProject/PhaseList"));
+const AdminFacultyAttendance = lazy(() => import("@pages/AdminAttendance/AdminFacultyAttendance"));
+const AdminLeaves = lazy(() => import("@pages/AdminLeaves/AdminLeaves"));
+const AdminCourses = lazy(() => import("@pages/AdminCourses"));
 
 const LazyLoader = ({ children }) => {
   const location = useLocation()
@@ -226,6 +229,43 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Slots",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    element: <Protected roles={[ROLES.ADMIN]} />,
+    children: [
+      {
+        element: <SidebarLayout />,
+        children: [
+          {
+            path: "/admin/faculty-attendance",
+            element: (
+              <LazyLoader>
+                <AdminFacultyAttendance />
+              </LazyLoader>
+            ),
+            title: "Faculty Attendance",
+          },
+          {
+            path: "/admin/manage-leaves",
+            element: (
+              <LazyLoader>
+                <AdminLeaves />
+              </LazyLoader>
+            ),
+            title: "Manage Leaves",
+          },
+          {
+            path: "/admin/courses",
+            element: (
+              <LazyLoader>
+                <AdminCourses />
+              </LazyLoader>
+            ),
+            title: "Courses",
           },
         ],
       },

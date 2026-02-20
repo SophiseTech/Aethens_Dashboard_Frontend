@@ -1,7 +1,6 @@
 import { DownloadOutlined, RestOutlined } from '@ant-design/icons';
 import Invoice from '@pages/Bills/Components/Invoice';
 import RecordPaymentModal from '@pages/Bills/Components/RecordPaymentModal';
-import inventoryStore from '@stores/InventoryStore';
 import userStore from '@stores/UserStore';
 import permissions from '@utils/permissions';
 import { Button, Popconfirm } from 'antd';
@@ -19,7 +18,6 @@ function BillDetails() {
   const [bill, setBill] = useState({});
   const { user } = useStore(userStore);
   const nav = useNavigate();
-  const { editItem } = useStore(inventoryStore);
   const invoiceRef = useRef(null);
 
   useEffect(() => {
@@ -31,12 +29,8 @@ function BillDetails() {
   const handleRecordPayment = async (values) => {
     if (id && bill) {
       editBill(id, { status: "paid", payment_date: values.payment_date, payment_method: values.payment_method });
+      // Backend automatically deducts inventory when marking materials as collected
       editMaterials(bill._id, { status: "collected", collected_on: new Date() });
-      await Promise.all(bill?.items?.map(async material => {
-        await editItem(material.item?._id, {
-          $inc: { quantity: -(material.qty) }
-        });
-      }));
     }
   };
 
@@ -52,7 +46,7 @@ function BillDetails() {
       <div className='border-b border-border flex justify-between | p-5 2xl:p-10'>
         <h1 className='font-bold | max-2xl:text-xl 2xl:text-2xl'>Preview</h1>
         <div className='flex gap-2'>
-          {permissions.bills.record_payment.includes(user.role) &&
+          {permissions.bills?.record_payment?.includes(user.role) &&
             <RecordPaymentModal handleRecordPayment={handleRecordPayment} bill={bill} />
           }
 
@@ -73,7 +67,7 @@ function BillDetails() {
             )}
           </PDFDownloadLink>
 
-          {permissions.bills.delete.includes(user.role) &&
+          {permissions.bills?.delete?.includes(user.role) &&
             <Popconfirm
               title="Delete Bill"
               description="Are you sure to delete this bill?"

@@ -51,7 +51,10 @@ function AllotMaterials({ student_id, handleOk, course_id }) {
 
   const onSubmitWithInvoice = async (values) => {
     await form.validateFields()
-    const invoiceNo = await getInvoiceNo()
+    const invoiceData = await getInvoiceNo()
+    const invoiceNo = invoiceData?.invoiceNo || 0;
+    const center_initial = invoiceData?.center_initial || '';
+
     const items = values.items?.map((item, index) => ({
       ...item,
       item: selecteItems[index]._id,
@@ -61,6 +64,7 @@ function AllotMaterials({ student_id, handleOk, course_id }) {
     const data = {
       ...totals,
       invoiceNo,
+      center_initial,
       items,
       status: "unpaid",
       generated_on: new Date(),

@@ -145,10 +145,10 @@ const studentStore = create((set, get) => ({
       set({ loading: false });
     }
   },
-  getStudentSyllabus: async (userId) => {
+  getStudentSyllabus: async (userId, filters = {}) => {
     try {
       set({ loading: true });
-      const response = await courseService.getStudentSyllabus(userId);
+      const response = await courseService.getStudentSyllabus(userId, filters);
       set({ syllabus: response });
     } catch (error) {
       handleInternalError(error);

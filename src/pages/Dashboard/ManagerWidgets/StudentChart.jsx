@@ -12,17 +12,17 @@ function StudentChart({ dateRange }) {
   const { firstDay, lastDay } = dateRange;
   const [data, setData] = useState([])
 
-  const {selectedCenter} = useStore(centersStore);
+  const { selectedCenter } = useStore(centersStore);
 
   const fetchData = async () => {
-    const report  = await attendanceService.getGraphSummary(user.role !== 'admin' ? user.center_id : selectedCenter, firstDay, lastDay) || []
+    const report = await attendanceService.getGraphSummary(user.role !== 'admin' ? user.center_id : selectedCenter, firstDay, lastDay) || []
     setData(report)
   }
 
   useEffect(() => {
     fetchData()
   }, [dateRange, selectedCenter])
-  
+
   // Sort data chronologically and extract required values
   const sortedData = useMemo(() => {
     return [...data].sort((a, b) => new Date(a.date) - new Date(b.date))
@@ -36,8 +36,8 @@ function StudentChart({ dateRange }) {
   const options = {
     chart: {
       type: "line",
-      width: "100%",
-      height: "auto",
+      // width: "100%",
+      // height: "auto",
       toolbar: {
         show: false,
       },
@@ -49,7 +49,7 @@ function StudentChart({ dateRange }) {
         show: true,
         style: {
           colors: "black",
-          fontSize: '12px',
+          fontSize: 'clamp(10px, 1.5vw, 12px)',
         },
       },
       axisTicks: {
@@ -68,6 +68,7 @@ function StudentChart({ dateRange }) {
         maxWidth: 200,
         style: {
           colors: "black",
+          fontSize: 'clamp(10px, 1.5vw, 12px)',
         },
       },
     },
@@ -83,17 +84,17 @@ function StudentChart({ dateRange }) {
       show: true,
       borderColor: "#ccc",
       strokeDashArray: 2,
-      padding: {
-        right: 90
-      }
+      // padding: {
+      //   right: 90
+      // }
     },
-    plotOptions: {
-      bar: {
-        columnWidth: "10%",
-        borderRadius: 10,
-        borderRadiusApplication: 'around'
-      },
-    },
+    // plotOptions: {
+    //   bar: {
+    //     columnWidth: "10%",
+    //     borderRadius: 10,
+    //     borderRadiusApplication: 'around'
+    //   },
+    // },
   }
 
   return (
@@ -111,6 +112,7 @@ function StudentChart({ dateRange }) {
           }
         ]}
         options={options}
+        height={320}
       />
     </Card>
   )
