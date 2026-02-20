@@ -22,8 +22,8 @@ function MaterialItemsSelector({ value = [], onChange }) {
             setLoading(true);
             // Fetch with large limit to get all items for selection
             const response = await inventoryService.getInventoryItems(0, 1000);
-            if (response?.inventoryItems) {
-                setInventoryItems(response.inventoryItems);
+            if (response?.items) {
+                setInventoryItems(response.items);
             }
         } catch (error) {
             console.error('Error fetching inventory items:', error);

@@ -6,9 +6,10 @@ class SyllabusGalleryService {
      * Get all syllabus gallery images
      * @returns {Promise<Array>} Array of gallery images
      */
-    async getSyllabusGalleryImages() {
+    async getSyllabusGalleryImages({ page = 1, limit = 20, search = "" } = {}) {
         try {
-            const response = await get("/v2/syllabusGallery");
+            const params = new URLSearchParams({ page, limit, ...(search && { search }) });
+            const response = await get(`/v2/syllabusGallery?${params}`);
             if (!response || !response.data)
                 throw new Error("An error occurred. Please try again");
             return response;

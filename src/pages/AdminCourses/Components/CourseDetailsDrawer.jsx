@@ -37,20 +37,21 @@ const CourseDetailsDrawer = ({ course, visible, onClose, onRefresh }) => {
     const [materialItems, setMaterialItems] = useState([]);
     const [loadingMaterials, setLoadingMaterials] = useState(false);
     const { deleteCourse, loading } = courseStore();
+    console.log(course);
 
-    useEffect(() => {
-        if (visible && course?.defaultMaterialItems?.length > 0) {
-            fetchMaterialItems();
-        }
-    }, [visible, course]);
+    // useEffect(() => {
+    //     if (visible && course?.defaultMaterialItems?.length > 0) {
+    //         fetchMaterialItems();
+    //     }
+    // }, [visible, course]);
 
     const fetchMaterialItems = async () => {
         try {
             setLoadingMaterials(true);
             // Fetch all inventory items and filter by IDs
             const response = await inventoryService.getInventoryItems(0, 1000);
-            if (response?.inventoryItems) {
-                const filtered = response.inventoryItems.filter(item =>
+            if (response?.items) {
+                const filtered = response.items.filter(item =>
                     course.defaultMaterialItems.includes(item._id)
                 );
                 setMaterialItems(filtered);
@@ -336,9 +337,9 @@ const CourseDetailsDrawer = ({ course, visible, onClose, onRefresh }) => {
                                 <div className="flex justify-center py-4">
                                     <Spin tip="Loading materials..." />
                                 </div>
-                            ) : materialItems.length > 0 ? (
+                            ) : course.defaultMaterialItems.length > 0 ? (
                                 <List
-                                    dataSource={materialItems}
+                                    dataSource={course.defaultMaterialItems}
                                     renderItem={(item) => (
                                         <List.Item key={item._id}>
                                             <Text>{item.name}</Text>

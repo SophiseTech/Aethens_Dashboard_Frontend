@@ -24,7 +24,10 @@ function EditCourseModal({ course, visible, onCancel, onSave }) {
                 syllabusType: course.syllabusType || 'general',
                 images: course.images || [],
                 modules: course.modules || [],
-                defaultMaterialItems: course.defaultMaterialItems || [],
+                // Normalize: items may be plain IDs or populated objects
+                defaultMaterialItems: (course.defaultMaterialItems || []).map(item =>
+                    typeof item === 'object' ? item._id : item
+                ),
             };
 
             form.setFieldsValue(formValues);
