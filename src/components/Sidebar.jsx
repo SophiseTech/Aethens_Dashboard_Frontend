@@ -216,6 +216,18 @@ const MENU_CONFIG = [
     roles: [ROLES.MANAGER, ROLES.ADMIN],
   },
   {
+    label: "Syllabus Gallery",
+    icon: PictureOutlined,
+    path: "/admin/syllabus-gallery",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Courses",
+    icon: BookOutlined,
+    path: "/admin/courses",
+    roles: [ROLES.ADMIN],
+  },
+  {
     label: "Announcements",
     icon: ClockCircleOutlined,
     path: "/student/announcements",
