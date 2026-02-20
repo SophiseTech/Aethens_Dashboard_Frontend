@@ -252,6 +252,7 @@ export const ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES = [
   "/admin/art-works",
   "/admin/student-of-the-week",
   "/admin/latest-videos",
+  "/admin/courses",
 ]
 
 export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
@@ -267,4 +268,5 @@ export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
   "/admin/student-of-the-week",
   "/admin/latest-videos",
   "/admin/syllabus-gallery",
+  "/admin/courses"
 ]
