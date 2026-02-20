@@ -3,52 +3,81 @@ import SyllabusGalleryItem from '@pages/SyllabusGallery/components/SyllabusGalle
 import SyllabusGalleryForm from '@pages/SyllabusGallery/components/SyllabusGalleryForm'
 import syllabusGalleryService from '@services/SyllabusGalleryService'
 import { Button, Empty, Image, message, Modal, Skeleton } from 'antd'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 
 const { confirm } = Modal
+const PAGE_LIMIT = 20
 
 function SyllabusGalleryList({ searchQuery = '' }) {
     const [items, setItems] = useState([])
-    const [loading, setLoading] = useState(true)
+    const [page, setPage] = useState(1)
+    const [hasMore, setHasMore] = useState(true)
+    const [loading, setLoading] = useState(true)      // initial load
+    const [loadingMore, setLoadingMore] = useState(false) // subsequent pages
     const [selectedItem, setSelectedItem] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
 
-    // Fetch items on mount
-    useEffect(() => {
-        fetchItems()
-    }, [])
+    const sentinelRef = useRef(null)   // bottom of list — triggers next page
+    const searchRef = useRef(searchQuery)
+    const debounceRef = useRef(null)
 
-    const fetchItems = async () => {
-        setLoading(true)
+    // ── Fetch a single page ───────────────────────────────────
+    const fetchPage = useCallback(async (pageNum, search, replace = false) => {
         try {
-            const response = await syllabusGalleryService.getSyllabusGalleryImages()
-            setItems(response.data || [])
+            const response = await syllabusGalleryService.getSyllabusGalleryImages({
+                page: pageNum,
+                limit: PAGE_LIMIT,
+                search,
+            })
+            const { data, hasMore: more } = response.data
+
+            setItems(prev => replace ? data : [...prev, ...data])
+            setHasMore(more)
+            setPage(pageNum)
         } catch (error) {
             message.error(error.message || 'Failed to fetch gallery images')
-            setItems([])
-        } finally {
-            setLoading(false)
         }
-    }
+    }, [])
 
-    // Filter items based on search query
-    const filteredItems = useMemo(() => {
-        if (!searchQuery) return items
-        return items.filter(item =>
-            item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    // ── Initial load / search change ─────────────────────────
+    useEffect(() => {
+        // Debounce search changes
+        clearTimeout(debounceRef.current)
+        debounceRef.current = setTimeout(async () => {
+            searchRef.current = searchQuery
+            setLoading(true)
+            setItems([])
+            setHasMore(true)
+            await fetchPage(1, searchQuery, true)
+            setLoading(false)
+        }, searchQuery === searchRef.current ? 0 : 300)
+
+        return () => clearTimeout(debounceRef.current)
+    }, [searchQuery, fetchPage])
+
+    // ── IntersectionObserver — sentinel at bottom of list ────
+    useEffect(() => {
+        const sentinel = sentinelRef.current
+        if (!sentinel) return
+
+        const observer = new IntersectionObserver(
+            async ([entry]) => {
+                if (!entry.isIntersecting || !hasMore || loadingMore || loading) return
+                setLoadingMore(true)
+                await fetchPage(page + 1, searchRef.current)
+                setLoadingMore(false)
+            },
+            { threshold: 0.1 }
         )
-    }, [items, searchQuery])
 
-    const showModal = (item) => {
-        setSelectedItem(item)
-        setIsModalOpen(true)
-    }
+        observer.observe(sentinel)
+        return () => observer.disconnect()
+    }, [hasMore, loadingMore, loading, page, fetchPage])
 
-    const handleModalClose = () => {
-        setIsModalOpen(false)
-        setSelectedItem(null)
-    }
+    // ── Delete + modal helpers ────────────────────────────────
+    const showModal = (item) => { setSelectedItem(item); setIsModalOpen(true) }
+    const handleModalClose = () => { setIsModalOpen(false); setSelectedItem(null) }
 
     const handleDelete = (item) => {
         confirm({
@@ -62,10 +91,12 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                 try {
                     await syllabusGalleryService.deleteSyllabusGalleryImage(item._id)
                     message.success('Gallery image deleted successfully')
-                    fetchItems() // Refresh list
-                    if (isModalOpen && selectedItem?._id === item._id) {
-                        handleModalClose()
-                    }
+                    // Reset and reload from page 1
+                    setLoading(true)
+                    setItems([])
+                    await fetchPage(1, searchRef.current, true)
+                    setLoading(false)
+                    if (isModalOpen && selectedItem?._id === item._id) handleModalClose()
                 } catch (error) {
                     message.error(error.message || 'Failed to delete gallery image')
                 }
@@ -73,9 +104,10 @@ function SyllabusGalleryList({ searchQuery = '' }) {
         })
     }
 
+    // ── Render ────────────────────────────────────────────────
     if (loading) return <Loader />
 
-    if (filteredItems.length === 0) {
+    if (!loading && items.length === 0) {
         return (
             <div className="flex justify-center items-center py-20">
                 <Empty
@@ -98,7 +130,7 @@ function SyllabusGalleryList({ searchQuery = '' }) {
             )}
 
             <MasonryLayout>
-                {filteredItems.map((item) => (
+                {items.map((item) => (
                     <SyllabusGalleryItem
                         key={item._id}
                         item={item}
@@ -106,6 +138,25 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                     />
                 ))}
             </MasonryLayout>
+
+            {/* Sentinel div — IntersectionObserver watches this */}
+            <div ref={sentinelRef} className="h-4" />
+
+            {/* Bottom skeleton while loading next page */}
+            {loadingMore && (
+                <MasonryLayout>
+                    <Skeleton.Node active className="!w-full" style={{ height: 300 }} />
+                    <Skeleton.Node active className="!w-full" style={{ height: 250 }} />
+                    <Skeleton.Node active className="!w-full" style={{ height: 350 }} />
+                </MasonryLayout>
+            )}
+
+            {/* End of results message */}
+            {!hasMore && items.length > 0 && (
+                <p className="text-center text-gray-400 text-sm py-6">
+                    All {items.length} images loaded
+                </p>
+            )}
 
             {/* Detail Modal */}
             <Modal
@@ -122,7 +173,6 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                             src={selectedItem?.url}
                             alt={selectedItem?.name}
                             className="rounded-lg overflow-hidden w-full"
-                            fallback="data:image/png;base64,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"
                         />
                     </div>
 
@@ -147,7 +197,9 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                                 isCreate={false}
                                 item={selectedItem}
                                 onSuccess={() => {
-                                    fetchItems()
+                                    setLoading(true)
+                                    setItems([])
+                                    fetchPage(1, searchRef.current, true).then(() => setLoading(false))
                                     handleModalClose()
                                 }}
                             />
@@ -166,16 +218,14 @@ function SyllabusGalleryList({ searchQuery = '' }) {
     )
 }
 
-const Loader = () => {
-    return (
-        <MasonryLayout>
-            <Skeleton.Node active className="!w-full" style={{ height: 350 }} />
-            <Skeleton.Node active className="!w-full" style={{ height: 450 }} />
-            <Skeleton.Node active className="!w-full" style={{ height: 250 }} />
-            <Skeleton.Node active className="!w-full" style={{ height: 400 }} />
-            <Skeleton.Node active className="!w-full" style={{ height: 300 }} />
-        </MasonryLayout>
-    )
-}
+const Loader = () => (
+    <MasonryLayout>
+        <Skeleton.Node active className="!w-full" style={{ height: 350 }} />
+        <Skeleton.Node active className="!w-full" style={{ height: 450 }} />
+        <Skeleton.Node active className="!w-full" style={{ height: 250 }} />
+        <Skeleton.Node active className="!w-full" style={{ height: 400 }} />
+        <Skeleton.Node active className="!w-full" style={{ height: 300 }} />
+    </MasonryLayout>
+)
 
 export default SyllabusGalleryList

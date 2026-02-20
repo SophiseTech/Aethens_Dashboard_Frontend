@@ -27,7 +27,7 @@ function CourseList() {
 
     // Fetch courses for a specific page using admin pagination method
     const fetchCoursesForPage = (page) => {
-        getCoursesForAdmin(pageSize, page);
+        getCoursesForAdmin(pageSize, page, { populate: "defaultMaterialItems" });
     };
 
     useEffect(() => {
