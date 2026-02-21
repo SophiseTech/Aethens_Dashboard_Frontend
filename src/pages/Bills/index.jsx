@@ -138,7 +138,12 @@ function Bills() {
   }
 
   const handleSearch = async (value, itemType) => {
-    const effectiveCenterId = selectedCenter || user?.center_id;
+    let effectiveCenterId;
+    if(user.role === 'manager'){
+      effectiveCenterId =  user?.center_id
+    }else{
+      effectiveCenterId = selectedCenter
+    }
     if (!effectiveCenterId) return;
 
     if (itemType === "materials") {

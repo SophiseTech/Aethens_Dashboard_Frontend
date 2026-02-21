@@ -8,6 +8,7 @@ import userStore from '@stores/UserStore'
 import { formatDate, formatTime } from '@utils/helper'
 import permissions from '@utils/permissions'
 import { useStore } from 'zustand'
+import userStore from '@stores/UserStore'
 
 const { Search } = Input;
 
@@ -17,13 +18,12 @@ function SessionStatusTable({ student }) {
   const { course } = useStore(courseStore); // Get course from courseStore which has full data
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchText, setSearchText] = useState('');
-
+  const { user } = userStore()
   // Use course from courseStore which has syllabusType and images populated
   const syllabusType = course?.syllabusType || 'general';
 
   console.log('Course from store:', course);
   console.log('SyllabusType:', syllabusType);
-  const { user } = userStore()
 
   useEffect(() => {
     if (!student?._id) return;
@@ -131,7 +131,11 @@ function SessionStatusTable({ student }) {
         dataIndex: "action",
         key: "action",
         render: (_, record) => (
-          <Button icon={<RestFilled />} color='red' onClick={() => { deleteFacultyRemark(record._id) }} />
+          <>
+            {permissions.session_status.delete.includes(user?.role) &&
+              <Button icon={<RestFilled />} color='red' onClick={() => { deleteFacultyRemark(record._id) }} />
+            }
+          </>
         ),
       }
     );
