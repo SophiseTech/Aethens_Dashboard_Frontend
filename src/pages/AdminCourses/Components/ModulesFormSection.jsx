@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, Button, Input, Space, Typography, Collapse } from 'antd';
+import { Card, Button, Input, InputNumber, Space, Typography, Collapse } from 'antd';
 import { PlusOutlined, DeleteOutlined, MinusCircleOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
@@ -7,7 +7,7 @@ const { Panel } = Collapse;
 
 /**
  * Component for managing course modules structure
- * Handles nested modules -> units -> topics
+ * Handles nested modules -> units -> topics (each topic has name + sessionsRequired)
  */
 function ModulesFormSection({ value = [], onChange }) {
     const modules = value || [];
@@ -45,11 +45,29 @@ function ModulesFormSection({ value = [], onChange }) {
         onChange(newModules);
     };
 
-    const handleTopicChange = (moduleIndex, unitIndex, topicValue) => {
+    const handleAddTopic = (moduleIndex, unitIndex) => {
         const newModules = [...modules];
-        // Store as string directly to avoid issues with typing
-        // Convert to array only when submitting the form
-        newModules[moduleIndex].units[unitIndex].topics = topicValue;
+        newModules[moduleIndex].units[unitIndex].topics.push({ name: '', sessionsRequired: 0 });
+        onChange(newModules);
+    };
+
+    const handleRemoveTopic = (moduleIndex, unitIndex, topicIndex) => {
+        const newModules = [...modules];
+        newModules[moduleIndex].units[unitIndex].topics =
+            newModules[moduleIndex].units[unitIndex].topics.filter((_, i) => i !== topicIndex);
+        onChange(newModules);
+    };
+
+    const handleTopicFieldChange = (moduleIndex, unitIndex, topicIndex, field, val) => {
+        const newModules = [...modules];
+        const topic = newModules[moduleIndex].units[unitIndex].topics[topicIndex];
+        // Handle backward-compat: topic may still be a plain string from old data
+        if (typeof topic === 'string') {
+            newModules[moduleIndex].units[unitIndex].topics[topicIndex] =
+                field === 'name' ? { name: val, sessionsRequired: 0 } : { name: topic, sessionsRequired: val };
+        } else {
+            newModules[moduleIndex].units[unitIndex].topics[topicIndex] = { ...topic, [field]: val };
+        }
         onChange(newModules);
     };
 
@@ -133,18 +151,60 @@ function ModulesFormSection({ value = [], onChange }) {
                                                             handleUnitNameChange(moduleIndex, unitIndex, e.target.value)
                                                         }
                                                     />
-                                                    <Input.TextArea
-                                                        placeholder="Topics (comma-separated)"
-                                                        value={
-                                                            Array.isArray(unit.topics)
-                                                                ? unit.topics.join(', ')
-                                                                : unit.topics || ''
-                                                        }
-                                                        onChange={(e) =>
-                                                            handleTopicChange(moduleIndex, unitIndex, e.target.value)
-                                                        }
-                                                        rows={2}
-                                                    />
+
+                                                    {/* Topics list */}
+                                                    <div>
+                                                        <div className="flex justify-between items-center mb-1">
+                                                            <Text className="text-xs" type="secondary">Topics</Text>
+                                                            <Button
+                                                                type="dashed"
+                                                                size="small"
+                                                                icon={<PlusOutlined />}
+                                                                onClick={() => handleAddTopic(moduleIndex, unitIndex)}
+                                                            >
+                                                                Add Topic
+                                                            </Button>
+                                                        </div>
+
+                                                        {unit.topics && unit.topics.length > 0 ? (
+                                                            unit.topics.map((topic, topicIndex) => {
+                                                                const topicName = typeof topic === 'string' ? topic : topic.name || '';
+                                                                const topicSessions = typeof topic === 'string' ? 0 : topic.sessionsRequired || 0;
+                                                                return (
+                                                                    <div key={topicIndex} className="flex gap-2 items-center mb-1">
+                                                                        <Input
+                                                                            placeholder="Topic name"
+                                                                            value={topicName}
+                                                                            size="small"
+                                                                            style={{ flex: 1 }}
+                                                                            onChange={(e) =>
+                                                                                handleTopicFieldChange(moduleIndex, unitIndex, topicIndex, 'name', e.target.value)
+                                                                            }
+                                                                        />
+                                                                        <InputNumber
+                                                                            placeholder="Sessions"
+                                                                            min={0}
+                                                                            value={topicSessions}
+                                                                            size="small"
+                                                                            style={{ width: 90 }}
+                                                                            addonAfter="sess."
+                                                                            onChange={(val) =>
+                                                                                handleTopicFieldChange(moduleIndex, unitIndex, topicIndex, 'sessionsRequired', val || 0)
+                                                                            }
+                                                                        />
+                                                                        <MinusCircleOutlined
+                                                                            className="text-red-400"
+                                                                            onClick={() => handleRemoveTopic(moduleIndex, unitIndex, topicIndex)}
+                                                                        />
+                                                                    </div>
+                                                                );
+                                                            })
+                                                        ) : (
+                                                            <Text type="secondary" className="text-xs">
+                                                                No topics added yet
+                                                            </Text>
+                                                        )}
+                                                    </div>
                                                 </Space>
                                             </Card>
                                         ))

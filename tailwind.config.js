@@ -8,7 +8,6 @@ export default {
     extend: {
       screens: {
         'tablet': '820px',
-        'tablet-max': { 'max': '1180px' },
       },
       backgroundImage: {
         login: "url('/images/login_abstract.jpg')",

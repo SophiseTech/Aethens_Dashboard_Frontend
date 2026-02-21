@@ -25,13 +25,14 @@ function AttendanceStats({
     return {
       totalStudents: attendanceData?.totalStudents,
       totalAttendanceMarked: attendanceData?.totalAttendedSlots,
-      averageAttendance: parseFloat(averageAttendance)
+      averageAttendance: parseFloat(averageAttendance),
+      totalSlots: attendanceData?.totalSlots
     };
   }, [students, attendanceData, loading]);
 
   return (
     <Row gutter={[16, 16]}>
-      <Col xs={24} sm={8}>
+      <Col xs={24} sm={6}>
         <Card bordered={false} className="shadow-sm">
           <Statistic
             title="Total Students"
@@ -41,17 +42,27 @@ function AttendanceStats({
           />
         </Card>
       </Col>
-      <Col xs={24} sm={8}>
+      <Col xs={24} sm={6}>
         <Card bordered={false} className="shadow-sm">
           <Statistic
-            title="Records Marked"
+            title="Total Slots"
+            value={stats.totalSlots}
+            prefix={<CheckCircleOutlined className="text-green-500" />}
+            valueStyle={{ color: '#52c41a' }}
+          />
+        </Card>
+      </Col>
+      <Col xs={24} sm={6}>
+        <Card bordered={false} className="shadow-sm">
+          <Statistic
+            title="Attended Slots"
             value={stats.totalAttendanceMarked}
             prefix={<CheckCircleOutlined className="text-green-500" />}
             valueStyle={{ color: '#52c41a' }}
           />
         </Card>
       </Col>
-      <Col xs={24} sm={8}>
+      <Col xs={24} sm={6}>
         <Card bordered={false} className="shadow-sm">
           <Statistic
             title="Average Attendance"
