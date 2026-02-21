@@ -18,8 +18,10 @@ const feeStore = create((set) => ({
     set({ loading: true, error: null });
     try {
       await FeeService.markAsPaid(billId, payload);
+      set({ loading: false });
     } catch (error) {
       set({ error: error.message, loading: false });
+      throw error;
     }
   },
   markPartialPayment: async (feeAccountId, payload) => {
@@ -31,7 +33,37 @@ const feeStore = create((set) => ({
       set({ error: error.message, loading: false });
       throw error;
     }
-  }
+  },
+  generatePartialBalanceBill: async (feeAccountId) => {
+    set({ loading: true, error: null });
+    try {
+      await FeeService.generatePartialBalanceBill(feeAccountId);
+      set({ loading: false });
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
+  generateInstallmentBill: async (feeAccountId, installmentId) => {
+    set({ loading: true, error: null });
+    try {
+      await FeeService.generateInstallmentBill(feeAccountId, installmentId);
+      set({ loading: false });
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
+  markInstallmentAsPaid: async (feeAccountId, installmentId, payload = {}) => {
+    set({ loading: true, error: null });
+    try {
+      await FeeService.markInstallmentAsPaid(feeAccountId, installmentId, payload);
+      set({ loading: false });
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
 }));
 
 export default feeStore;
