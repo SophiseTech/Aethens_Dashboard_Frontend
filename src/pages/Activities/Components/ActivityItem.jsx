@@ -100,7 +100,25 @@ const Post = ({ title, content }) => {
   )
 }
 
+const ImageThumbnail = ({ url, fileName }) => {
+  return (
+    <div className='rounded-xl border border-border bg-card overflow-hidden | w-full md:w-fit'>
+      <a href={url} target="_blank" rel="noopener noreferrer">
+        <img
+          src={url}
+          alt={fileName}
+          className="w-full md:w-64 max-h-48 object-cover hover:opacity-90 transition-opacity"
+        />
+      </a>
+      {fileName && (
+        <p className="text-xs text-gray-500 px-3 py-2 truncate">{fileName}</p>
+      )}
+    </div>
+  );
+};
+
 ActivityItem.Document = Document
 ActivityItem.Post = Post
+ActivityItem.Image = ImageThumbnail
 
 export default ActivityItem

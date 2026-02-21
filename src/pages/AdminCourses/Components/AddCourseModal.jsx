@@ -22,7 +22,7 @@ function AddCourseModal() {
         setSyllabusType('general');
     };
 
-    // Helper to normalize modules (convert topics from string to array)
+    // Helper to normalize modules — ensures topics are stored as [{name, sessionsRequired}]
     const normalizeModules = (modules) => {
         if (!modules || modules.length === 0) return modules;
 
@@ -30,9 +30,13 @@ function AddCourseModal() {
             ...module,
             units: module.units?.map(unit => ({
                 ...unit,
-                topics: typeof unit.topics === 'string'
-                    ? unit.topics.split(',').map(t => t.trim()).filter(t => t)
-                    : unit.topics || []
+                topics: (unit.topics || []).map(topic => {
+                    if (typeof topic === 'string') {
+                        // Legacy: plain string -> object
+                        return { name: topic.trim(), sessionsRequired: 0 };
+                    }
+                    return { name: topic.name || '', sessionsRequired: topic.sessionsRequired || 0 };
+                }).filter(t => t.name)
             })) || []
         }));
     };

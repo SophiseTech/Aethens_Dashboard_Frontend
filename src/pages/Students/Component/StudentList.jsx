@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from "react";
-import { Button, Segmented, Select, Table, Tag } from "antd";
+import { Badge, Button, Segmented, Select, Table, Tag } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import studentStore from "@stores/StudentStore";
 import userStore from "@stores/UserStore";
@@ -45,6 +45,9 @@ function StudentList() {
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [allCourses, setAllCourses] = useState([]);
   const { setActiveStudent } = studentStore()
+  // Per-view total counts (separate so they don't overwrite each other)
+  const [viewTotals, setViewTotals] = useState({});
+
 
   // Temporary filter states (before Apply is clicked)
   const [tempFromBranch, setTempFromBranch] = useState(null);
@@ -133,9 +136,7 @@ function StudentList() {
         } else {
           getStudentsByCenter(10, currentPage, null, selectedCourses, fromBranch, toBranchParam);
         }
-        // setVisitedPages(new Set([1]));
       } else if (selectedView === "Active Students") {
-        // Fetch only active students from backend
         if (searchQuery) {
           search(
             10,
@@ -145,8 +146,6 @@ function StudentList() {
         } else {
           getStudentsByCenter(10, currentPage, "active", selectedCourses, fromBranch, toBranchParam);
         }
-        // setVisitedPages(new Set([1]));
-
       } else if (selectedView === "Todays Students") {
         getTodaysSessionAttendees(user, selectedCenter);
       } else {
@@ -358,20 +357,41 @@ function StudentList() {
     }
   };
 
-  const segmentOptions = useMemo(() => {
-    const base = ["Current Students", "Active Students", "All Students"];
+  // Cache the latest total for the current view so counts don't bleed between tabs
+  useEffect(() => {
+    if (selectedView === 'All Students' || selectedView === 'Active Students') {
+      const count = searchQuery ? searchTotal : total;
+      setViewTotals((prev) => ({ ...prev, [selectedView]: count }));
+    } else if (selectedView === 'Current Students') {
+      setViewTotals((prev) => ({ ...prev, [selectedView]: currentSessionAttendees?.length ?? 0 }));
+    } else if (selectedView === 'Todays Students') {
+      setViewTotals((prev) => ({ ...prev, [selectedView]: todaysSessionAttendees?.length ?? 0 }));
+    }
+  }, [total, searchTotal, searchQuery, selectedView, currentSessionAttendees?.length, todaysSessionAttendees?.length]);
 
+  const segmentOptions = useMemo(() => {
+    const countFor = (view) => viewTotals[view] ?? 0;
+
+    const makeLabel = (view) => (
+      <span className="flex items-center gap-1">
+        {view}
+        <Badge
+          count={countFor(view)}
+          overflowCount={9999}
+          style={{ backgroundColor: '#4F651E', fontSize: 10, transform: 'scale(0.9)' }}
+          showZero
+        />
+      </span>
+    );
+
+    const views = ['Current Students', 'Active Students', 'All Students'];
     if (user?.role === ROLES.ADMIN || user?.role === ROLES.FACULTY) {
-      return [
-        "Current Students",
-        "Active Students",
-        "All Students",
-        "Todays Students",
-      ];
+      views.push('Todays Students');
     }
 
-    return base;
-  }, [user?.role]);
+    return views.map((v) => ({ label: makeLabel(v), value: v }));
+  }, [user?.role, viewTotals]);
+
 
   return (
     <>
@@ -434,10 +454,23 @@ function StudentList() {
       {/* View Selector */}
       <Segmented
         options={segmentOptions}
-        className="w-fit mb-4"
+        className="w-fit mb-3"
         value={selectedView}
         onChange={handleSegmentChange}
       />
+
+      {/* Total count line */}
+      <div className="text-xs text-gray-400 mb-2">
+        Showing{' '}
+        <span className="font-semibold text-gray-600">
+          {selectedView === 'All Students' || selectedView === 'Active Students'
+            ? (searchQuery ? searchTotal : total)
+            : studentsToDisplay.length}
+        </span>
+        {' '}student{((selectedView === 'All Students' || selectedView === 'Active Students'
+          ? (searchQuery ? searchTotal : total)
+          : studentsToDisplay.length) !== 1) && 's'}
+      </div>
 
       <Table
         columns={columns}

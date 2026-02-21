@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar } from "antd";
 import {
@@ -279,12 +279,12 @@ const SidebarLogo = () => (
   />
 );
 
-const MenuItem = ({ item, isActive, user }) => {
+const MenuItem = ({ item, isActive, user, onNavigate }) => {
   const IconComponent = item.icon;
   const dynamicPath = getDynamicPath(item.path, user);
 
   return (
-    <Link to={dynamicPath} className="block">
+    <Link to={dynamicPath} className="block" onClick={onNavigate}>
       <div className="flex gap-10 items-center group hover:bg-gray-50 transition-colors duration-200 rounded-r-xl">
         <div
           className={`rounded-r-xl bg-secondary transition-opacity duration-200 w-1 h-9 2xl:w-1.5 2xl:h-12 ${isActive ? "opacity-100" : "opacity-0"
@@ -346,6 +346,11 @@ function Sidebar({ children }) {
   const navigate = useNavigate();
   const { user, logOut } = userStore();
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const drawerRef = useRef(null);
+
+  const closeSidebar = useCallback(() => {
+    if (drawerRef.current) drawerRef.current.checked = false;
+  }, []);
 
   // Memoized filtered menu items
   const visibleMenuItems = useMemo(
@@ -393,7 +398,7 @@ function Sidebar({ children }) {
 
   return (
     <div className="drawer h-full lg:drawer-open">
-      <input id="my-drawer" type="checkbox" className="drawer-toggle" />
+      <input ref={drawerRef} id="my-drawer" type="checkbox" className="drawer-toggle" />
 
       <div className="drawer-content">
         <MobileMenuButton />
@@ -417,6 +422,7 @@ function Sidebar({ children }) {
                 item={item}
                 isActive={isActive(item.path)}
                 user={user}
+                onNavigate={closeSidebar}
               />
             ))}
           </nav>

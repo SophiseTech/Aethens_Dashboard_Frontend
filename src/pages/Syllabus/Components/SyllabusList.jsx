@@ -9,7 +9,7 @@ import CustomSyllabusList from './CustomSyllabusList';
 
 const { Search } = Input;
 
-function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, searchText, setSearchText }) {
+function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, searchText, setSearchText, course }) {
   // Get user data
   const { user } = useStore(userStore);
 
@@ -41,6 +41,7 @@ function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, se
             topic: topic?.name || topic,
             completed: topic?.completed || false,
             sessionCount: topic?.sessionCount || 0,
+            sessionsRequired: topic?.sessionsRequired || 0,
           });
           unitAdded = true;
           moduleAdded = true;
@@ -110,13 +111,14 @@ function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, se
         title: 'Sessions',
         dataIndex: 'sessionCount',
         key: 'sessionCount',
-        render: (sessionCount) => {
-          // TODO: Replace dummy total (10) with actual total from backend when available
-          const totalSessions = 10;
+        render: (sessionCount, record) => {
+          const totalSessions = record.sessionsRequired || null;
           return (
             <span className="text-sm">
               <span className="font-semibold">{sessionCount}</span>
-              <span className="text-gray-500">/{totalSessions}</span>
+              {totalSessions > 0 && (
+                <span className="text-gray-500">/{totalSessions}</span>
+              )}
             </span>
           );
         },

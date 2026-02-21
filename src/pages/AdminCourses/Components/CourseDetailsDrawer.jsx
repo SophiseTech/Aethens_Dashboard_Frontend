@@ -251,10 +251,13 @@ const CourseDetailsDrawer = ({ course, visible, onClose, onRefresh }) => {
                                                                                             }
                                                                                         >
                                                                                             <Text>
-                                                                                                {
-                                                                                                    topic
-                                                                                                }
+                                                                                                {typeof topic === 'string' ? topic : topic.name}
                                                                                             </Text>
+                                                                                            {typeof topic === 'object' && topic.sessionsRequired > 0 && (
+                                                                                                <Text type="secondary" className="text-xs ml-2">
+                                                                                                    ({topic.sessionsRequired} sess.)
+                                                                                                </Text>
+                                                                                            )}
                                                                                         </li>
                                                                                     )
                                                                                 )}

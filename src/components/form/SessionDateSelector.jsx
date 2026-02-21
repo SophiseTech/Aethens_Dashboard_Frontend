@@ -21,7 +21,7 @@ const formatSessionLabel = (session) => {
  * Render session option with availability details
  * Shows remaining slots and additional slots with color coding
  */
-export const sessionSlotOptionRenderer = (option, user) => {
+export const sessionSlotOptionRenderer = (option, user, showSlotCount = true) => {
   const { data: session } = option.data;
   if (!session) return null;
 
@@ -29,7 +29,7 @@ export const sessionSlotOptionRenderer = (option, user) => {
   const weekday = weekDays[session.weekDay];
   const time = dayjs(session.start_time).format('h:mm A');
   const remainingSlots = user.role === ROLES.STUDENT ? totalRemainingSlots : regularRemainingSLots
-  
+
   // Determine color based on remaining slots
   let slotColor = 'green';
   if (remainingSlots <= 5) slotColor = 'orange';
@@ -41,30 +41,32 @@ export const sessionSlotOptionRenderer = (option, user) => {
         <p style={{ fontSize: '1.05em', fontWeight: 'bold', margin: 0 }}>{weekday}</p>
         <p style={{ fontWeight: "bold", margin: 0 }}>{time}</p>
       </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <Tag
-          color={slotColor}
-          style={{
-            fontWeight: 600,
-            borderRadius: 4,
-            marginRight: 0
-          }}
-        >
-          {remainingSlots} slot{remainingSlots !== 1 ? 's' : ''} left
-        </Tag>
-        {(additional > 0 && user.role === ROLES.MANAGER) && (
+      {showSlotCount && (
+        <div style={{ display: 'flex', gap: 8 }}>
           <Tag
-            color='gold'
+            color={slotColor}
             style={{
               fontWeight: 600,
               borderRadius: 4,
               marginRight: 0
             }}
           >
-            + {additional}
+            {remainingSlots} slot{remainingSlots !== 1 ? 's' : ''} left
           </Tag>
-        )}
-      </div>
+          {(additional > 0 && user.role === ROLES.MANAGER) && (
+            <Tag
+              color='gold'
+              style={{
+                fontWeight: 600,
+                borderRadius: 4,
+                marginRight: 0
+              }}
+            >
+              + {additional}
+            </Tag>
+          )}
+        </div>
+      )}
     </Flex>
   );
 };
