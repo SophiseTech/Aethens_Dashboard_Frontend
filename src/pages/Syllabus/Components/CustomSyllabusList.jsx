@@ -45,7 +45,7 @@ function CustomSyllabusList({ images, loading, statusFilter, setStatusFilter, se
                     return (
                         <span className="text-sm">
                             <span className="font-semibold">{sessionCount}</span>
-                            <span className="text-gray-500">/{totalSessions}</span>
+                            {/* <span className="text-gray-500">/{totalSessions}</span> */}
                         </span>
                     );
                 },

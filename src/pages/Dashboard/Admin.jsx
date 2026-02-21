@@ -8,6 +8,7 @@ import FeeReport from "@pages/Dashboard/ManagerWidgets/FeeReport";
 import IncomeReport from "@pages/Dashboard/ManagerWidgets/IncomeReport";
 import AttendanceReport from "@pages/Dashboard/ManagerWidgets/AttendanceReport";
 import OverDurationStudents from "@pages/Dashboard/ManagerWidgets/OverDurationStudents";
+import FinancialSummary from "@pages/Dashboard/ManagerWidgets/FinancialSummary";
 import billStore from "@stores/BillStore";
 import payslipStore from "@stores/PayslipStore";
 import userStore from "@stores/UserStore";
@@ -87,7 +88,7 @@ function Admin() {
         onChange={handleDateChange}
         className="w-full tablet:w-2/3 lg:w-1/2 border-primary text-primary"
       />
-      <Row gutter={[20, 20]}>
+      {/* <Row gutter={[20, 20]}>
         <Col xs={24} sm={12} tablet={12} lg={12} xxl={6}>
           <StudentCounts />
         </Col>
@@ -103,6 +104,11 @@ function Admin() {
           <Link to={"/manager/bills?status=unpaid"}>
             <DueStat />
           </Link>
+        </Col>
+      </Row> */}
+      <Row gutter={[20, 20]}>
+        <Col xs={24}>
+          <FinancialSummary />
         </Col>
       </Row>
       <Row gutter={[20, 20]}>

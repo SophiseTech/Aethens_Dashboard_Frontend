@@ -44,6 +44,7 @@ function Syllabus() {
           setStatusFilter={setStatusFilter}
           searchText={searchText}
           setSearchText={setSearchText}
+          course={course}
         />
         <CourseDetail course={course} />
       </div>
