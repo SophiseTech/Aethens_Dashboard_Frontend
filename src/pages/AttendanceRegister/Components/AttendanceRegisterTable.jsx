@@ -44,7 +44,7 @@ function AttendanceRegisterTable({
         render: (value, row) => {
           const status = value?.status || 'no_slot';
           const type = value?.type || 'no_slot'
-          const config = getConfig(status, type, value.isHoliday);
+          const config = getConfig(status, type, value?.isHoliday);
           return (
             <div
               className="w-full h-full flex items-center justify-center text-white font-bold text-sm rounded"
@@ -95,8 +95,6 @@ function AttendanceRegisterTable({
       return record;
     });
   }, [students, attendanceData, pagination]);
-  console.log(tableData);
-
 
   const columns = [
     {
