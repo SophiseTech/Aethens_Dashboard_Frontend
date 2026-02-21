@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Modal, Table, Spin, Alert, Row, Col, Statistic, Tag, Button, InputNumber, Form, DatePicker, Select, Card, Checkbox, Space, Divider, Flex } from 'antd';
-import { WalletOutlined, DollarOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Modal, Table, Spin, Alert, Row, Col, Statistic, Tag, Button, InputNumber, Form, DatePicker, Select, Card, Checkbox, Space, Divider, Flex, Popconfirm, message } from 'antd';
+import { WalletOutlined, DollarOutlined, CheckCircleOutlined, FileDoneOutlined, CheckSquareOutlined } from '@ant-design/icons';
 import { useStore } from 'zustand';
 import feeStore from '@stores/FeeStore';
 import { formatDate } from '@utils/helper';
@@ -8,13 +8,40 @@ import CustomInput from '@components/form/CustomInput';
 import { paymentMethods } from '@utils/constants';
 
 const FeeTracker = ({ student, visible, onCancel }) => {
-  const { feeDetails, loading, error, getFeeDetailsByStudent, markAsPaid, markPartialPayment } = useStore(feeStore);
+  const {
+    feeDetails,
+    loading,
+    error,
+    getFeeDetailsByStudent,
+    markAsPaid,
+    markPartialPayment,
+    generateInstallmentBill,
+    generatePartialBalanceBill,
+    markInstallmentAsPaid,
+  } = useStore(feeStore);
+
   const [paymentModal, setPaymentModal] = useState(false);
   const [selectedBill, setSelectedBill] = useState(null);
   const [form] = Form.useForm();
   const [useWallet, setUseWallet] = useState(false);
   const paidAmount = Form.useWatch('paidAmount', form);
   const isPartialPayment = feeDetails?.feeAccount?.type === 'partial';
+  const isInstallment = feeDetails?.feeAccount?.isInstallment;
+
+  // Build items array for partial payments
+  const partialItems = useMemo(() => {
+    if (!feeDetails || !isPartialPayment) return [];
+    const items = [...(feeDetails.feeAccount?.installments || [])];
+    if (feeDetails.feeAccount?.balance > 0) {
+      items.push({
+        _id: 'balance',
+        isBalance: true,
+        amount: feeDetails.feeAccount.balance,
+        status: 'pending'
+      });
+    }
+    return items;
+  }, [feeDetails, isPartialPayment]);
 
   const walletBalance = useMemo(() => {
     return student?.wallet?.balance || 0;
@@ -34,6 +61,10 @@ const FeeTracker = ({ student, visible, onCancel }) => {
     }
   }, [student, getFeeDetailsByStudent]);
 
+  const refreshFeeDetails = () => {
+    if (student?._id) getFeeDetailsByStudent(student._id);
+  };
+
   const handleMarkAsPaid = async (bill) => {
     setSelectedBill(bill);
     setUseWallet(false);
@@ -45,37 +76,33 @@ const FeeTracker = ({ student, visible, onCancel }) => {
   const handlePaymentSubmit = async () => {
     try {
       const values = await form.validateFields();
-
       if (isPartialPayment) {
-        // Partial payment: custom amount
         const payload = {
           paidAmount: values.paidAmount,
           bill_id: selectedBill._id,
           payment_method: values.payment_method,
           payment_date: values.payment_date?.toISOString(),
-          useWallet: useWallet,
-          walletDeduction: walletDeduction,
-          excessPayment: excessPayment,
+          useWallet,
+          walletDeduction,
+          excessPayment,
           newWalletBalance: walletBalance + excessPayment - walletDeduction,
           walletId: student?.wallet?._id || null,
         };
         await markPartialPayment(feeDetails.feeAccount._id, payload);
       } else {
-        // Full payment: standard mark as paid with payment details
         const payload = {
           payment_method: values.payment_method,
           payment_date: values.payment_date?.toISOString(),
-          useWallet: useWallet,
-          walletDeduction: walletDeduction,
-          excessPayment: excessPayment,
+          useWallet,
+          walletDeduction,
+          excessPayment,
           newWalletBalance: walletBalance + excessPayment - walletDeduction,
           walletId: student?.wallet?._id || null,
         };
         await markAsPaid(selectedBill._id, payload);
       }
-
       setPaymentModal(false);
-      getFeeDetailsByStudent(student._id);
+      refreshFeeDetails();
       form.resetFields();
       setSelectedBill(null);
       setUseWallet(false);
@@ -84,11 +111,262 @@ const FeeTracker = ({ student, visible, onCancel }) => {
     }
   };
 
-  const columns = [
+  // Find the bill corresponding to an installment's month.
+  // Works correctly because installments are guaranteed unique months (fixed in FeeHelper.getInstallments).
+  const getBillForInstallment = (installment) => {
+    if (!feeDetails?.bills) return null;
+    return feeDetails.bills.find((bill) => {
+      const billDate = new Date(bill.generated_on);
+      const instDate = new Date(installment.month);
+      return (
+        billDate.getFullYear() === instDate.getFullYear() &&
+        billDate.getMonth() === instDate.getMonth()
+      );
+    }) || null;
+  };
+
+  const handleGenerateInstallmentBill = async (installment) => {
+    try {
+      await generateInstallmentBill(feeDetails.feeAccount._id, installment._id);
+      message.success('Bill generated successfully');
+      refreshFeeDetails();
+    } catch (err) {
+      message.error(err?.message || 'Failed to generate bill');
+    }
+  };
+
+  const handleMarkInstallmentAsPaid = async (installment) => {
+    try {
+      await markInstallmentAsPaid(feeDetails.feeAccount._id, installment._id, {});
+      message.success('Installment marked as paid');
+      refreshFeeDetails();
+    } catch (err) {
+      message.error(err?.message || 'Failed to mark installment as paid');
+    }
+  };
+
+  const handleGeneratePartialBill = async () => {
+    try {
+      await generatePartialBalanceBill(feeDetails.feeAccount._id);
+      message.success('Balance bill generated successfully');
+      refreshFeeDetails();
+    } catch (err) {
+      message.error(err?.message || 'Failed to generate bill');
+    }
+  };
+
+  // Columns for INSTALLMENT fee accounts — shows installments, not bills
+  const installmentColumns = [
     {
-      title: 'Invoice No',
-      dataIndex: 'invoiceNo',
+      title: 'No.',
+      key: 'index',
+      render: (_, __, index) => index + 1,
+      width: 50,
+    },
+    {
+      title: 'Due Month',
+      dataIndex: 'month',
+      key: 'month',
+      render: (date) => formatDate(date, 'MMM YYYY'),
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
+      render: (amt) => `₹${amt?.toFixed(2)}`,
+    },
+    {
+      title: 'Invoice No.',
       key: 'invoiceNo',
+      render: (_, record) => {
+        const bill = getBillForInstallment(record);
+        return bill ? `${bill.center_initial || ''}${bill.invoiceNo}` : '—';
+      },
+    },
+    {
+      title: 'Bill Status',
+      key: 'billStatus',
+      render: (_, record) => {
+        const bill = getBillForInstallment(record);
+        if (!bill) return <Tag color="default">No Bill</Tag>;
+        return (
+          <Tag color={bill.status === 'paid' ? 'green' : 'orange'}>
+            {bill.status === 'paid' ? 'Paid' : 'Unpaid'}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status) => (
+        <Tag color={status === 'paid' ? 'green' : 'blue'}>
+          {status === 'paid' ? 'Paid' : 'Pending'}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Actions',
+      key: 'action',
+      render: (_, record) => {
+        if (record.status === 'paid') {
+          return <Tag color="green" icon={<CheckCircleOutlined />}>Paid</Tag>;
+        }
+
+        const bill = getBillForInstallment(record);
+
+        return (
+          <Space>
+            {/* If a bill exists and is unpaid, allow marking the bill as paid */}
+            {bill && bill.status !== 'paid' && (
+              <Button
+                type="primary"
+                size="small"
+                icon={<CheckSquareOutlined />}
+                onClick={() => handleMarkAsPaid(bill)}
+              >
+                Mark Bill Paid
+              </Button>
+            )}
+
+            {/* If no bill exists yet, show Generate Bill */}
+            {!bill && (
+              <Button
+                type="default"
+                size="small"
+                icon={<FileDoneOutlined />}
+                onClick={() => handleGenerateInstallmentBill(record)}
+                loading={loading}
+              >
+                Generate Bill
+              </Button>
+            )}
+
+            {/* Mark installment as paid directly (no bill) with warning */}
+            {record.status !== 'paid' && (
+              <Popconfirm
+                title="Mark as Paid (No Bill)"
+                description={
+                  <div style={{ maxWidth: 280 }}>
+                    <p>⚠️ <strong>Warning:</strong> This will mark the installment as paid <strong>without generating a bill</strong>.</p>
+                    <p>No invoice will be created for this action. Proceed?</p>
+                  </div>
+                }
+                onConfirm={() => handleMarkInstallmentAsPaid(record)}
+                okText="Yes, Mark Paid"
+                cancelText="Cancel"
+                okButtonProps={{ danger: true }}
+              >
+                <Button
+                  size="small"
+                  danger
+                  icon={<CheckCircleOutlined />}
+                >
+                  Mark Paid
+                </Button>
+              </Popconfirm>
+            )}
+          </Space>
+        );
+      },
+    },
+  ];
+
+  // Columns for PARTIAL fee accounts - history of payments and a single balance
+  const partialColumns = [
+    {
+      title: 'No.',
+      key: 'index',
+      render: (_, __, index) => index + 1,
+      width: 50,
+    },
+    {
+      title: 'Date/Month',
+      dataIndex: 'month',
+      key: 'month',
+      render: (date, record) => record.isBalance ? 'Remaining Balance' : formatDate(date, 'MMM DD YYYY'),
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
+      render: (amt) => `₹${amt?.toFixed(2)}`,
+    },
+    {
+      title: 'Invoice No.',
+      key: 'invoiceNo',
+      render: (_, record) => {
+        if (record.isBalance) {
+          // Unpaid bill check for balance
+          const unpaidBill = feeDetails?.bills?.find(b => b.status === "unpaid" && b.subject === 'course');
+          return unpaidBill ? `${unpaidBill.center_initial || ''}${unpaidBill.invoiceNo}` : '—';
+        }
+        // Historical check
+        const bill = getBillForInstallment(record);
+        return bill ? `${bill.center_initial || ''}${bill.invoiceNo}` : '—';
+      },
+    },
+    {
+      title: 'Status',
+      key: 'status',
+      render: (_, record) => {
+        if (record.isBalance) {
+          return <Tag color="blue">Pending</Tag>;
+        }
+        return <Tag color="green">Paid</Tag>;
+      },
+    },
+    {
+      title: 'Actions',
+      key: 'action',
+      render: (_, record) => {
+        if (!record.isBalance) {
+          return <Tag color="green" icon={<CheckCircleOutlined />}>Paid</Tag>;
+        }
+
+        const unpaidBill = feeDetails?.bills?.find(b => b.status === "unpaid" && b.subject === 'course');
+
+        return (
+          <Space>
+            {unpaidBill ? (
+              <Button
+                type="primary"
+                size="small"
+                icon={<CheckSquareOutlined />}
+                onClick={() => handleMarkAsPaid(unpaidBill)}
+              >
+                Mark Bill Paid
+              </Button>
+            ) : (
+              <Button
+                type="default"
+                size="small"
+                icon={<FileDoneOutlined />}
+                onClick={handleGeneratePartialBill}
+                loading={loading}
+              >
+                Generate Bill
+              </Button>
+            )}
+          </Space>
+        );
+      },
+    },
+  ];
+
+  // Columns for SINGLE / PARTIAL fee accounts — shows bills
+  const billColumns = [
+    {
+      title: 'No.',
+      key: 'index',
+      render: (_, __, index) => index + 1,
+      width: 50,
+    },
+    {
+      title: 'Invoice No.',
+      key: 'invoiceNo',
+      render: (_, record) => `${record.center_initial || ''}${record.invoiceNo}`,
     },
     {
       title: 'Generated On',
@@ -100,11 +378,17 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       title: 'Total',
       dataIndex: 'total',
       key: 'total',
+      render: (amt) => `₹${amt?.toFixed(2)}`,
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
+      render: (status) => (
+        <Tag color={status === 'paid' ? 'green' : 'orange'}>
+          {status === 'paid' ? 'Paid' : 'Unpaid'}
+        </Tag>
+      ),
     },
     {
       title: 'Action',
@@ -113,6 +397,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         record.subject === 'course' && (
           <Button
             type="primary"
+            size="small"
             onClick={() => handleMarkAsPaid(record)}
             disabled={record.status === 'paid'}
           >
@@ -123,26 +408,6 @@ const FeeTracker = ({ student, visible, onCancel }) => {
     },
   ];
 
-  const renderMonthStatus = () => {
-    if (!feeDetails?.feeAccount?.installments) {
-      return null;
-    }
-
-    return (
-      <div style={{ display: 'flex', overflowX: 'auto', padding: '10px 0' }}>
-        {feeDetails.feeAccount.installments.map((installment) => (
-          <Tag
-            key={installment.month}
-            color={installment.status === 'paid' ? 'green' : 'red'}
-            style={{ marginRight: 8, flexShrink: 0 }}
-          >
-            {formatDate(installment.month, 'MMM YYYY')} - {installment.amount}
-          </Tag>
-        ))}
-      </div>
-    );
-  };
-
   return (
     <>
       <Modal
@@ -150,7 +415,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         visible={visible}
         onCancel={onCancel}
         footer={null}
-        width={800}
+        width={950}
       >
         {loading ? (
           <Spin />
@@ -191,13 +456,41 @@ const FeeTracker = ({ student, visible, onCancel }) => {
               </div>
             </div>
 
-            <Table columns={columns} dataSource={feeDetails.bills} rowKey="_id" />
-
-            <h3 style={{}}>Installment Status</h3>
-            {feeDetails.feeAccount?.isInstallment ? (
-              <Alert message="This fee is an installment." type="success" showIcon />
+            {/* Show installment-based table for monthly fee types */}
+            {isInstallment ? (
+              <>
+                <Alert
+                  message="Installment Fee Account"
+                  description="Bills are generated per installment. Use 'Generate Bill' to create an invoice, or 'Mark Paid' to directly mark an installment as paid without generating an invoice."
+                  type="info"
+                  showIcon
+                  style={{ marginBottom: 16 }}
+                />
+                <Table
+                  columns={installmentColumns}
+                  dataSource={feeDetails.feeAccount?.installments || []}
+                  rowKey="_id"
+                  size="small"
+                />
+              </>
+            ) : isPartialPayment ? (
+              <>
+                <Alert
+                  message="Partial Fee Account"
+                  description="Generate a bill to pay your remaining balance. The history of paid partial payments will be displayed."
+                  type="info"
+                  showIcon
+                  style={{ marginBottom: 16 }}
+                />
+                <Table
+                  columns={partialColumns}
+                  dataSource={partialItems}
+                  rowKey="_id"
+                  size="small"
+                />
+              </>
             ) : (
-              <Alert message="This fee is not an installment." type="info" showIcon />
+              <Table columns={billColumns} dataSource={feeDetails.bills} rowKey="_id" />
             )}
           </div>
         ) : (
@@ -205,6 +498,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         )}
       </Modal>
 
+      {/* Payment Modal */}
       <Modal
         title={`Payment - Invoice ${selectedBill?.invoiceNo}`}
         visible={paymentModal}
@@ -222,40 +516,22 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         <Form
           form={form}
           layout="vertical"
-          initialValues={{
-            paidAmount: selectedBill?.total,
-          }}
+          initialValues={{ paidAmount: selectedBill?.total }}
         >
-          {isPartialPayment ? (
-            <CustomInput name={"paidAmount"} label={"Paid Amount"} rules={[
-              { required: true, message: 'Please enter paid amount' },
-              {
-                validator: (_, value) => {
-                  if (!value || value <= 0) {
-                    return Promise.reject(new Error('Please enter a valid payment amount'));
-                  }
-                  return Promise.resolve();
+          <CustomInput name={"paidAmount"} label={"Paid Amount"} rules={[
+            { required: true, message: 'Please enter paid amount' },
+            {
+              validator: (_, value) => {
+                if (!value || value <= 0) {
+                  return Promise.reject(new Error('Please enter a valid payment amount'));
                 }
+                return Promise.resolve();
               }
-            ]}
-              type='number'
-            />
-          ) :
+            }
+          ]}
+            type='number'
+          />
 
-            <CustomInput name={"paidAmount"} label={"Paid Amount"} rules={[
-              { required: true, message: 'Please enter paid amount' },
-              {
-                validator: (_, value) => {
-                  if (!value || value <= 0) {
-                    return Promise.reject(new Error('Please enter a valid payment amount'));
-                  }
-                  return Promise.resolve();
-                }
-              }
-            ]}
-              type='number'
-            />
-          }
           {(paidAmount > 0) && (
             <div className="space-y-3 mb-4">
               <Alert
@@ -332,21 +608,11 @@ const FeeTracker = ({ student, visible, onCancel }) => {
             </Card>
           )}
 
-          <Form.Item
-            label="Payment Method"
-            name="payment_method"
-          >
-            <Select
-              placeholder="Select payment method (optional)"
-              allowClear
-              options={paymentMethods}
-            />
+          <Form.Item label="Payment Method" name="payment_method">
+            <Select placeholder="Select payment method (optional)" allowClear options={paymentMethods} />
           </Form.Item>
 
-          <Form.Item
-            label="Payment Date"
-            name="payment_date"
-          >
+          <Form.Item label="Payment Date" name="payment_date">
             <DatePicker style={{ width: '100%' }} />
           </Form.Item>
         </Form>
