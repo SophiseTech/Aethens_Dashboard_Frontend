@@ -32,11 +32,14 @@ const FeeTracker = ({ student, visible, onCancel }) => {
   const partialItems = useMemo(() => {
     if (!feeDetails || !isPartialPayment) return [];
     const items = [...(feeDetails.feeAccount?.installments || [])];
-    if (feeDetails.feeAccount?.balance > 0) {
+    // Use summary.balance (derived from paid bills) rather than the raw DB field
+    // which can be stale when the initial paidAmount was set on account creation.
+    const remainingBalance = feeDetails.summary?.balance ?? 0;
+    if (remainingBalance > 0) {
       items.push({
         _id: 'balance',
         isBalance: true,
-        amount: feeDetails.feeAccount.balance,
+        amount: remainingBalance,
         status: 'pending'
       });
     }
@@ -111,13 +114,26 @@ const FeeTracker = ({ student, visible, onCancel }) => {
     }
   };
 
-  // Find the bill corresponding to an installment's month.
-  // Works correctly because installments are guaranteed unique months (fixed in FeeHelper.getInstallments).
+  // Find the bill corresponding to an installment.
+  // For partial payment history: installment.month is set to the exact generated_on of the bill,
+  // so we match at day-level (year+month+day) to distinguish same-month payments.
+  // For monthly installments: month-level match is fine since months are unique.
   const getBillForInstallment = (installment) => {
     if (!feeDetails?.bills) return null;
+    const instDate = new Date(installment.month);
+    // Try exact day-level match first (handles multiple partial payments in same month)
+    const dayMatch = feeDetails.bills.find((bill) => {
+      const billDate = new Date(bill.generated_on);
+      return (
+        billDate.getFullYear() === instDate.getFullYear() &&
+        billDate.getMonth() === instDate.getMonth() &&
+        billDate.getDate() === instDate.getDate()
+      );
+    });
+    if (dayMatch) return dayMatch;
+    // Fallback: month-level match for monthly installments (unique months guaranteed)
     return feeDetails.bills.find((bill) => {
       const billDate = new Date(bill.generated_on);
-      const instDate = new Date(installment.month);
       return (
         billDate.getFullYear() === instDate.getFullYear() &&
         billDate.getMonth() === instDate.getMonth()
@@ -201,8 +217,8 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       dataIndex: 'status',
       key: 'status',
       render: (status) => (
-        <Tag color={status === 'paid' ? 'green' : 'blue'}>
-          {status === 'paid' ? 'Paid' : 'Pending'}
+        <Tag color={status === 'paid' ? 'green' : status === 'billed' ? 'orange' : 'blue'}>
+          {status === 'paid' ? 'Paid' : status === 'billed' ? 'Billed' : 'Pending'}
         </Tag>
       ),
     },
@@ -243,8 +259,8 @@ const FeeTracker = ({ student, visible, onCancel }) => {
               </Button>
             )}
 
-            {/* Mark installment as paid directly (no bill) with warning */}
-            {record.status !== 'paid' && (
+            {/* Mark installment as paid directly (no bill) — only shown when no bill has been generated yet */}
+            {record.status === 'pending' && (
               <Popconfirm
                 title="Mark as Paid (No Bill)"
                 description={
