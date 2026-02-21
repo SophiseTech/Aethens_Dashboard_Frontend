@@ -34,7 +34,7 @@ function RecordPaymentModal({ handleRecordPayment, bill }) {
         icon={<p>₹</p>}
         variant='outlined'
         onClick={showModal}
-        disabled={bill?.status === "paid"}
+        disabled={bill?.status === "paid" || bill?.subject === "course"}
       >
         Record Payment
       </Button>

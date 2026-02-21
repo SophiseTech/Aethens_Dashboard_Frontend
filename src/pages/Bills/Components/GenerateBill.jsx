@@ -64,6 +64,7 @@ function GenerateBill({
     {
       label: "Courses",
       value: "course",
+      disabled: true,
     },
   ];
 
@@ -212,6 +213,7 @@ function GenerateBill({
               label={center_initial ? `Invoice Number (${formattedInvoiceNo})` : "Invoice Number"}
               name={"invoiceNo"}
               placeholder={"1001"}
+              inputProps={{ readOnly: true }}
             />
             <CustomDatePicker
               label={"Invoice Date"}
