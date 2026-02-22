@@ -21,7 +21,7 @@ function Students() {
         {permissions.student.slot_requests.includes(user.role) &&
           <Button variant='filled' color='orange' onClick={() => { setDrawerState(true) }}>Requests</Button>
         }
-        <AddStudent />
+        {permissions.student.add.includes(user.role) && <AddStudent />}
       </Flex>}
     >
       <StudentSearch />

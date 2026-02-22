@@ -36,12 +36,12 @@ function Bills() {
   useEffect(() => {
     console.log(stateFilters?.query?.generated_for != student_id, stateFilters?.query?.generated_for, student_id);
 
-    if (!bills || stateFilters?.query?.generated_for != student_id || bills.length <= 0 || user.role === 'admin') {
+    if (!bills || stateFilters?.query?.generated_for != student_id || bills.length <= 0 || user.role === 'admin' || user.role === 'operations_manager') {
       let filters = _.cloneDeep(stateFilters);
       filters.query = filters.query || {};
 
       // Only display bills generated till today (this will hide post dated installment bills)
-      filters.query.generated_on = {$lte: dayjs().endOf("month")}
+      filters.query.generated_on = { $lte: dayjs().endOf("month") }
 
       if (user.role === ROLES.STUDENT) {
         filters.query.generated_for = user._id
@@ -51,7 +51,7 @@ function Bills() {
         delete filters.query.generated_for
       }
 
-      if (user.role === ROLES.ADMIN) {
+      if (user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER) {
         filters.query.center_id = selectedCenter;
       }
 
@@ -83,8 +83,8 @@ function Bills() {
   const loadInitData = async ({ itemType, centerId }) => {
     console.log(itemType, centerId);
 
-    if (!invoiceNo || invoiceNo === 0 || user.role === ROLES.ADMIN) {
-      user.role === ROLES.ADMIN ? getInvoiceNo(centerId) : getInvoiceNo();
+    if (!invoiceNo || invoiceNo === 0 || user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER) {
+      user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER ? getInvoiceNo(centerId) : getInvoiceNo();
     }
 
     // Determine which center to fetch items from
@@ -125,7 +125,7 @@ function Bills() {
         setLineItems(mappedItems)
       }
     }
-    if (studentTotal === 0 || students.length < studentTotal || user.role === ROLES.ADMIN) {
+    if (studentTotal === 0 || students.length < studentTotal || user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER) {
       getStudentsByCenter(0)
     }
   }

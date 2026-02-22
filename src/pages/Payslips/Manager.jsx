@@ -8,6 +8,7 @@ import { months } from '@utils/constants'
 import { Button, Drawer, Flex } from 'antd'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useStore } from 'zustand'
+import centersStore from '@stores/CentersStore';
 
 function ManagerPayslips() {
 
@@ -15,6 +16,7 @@ function ManagerPayslips() {
   const { getPayslips } = useStore(payslipStore)
   const { user } = useStore(userStore)
   const [drawerState, setDrawerState] = useState(false);
+  const { selectedCenter } = useStore(centersStore);
 
   const handleApprove = async (id) => {
     await approvePayslipRequest(id)
@@ -27,7 +29,7 @@ function ManagerPayslips() {
   const loadRequests = () => {
     if (payslipRequests.length === 0 || lastRefKey < total) {
       getPayslipRequests(10, {
-        query: { center: user.center_id, status: "pending" },
+        query: { center: user.center_id || selectedCenter, status: "pending" },
         populate: "raised_by_center"
       }) // Adjust the limit as needed
     }
@@ -36,7 +38,7 @@ function ManagerPayslips() {
   const fetchPayslips = (limit = 10,) => {
     getPayslips(limit, {
       query: {
-        center_id: user.center_id
+        center_id: user.center_id || selectedCenter
       },
       sort: { status: 1 },
       populate: "faculty_id manager_id"

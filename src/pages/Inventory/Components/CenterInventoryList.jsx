@@ -24,7 +24,8 @@ function CenterInventoryList() {
   const [form] = Form.useForm();
 
   const isAdmin = user?.role === ROLES.ADMIN;
-  const centerId = isAdmin ? selectedCenter : user?.center_id;
+  const isOpsManager = user?.role === ROLES.OPERATIONS_MANAGER;
+  const centerId = isAdmin || isOpsManager ? selectedCenter : user?.center_id;
 
   // Reset search and page when tab changes
   useEffect(() => {
@@ -70,7 +71,7 @@ function CenterInventoryList() {
     {
       title: 'Action',
       key: 'action',
-      render: (_, record) => (
+      render: (_, record) => (!isOpsManager &&
         <Button type="primary" onClick={() => setEditEntry(record)}>
           Edit
         </Button>

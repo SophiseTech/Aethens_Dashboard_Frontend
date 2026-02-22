@@ -2,7 +2,8 @@ export const ROLES = {
   STUDENT: "student",
   MANAGER: "manager",
   ADMIN: "admin",
-  FACULTY: "faculty"
+  FACULTY: "faculty",
+  OPERATIONS_MANAGER: "operations_manager"
 }
 
 export const imageCategories = [
@@ -227,7 +228,7 @@ export const paymentMethods = [
   { label: 'Card', value: 'card' },
   { label: 'Cheque', value: 'cheque' },
   { label: 'Wallet', value: 'wallet' },
-] 
+]
 export const TASK_PRIORITY = [
   { label: "Urgent", value: "Urgent" },
   { label: "Normal", value: "Normal" },

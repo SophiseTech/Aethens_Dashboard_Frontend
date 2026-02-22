@@ -2,7 +2,7 @@ import { ROLES } from "@utils/constants"
 
 const permissions = {
   student: {
-    add: [ROLES.MANAGER],
+    add: [ROLES.MANAGER, ROLES.ADMIN],
     slot_requests: [ROLES.MANAGER]
   },
   payslips: {
@@ -27,10 +27,10 @@ const permissions = {
     mark_don: [ROLES.MANAGER]
   },
   holidays: {
-    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.STUDENT],
-    add: [ROLES.MANAGER, ROLES.ADMIN],
-    edit: [ROLES.MANAGER, ROLES.ADMIN],
-    delete: [ROLES.MANAGER, ROLES.ADMIN]
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.STUDENT, ROLES.OPERATIONS_MANAGER],
+    add: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    edit: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    delete: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]
   },
   targets: {
     add: [ROLES.ADMIN],
@@ -62,6 +62,12 @@ const permissions = {
   },
   fee_tracker: {
     view: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  enquiries: {
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    add: [ROLES.MANAGER, ROLES.ADMIN],
+    edit: [ROLES.MANAGER, ROLES.ADMIN],
+    delete: [ROLES.MANAGER, ROLES.ADMIN]
   }
 }
 

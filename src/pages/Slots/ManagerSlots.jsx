@@ -106,25 +106,25 @@ function ManagerSlots() {
 
         return index + 1 + (currentPage - 1) * pageSize;
       },
-      roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN]
+      roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]
     },
     {
       title: 'Student Name',
       dataIndex: 'name',
       key: 'name',
-      roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN],
+      roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
-      roles: [ROLES.MANAGER, ROLES.ADMIN],
+      roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     },
     {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
-      roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN],
+      roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
       render: (value) => value ? String(value).charAt(0).toUpperCase() + String(value).slice(1) : ''
     },
     // {
@@ -186,7 +186,7 @@ function ManagerSlots() {
 
   return (
     <TitleLayout title={"View Students by Session"}>
-      <Space direction="vertical" style={{width: '100%' }}>
+      <Space direction="vertical" style={{ width: '100%' }}>
         {/* <Row justify="space-between">
           <Title level={3}>View Students by Session</Title>
           <AdminCenterSelector />

@@ -31,11 +31,13 @@ import BranchTransferCard from "@pages/Enquiries/Component/BranchTranserCard";
 import CustomSelect from "@components/form/CustomSelect";
 import EnquiryDemoBookModal from "@pages/Enquiries/Component/EnquiryDemoBookModal";
 import EnquiryDemoRescheduleModal from "@pages/Enquiries/Component/EnquiryDemoRescheduleModal";
-
+import permissions from "@utils/permissions";
+import userStore from "@stores/UserStore";
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnquiries }) => {
+  const user = useStore(userStore);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isBookSlotModalVisible, setIsBookSlotModalVisible] = useState(false);
   const [isCloseModalVisible, setIsCloseModalVisible] = useState(false);
@@ -152,21 +154,21 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
         extra={
           parentPage === "enquiryList" && !isClosed ? (
             <div className="flex gap-2">
-              <Button
+              {permissions.enquiries.edit.includes(user.role) && <Button
                 type="primary"
                 icon={<EditOutlined />}
                 onClick={handleEditClick}
               >
                 Edit
-              </Button>
-              <Button
+              </Button>}
+              {permissions.enquiries.delete.includes(user.role) && <Button
                 variant="solid"
                 color="danger"
                 icon={<DeleteOutlined />}
                 onClick={handleCloseClick}
               >
                 Close
-              </Button>
+              </Button>}
             </div>
           ) : null
         }
@@ -383,12 +385,12 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
           <div className="flex gap-2 items-center mb-2">
             {(enquiry?.stage === "New" || enquiry?.stage === "Demo") &&
               <Button
-              variant="filled"
-              color="orange"
-              onClick={() => setFollowUpVisible(true)}
-            >
-              Change Follow Up Date
-            </Button>
+                variant="filled"
+                color="orange"
+                onClick={() => setFollowUpVisible(true)}
+              >
+                Change Follow Up Date
+              </Button>
             }
             {enquiry?.stage === "New" &&
               <Button

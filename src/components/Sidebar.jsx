@@ -33,7 +33,7 @@ const MENU_CONFIG = [
     label: "Dashboard",
     icon: AppstoreOutlined,
     path: "/",
-    roles: [ROLES.STUDENT, ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.STUDENT, ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   {
     label: "Students",
@@ -45,19 +45,19 @@ const MENU_CONFIG = [
     label: "Enquiries",
     icon: MessageOutlined,
     path: "/manager/enquiries",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   {
     label: "Enquiry Slots",
     icon: MessageOutlined,
     path: "/manager/enquiry-slots",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   {
     label: "Targets",
     icon: Target,
     path: "/manager/targets",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   {
     label: "Materials",
@@ -81,13 +81,13 @@ const MENU_CONFIG = [
     label: "Students",
     icon: SolutionOutlined,
     path: "/manager/students",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   {
     label: "Bills",
     icon: DollarOutlined,
     path: "/manager/bills",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   {
     label: "Bills",
@@ -99,7 +99,7 @@ const MENU_CONFIG = [
     label: "Inventory",
     icon: ShopOutlined,
     path: "/manager/inventory",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   {
     label: "Inventory Items",
@@ -117,7 +117,7 @@ const MENU_CONFIG = [
     label: "Payslips",
     icon: MoneyCollectOutlined,
     path: "/manager/payslips",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   {
     label: "Courses",
@@ -183,7 +183,7 @@ const MENU_CONFIG = [
     label: "Slots",
     icon: ClockCircleOutlined,
     path: "/manager/slots",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   {
     label: "Slots",
@@ -201,19 +201,19 @@ const MENU_CONFIG = [
     label: "Announcements",
     icon: ClockCircleOutlined,
     path: "/manager/announcements",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   {
     label: "Notifications",
     icon: BellOutlined,
     path: "/manager/notifications",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   {
     label: "Holidays",
     icon: CalendarOutlined,
     path: "/manager/holidays",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   {
     label: "Announcements",
@@ -237,7 +237,7 @@ const MENU_CONFIG = [
     label: "Tasks",
     icon: CheckSquareOutlined,
     path: "/manager/tasks",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   {
     label: "Attendance Register",
