@@ -65,7 +65,7 @@ export const generalRoutes = [
     title: "Login | School Of Aethens",
   },
   {
-    element: <Protected roles={[ROLES.STUDENT, ROLES.MANAGER, ROLES.FACULTY, ROLES.ADMIN]} />,
+    element: <Protected roles={[ROLES.STUDENT, ROLES.MANAGER, ROLES.FACULTY, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]} />,
     children: [
       {
         element: <SidebarLayout />,

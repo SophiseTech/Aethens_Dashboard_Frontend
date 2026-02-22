@@ -48,7 +48,7 @@ class SessionService {
       const { selectedCenter } = centersStore.getState();
 
       let constructedPath;
-      if (user.role === 'admin' && selectedCenter) {
+      if ((user.role === 'admin' || user.role === 'operations_manager') && selectedCenter) {
         constructedPath = `/sessions/getAll?centerId=${selectedCenter}&slotDate=${date || ""}`;
       } else {
         constructedPath = `/sessions/getAll?slotDate=${date || ""}`;

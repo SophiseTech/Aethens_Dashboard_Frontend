@@ -7,18 +7,20 @@ import dayjs from 'dayjs'
 import React, { useEffect, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { useStore } from 'zustand'
+import centersStore from '@stores/CentersStore';
 
 function PayslipLayout({ fetchPayslips }) {
 
   const { id } = useParams()
   const { payslips, loading, total } = useStore(payslipStore)
-  const { user } = useStore(userStore)
+  const { user } = useStore(userStore);
+  const { selectedCenter } = useStore(centersStore);
 
   useEffect(() => {
     if (!payslips || payslips.length <= 0) {
       fetchPayslips(10)
     }
-  }, [])
+  }, [selectedCenter])
 
 
 

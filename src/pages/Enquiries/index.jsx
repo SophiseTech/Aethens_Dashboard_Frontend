@@ -3,14 +3,18 @@ import AddEnquiry from '@pages/Enquiries/Component/AddEnquiry'
 import { Skeleton } from 'antd';
 import { lazy, Suspense } from 'react'
 import EnquirySearch from './Component/EnquirySearch';
+import permissions from '@utils/permissions';
+import userStore from '@stores/UserStore';
+
 const EnquiryList = lazy(() => import('@pages/Enquiries/Component/EnquiryList'));
 
 function Enquiries() {
+  const user = userStore((state) => state.user);
 
   return (
     <Title
       title={"Enquiries"}
-      button={<AddEnquiry />}
+      button={permissions.enquiries.add.includes(user.role) && <AddEnquiry />}
     >
       {/* <EnquirySearch /> */}
       <Suspense fallback={<Loader />}>

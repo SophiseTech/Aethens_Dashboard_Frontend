@@ -19,15 +19,16 @@ function Inventory() {
   const { requests, getRequests, approveRequest, rejectRequest, loading: requestsLoading } = requestsStore();
 
   const isAdmin = user?.role === ROLES.ADMIN;
-  const centerId = isAdmin ? selectedCenter : user?.center_id;
+  const isOpsManager = user?.role === ROLES.OPERATIONS_MANAGER;
+  const centerId = isAdmin || isOpsManager ? selectedCenter : user?.center_id;
 
   useEffect(() => {
     // Clear inventory when "all" is selected or center changes to invalid value
-    if (isAdmin && centerId === 'all') {
+    if ((isAdmin || isOpsManager) && centerId === 'all') {
       clearCenterInventory();
     }
     // Note: CenterInventoryList component handles its own data fetching with search/pagination
-  }, [centerId, isAdmin]);
+  }, [centerId, isAdmin, isOpsManager]);
 
   const loadRequests = () => {
     if (!requests || requests.length <= 0) {
@@ -60,11 +61,11 @@ function Inventory() {
 
   const headerButtons = (
     <Flex gap={20}>
-      <RaiseRequest />
+      {!isOpsManager && <RaiseRequest />}
       <Button variant="filled" color="orange" onClick={() => setDrawerState(true)}>
         Requests
       </Button>
-      {!isAdmin && <AddToCenterModal />}
+      {!isAdmin && !isOpsManager && <AddToCenterModal />}
     </Flex>
   );
 
