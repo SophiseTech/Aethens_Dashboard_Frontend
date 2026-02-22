@@ -114,31 +114,63 @@ const FeeTracker = ({ student, visible, onCancel }) => {
     }
   };
 
-  // Find the bill corresponding to an installment.
-  // For partial payment history: installment.month is set to the exact generated_on of the bill,
-  // so we match at day-level (year+month+day) to distinguish same-month payments.
-  // For monthly installments: month-level match is fine since months are unique.
-  const getBillForInstallment = (installment) => {
-    if (!feeDetails?.bills) return null;
-    const instDate = new Date(installment.month);
-    // Try exact day-level match first (handles multiple partial payments in same month)
-    const dayMatch = feeDetails.bills.find((bill) => {
-      const billDate = new Date(bill.generated_on);
-      return (
-        billDate.getFullYear() === instDate.getFullYear() &&
-        billDate.getMonth() === instDate.getMonth() &&
-        billDate.getDate() === instDate.getDate()
-      );
+  // Build map of installments to bills, ensuring 1-to-1 mapping
+  const installmentBillMap = useMemo(() => {
+    const map = new Map();
+    if (!feeDetails?.bills || !feeDetails?.feeAccount?.installments) return map;
+
+    // Use a cloned array so we can remove matched bills and prevent duplicate mappings
+    const availableBills = [...feeDetails.bills];
+
+    feeDetails.feeAccount.installments.forEach((installment) => {
+      const instDate = new Date(installment.month);
+
+      // Find all bills matching the same year and month
+      const eligibleIndices = availableBills
+        .map((bill, index) => {
+          const billDate = new Date(bill.generated_on);
+          if (
+            billDate.getFullYear() === instDate.getFullYear() &&
+            billDate.getMonth() === instDate.getMonth()
+          ) {
+            return index;
+          }
+          return -1;
+        })
+        .filter((i) => i !== -1);
+
+      if (eligibleIndices.length > 0) {
+        // First try to match by exact amount (to differentiate Registration vs Course Fee)
+        let exactMatchIdx = eligibleIndices.find(
+          (idx) => Math.abs(availableBills[idx].total - installment.amount) < 0.1
+        );
+
+        // If no exact amount match, try exact day match
+        if (exactMatchIdx === undefined) {
+          exactMatchIdx = eligibleIndices.find((idx) => {
+            const billDate = new Date(availableBills[idx].generated_on);
+            return billDate.getDate() === instDate.getDate();
+          });
+        }
+
+        // If still no match, just take the first eligible bill
+        if (exactMatchIdx === undefined) {
+          exactMatchIdx = eligibleIndices[0];
+        }
+
+        map.set(installment._id, availableBills[exactMatchIdx]);
+
+        // Remove the matched bill so it isn't assigned to another installment
+        availableBills.splice(exactMatchIdx, 1);
+      }
     });
-    if (dayMatch) return dayMatch;
-    // Fallback: month-level match for monthly installments (unique months guaranteed)
-    return feeDetails.bills.find((bill) => {
-      const billDate = new Date(bill.generated_on);
-      return (
-        billDate.getFullYear() === instDate.getFullYear() &&
-        billDate.getMonth() === instDate.getMonth()
-      );
-    }) || null;
+
+    return map;
+  }, [feeDetails]);
+
+  // Find the bill corresponding to an installment.
+  const getBillForInstallment = (installment) => {
+    return installmentBillMap.get(installment._id) || null;
   };
 
   const handleGenerateInstallmentBill = async (installment) => {
