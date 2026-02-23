@@ -6,6 +6,8 @@ import { isUserActive } from '@utils/helper';
 import slotService from '@/services/Slot';
 import sessionService from '@/services/Session'; // Assuming you have a session service
 import { render } from 'react-dom';
+import permissions from '@utils/permissions';
+import userStore from '@stores/UserStore';
 
 const { Text, Title } = Typography;
 
@@ -16,6 +18,8 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [deallocating, setDeallocating] = useState(false);
   const [syncing, setSyncing] = useState(false);
+
+  const { user } = userStore();
 
   const { getActiveSessions } = studentStore();
   const activeStudentSessions = studentStore((state) => state.activeStudentSessions);
@@ -221,6 +225,7 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
       title: 'Actions',
       key: 'actions',
       render: (record) => (
+        permissions.sessions.edit.includes(user?.role) &&
         <Space>
           <Popconfirm
             title="Are you sure you want to delete this slot?"
@@ -336,7 +341,7 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
           </Space>
 
           <Space size="middle">
-            <Button
+            {permissions.sessions.delete.includes(user?.role) && <Button
               variant='solid'
               color='danger'
               onClick={handleSyncSlots}
@@ -344,7 +349,7 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
               disabled={syncing || loadingSessions}
             >
               Deallocate Session
-            </Button>
+            </Button>}
           </Space>
         </Flex>
 

@@ -131,6 +131,24 @@ const permissions = {
   notifications: {
     view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     toggle_read_status: [ROLES.MANAGER, ROLES.ADMIN],
+  },
+  fee_tracker: {
+    view: [ROLES.MANAGER, ROLES.ADMIN],
+    add: [ROLES.MANAGER, ROLES.ADMIN],
+    edit: [ROLES.MANAGER, ROLES.ADMIN],
+    delete: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  sessions: {
+    view: [ROLES.MANAGER, ROLES.ADMIN],
+    add: [ROLES.MANAGER, ROLES.ADMIN],
+    edit: [ROLES.MANAGER, ROLES.ADMIN],
+    delete: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  remarks: {
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY],
+    add: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY],
+    edit: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY],
+    delete: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY]
   }
 }
 

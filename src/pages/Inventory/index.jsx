@@ -10,6 +10,7 @@ import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
 import { Button, Drawer, Flex, Table } from 'antd';
 import React, { useEffect, useState } from 'react';
+import permissions from '@utils/permissions';
 
 function Inventory() {
   const { getCenterInventory, clearCenterInventory, inventory } = inventoryStore();
@@ -62,9 +63,9 @@ function Inventory() {
   const headerButtons = (
     <Flex gap={20}>
       {!isOpsManager && <RaiseRequest />}
-      <Button variant="filled" color="orange" onClick={() => setDrawerState(true)}>
+      {permissions.inventory.request.includes(user?.role) && <Button variant="filled" color="orange" onClick={() => setDrawerState(true)}>
         Requests
-      </Button>
+      </Button>}
       {!isAdmin && !isOpsManager && <AddToCenterModal />}
     </Flex>
   );
