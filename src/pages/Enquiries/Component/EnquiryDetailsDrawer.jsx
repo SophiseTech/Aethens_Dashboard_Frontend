@@ -384,21 +384,21 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
         {parentPage === "enquiryList" && (
           <div className="flex gap-2 items-center mb-2">
             {(enquiry?.stage === "New" || enquiry?.stage === "Demo") &&
-              <Button
+              (permissions.enquiries.edit.includes(user?.role) && <Button
                 variant="filled"
                 color="orange"
                 onClick={() => setFollowUpVisible(true)}
               >
                 Change Follow Up Date
-              </Button>
+              </Button>)
             }
             {enquiry?.stage === "New" &&
-              <Button
+              (permissions.enquiries.edit.includes(user?.role) && <Button
                 type="primary"
                 onClick={() => setIsBookSlotModalVisible(true)}
               >
                 Book Demo Slot
-              </Button>
+              </Button>)
             }
           </div>
         )}
@@ -408,12 +408,12 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
           enquiry?.stage === "Demo" &&
           enquiry?.demoSlot?.status !== "Completed" && (
             <div className="flex gap-2 items-center">
-              <Button type="primary" onClick={() => setReschduleSlot(true)}>
+              {permissions.enquiries.edit.includes(user?.role) && <Button type="primary" onClick={() => setReschduleSlot(true)}>
                 Reschedule Slot
-              </Button>
-              <Button type="primary" danger onClick={handleMarkCompleted}>
+              </Button>}
+              {permissions.enquiries.edit.includes(user?.role) && <Button type="primary" danger onClick={handleMarkCompleted}>
                 Mark As Completed
-              </Button>
+              </Button>}
             </div>
           )}
 
@@ -421,7 +421,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
         {(parentPage === "slotlist" || parentPage === "enquiryList") &&
           enquiry?.stage === "Demo" &&
           enquiry?.demoSlot?.status === "Completed" && (
-            <Button type="primary" block onClick={() => setEnrolled(true)}>
+            permissions.enquiries.edit.includes(user?.role) && <Button type="primary" block onClick={() => setEnrolled(true)}>
               Enroll Student
             </Button>
           )}

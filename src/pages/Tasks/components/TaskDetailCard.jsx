@@ -29,6 +29,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import useManagerTaskStore from "@/stores/ManagerTaskStore";
 import userStore from "@stores/UserStore";
 import { useNavigate } from "react-router-dom";
+import permissions from "@utils/permissions";
 
 dayjs.extend(relativeTime);
 
@@ -287,7 +288,7 @@ export default function TaskDetailCard({ task, onClose }) {
                     </div>
                 )}
 
-                <Button
+                {permissions.tasks.edit.includes(user.role) && <Button
                     type={
                         hasMultipleAssignees && !isAdmin
                             ? (isUserCompleted ? "default" : "primary")
@@ -306,7 +307,7 @@ export default function TaskDetailCard({ task, onClose }) {
                         ? (isUserCompleted ? "Mark My Task as Pending" : "Mark My Task as Completed")
                         : (task.status === "Pending" ? "Mark as Completed" : "Mark as Pending")
                     }
-                </Button>
+                </Button>}
 
                 {task.status === "Completed" && task.completedAt && (
                     <Text type="secondary" className="block mt-2 text-center text-sm">
