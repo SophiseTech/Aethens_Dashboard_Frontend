@@ -12,13 +12,6 @@ function SyllabusGallery() {
     const [searchQuery, setSearchQuery] = useState('')
 
     // Check permission - admin only
-    if (user?.role !== ROLES.ADMIN) {
-        return (
-            <div className="text-center py-8">
-                You don't have permission to access the syllabus gallery
-            </div>
-        )
-    }
 
     return (
         <Title
