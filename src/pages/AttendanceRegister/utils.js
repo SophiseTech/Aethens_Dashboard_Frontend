@@ -7,7 +7,7 @@ export const StatusColors = {
   excused: { color: '#1890ff', label: 'E', bgColor: 'bg-blue-100', textColor: 'text-blue-700' },
   holiday: { color: '#999', label: 'H', bgColor: 'bg-gray-100', textColor: 'text-gray-700' },
   no_slot: { color: '#999', label: 'NA' },
-  upcoming: {color: '#4E739C', label: 'U'}
+  upcoming: { color: '#4E739C', label: 'U' }
 };
 
 export const TypeConfigs = {
@@ -107,7 +107,8 @@ export function exportToCSV(data, filename = 'attendance-register.csv') {
         const record = row[dateKey];
         if (!record) return '-';
         const status = record?.status || 'no_slot';
-        return StatusColors[status]?.label ? `${StatusColors[status]?.label}${TypeConfigs[status]?.prefix}${TypeConfigs[status]?.label}` : '-';
+        const typeConfig = TypeConfigs[record?.type] || TypeConfigs.regular;
+        return StatusColors[status]?.label ? `${StatusColors[status]?.label}${typeConfig.prefix}${typeConfig.label}` : '-';
       })
     ];
     csv.push(values.map(v => `"${v}"`).join(','));

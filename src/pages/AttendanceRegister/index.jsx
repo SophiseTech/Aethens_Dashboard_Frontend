@@ -69,7 +69,7 @@ function AttendanceRegister() {
         username: student.username || 'N/A',
         email: student.email || 'N/A',
         admissionNumber: student.admissionNumber || 'N/A',
-        stats: `${totalPresent}/${totalMarked}`,
+        stats: `${totalPresent} out of ${totalMarked}`,
         ...studentAttendance
       };
 
