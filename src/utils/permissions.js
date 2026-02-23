@@ -3,7 +3,8 @@ import { ROLES } from "@utils/constants"
 const permissions = {
   student: {
     add: [ROLES.MANAGER, ROLES.ADMIN],
-    slot_requests: [ROLES.MANAGER]
+    slot_requests: [ROLES.MANAGER],
+    edit: [ROLES.MANAGER, ROLES.ADMIN]
   },
   payslips: {
     mark_paid: [ROLES.MANAGER],
@@ -114,6 +115,22 @@ const permissions = {
     add: [ROLES.MANAGER, ROLES.ADMIN],
     edit: [ROLES.MANAGER, ROLES.ADMIN],
     delete: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  wallets: {
+    view: [ROLES.MANAGER, ROLES.ADMIN],
+    add: [ROLES.MANAGER, ROLES.ADMIN],
+    edit: [ROLES.MANAGER, ROLES.ADMIN],
+    delete: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  tasks: {
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    add: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    edit: [ROLES.MANAGER, ROLES.ADMIN],
+    delete: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  notifications: {
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    toggle_read_status: [ROLES.MANAGER, ROLES.ADMIN],
   }
 }
 

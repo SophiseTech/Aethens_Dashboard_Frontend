@@ -2,8 +2,11 @@ import React from "react";
 import { Table, Avatar, Tag, Tooltip, Button } from "antd";
 import { UserOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { formatDate } from "@utils/helper";
+import permissions from "@utils/permissions";
+import userStore from "@stores/UserStore";
 
 export default function NotificationList({ notifications, loading, pagination, handleTableChange, onToggleReadStatus }) {
+  const { user } = userStore();
   const columns = [
     {
       title: "Sender",
@@ -63,7 +66,7 @@ export default function NotificationList({ notifications, loading, pagination, h
       title: "Actions",
       key: "actions",
       width: 100,
-      render: (_, record) => (
+      render: (_, record) => (permissions.notifications.toggle_read_status.includes(user.role) &&
         <Tooltip title={record.is_read ? "Mark as Unread" : "Mark as Read"}>
           <Button
             type="text"
