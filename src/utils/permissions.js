@@ -2,8 +2,9 @@ import { ROLES } from "@utils/constants"
 
 const permissions = {
   student: {
-    add: [ROLES.MANAGER],
-    slot_requests: [ROLES.MANAGER]
+    add: [ROLES.MANAGER, ROLES.ADMIN],
+    slot_requests: [ROLES.MANAGER],
+    edit: [ROLES.MANAGER, ROLES.ADMIN]
   },
   payslips: {
     mark_paid: [ROLES.MANAGER],
@@ -27,10 +28,10 @@ const permissions = {
     mark_don: [ROLES.MANAGER]
   },
   holidays: {
-    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.STUDENT],
-    add: [ROLES.MANAGER, ROLES.ADMIN],
-    edit: [ROLES.MANAGER, ROLES.ADMIN],
-    delete: [ROLES.MANAGER, ROLES.ADMIN]
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.STUDENT, ROLES.OPERATIONS_MANAGER],
+    add: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    edit: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    delete: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]
   },
   targets: {
     add: [ROLES.ADMIN],
@@ -62,6 +63,46 @@ const permissions = {
   },
   fee_tracker: {
     view: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  enquiries: {
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    add: [ROLES.MANAGER, ROLES.ADMIN],
+    edit: [ROLES.MANAGER, ROLES.ADMIN],
+    delete: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  wallets: {
+    view: [ROLES.MANAGER, ROLES.ADMIN],
+    add: [ROLES.MANAGER, ROLES.ADMIN],
+    edit: [ROLES.MANAGER, ROLES.ADMIN],
+    delete: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  tasks: {
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    add: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    edit: [ROLES.MANAGER, ROLES.ADMIN],
+    delete: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  notifications: {
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    toggle_read_status: [ROLES.MANAGER, ROLES.ADMIN],
+  },
+  fee_tracker: {
+    view: [ROLES.MANAGER, ROLES.ADMIN],
+    add: [ROLES.MANAGER, ROLES.ADMIN],
+    edit: [ROLES.MANAGER, ROLES.ADMIN],
+    delete: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  sessions: {
+    view: [ROLES.MANAGER, ROLES.ADMIN],
+    add: [ROLES.MANAGER, ROLES.ADMIN],
+    edit: [ROLES.MANAGER, ROLES.ADMIN],
+    delete: [ROLES.MANAGER, ROLES.ADMIN]
+  },
+  remarks: {
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY],
+    add: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY],
+    edit: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY],
+    delete: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY]
   }
 }
 

@@ -10,6 +10,7 @@ import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
 import { Button, Drawer, Flex, Table } from 'antd';
 import React, { useEffect, useState } from 'react';
+import permissions from '@utils/permissions';
 
 function Inventory() {
   const { getCenterInventory, clearCenterInventory, inventory } = inventoryStore();
@@ -19,15 +20,16 @@ function Inventory() {
   const { requests, getRequests, approveRequest, rejectRequest, loading: requestsLoading } = requestsStore();
 
   const isAdmin = user?.role === ROLES.ADMIN;
-  const centerId = isAdmin ? selectedCenter : user?.center_id;
+  const isOpsManager = user?.role === ROLES.OPERATIONS_MANAGER;
+  const centerId = isAdmin || isOpsManager ? selectedCenter : user?.center_id;
 
   useEffect(() => {
     // Clear inventory when "all" is selected or center changes to invalid value
-    if (isAdmin && centerId === 'all') {
+    if ((isAdmin || isOpsManager) && centerId === 'all') {
       clearCenterInventory();
     }
     // Note: CenterInventoryList component handles its own data fetching with search/pagination
-  }, [centerId, isAdmin]);
+  }, [centerId, isAdmin, isOpsManager]);
 
   const loadRequests = () => {
     if (!requests || requests.length <= 0) {
@@ -60,11 +62,11 @@ function Inventory() {
 
   const headerButtons = (
     <Flex gap={20}>
-      <RaiseRequest />
-      <Button variant="filled" color="orange" onClick={() => setDrawerState(true)}>
+      {!isOpsManager && <RaiseRequest />}
+      {permissions.inventory.request.includes(user?.role) && <Button variant="filled" color="orange" onClick={() => setDrawerState(true)}>
         Requests
-      </Button>
-      {!isAdmin && <AddToCenterModal />}
+      </Button>}
+      {!isAdmin && !isOpsManager && <AddToCenterModal />}
     </Flex>
   );
 

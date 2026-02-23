@@ -7,6 +7,7 @@ import AddRemarkModal from "./AddRemarkModal";
 import { useParams } from "react-router-dom";
 import useModal from "@hooks/useModal";
 import useUser from "@hooks/useUser";
+import permissions from "@utils/permissions";
 
 const { Title } = Typography;
 
@@ -40,7 +41,7 @@ export default function StudentRemarksPage() {
     <div className="p-4">
       <div className="flex items-center justify-between mb-4">
         <Title level={4}>Student Remarks</Title>
-        <Button type="primary" onClick={() => modal.showModal()}>Add Remark</Button>
+        {permissions.remarks.add.includes(user?.role) && <Button type="primary" onClick={() => modal.showModal()}>Add Remark</Button>}
       </div>
 
       {/* Student details */}

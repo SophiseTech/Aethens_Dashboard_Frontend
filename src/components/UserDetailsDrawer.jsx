@@ -29,6 +29,7 @@ import { ROLES } from "@utils/constants";
 import DrawerActionButtons from "@components/DrawerActionButtons";
 import userStore from "@stores/UserStore";
 import PropTypes from "prop-types";
+import permissions from "@utils/permissions";
 
 const { Title, Text } = Typography;
 
@@ -73,7 +74,7 @@ const UserDetailsDrawer = ({
         }}
         extra={
           (!isStudentDetail || loggedinUser.role !== ROLES.FACULTY) && (
-            <Button
+            permissions.student.edit.includes(loggedinUser.role) && <Button
               type="primary"
               icon={<EditOutlined />}
               onClick={handleEditClick}

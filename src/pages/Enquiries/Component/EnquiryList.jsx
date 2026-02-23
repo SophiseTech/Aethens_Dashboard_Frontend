@@ -41,7 +41,7 @@ function EnquiryList() {
     if (searchQuery) {
       search(10, { searchQuery }, currentPage);
     } else {
-      if (user.role === 'admin' && selectedCenter !== null) {
+      if ((user.role === 'admin' || user.role === 'operations_manager') && selectedCenter !== null) {
         getEnquiries(10, currentPage, { stage: selectedView, centerId: selectedCenter });
       } else {
         getEnquiries(10, currentPage, { stage: selectedView });

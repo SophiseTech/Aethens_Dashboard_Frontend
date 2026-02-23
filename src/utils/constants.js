@@ -2,7 +2,8 @@ export const ROLES = {
   STUDENT: "student",
   MANAGER: "manager",
   ADMIN: "admin",
-  FACULTY: "faculty"
+  FACULTY: "faculty",
+  OPERATIONS_MANAGER: "operations_manager"
 }
 
 export const imageCategories = [
@@ -250,5 +251,6 @@ export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
   "/manager/holidays",
   "/manager/inventory-items",
   "/admin/syllabus-gallery",
-  "/admin/courses"
+  "/admin/courses",
+  "/manager/attendance-register"
 ]

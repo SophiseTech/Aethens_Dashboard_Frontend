@@ -23,6 +23,8 @@ function DrawerActionButtons({ userDetails }) {
     return <ManagerActionButtons userDetails={userDetails} />
   } else if (user.role === ROLES.FACULTY) {
     return <FacultyActionButton userDetails={userDetails} />
+  } else if (user.role === ROLES.OPERATIONS_MANAGER) {
+    return <OperationsManagerActionButtons userDetails={userDetails} />
   }
   return null
 }
@@ -103,7 +105,79 @@ const ManagerActionButtons = ({ userDetails }) => {
       <Button onClick={showFeeModal} variant='filled' color='green'>
         Fee Tracker
       </Button>
-      
+
+      <FeeTracker student={userDetails} visible={isFeeModalOpen} onCancel={handleFeeCancel} />
+    </Flex>
+  )
+}
+
+const OperationsManagerActionButtons = ({ userDetails }) => {
+  const nav = useNavigate()
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { handleCancel: handleFeeCancel, isModalOpen: isFeeModalOpen, handleOk: handleFeeOk, showModal: showFeeModal } = useModal()
+
+  const handleViewBills = (student_id) => {
+    nav(`/manager/bills?student_id=${student_id}`);
+  };
+
+  const handleViewMaterials = (student_id, course_id) => {
+    nav(`/manager/materials?student_id=${student_id}&course_id=${course_id}`);
+  };
+
+  const handleViewAttendance = (student_id, course_id) => {
+    nav(`/manager/attendance/${student_id}/c/${course_id}`);
+  };
+
+  const handleViewCourseHistory = (student_id) => {
+    nav(`/manager/courseHistory/${student_id}`);
+  };
+
+  const handleViewRemarks = (student_id) => {
+    nav(`/manager/remarks/s/${student_id}`);
+  };
+
+  const handleViewFinalProject = (student_id) => {
+    nav(`/manager/final-project/student/${student_id}/details`);
+  };
+
+  const handleViewWallet = (student_id) => {
+    nav(`/manager/wallets/s/${student_id}`)
+  }
+
+  const handleViewSession = () => {
+    setIsModalOpen(true);
+  };
+
+  return (
+    <Flex wrap gap={10}>
+      <Button onClick={() => handleViewBills(userDetails._id)} variant="filled" color="cyan">
+        View Bills
+      </Button>
+      <Button onClick={() => handleViewWallet(userDetails._id)} variant="filled" color="cyan">
+        View Wallet
+      </Button>
+      <Button onClick={() => handleViewMaterials(userDetails._id, userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id)} variant="filled" color="blue">
+        View Materials
+      </Button>
+      <Button onClick={() => handleViewAttendance(userDetails._id, userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id)} variant="filled" color="orange">
+        View Attendance
+      </Button>
+      <Button onClick={handleViewSession} disabled={!isUserActive(userDetails)} variant='filled' color='magenta'>
+        View Sessions
+      </Button>
+      <Button onClick={() => handleViewCourseHistory(userDetails?._id)} variant='filled' color='cyan'>
+        View Course History
+      </Button>
+      <Button onClick={() => handleViewRemarks(userDetails?._id)} variant='filled' color='cyan'>
+        View Remarks
+      </Button>
+
+      <ViewStudentSessions isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} student={userDetails} />
+
+      <Button onClick={showFeeModal} variant='filled' color='green'>
+        Fee Tracker
+      </Button>
+
       <FeeTracker student={userDetails} visible={isFeeModalOpen} onCancel={handleFeeCancel} />
     </Flex>
   )

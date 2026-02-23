@@ -33,13 +33,14 @@ export default function TasksPage() {
 
     const isAdmin = user?.role === "admin";
     const isManager = user?.role === "manager";
+    const isOpsManager = user?.role === "operations_manager";
 
     useEffect(() => {
         // Set center filter for admin
-        if (isAdmin && selectedCenter) {
+        if ((isAdmin || isOpsManager) && selectedCenter) {
             setFilters({ centerId: selectedCenter });
         }
-    }, [selectedCenter, isAdmin]);
+    }, [selectedCenter, isAdmin, isOpsManager]);
 
     useEffect(() => {
         fetch(1);

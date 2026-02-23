@@ -61,7 +61,7 @@ export default function AnnouncementForm() {
           center_id: selected.center_id
         });
       } else {
-        setForm({ title: "", body: "", expires_at: "", is_published: false ,center_id : ""});
+        setForm({ title: "", body: "", expires_at: "", is_published: false, center_id: "" });
       }
       setErrors({});
     }
@@ -84,7 +84,7 @@ export default function AnnouncementForm() {
         message.success("Announcement updated", 2);
       } else {
         let finalData = form;
-        if(user.role === ROLES.MANAGER){
+        if (user.role === ROLES.MANAGER) {
           delete finalData.center_id;
         }
         await create(finalData);
@@ -128,13 +128,13 @@ export default function AnnouncementForm() {
           error={errors.expires_at}
           required
         />
-        {user.role === ROLES.ADMIN && (
-          <Select 
-          style={{width : 150}}
-          options={centerOptions} 
-          value={form.center_id} 
-          placeholder="Select Center"
-          onChange={(value) => setForm((f) => ({ ...f, center_id: value }))}
+        {(user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER) && (
+          <Select
+            style={{ width: 150 }}
+            options={centerOptions}
+            value={form.center_id}
+            placeholder="Select Center"
+            onChange={(value) => setForm((f) => ({ ...f, center_id: value }))}
           />
         )}
         <div className="flex items-center gap-2">

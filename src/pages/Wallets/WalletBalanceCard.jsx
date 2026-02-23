@@ -1,5 +1,8 @@
 import { Card, Avatar, Button } from 'antd'
 import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons'
+import PropTypes from 'prop-types'
+import useUser from '@hooks/useUser'
+import permissions from '@utils/permissions'
 
 function WalletBalanceCard({ wallet, totals = {}, onTopUp, onDeduct }) {
   if (!wallet) return null
@@ -51,8 +54,8 @@ function WalletBalanceCard({ wallet, totals = {}, onTopUp, onDeduct }) {
 
           <div className="mt-4 flex items-center justify-between gap-4">
             <div className="flex gap-3">
-              <Button type="primary" onClick={onTopUp}>Top-up</Button>
-              <Button danger onClick={onDeduct}>Deduct</Button>
+              {permissions.wallets.edit.includes(user.role) && <Button type="primary" onClick={onTopUp}>Top-up</Button>}
+              {permissions.wallets.edit.includes(user.role) && <Button danger onClick={onDeduct}>Deduct</Button>}
             </div>
           </div>
         </div>
@@ -60,9 +63,6 @@ function WalletBalanceCard({ wallet, totals = {}, onTopUp, onDeduct }) {
     </Card>
   )
 }
-
-import PropTypes from 'prop-types'
-import useUser from '@hooks/useUser'
 
 WalletBalanceCard.propTypes = {
   wallet: PropTypes.object,

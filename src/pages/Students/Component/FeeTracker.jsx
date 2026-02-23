@@ -6,6 +6,8 @@ import feeStore from '@stores/FeeStore';
 import { formatDate } from '@utils/helper';
 import CustomInput from '@components/form/CustomInput';
 import { paymentMethods } from '@utils/constants';
+import permissions from '@utils/permissions';
+import userStore from '@stores/UserStore';
 
 const FeeTracker = ({ student, visible, onCancel }) => {
   const {
@@ -20,6 +22,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
     markInstallmentAsPaid,
   } = useStore(feeStore);
 
+  const { user } = useStore(userStore);
   const [paymentModal, setPaymentModal] = useState(false);
   const [selectedBill, setSelectedBill] = useState(null);
   const [form] = Form.useForm();
@@ -226,6 +229,9 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       title: 'Actions',
       key: 'action',
       render: (_, record) => {
+
+        if (!permissions.fee_tracker.edit.includes(user?.role)) return;
+
         if (record.status === 'paid') {
           return <Tag color="green" icon={<CheckCircleOutlined />}>Paid</Tag>;
         }
@@ -341,6 +347,8 @@ const FeeTracker = ({ student, visible, onCancel }) => {
           return <Tag color="green" icon={<CheckCircleOutlined />}>Paid</Tag>;
         }
 
+        if (!permissions.fee_tracker.edit.includes(user?.role)) return null;
+
         const unpaidBill = feeDetails?.bills?.find(b => b.status === "unpaid" && b.subject === 'course');
 
         return (
@@ -409,8 +417,10 @@ const FeeTracker = ({ student, visible, onCancel }) => {
     {
       title: 'Action',
       key: 'action',
-      render: (_, record) => (
-        record.subject === 'course' && (
+      render: (_, record) => {
+        if (!permissions.fee_tracker.edit.includes(user?.role)) return null;
+        if (record.subject !== 'course') return null;
+        return (
           <Button
             type="primary"
             size="small"
@@ -419,8 +429,8 @@ const FeeTracker = ({ student, visible, onCancel }) => {
           >
             Mark as Paid
           </Button>
-        )
-      ),
+        );
+      },
     },
   ];
 

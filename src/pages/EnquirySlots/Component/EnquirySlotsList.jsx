@@ -21,13 +21,13 @@ function EnquirySlotsList() {
   const { selectedCenter } = centersStore();
 
   useEffect(() => {
-    getDemoSlots({ selectedView });     // fetch once when component loads
-    if (user.role === 'admin' && selectedCenter) {
+    // getDemoSlots({ selectedView });     // fetch once when component loads
+    if ((user.role === 'admin' || user.role === 'operations_manager') && selectedCenter) {
       getDemoSlots({ selectedView, centerId: selectedCenter });
     } else {
       getDemoSlots({ selectedView });     // fetch once when component loads
     }
-  }, [selectedView]);
+  }, [selectedView, selectedCenter]);
 
   const handleRowClick = (record) => {
     // Pass the populated enquiry data, not the slot record

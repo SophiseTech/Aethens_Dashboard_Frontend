@@ -6,6 +6,7 @@ import userStore from "@stores/UserStore";
 import userService from "@services/User";
 import NotificationList from "./components/NotificationList";
 import Title from "@components/layouts/Title";
+import centersStore from "@stores/CentersStore";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -21,6 +22,8 @@ export default function Notifications() {
 
   const { user } = useStore(userStore);
   const isAdmin = user?.role === "admin";
+  const isOpsManager = user?.role === "operations_manager";
+  const { selectedCenter } = useStore(centersStore);
 
   const [managers, setManagers] = useState([]);
   const [filters, setFilters] = useState({
@@ -28,16 +31,17 @@ export default function Notifications() {
     limit: 10,
     search: "",
     type: "all",
+    status: "all",
     managerId: null,
   });
 
   useEffect(() => {
     fetchAllNotifications(filters);
-  }, [filters, fetchAllNotifications]);
+  }, [filters, fetchAllNotifications, selectedCenter]);
 
   useEffect(() => {
-    // Only fetch managers list if user is admin
-    if (!isAdmin) return;
+    // Only fetch managers list if user is admin or operations manager
+    if (!isAdmin && !isOpsManager) return;
 
     async function fetchManagers() {
       try {
@@ -50,7 +54,7 @@ export default function Notifications() {
       }
     }
     fetchManagers();
-  }, [isAdmin]);
+  }, [isAdmin, isOpsManager]);
 
   const handleTableChange = (pagination) => {
     setFilters((prev) => ({
@@ -72,6 +76,10 @@ export default function Notifications() {
     setFilters((prev) => ({ ...prev, managerId: value, page: 1 }));
   };
 
+  const handleStatusChange = (value) => {
+    setFilters((prev) => ({ ...prev, status: value, page: 1 }));
+  };
+
   return (
     <Title title="Notifications">
       <div className="">
@@ -79,7 +87,7 @@ export default function Notifications() {
           <Col>
             <div className="flex gap-2">
               {/* Only show manager filter for admins */}
-              {isAdmin && (
+              {(isAdmin || isOpsManager) && (
                 <Select
                   placeholder="Filter by Manager"
                   style={{ width: 200 }}
@@ -102,6 +110,15 @@ export default function Notifications() {
                 <Option value="fee_payment">Fee Payment</Option>
                 <Option value="slot_request">Slot Request</Option>
                 <Option value="enquiry">Enquiry</Option>
+              </Select>
+              <Select
+                defaultValue="all"
+                style={{ width: 130 }}
+                onChange={handleStatusChange}
+              >
+                <Option value="all">All Status</Option>
+                <Option value="read">Read</Option>
+                <Option value="unread">Unread</Option>
               </Select>
               <Search
                 placeholder="Search message..."

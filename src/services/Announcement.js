@@ -8,7 +8,7 @@ function constructPath(path, centerVariableName) {
   const { selectedCenter } = centersStore.getState();
 
   let constructedPath;
-  if (user.role === "admin" && selectedCenter) {
+  if ((user.role === "admin" || user.role === "operations_manager") && selectedCenter) {
     constructedPath = `${path}?${centerVariableName}=${selectedCenter}`;
   } else {
     constructedPath = `${path}?`;
