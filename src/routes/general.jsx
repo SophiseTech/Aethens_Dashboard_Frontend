@@ -25,6 +25,7 @@ const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"));
 const PhaseListPage = lazy(() => import("@pages/FinalProject/PhaseList"));
 const AdminFacultyAttendance = lazy(() => import("@pages/AdminAttendance/AdminFacultyAttendance"));
 const AdminLeaves = lazy(() => import("@pages/AdminLeaves/AdminLeaves"));
+const AdminCourses = lazy(() => import("@pages/AdminCourses"));
 
 const LazyLoader = ({ children }) => {
   const location = useLocation()
@@ -256,6 +257,15 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Manage Leaves",
+          },
+          {
+            path: "/admin/courses",
+            element: (
+              <LazyLoader>
+                <AdminCourses />
+              </LazyLoader>
+            ),
+            title: "Courses",
           },
         ],
       },

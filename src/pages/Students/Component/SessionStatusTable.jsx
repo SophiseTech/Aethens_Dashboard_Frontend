@@ -1,26 +1,26 @@
 import { RestFilled } from '@ant-design/icons'
 import facultyRemarksStore from '@stores/FacultyRemarksStore'
 import courseStore from '@stores/CourseStore'
+import studentSyllabusStore from '@stores/StudentSyllabusStore'
 import { formatDate } from '@utils/helper'
 import permissions from '@utils/permissions'
 import { Button, Image, Input, Select, Space, Table } from 'antd'
 import React, { useEffect, useState, useMemo } from 'react'
 import { useStore } from 'zustand'
+import userStore from '@stores/UserStore'
 
 const { Search } = Input;
 
 function SessionStatusTable({ student }) {
 
   const { getFacultyRemarks, facultyRemarks, loading, deleteFacultyRemark } = useStore(facultyRemarksStore)
-  const { course } = useStore(courseStore); // Get course from courseStore which has full data
+  const { course } = useStore(courseStore);
+  const { syllabus: studentSyllabus, fetchSyllabus } = useStore(studentSyllabusStore);
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchText, setSearchText] = useState('');
+  const { user } = userStore()
 
-  // Use course from courseStore which has syllabusType and images populated
   const syllabusType = course?.syllabusType || 'general';
-
-  console.log('Course from store:', course);
-  console.log('SyllabusType:', syllabusType);
 
   useEffect(() => {
     if (!student?._id) return;
@@ -35,18 +35,34 @@ function SessionStatusTable({ student }) {
       populate: "faculty_id"
     };
 
-    // Add status filter
     if (statusFilter && statusFilter !== 'all') {
       filters.status = statusFilter;
     }
 
-    // Add search filter
     if (searchText) {
       filters.search = searchText;
     }
 
     getFacultyRemarks(filters);
+
+    // Also fetch the student's personal syllabus so we can resolve image URLs
+    // for images added via the gallery (not in course.images)
+    if (courseId) {
+      fetchSyllabus(student._id, courseId);
+    }
   }, [student?._id, student?.details_id?.course_id, statusFilter, searchText]);
+
+  /**
+   * Resolve an image by name.
+   * Checks course.images first (course-level custom syllabus),
+   * then falls back to the student's personal StudentSyllabus images.
+   */
+  const findImageByName = (imageName) => {
+    const courseImg = course?.images?.find(img => img.name === imageName);
+    if (courseImg) return courseImg;
+    const personalImg = studentSyllabus?.images?.find(img => img.name === imageName);
+    return personalImg || null;
+  };
 
   // Build columns based on syllabus type
   const columns = useMemo(() => {
@@ -59,8 +75,7 @@ function SessionStatusTable({ student }) {
         dataIndex: "topic", // topic field stores image name for custom syllabus
         key: "image",
         render: (imageName) => {
-          // Find the image URL from course images
-          const image = course?.images?.find(img => img.name === imageName);
+          const image = findImageByName(imageName);
           return (
             <div className="flex items-center gap-2">
               {image?.url && (
@@ -122,17 +137,17 @@ function SessionStatusTable({ student }) {
         dataIndex: "action",
         key: "action",
         render: (_, record) => (
-           <>
-          {permissions.session_status.delete.includes(user?.role) &&
-            <Button icon={<RestFilled />} color='red' onClick={() => { deleteFacultyRemark(record._id) }} />
-          }
+          <>
+            {permissions.session_status.delete.includes(user?.role) &&
+              <Button icon={<RestFilled />} color='red' onClick={() => { deleteFacultyRemark(record._id) }} />
+            }
           </>
         ),
       }
     );
 
     return cols;
-  }, [syllabusType, course?.images, deleteFacultyRemark]);
+  }, [syllabusType, course?.images, studentSyllabus?.images, deleteFacultyRemark]);
 
   return (
     <div>

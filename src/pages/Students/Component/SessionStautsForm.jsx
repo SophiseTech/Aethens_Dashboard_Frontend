@@ -7,7 +7,7 @@ import courseStore from '@stores/CourseStore';
 import facultyRemarksStore from '@stores/FacultyRemarksStore';
 import facultyStore from '@stores/FacultyStore';
 import userStore from '@stores/UserStore';
-import { Flex, Form } from 'antd';
+import { Flex, Form, Spin } from 'antd';
 import React, { useEffect, useState } from 'react'
 import { useStore } from 'zustand';
 import CustomSyllabusForm from './CustomSyllabusForm';
@@ -22,16 +22,27 @@ function SessionStautsForm({ handleOk, student }) {
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [units, setUnits] = useState([]);
   const [topics, setTopics] = useState([]);
+  // Track whether course has finished loading for this student
+  const [courseLoading, setCourseLoading] = useState(true);
   const { user } = useStore(userStore)
 
   useEffect(() => {
     if (student?.details_id?.course_id) {
-      getCourse(student.details_id.course_id)
+      setCourseLoading(true);
+      getCourse(student.details_id.course_id).finally(() => setCourseLoading(false));
+    } else {
+      setCourseLoading(false);
     }
-    // if (!faculties || total === 0 || faculties.length < total) {
-    //   getFacultiesByCenter(0)
-    // }
-  }, [])
+  }, [student?._id])
+
+  // Show spinner while course data is being fetched
+  if (courseLoading) {
+    return (
+      <div className="flex justify-center items-center py-10">
+        <Spin tip="Loading course..." />
+      </div>
+    );
+  }
 
   // Check syllabus type - if custom, render CustomSyllabusForm
   const syllabusType = course?.syllabusType || 'general';
@@ -99,8 +110,8 @@ function SessionStautsForm({ handleOk, student }) {
     const selectedUnitData = selectedModuleData.units.find(u => u.name === unitName);
     if (selectedUnitData) {
       setTopics(selectedUnitData.topics.map(topic => ({
-        label: topic,
-        value: topic,
+        label: topic.name || topic,   // handle both new object and old string
+        value: topic.name || topic,
       })));
     } else {
       setTopics([]);
