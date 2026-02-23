@@ -219,7 +219,13 @@ const MENU_CONFIG = [
     label: "Syllabus Gallery",
     icon: PictureOutlined,
     path: "/admin/syllabus-gallery",
-    roles: [ROLES.ADMIN],
+    roles: [ROLES.ADMIN, ROLES.MANAGER],
+  },
+  {
+    label: "Syllabus Gallery",
+    icon: PictureOutlined,
+    path: "/faculty/syllabus-gallery",
+    roles: [ROLES.FACULTY],
   },
   {
     label: "Courses",
