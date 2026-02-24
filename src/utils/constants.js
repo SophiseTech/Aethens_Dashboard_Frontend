@@ -235,6 +235,7 @@ export const TASK_PRIORITY = [
 ];
 
 export const TASK_STATUS = [
+  { label: "All", value: "All" },
   { label: "Pending", value: "Pending" },
   { label: "Completed", value: "Completed" },
 ];
