@@ -4,9 +4,11 @@ import { useState } from "react";
 import { Card, Row, Col, Typography, Tag, Divider, Spin, Alert, Button, Select } from "antd";
 import EChart from "@pages/Dashboard/Chart/EChart";
 import enquiryService from "@/services/Enquiry";
+import centersStore from "@stores/CentersStore";
 const { Title, Text } = Typography;
 
 export default function EnquiryDashboard() {
+  const { selectedCenter } = centersStore();
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(false);
   const [period, setPeriod] = useState("last_month");
@@ -21,7 +23,7 @@ export default function EnquiryDashboard() {
     setMetrics(null);
 
     try {
-      const res = await enquiryService.getEnquiryKPI(period);
+      const res = await enquiryService.getEnquiryKPI(period, undefined, undefined, selectedCenter);
 
       if (!res) {
         throw new Error("No response received from server.");
@@ -204,7 +206,7 @@ export default function EnquiryDashboard() {
         horizontal: true,
         borderRadius: 4,
         barHeight: "25%",
-        distributed: true 
+        distributed: true
       }
     },
     colors: ["#4B9EFF", "#FFB74D", "#66BB6A", "#EF5350"],

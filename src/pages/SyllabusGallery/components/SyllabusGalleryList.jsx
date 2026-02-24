@@ -7,7 +7,7 @@ import activitiesStore from '@stores/ActivitiesStore'
 import studentStore from '@stores/StudentStore'
 import { Avatar, Button, Empty, Input, message, Modal, Select, Skeleton, Spin } from 'antd'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { DeleteOutlined, ExclamationCircleOutlined, PlusCircleOutlined, BookOutlined } from '@ant-design/icons'
+import { DeleteOutlined, ExclamationCircleOutlined, PlusCircleOutlined, BookOutlined, PrinterOutlined } from '@ant-design/icons'
 import { useStore } from 'zustand'
 import userStore from '@stores/UserStore'
 
@@ -179,7 +179,7 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                 </h2>
             )}
 
-            <MasonryLayout>
+            <MasonryLayout customBreakPoiints={{ 350: 1, 600: 2, 750: 3, 900: 4 }}>
                 {items.map((item) => (
                     <SyllabusGalleryItem
                         key={item._id}
@@ -232,9 +232,6 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                             <h1 className="text-primary font-bold text-2xl mb-1">
                                 {selectedItem?.name}
                             </h1>
-                            <p className="text-gray-500 text-sm break-all">
-                                {selectedItem?.url}
-                            </p>
                         </div>
 
                         <div className="text-xs text-gray-400">
@@ -243,16 +240,18 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                         </div>
 
                         <div className="flex flex-wrap gap-2 mt-auto">
-                            <SyllabusGalleryForm
-                                isCreate={false}
-                                item={selectedItem}
-                                onSuccess={() => {
-                                    setLoading(true)
-                                    setItems([])
-                                    fetchPage(1, searchRef.current, true).then(() => setLoading(false))
-                                    handleModalClose()
-                                }}
-                            />
+                            {user?.role === 'admin' && (
+                                <SyllabusGalleryForm
+                                    isCreate={false}
+                                    item={selectedItem}
+                                    onSuccess={() => {
+                                        setLoading(true)
+                                        setItems([])
+                                        fetchPage(1, searchRef.current, true).then(() => setLoading(false))
+                                        handleModalClose()
+                                    }}
+                                />
+                            )}
                             {/* Assign to Student Activity */}
                             <Button
                                 icon={<PlusCircleOutlined />}
@@ -268,12 +267,45 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                                 Add to Syllabus
                             </Button>
                             <Button
-                                danger
-                                icon={<DeleteOutlined />}
-                                onClick={() => handleDelete(selectedItem)}
+                                icon={<PrinterOutlined />}
+                                onClick={() => {
+                                    // Remove any existing print iframes
+                                    const oldIframe = document.getElementById('print-iframe');
+                                    if (oldIframe) {
+                                        document.body.removeChild(oldIframe);
+                                    }
+
+                                    // Create a new hidden iframe
+                                    const iframe = document.createElement('iframe');
+                                    iframe.id = 'print-iframe';
+                                    iframe.style.display = 'none';
+                                    document.body.appendChild(iframe);
+
+                                    iframe.contentDocument.head.innerHTML = `
+                                        <title>Print Image</title>
+                                        <style>
+                                            @page { margin: 0; }
+                                            body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: white; }
+                                            img { max-width: 100vw; max-height: 100vh; object-fit: contain; display: block; }
+                                        </style>
+                                    `;
+
+                                    iframe.contentDocument.body.innerHTML = `
+                                        <img src="${selectedItem?.url}" onload="setTimeout(() => { window.parent.document.getElementById('print-iframe').contentWindow.print(); }, 250);" />
+                                    `;
+                                }}
                             >
-                                Delete
+                                Print
                             </Button>
+                            {user?.role === 'admin' && (
+                                <Button
+                                    danger
+                                    icon={<DeleteOutlined />}
+                                    onClick={() => handleDelete(selectedItem)}
+                                >
+                                    Delete
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </div>

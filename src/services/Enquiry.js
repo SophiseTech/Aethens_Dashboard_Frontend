@@ -151,9 +151,14 @@ class EnquiryService {
     }
   }
 
-  async getEnquiryKPI(period, startDate, endDate) {
+  async getEnquiryKPI(period, startDate, endDate, centerId) {
     try {
-      const response = await get(`/v3/enquiry/kpi?period=${period}&startDate=${startDate}&endDate=${endDate}`);
+      let url = `/v3/enquiry/kpi?period=${period}`;
+      if (startDate) url += `&startDate=${startDate}`;
+      if (endDate) url += `&endDate=${endDate}`;
+      if (centerId) url += `&centerId=${centerId}`;
+
+      const response = await get(url);
       if (!response) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {
