@@ -27,7 +27,7 @@ const useManagerTaskStore = create((set, get) => ({
     // Filters
     filters: {
         priority: null,
-        status: null,
+        status: "Pending",
         assignedTo: null,
         search: "",
         deadlineFrom: null,
@@ -48,7 +48,7 @@ const useManagerTaskStore = create((set, get) => ({
         try {
             const { filters, pagination } = get();
             const cleanFilters = Object.fromEntries(
-                Object.entries(filters).filter(([_, v]) => v != null && v !== "")
+                Object.entries(filters).filter(([_, v]) => v != null && v !== "" && v !== "All")
             );
 
             const data = await getTasks(cleanFilters, page, pagination.limit);
@@ -158,7 +158,7 @@ const useManagerTaskStore = create((set, get) => ({
         set({
             filters: {
                 priority: null,
-                status: null,
+                status: "Pending",
                 assignedTo: null,
                 search: "",
                 deadlineFrom: null,

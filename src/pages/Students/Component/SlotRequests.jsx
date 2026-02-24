@@ -37,11 +37,18 @@ function SlotRequests({ handleClose, drawerState }) {
 
   const formattedRequests = useMemo(() => slotRequests?.map(request => ({
     ...request,
-    request_details: <p>
-      {request.raised_by_center?.username} has requested to reschedule their slot
-      from <span className='font-bold'>{formatDate(request?.current_slot?.start_date)}, {formatTime(request?.current_slot?.session?.start_time)}</span>&nbsp;
-      to <span className='font-bold'>{formatDate(request?.requested_slot?.date)}, {formatTime(request?.requested_slot?.date)}</span>
-    </p>
+    request_details: <div>
+      <p>
+        {request.raised_by_center?.username} has requested to reschedule their slot
+        from <span className='font-bold'>{formatDate(request?.current_slot?.start_date)}, {formatTime(request?.current_slot?.session?.start_time)}</span>&nbsp;
+        to <span className='font-bold'>{formatDate(request?.requested_slot?.date)}, {formatTime(request?.requested_slot?.date)}</span>
+      </p>
+      {request.status === 'pending' && request.available_slots !== undefined && (
+        <p className='text-sm text-gray-500 mt-1'>
+          Available slots in requested session: <span className='font-semibold'>{request.available_slots}</span>
+        </p>
+      )}
+    </div>
   })), [slotRequests])
 
   return (

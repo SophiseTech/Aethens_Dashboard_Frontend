@@ -37,7 +37,7 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnquiries }) => {
-  const user = useStore(userStore);
+  const { user } = useStore(userStore);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isBookSlotModalVisible, setIsBookSlotModalVisible] = useState(false);
   const [isCloseModalVisible, setIsCloseModalVisible] = useState(false);

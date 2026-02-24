@@ -77,7 +77,7 @@ function EnquirySlotsList() {
   return (
     <>
       <Segmented
-        options={["All", "Scheduled", "Completed", "Cancelled", "Rescheduled"]}
+        options={["Scheduled", "Completed", "Cancelled", "Rescheduled"]}
         className="w-fit mb-3"
         value={selectedView}
         onChange={setSelectedView}
