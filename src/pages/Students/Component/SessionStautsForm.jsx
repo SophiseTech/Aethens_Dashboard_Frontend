@@ -110,8 +110,8 @@ function SessionStautsForm({ handleOk, student }) {
     const selectedUnitData = selectedModuleData.units.find(u => u.name === unitName);
     if (selectedUnitData) {
       setTopics(selectedUnitData.topics.map(topic => ({
-        label: topic.name || topic,   // handle both new object and old string
-        value: topic.name || topic,
+        label: topic.name || "No Topic",   // handle both new object and old string
+        value: topic.name || "No Topic",
       })));
     } else {
       setTopics([]);
