@@ -76,17 +76,40 @@ function SessionStatusTable({ student }) {
         key: "image",
         render: (imageName) => {
           const image = findImageByName(imageName);
+          const hasMultipleImages = image?.images && image.images.length > 1;
+          const displayUrl = hasMultipleImages ? image.images[0] : (image?.images?.[0] || image?.url);
+
           return (
             <div className="flex items-center gap-2">
-              {image?.url && (
-                <Image
-                  src={image.url}
-                  alt={imageName}
-                  width={50}
-                  height={50}
-                  className="object-cover rounded"
-                  preview={{ src: image.url }}
-                />
+              {displayUrl && (
+                <div className="relative inline-block group/preview cursor-pointer">
+                  {hasMultipleImages ? (
+                    <Image.PreviewGroup>
+                      <Image
+                        src={displayUrl}
+                        alt={imageName}
+                        width={50}
+                        height={50}
+                        className="object-cover rounded hover:opacity-90 transition-opacity"
+                      />
+                      {image.images.slice(1).map((imgUrl, idx) => (
+                        <Image key={idx} src={imgUrl} style={{ display: 'none' }} preview={{ src: imgUrl }} />
+                      ))}
+                      <span className="absolute bottom-0 right-0 bg-black/60 text-white text-[8px] px-1 py-0.5 rounded-tl pointer-events-none group-hover/preview:bg-black/80 transition-colors leading-none">
+                        +{image.images.length - 1} view
+                      </span>
+                    </Image.PreviewGroup>
+                  ) : (
+                    <Image
+                      src={displayUrl}
+                      alt={imageName}
+                      width={50}
+                      height={50}
+                      className="object-cover rounded"
+                      preview={{ src: displayUrl }}
+                    />
+                  )}
+                </div>
               )}
               <span>{imageName}</span>
             </div>

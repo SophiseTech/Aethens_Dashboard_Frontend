@@ -3,7 +3,7 @@ import ActivityAvatar from '@pages/Activities/Components/ActivityAvatar'
 import activitiesStore from '@stores/ActivitiesStore'
 import userStore from '@stores/UserStore'
 import permissions from '@utils/permissions'
-import { Button, Popconfirm, Spin } from 'antd'
+import { Button, Popconfirm, Spin, Image } from 'antd'
 import React, { useState } from 'react'
 import { useStore } from 'zustand'
 
@@ -100,18 +100,88 @@ const Post = ({ title, content }) => {
   )
 }
 
-const ImageThumbnail = ({ url, fileName }) => {
+const ImageThumbnail = ({ url, images, fileName }) => {
+  const [loading, setLoading] = useState(false);
+  const displayUrl = images && images.length > 0 ? images[0] : url;
+
+  const handleDownload = async (e) => {
+    e.stopPropagation();
+    try {
+      setLoading(true);
+
+      const imagesToDownload = images && images.length > 0 ? images : [url];
+
+      const downloadPromises = imagesToDownload.map(async (imgUrl, index) => {
+        if (!imgUrl) return;
+        const response = await fetch(imgUrl);
+        const blob = await response.blob();
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+
+        let downloadName = fileName || "download_image";
+        if (imagesToDownload.length > 1) {
+          // Add index suffix if multiple images
+          const nameParts = downloadName.split('.');
+          const ext = nameParts.length > 1 ? nameParts.pop() : 'jpg'; // Fallback extension
+          const baseName = nameParts.join('.');
+          downloadName = `${baseName}-${index + 1}.${ext}`;
+        }
+
+        link.download = downloadName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        // Revoke object URL after a short delay to free memory
+        setTimeout(() => URL.revokeObjectURL(link.href), 100);
+      });
+
+      await Promise.all(downloadPromises);
+
+    } catch (error) {
+      console.error("Download failed:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className='rounded-xl border border-border bg-card overflow-hidden | w-full md:w-fit'>
-      <a href={url} target="_blank" rel="noopener noreferrer">
-        <img
-          src={url}
+    <div className='rounded-xl border border-border bg-card overflow-hidden | w-full md:w-fit relative group/imageContainer'>
+      {images && images.length > 1 ? (
+        <Image.PreviewGroup>
+          <div className="relative group/preview inline-block">
+            <Image
+              src={images[0]}
+              alt={fileName}
+              className="w-full md:w-64 max-h-48 object-cover hover:opacity-90 transition-opacity cursor-pointer"
+            />
+            {/* Hidden images for preview group */}
+            {images.slice(1).map((imgUrl, idx) => (
+              <Image key={idx} src={imgUrl} style={{ display: 'none' }} preview={{ src: imgUrl }} />
+            ))}
+            <span className="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-md pointer-events-none z-10 group-hover/preview:bg-black/80 transition-colors">
+              +{images.length - 1} view
+            </span>
+          </div>
+        </Image.PreviewGroup>
+      ) : (
+        <Image
+          src={displayUrl}
           alt={fileName}
-          className="w-full md:w-64 max-h-48 object-cover hover:opacity-90 transition-opacity"
+          className="w-full md:w-64 max-h-48 object-cover hover:opacity-90 transition-opacity cursor-pointer"
         />
-      </a>
+      )}
+
+      {/* Download button overlay */}
+      <div
+        onClick={handleDownload}
+        className="absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1.5 cursor-pointer z-20 transition-all opacity-0 group-hover/imageContainer:opacity-100 flex items-center justify-center shadow-sm"
+        title="Download Image"
+      >
+        {loading ? <Spin indicator={<LoadingOutlined style={{ fontSize: 14, color: 'white' }} spin />} /> : <DownloadOutlined style={{ fontSize: 14 }} />}
+      </div>
+
       {fileName && (
-        <p className="text-xs text-gray-500 px-3 py-2 truncate">{fileName}</p>
+        <p className="text-xs text-gray-500 px-3 py-2 truncate relative z-10 bg-card">{fileName}</p>
       )}
     </div>
   );

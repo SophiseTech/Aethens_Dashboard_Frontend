@@ -5,11 +5,12 @@ import AssignCustomSyllabusModal from '@pages/SyllabusGallery/components/AssignC
 import syllabusGalleryService from '@services/SyllabusGalleryService'
 import activitiesStore from '@stores/ActivitiesStore'
 import studentStore from '@stores/StudentStore'
-import { Avatar, Button, Empty, Input, message, Modal, Select, Skeleton, Spin } from 'antd'
+import { Avatar, Button, Empty, Input, message, Modal, Skeleton, Spin, Carousel, Image, Select } from 'antd'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { DeleteOutlined, ExclamationCircleOutlined, PlusCircleOutlined, BookOutlined, PrinterOutlined } from '@ant-design/icons'
 import { useStore } from 'zustand'
 import userStore from '@stores/UserStore'
+import courseService from '@services/Course'
 
 const { confirm } = Modal
 const PAGE_LIMIT = 20
@@ -23,6 +24,12 @@ function SyllabusGalleryList({ searchQuery = '' }) {
     const [selectedItem, setSelectedItem] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isSyllabusModalOpen, setIsSyllabusModalOpen] = useState(false)
+
+    // Filters
+    const [courseFilter, setCourseFilter] = useState('all')
+    const [typeFilter, setTypeFilter] = useState('all')
+    const [courses, setCourses] = useState([])
+
     // Assign-to-Activity state
     const [isActivityModalOpen, setIsActivityModalOpen] = useState(false)
     const [activityStudent, setActivityStudent] = useState(null)
@@ -38,13 +45,32 @@ function SyllabusGalleryList({ searchQuery = '' }) {
     const debounceRef = useRef(null)
     const activityDebounceRef = useRef(null)
 
+    // Fetch courses for filter dropdown
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const data = await courseService.getCourses({}, 0, 1000)
+                if (data && data.courses) {
+                    setCourses(data.courses)
+                } else if (Array.isArray(data)) {
+                    setCourses(data)
+                }
+            } catch (error) {
+                console.error("Failed to fetch courses:", error)
+            }
+        }
+        fetchCourses()
+    }, [])
+
     // ── Fetch a single page ───────────────────────────────────
-    const fetchPage = useCallback(async (pageNum, search, replace = false) => {
+    const fetchPage = useCallback(async (pageNum, search, course, type, replace = false) => {
         try {
             const response = await syllabusGalleryService.getSyllabusGalleryImages({
                 page: pageNum,
                 limit: PAGE_LIMIT,
                 search,
+                course,
+                type,
             })
             const { data, hasMore: more } = response.data
 
@@ -56,7 +82,7 @@ function SyllabusGalleryList({ searchQuery = '' }) {
         }
     }, [])
 
-    // ── Initial load / search change ─────────────────────────
+    // ── Initial load / search change / filter change ─────────────────────────
     useEffect(() => {
         // Debounce search changes
         clearTimeout(debounceRef.current)
@@ -65,12 +91,12 @@ function SyllabusGalleryList({ searchQuery = '' }) {
             setLoading(true)
             setItems([])
             setHasMore(true)
-            await fetchPage(1, searchQuery, true)
+            await fetchPage(1, searchQuery, courseFilter, typeFilter, true)
             setLoading(false)
-        }, searchQuery === searchRef.current ? 0 : 300)
+        }, 300) // Always apply a slight debounce to prevent race conditions on quick filter taps
 
         return () => clearTimeout(debounceRef.current)
-    }, [searchQuery, fetchPage])
+    }, [searchQuery, courseFilter, typeFilter, fetchPage])
 
     // ── IntersectionObserver — sentinel at bottom of list ────
     useEffect(() => {
@@ -81,7 +107,7 @@ function SyllabusGalleryList({ searchQuery = '' }) {
             async ([entry]) => {
                 if (!entry.isIntersecting || !hasMore || loadingMore || loading) return
                 setLoadingMore(true)
-                await fetchPage(page + 1, searchRef.current)
+                await fetchPage(page + 1, searchRef.current, courseFilter, typeFilter)
                 setLoadingMore(false)
             },
             { threshold: 0.1 }
@@ -89,7 +115,7 @@ function SyllabusGalleryList({ searchQuery = '' }) {
 
         observer.observe(sentinel)
         return () => observer.disconnect()
-    }, [hasMore, loadingMore, loading, page, fetchPage])
+    }, [hasMore, loadingMore, loading, page, courseFilter, typeFilter, fetchPage])
 
     const showModal = (item) => { setSelectedItem(item); setIsModalOpen(true) }
     const handleModalClose = () => { setIsModalOpen(false); setSelectedItem(null) }
@@ -108,18 +134,26 @@ function SyllabusGalleryList({ searchQuery = '' }) {
     const handleAssignToActivity = async () => {
         if (!activityStudent || !selectedItem) return
         setActivityAssigning(true)
+
+        const resourcePayload = {
+            fileName: selectedItem.name,
+            fileType: 'image',
+            fileSize: '0',
+        };
+
+        if (selectedItem.images && selectedItem.images.length > 0) {
+            resourcePayload.images = selectedItem.images;
+        } else {
+            resourcePayload.url = selectedItem.url;
+        }
+
         try {
             await createActivity({
                 faculty_id: user._id,
                 student_id: activityStudent._id,
                 title: selectedItem.name,
                 type: 'image',
-                resource: {
-                    url: selectedItem.url,
-                    fileName: selectedItem.name,
-                    fileType: 'image',
-                    fileSize: '0',
-                },
+                resource: resourcePayload,
             })
             setIsActivityModalOpen(false)
             setActivityStudent(null)
@@ -144,7 +178,7 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                     // Reset and reload from page 1
                     setLoading(true)
                     setItems([])
-                    await fetchPage(1, searchRef.current, true)
+                    await fetchPage(1, searchRef.current, courseFilter, typeFilter, true)
                     setLoading(false)
                     if (isModalOpen && selectedItem?._id === item._id) handleModalClose()
                 } catch (error) {
@@ -155,58 +189,100 @@ function SyllabusGalleryList({ searchQuery = '' }) {
     }
 
     // ── Render ────────────────────────────────────────────────
-    if (loading) return <Loader />
-
-    if (!loading && items.length === 0) {
-        return (
-            <div className="flex justify-center items-center py-20">
-                <Empty
-                    description={
-                        searchQuery
-                            ? `No results found for "${searchQuery}"`
-                            : 'No gallery images yet. Click "Add Gallery Image" to get started.'
-                    }
-                />
-            </div>
-        )
-    }
+    if (loading && items.length === 0) return <Loader />
 
     return (
         <div>
-            {searchQuery && (
-                <h2 className="mb-4 text-gray-500 text-lg">
-                    Search results for <span className="font-bold capitalize">{searchQuery}</span>
-                </h2>
+            {/* Context Header & Filters */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                {searchQuery ? (
+                    <h2 className="text-gray-500 text-lg flex-1">
+                        Search results for <span className="font-bold capitalize">{searchQuery}</span>
+                    </h2>
+                ) : (
+                    <div className="flex-1" />
+                )}
+
+                {/* Filters */}
+                <div className="flex flex-wrap items-center gap-3">
+                    <Select
+                        showSearch
+                        placeholder="Filter by Course"
+                        optionFilterProp="children"
+                        className="w-48"
+                        value={courseFilter}
+                        onChange={setCourseFilter}
+                        filterOption={(input, option) =>
+                            (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                        }
+                    >
+                        <Select.Option value="all">All Courses</Select.Option>
+                        {courses.map(c => (
+                            <Select.Option key={c._id} value={c._id}>
+                                {c.course_name}
+                            </Select.Option>
+                        ))}
+                    </Select>
+
+                    <Select
+                        placeholder="Image Type"
+                        className="w-36"
+                        value={typeFilter}
+                        onChange={setTypeFilter}
+                    >
+                        <Select.Option value="all">All Types</Select.Option>
+                        <Select.Option value="single">Single Images</Select.Option>
+                        <Select.Option value="set">Image Sets</Select.Option>
+                    </Select>
+                </div>
+            </div>
+
+            {!loading && items.length === 0 && (
+                <div className="flex justify-center items-center py-20">
+                    <Empty
+                        description={
+                            searchQuery || courseFilter !== 'all' || typeFilter !== 'all'
+                                ? `No results found for applied filters`
+                                : 'No gallery images yet. Click "Add Gallery Image" to get started.'
+                        }
+                    />
+                </div>
             )}
 
-            <MasonryLayout customBreakPoiints={{ 350: 1, 600: 2, 750: 3, 900: 4 }}>
-                {items.map((item) => (
-                    <SyllabusGalleryItem
-                        key={item._id}
-                        item={item}
-                        onClick={() => showModal(item)}
-                    />
-                ))}
-            </MasonryLayout>
+            {items.length > 0 && (
+                <MasonryLayout customBreakPoiints={{ 350: 1, 600: 2, 750: 3, 900: 4 }}>
+                    {items.map((item) => (
+                        <SyllabusGalleryItem
+                            key={item._id}
+                            item={item}
+                            onClick={() => showModal(item)}
+                        />
+                    ))}
+                </MasonryLayout>
+            )}
 
             {/* Sentinel div — IntersectionObserver watches this */}
             <div ref={sentinelRef} className="h-4" />
 
             {/* Bottom skeleton while loading next page */}
-            {loadingMore && (
-                <MasonryLayout>
-                    <Skeleton.Node active className="!w-full" style={{ height: 300 }} />
-                    <Skeleton.Node active className="!w-full" style={{ height: 250 }} />
-                    <Skeleton.Node active className="!w-full" style={{ height: 350 }} />
-                </MasonryLayout>
-            )}
+            {
+                loadingMore && (
+                    <MasonryLayout>
+                        <Skeleton.Node active className="!w-full" style={{ height: 300 }} />
+                        <Skeleton.Node active className="!w-full" style={{ height: 250 }} />
+                        <Skeleton.Node active className="!w-full" style={{ height: 350 }} />
+                    </MasonryLayout>
+                )
+            }
 
             {/* End of results message */}
-            {!hasMore && items.length > 0 && (
-                <p className="text-center text-gray-400 text-sm py-6">
-                    All {items.length} images loaded
-                </p>
-            )}
+            {
+                !hasMore && items.length > 0 && (
+                    <p className="text-center text-gray-400 text-sm py-6">
+                        All {items.length} images loaded
+                    </p>
+                )
+            }
 
             {/* Detail Modal */}
             <Modal
@@ -219,11 +295,29 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                 <div className="flex gap-6 max-lg:flex-col">
                     {/* Image */}
                     <div className="w-full lg:w-1/2">
-                        <img
-                            src={selectedItem?.url}
-                            alt={selectedItem?.name}
-                            className="rounded-lg overflow-hidden w-full object-contain"
-                        />
+                        {selectedItem?.images && selectedItem.images.length > 1 ? (
+                            <Carousel arrows dots className="bg-gray-100 rounded-lg overflow-hidden">
+                                {selectedItem.images.map((imgUrl, i) => (
+                                    <div key={i}>
+                                        <Image
+                                            src={imgUrl}
+                                            alt={`${selectedItem?.name} - part ${i + 1}`}
+                                            className="w-full object-contain"
+                                            style={{ maxHeight: '60vh' }}
+                                            preview={{ src: imgUrl }}
+                                        />
+                                    </div>
+                                ))}
+                            </Carousel>
+                        ) : (
+                            <Image
+                                src={selectedItem?.images && selectedItem.images.length > 0 ? selectedItem.images[0] : selectedItem?.url}
+                                alt={selectedItem?.name}
+                                className="rounded-lg overflow-hidden w-full object-contain bg-gray-100"
+                                style={{ maxHeight: '60vh' }}
+                                preview={{ src: selectedItem?.images && selectedItem.images.length > 0 ? selectedItem.images[0] : selectedItem?.url }}
+                            />
+                        )}
                     </div>
 
                     {/* Details */}
@@ -247,7 +341,7 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                                     onSuccess={() => {
                                         setLoading(true)
                                         setItems([])
-                                        fetchPage(1, searchRef.current, true).then(() => setLoading(false))
+                                        fetchPage(1, searchRef.current, courseFilter, typeFilter, true).then(() => setLoading(false))
                                         handleModalClose()
                                     }}
                                 />
@@ -284,15 +378,27 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                                     iframe.contentDocument.head.innerHTML = `
                                         <title>Print Image</title>
                                         <style>
-                                            @page { margin: 0; }
-                                            body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: white; }
-                                            img { max-width: 100vw; max-height: 100vh; object-fit: contain; display: block; }
+                                            @page { margin: 0; size: auto; }
+                                            body { margin: 0; padding: 0; display: block; background: white; }
+                                            img { width: 100vw; height: 100vh; object-fit: contain; display: block; page-break-after: always; break-after: page; margin: 0; }
+                                            /* Remove page break for the last image */
+                                            img:last-child { page-break-after: auto; break-after: auto; }
                                         </style>
                                     `;
 
+                                    const imagesHTML = (selectedItem?.images && selectedItem.images.length > 0)
+                                        ? selectedItem.images.map(url => `<img src="${url}" />`).join('')
+                                        : `<img src="${selectedItem?.url}" />`;
+
                                     iframe.contentDocument.body.innerHTML = `
-                                        <img src="${selectedItem?.url}" onload="setTimeout(() => { window.parent.document.getElementById('print-iframe').contentWindow.print(); }, 250);" />
+                                        <div style="display: block; width: 100%;">
+                                            ${imagesHTML}
+                                        </div>
                                     `;
+
+                                    setTimeout(() => {
+                                        window.parent.document.getElementById('print-iframe').contentWindow.print();
+                                    }, 500);
                                 }}
                             >
                                 Print
@@ -321,7 +427,7 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                 destroyOnClose
             >
                 <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <img src={selectedItem?.url} alt={selectedItem?.name} className="w-12 h-12 object-cover rounded" />
+                    <img src={selectedItem?.images && selectedItem.images.length > 0 ? selectedItem.images[0] : selectedItem?.url} alt={selectedItem?.name} className="w-12 h-12 object-cover rounded" />
                     <p className="font-semibold text-sm truncate">{selectedItem?.name}</p>
                 </div>
                 <Input
@@ -378,14 +484,16 @@ function SyllabusGalleryList({ searchQuery = '' }) {
             </Modal>
 
             {/* Add to Student Syllabus modal */}
-            {selectedItem && (
-                <AssignCustomSyllabusModal
-                    open={isSyllabusModalOpen}
-                    onClose={() => setIsSyllabusModalOpen(false)}
-                    galleryImage={selectedItem}
-                />
-            )}
-        </div>
+            {
+                selectedItem && (
+                    <AssignCustomSyllabusModal
+                        open={isSyllabusModalOpen}
+                        onClose={() => setIsSyllabusModalOpen(false)}
+                        galleryImage={selectedItem}
+                    />
+                )
+            }
+        </div >
     )
 }
 

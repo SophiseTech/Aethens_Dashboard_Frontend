@@ -88,12 +88,19 @@ function CustomSyllabusForm({ student, course }) {
                                         }`}
                                     onClick={() => setSelectedImage(image)}
                                     cover={
-                                        <Image
-                                            alt={image.name}
-                                            src={image.url}
-                                            preview={false}
-                                            style={{ width: '100%', height: '160px', objectFit: 'cover' }}
-                                        />
+                                        <div className="relative group/preview inline-block w-full h-[160px]">
+                                            <Image
+                                                alt={image.name}
+                                                src={image.images && image.images.length > 0 ? image.images[0] : image.url}
+                                                preview={false}
+                                                style={{ width: '100%', height: '160px', objectFit: 'cover' }}
+                                            />
+                                            {image.images && image.images.length > 1 && (
+                                                <span className="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-md pointer-events-none z-10 group-hover/preview:bg-black/80 transition-colors">
+                                                    +{image.images.length - 1} view
+                                                </span>
+                                            )}
+                                        </div>
                                     }
                                 >
                                     <Card.Meta
