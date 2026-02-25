@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { Avatar, Button, Empty, Input, Modal, Spin, Tag, Tooltip } from 'antd';
 import { CloseOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons';
 import studentStore from '@stores/StudentStore';
@@ -59,12 +60,19 @@ function AssignCustomSyllabusModal({ open, onClose, galleryImage }) {
         const courseId = selectedStudent?.details_id?.course_id;
         if (!courseId) return;
 
-        await addImage(selectedStudent._id, courseId, {
+        const payload = {
             galleryImageId: galleryImage._id,
             name: galleryImage.name,
-            url: galleryImage.url,
             sessionsRequired: 0,
-        });
+        };
+
+        if (galleryImage.images && galleryImage.images.length > 0) {
+            payload.images = galleryImage.images;
+        } else {
+            payload.url = galleryImage.url;
+        }
+
+        await addImage(selectedStudent._id, courseId, payload);
         handleClose();
     };
 
@@ -80,13 +88,17 @@ function AssignCustomSyllabusModal({ open, onClose, galleryImage }) {
             {/* Image being assigned */}
             <div className="flex items-center gap-3 mb-5 p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <img
-                    src={galleryImage?.url}
+                    src={galleryImage?.images && galleryImage.images.length > 0 ? galleryImage.images[0] : galleryImage?.url}
                     alt={galleryImage?.name}
                     className="w-14 h-14 object-cover rounded-lg flex-shrink-0"
                 />
                 <div className="min-w-0">
                     <p className="font-semibold text-sm truncate">{galleryImage?.name}</p>
-                    <p className="text-xs text-gray-400 truncate">{galleryImage?.url}</p>
+                    <p className="text-xs text-gray-400 truncate">
+                        {galleryImage?.images && galleryImage.images.length > 1
+                            ? `${galleryImage.images.length} images set`
+                            : (galleryImage?.url || 'Image Set')}
+                    </p>
                 </div>
             </div>
 
@@ -152,17 +164,24 @@ function AssignCustomSyllabusModal({ open, onClose, galleryImage }) {
                     ) : (
                         <>
                             <p className="text-xs text-gray-500 mb-2">
-                                Current custom syllabus ({syllabus?.images?.length || 0} images):
+                                Current custom syllabus ({syllabus?.images?.length || 0} items):
                             </p>
                             {syllabus?.images?.length > 0 ? (
                                 <div className="flex flex-wrap gap-2 max-h-28 overflow-y-auto">
                                     {syllabus.images.map((img, i) => (
                                         <Tooltip key={i} title={img.name}>
-                                            <img
-                                                src={img.url}
-                                                alt={img.name}
-                                                className="w-12 h-12 object-cover rounded border border-gray-200"
-                                            />
+                                            <div className="relative">
+                                                <img
+                                                    src={img.images && img.images.length > 0 ? img.images[0] : img.url}
+                                                    alt={img.name}
+                                                    className="w-12 h-12 object-cover rounded border border-gray-200"
+                                                />
+                                                {img.images && img.images.length > 1 && (
+                                                    <span className="absolute bottom-0 right-0 bg-black/60 text-white text-[9px] px-1 rounded-tl">
+                                                        +{img.images.length - 1}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </Tooltip>
                                     ))}
                                 </div>
@@ -171,7 +190,7 @@ function AssignCustomSyllabusModal({ open, onClose, galleryImage }) {
                             )}
                             {alreadyAssigned && (
                                 <p className="text-xs text-amber-600 mt-2">
-                                    ⚠ This image is already in this student's syllabus
+                                    ⚠ This item is already in this student's syllabus
                                 </p>
                             )}
                         </>
@@ -195,5 +214,16 @@ function AssignCustomSyllabusModal({ open, onClose, galleryImage }) {
         </Modal>
     );
 }
+
+AssignCustomSyllabusModal.propTypes = {
+    open: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+    galleryImage: PropTypes.shape({
+        _id: PropTypes.string,
+        name: PropTypes.string,
+        url: PropTypes.string,
+        images: PropTypes.arrayOf(PropTypes.string)
+    })
+};
 
 export default AssignCustomSyllabusModal;

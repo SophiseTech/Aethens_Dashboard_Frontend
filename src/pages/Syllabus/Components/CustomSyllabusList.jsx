@@ -16,15 +16,38 @@ function CustomSyllabusList({ images, loading, statusFilter, setStatusFilter, se
             dataIndex: 'url',
             key: 'url',
             width: 100,
-            render: (url, record) => (
-                <Image
-                    src={url}
-                    alt={record.name}
-                    width={80}
-                    height={80}
-                    className="object-cover rounded"
-                />
-            ),
+            render: (url, record) => {
+                const displayUrl = record.images && record.images.length > 0 ? record.images[0] : url;
+                return (
+                    <div className="relative inline-block group/preview cursor-pointer">
+                        {record.images && record.images.length > 1 ? (
+                            <Image.PreviewGroup>
+                                <Image
+                                    src={displayUrl}
+                                    alt={record.name}
+                                    width={80}
+                                    height={80}
+                                    className="object-cover rounded hover:opacity-90 transition-opacity"
+                                />
+                                {record.images.slice(1).map((imgUrl, idx) => (
+                                    <Image key={idx} src={imgUrl} style={{ display: 'none' }} preview={{ src: imgUrl }} />
+                                ))}
+                                <span className="absolute bottom-0 right-0 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-tl pointer-events-none group-hover/preview:bg-black/80 transition-colors">
+                                    +{record.images.length - 1} view
+                                </span>
+                            </Image.PreviewGroup>
+                        ) : (
+                            <Image
+                                src={displayUrl}
+                                alt={record.name}
+                                width={80}
+                                height={80}
+                                className="object-cover rounded hover:opacity-90 transition-opacity"
+                            />
+                        )}
+                    </div>
+                );
+            },
         },
         {
             title: 'Name',
@@ -40,12 +63,10 @@ function CustomSyllabusList({ images, loading, statusFilter, setStatusFilter, se
                 title: 'Sessions',
                 dataIndex: 'sessionCount',
                 key: 'sessionCount',
-                render: (sessionCount, record) => {
-                    const totalSessions = record.sessionsRequired || 10;
+                render: (sessionCount) => {
                     return (
                         <span className="text-sm">
                             <span className="font-semibold">{sessionCount}</span>
-                            {/* <span className="text-gray-500">/{totalSessions}</span> */}
                         </span>
                     );
                 },

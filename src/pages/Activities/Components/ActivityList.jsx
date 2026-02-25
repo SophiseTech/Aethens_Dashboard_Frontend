@@ -20,7 +20,7 @@ function ActivityList({ activities }) {
           key={index}
         >
           {isImage(activity) ? (
-            <ActivityItem.Image url={activity?.resource?.url} fileName={activity?.resource?.fileName || activity?.title} />
+            <ActivityItem.Image url={activity?.resource?.url} images={activity?.resource?.images} fileName={activity?.resource?.fileName || activity?.title} />
           ) : isDocument(activity) ? (
             <ActivityItem.Document fileName={activity?.resource?.fileName} fileSize={formatFileSize(activity?.resource?.fileSize)} type={activity?.resource?.fileType} url={activity?.resource?.url} />
           ) : (

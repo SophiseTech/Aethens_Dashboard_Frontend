@@ -6,9 +6,14 @@ class SyllabusGalleryService {
      * Get all syllabus gallery images
      * @returns {Promise<Array>} Array of gallery images
      */
-    async getSyllabusGalleryImages({ page = 1, limit = 20, search = "" } = {}) {
+    async getSyllabusGalleryImages({ page = 1, limit = 20, search = "", course = "", type = "" } = {}) {
         try {
-            const params = new URLSearchParams({ page, limit, ...(search && { search }) });
+            const paramsParams = { page, limit };
+            if (search) paramsParams.search = search;
+            if (course && course !== 'all') paramsParams.course = course;
+            if (type && type !== 'all') paramsParams.type = type;
+
+            const params = new URLSearchParams(paramsParams);
             const response = await get(`/v2/syllabusGallery?${params}`);
             if (!response || !response.data)
                 throw new Error("An error occurred. Please try again");
@@ -46,8 +51,11 @@ class SyllabusGalleryService {
      */
     async createSyllabusGalleryImage(data) {
         try {
-            if (!data.name || !data.url) {
-                throw new Error("Please fill all required fields");
+            if (!data.name) {
+                throw new Error("Please provide a name");
+            }
+            if (!data.url && (!data.images || !Array.isArray(data.images) || data.images.length === 0)) {
+                throw new Error("Please provide an image or images array");
             }
             const response = await post("/v2/syllabusGallery", data);
             if (!response || !response.data)
@@ -68,8 +76,11 @@ class SyllabusGalleryService {
     async updateSyllabusGalleryImage(id, data) {
         try {
             if (!id) throw new Error("Invalid image ID");
-            if (!data.name || !data.url) {
-                throw new Error("Please fill all required fields");
+            if (!data.name) {
+                throw new Error("Please provide a name");
+            }
+            if (!data.url && (!data.images || !Array.isArray(data.images) || data.images.length === 0)) {
+                throw new Error("Please provide an image or images array");
             }
             const response = await put(`/v2/syllabusGallery/${id}`, data);
             if (!response || !response.data)
