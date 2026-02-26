@@ -52,7 +52,7 @@ export const generalRoutes = [
     title: "Login | School Of Aethens",
   },
   {
-    element: <Protected roles={[ROLES.STUDENT, ROLES.MANAGER, ROLES.FACULTY, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]} />,
+    element: <Protected roles={[ROLES.STUDENT, ROLES.MANAGER, ROLES.FACULTY, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER]} />,
     children: [
       {
         element: <SidebarLayout />,
@@ -258,6 +258,16 @@ export const generalRoutes = [
             ),
             title: "Manage Leaves",
           },
+        ],
+      },
+    ],
+  },
+  {
+    element: <Protected roles={[ROLES.ADMIN, ROLES.ACADEMIC_MANAGER]} />,
+    children: [
+      {
+        element: <SidebarLayout />,
+        children: [
           {
             path: "/admin/courses",
             element: (

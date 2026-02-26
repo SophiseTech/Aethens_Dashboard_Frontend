@@ -122,7 +122,7 @@ function StudentList() {
       // Determine toBranch based on role
       // Admin: use selected toBranch
       // Manager: use their center_id when fromBranch is set
-      const toBranchParam = (user?.role === ROLES.ADMIN || user?.role === ROLES.OPERATIONS_MANAGER)
+      const toBranchParam = (user?.role === ROLES.ADMIN || user?.role === ROLES.OPERATIONS_MANAGER || user?.role === ROLES.ACADEMIC_MANAGER)
         ? (toBranch || null)
         : (fromBranch ? user?.center_id : null);
 
@@ -385,7 +385,7 @@ function StudentList() {
     );
 
     const views = ['Current Students', 'Active Students', 'All Students'];
-    if (user?.role === ROLES.ADMIN || user?.role === ROLES.FACULTY || user?.role === ROLES.OPERATIONS_MANAGER) {
+    if (user?.role === ROLES.ADMIN || user?.role === ROLES.FACULTY || user?.role === ROLES.OPERATIONS_MANAGER || user.role === ROLES.ACADEMIC_MANAGER) {
       views.push('Todays Students');
     }
 

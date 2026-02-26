@@ -27,7 +27,7 @@ const AdminCenterSelector = () => {
 
   return (
     <>
-      {(user.role === "admin" || user.role === "operations_manager") && (
+      {(user.role === "admin" || user.role === "operations_manager" || user.role === "academic_manager") && (
         <Select
           value={selectedCenter}
           onChange={(value) =>

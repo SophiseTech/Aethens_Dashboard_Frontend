@@ -3,7 +3,8 @@ export const ROLES = {
   MANAGER: "manager",
   ADMIN: "admin",
   FACULTY: "faculty",
-  OPERATIONS_MANAGER: "operations_manager"
+  OPERATIONS_MANAGER: "operations_manager",
+  ACADEMIC_MANAGER: "academic_manager"
 }
 
 export const imageCategories = [

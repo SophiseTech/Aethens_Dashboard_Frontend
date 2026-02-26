@@ -17,7 +17,7 @@ function ManagerFacultyDevelopmentProgram() {
   const { getPrograms, programs } = useStore(facultyDevProgramStore)
   const { user } = useStore(userStore)
   const { selectedCenter } = useStore(centersStore);
-  const centerId = (user.role === "admin" && selectedCenter) ? selectedCenter : user.center_id;
+  const centerId = ((user.role === "admin" || user.role === "academic_manager") && selectedCenter) ? selectedCenter : user.center_id;
 
   useEffect(() => {
     getPrograms(10, {

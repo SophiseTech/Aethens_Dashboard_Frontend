@@ -25,6 +25,8 @@ function DrawerActionButtons({ userDetails }) {
     return <FacultyActionButton userDetails={userDetails} />
   } else if (user.role === ROLES.OPERATIONS_MANAGER) {
     return <OperationsManagerActionButtons userDetails={userDetails} />
+  } else if (user.role === ROLES.ACADEMIC_MANAGER) {
+    return <AcademicManagerActionButtons userDetails={userDetails} />
   }
   return null
 }
@@ -177,6 +179,63 @@ const OperationsManagerActionButtons = ({ userDetails }) => {
       <Button onClick={showFeeModal} variant='filled' color='green'>
         Fee Tracker
       </Button>
+
+      <FeeTracker student={userDetails} visible={isFeeModalOpen} onCancel={handleFeeCancel} />
+    </Flex>
+  )
+}
+
+const AcademicManagerActionButtons = ({ userDetails }) => {
+  const nav = useNavigate()
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { handleCancel: handleFeeCancel, isModalOpen: isFeeModalOpen, handleOk: handleFeeOk, showModal: showFeeModal } = useModal()
+
+  const handleViewAttendance = (student_id, course_id) => {
+    nav(`/manager/attendance/${student_id}/c/${course_id}`);
+  };
+
+  const handleViewCourseHistory = (student_id) => {
+    nav(`/manager/courseHistory/${student_id}`);
+  };
+
+  const handleViewRemarks = (student_id) => {
+    nav(`/manager/remarks/s/${student_id}`);
+  };
+
+  const handleViewFinalProject = (student_id) => {
+    nav(`/manager/final-project/student/${student_id}/details`);
+  };
+
+  const handleViewActivities = (student_id) => {
+    nav(`/faculty/activities/student/${student_id}`)
+  }
+
+  const handleViewSession = () => {
+    setIsModalOpen(true);
+  };
+
+  return (
+    <Flex wrap gap={10}>
+      <Button onClick={() => handleViewAttendance(userDetails._id, userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id)} variant="filled" color="orange">
+        View Attendance
+      </Button>
+      <Button onClick={handleViewSession} disabled={!isUserActive(userDetails)} variant='filled' color='magenta'>
+        View Sessions
+      </Button>
+      <Button onClick={() => handleViewCourseHistory(userDetails?._id)} variant='filled' color='cyan'>
+        View Course History
+      </Button>
+      <Button onClick={() => handleViewRemarks(userDetails?._id)} variant='filled' color='cyan'>
+        View Remarks
+      </Button>
+      <Button onClick={() => handleViewFinalProject(userDetails?._id, userDetails?.details_id?.course_id)} variant='filled' color='orange'>
+        View Final Project
+      </Button>
+      <Button onClick={() => { handleViewActivities(userDetails._id) }} variant='filled' color='lime'>
+        View Activities
+      </Button>
+
+      <ViewStudentSessions isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} student={userDetails} />
 
       <FeeTracker student={userDetails} visible={isFeeModalOpen} onCancel={handleFeeCancel} />
     </Flex>

@@ -37,12 +37,13 @@ const studentStore = create((set, get) => ({
         user.role !== ROLES.MANAGER &&
         user.role !== ROLES.FACULTY &&
         user.role !== ROLES.ADMIN &&
-        user.role !== ROLES.OPERATIONS_MANAGER
+        user.role !== ROLES.OPERATIONS_MANAGER &&
+        user.role !== ROLES.ACADEMIC_MANAGER
       ) {
         throw new Error("Unauthorized");
       }
       let centerId;
-      if (user.role === "admin" || user.role === "operations_manager") {
+      if (user.role === "admin" || user.role === "operations_manager" || user.role === "academic_manager") {
         centerId = selectedCenter;
       } else {
         centerId = user.center_id;
@@ -79,7 +80,7 @@ const studentStore = create((set, get) => ({
       set({ loading: true });
       const { user } = userStore.getState();
       const { selectedCenter } = centersStore.getState();
-      if ((user.role === "admin" || user.role === "operations_manager") && selectedCenter) {
+      if ((user.role === "admin" || user.role === "operations_manager" || user.role === "academic_manager") && selectedCenter) {
         const users = await userService.getCurrentSessionAttendees(
           selectedCenter
         );
@@ -106,12 +107,12 @@ const studentStore = create((set, get) => ({
       set({ loading: true });
       console.log(user);
 
-      if (user.role !== ROLES.ADMIN && user.role !== ROLES.FACULTY && user.role !== ROLES.OPERATIONS_MANAGER)
+      if (user.role !== ROLES.ADMIN && user.role !== ROLES.FACULTY && user.role !== ROLES.OPERATIONS_MANAGER && user.role !== ROLES.ACADEMIC_MANAGER)
         throw new Error("Unauthorized access!");
 
       let effectiveCenterId;
 
-      if ((user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER) && selectedCenter) {
+      if ((user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER || user.role === ROLES.ACADEMIC_MANAGER) && selectedCenter) {
         effectiveCenterId = selectedCenter;
       } else {
         effectiveCenterId = user.center_id;

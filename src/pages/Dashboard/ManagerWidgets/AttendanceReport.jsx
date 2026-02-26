@@ -112,7 +112,7 @@ function AttendanceReport({ dateRange: dashboardDateRange, onDateRangeChange }) 
         setLoading(true);
 
         const centerId =
-          user.role === 'admin' ? selectedCenter : user.center_id;
+          (user.role === 'admin' || user.role === 'academic_manager') ? selectedCenter : user.center_id;
 
         const payload = {
           filters: {

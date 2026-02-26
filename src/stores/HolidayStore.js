@@ -35,7 +35,7 @@ const holidayStore = create((set, get) => ({
 
       // Determine center ID based on role
       let centerId;
-      if (user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER) {
+      if (user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER || user.role === ROLES.ACADEMIC_MANAGER) {
         centerId = selectedCenter || null;
       } else if (user.role === ROLES.MANAGER) {
         centerId = user.center_id;
@@ -83,7 +83,7 @@ const holidayStore = create((set, get) => ({
       let centerId = data.centerId;
       if (user.role === ROLES.MANAGER) {
         centerId = user.center_id;
-      } else if ((user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER) && !centerId) {
+      } else if ((user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER || user.role === ROLES.ACADEMIC_MANAGER) && !centerId) {
         centerId = selectedCenter;
       }
 

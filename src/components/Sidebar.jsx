@@ -33,7 +33,7 @@ const MENU_CONFIG = [
     label: "Dashboard",
     icon: AppstoreOutlined,
     path: "/",
-    roles: [ROLES.STUDENT, ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    roles: [ROLES.STUDENT, ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER],
   },
   {
     label: "Students",
@@ -81,7 +81,7 @@ const MENU_CONFIG = [
     label: "Students",
     icon: SolutionOutlined,
     path: "/manager/students",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER],
   },
   {
     label: "Bills",
@@ -135,7 +135,7 @@ const MENU_CONFIG = [
     label: "FDP",
     icon: FundProjectionScreenOutlined,
     path: "/manager/faculty-development-program",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
   },
   {
     label: "FDP",
@@ -201,7 +201,7 @@ const MENU_CONFIG = [
     label: "Announcements",
     icon: ClockCircleOutlined,
     path: "/manager/announcements",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER],
   },
   {
     label: "Notifications",
@@ -213,7 +213,7 @@ const MENU_CONFIG = [
     label: "Holidays",
     icon: CalendarOutlined,
     path: "/manager/holidays",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER],
   },
   {
     label: "Syllabus Gallery",
@@ -231,7 +231,7 @@ const MENU_CONFIG = [
     label: "Courses",
     icon: BookOutlined,
     path: "/admin/courses",
-    roles: [ROLES.ADMIN],
+    roles: [ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
   },
   {
     label: "Announcements",
@@ -249,7 +249,7 @@ const MENU_CONFIG = [
     label: "Final Project",
     icon: ClockCircleOutlined,
     path: "/manager/final-project",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
   },
   {
     label: "Tasks",

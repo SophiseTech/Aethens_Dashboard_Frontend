@@ -25,6 +25,8 @@ function Dashboard() {
         return <ManagerStudents />;
       case ROLES.OPERATIONS_MANAGER:
         return <Admin />;
+      case ROLES.ACADEMIC_MANAGER:
+        return <Admin />;
       default:
         return <p>404</p>;
     }
