@@ -17,13 +17,17 @@ import leaveService from "@services/LeaveService";
 import holidayService from "@services/Holiday";
 import centerStore from "@stores/CentersStore";
 import userStore from "@stores/UserStore";
+import { useSearchParams } from "react-router-dom";
 
 function AdminFacultyAttendance() {
     const [loading, setLoading] = useState(false);
     const [faculties, setFaculties] = useState([]);
-    const [selectedFaculty, setSelectedFaculty] = useState(null);
     const [selectedDate, setSelectedDate] = useState(dayjs());
     const [selectedMonth, setSelectedMonth] = useState(dayjs().format("YYYY-MM"));
+    const [searchParams] = useSearchParams();
+
+    // Pre-select faculty from ?user_id query param if present
+    const [selectedFaculty, setSelectedFaculty] = useState(searchParams.get("user_id") || null);
 
     // Get selected center from store
     const { selectedCenter } = useStore(centerStore);
@@ -83,12 +87,14 @@ function AdminFacultyAttendance() {
             const facultyUsers = response?.users || [];
             setFaculties(facultyUsers);
 
-            // Reset selected faculty when center changes
-            setSelectedFaculty(null);
-
-            // Auto-select first faculty if available
-            if (facultyUsers.length > 0) {
-                setSelectedFaculty(facultyUsers[0]._id);
+            // Only reset if there's no pre-selected faculty from the URL query param
+            const preSelectedId = searchParams.get("user_id");
+            if (!preSelectedId) {
+                setSelectedFaculty(null);
+                // Auto-select first faculty if available
+                if (facultyUsers.length > 0) {
+                    setSelectedFaculty(facultyUsers[0]._id);
+                }
             }
         } catch (error) {
             message.error("Failed to load faculty list");

@@ -60,10 +60,10 @@ const permissions = {
   },
   // Admin-only content management (dashboard frontend)
   adminUsers: {
-    view: [ROLES.ADMIN],
-    add: [ROLES.ADMIN],
-    edit: [ROLES.ADMIN],
-    delete: [ROLES.ADMIN]
+    view: [ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER],
+    add: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    edit: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    delete: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]
   },
   adminCenters: {
     view: [ROLES.ADMIN]
@@ -152,10 +152,10 @@ const permissions = {
   },
   // Admin-only content management (dashboard frontend)
   adminUsers: {
-    view: [ROLES.ADMIN],
-    add: [ROLES.ADMIN],
-    edit: [ROLES.ADMIN],
-    delete: [ROLES.ADMIN]
+    view: [ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER],
+    add: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    edit: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    delete: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]
   },
   adminCenters: {
     view: [ROLES.ADMIN]

@@ -2,11 +2,13 @@ import { useState, useEffect, useCallback } from "react";
 import { Table, Button, Flex, Modal, Input, Select, message, Tag } from "antd";
 import { useNavigate } from "react-router-dom";
 import Title from "@components/layouts/Title";
+import StaffDetailsDrawer from "@components/StaffDetailsDrawer";
 import userStore from "@stores/UserStore";
 import permissions from "@utils/permissions";
 import usersV2Service from "@services/UsersV2";
 import centersService from "@services/Centers";
 import { useStore } from "zustand";
+import { ROLES } from "@utils/constants";
 
 function AdminUsers() {
   const { user } = useStore(userStore);
@@ -16,6 +18,8 @@ function AdminUsers() {
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10 });
   const [filters, setFilters] = useState({ search: "", role: "", status: "", center_id: "" });
+  const [selectedStaff, setSelectedStaff] = useState({});
+  const [isDrawerVisible, setIsDrawerVisible] = useState(false);
 
   const canView = permissions.adminUsers?.view?.includes(user?.role);
   const canAdd = permissions.adminUsers?.add?.includes(user?.role);
@@ -30,7 +34,11 @@ function AdminUsers() {
         limit: pagination.limit,
       };
       if (filters.search?.trim()) params.search = filters.search.trim();
-      if (filters.role) params.role = filters.role;
+      if (filters.role) {
+        params.role = filters.role;
+      } else {
+        params.role = [ROLES.FACULTY, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER].join(",");
+      }
       if (filters.status) params.status = filters.status;
       if (filters.center_id && filters.center_id !== "all") params.center_id = filters.center_id;
 
@@ -85,7 +93,22 @@ function AdminUsers() {
   }
 
   const columns = [
-    { title: "Name", dataIndex: "username", key: "username", ellipsis: true },
+    {
+      title: "Name",
+      dataIndex: "username",
+      key: "username",
+      ellipsis: true,
+      render: (name, record) => (
+        <div className="flex items-center gap-3">
+          <img
+            className="rounded-full aspect-square w-8 2xl:w-10 border border-border"
+            src={record?.profile_img || '/images/default.jpg'}
+            alt="Profile"
+          />
+          <span className="max-2xl:text-xs">{name}</span>
+        </div>
+      ),
+    },
     { title: "Email", dataIndex: "email", key: "email", ellipsis: true },
     {
       title: "Role",
@@ -122,7 +145,7 @@ function AdminUsers() {
 
   return (
     <Title
-      title="Users (Admin)"
+      title="Staff (Admin)"
       button={
         canAdd ? (
           <Button type="primary" onClick={() => navigate("/admin/users/new")}>
@@ -145,12 +168,11 @@ function AdminUsers() {
           allowClear
           value={filters.role || undefined}
           onChange={(v) => setFilters((f) => ({ ...f, role: v || "" }))}
-          style={{ width: 120 }}
+          style={{ width: 170 }}
           options={[
-            { value: "student", label: "Student" },
-            { value: "faculty", label: "Faculty" },
-            { value: "manager", label: "Manager" },
-            { value: "admin", label: "Admin" },
+            { value: ROLES.FACULTY, label: "Faculty" },
+            { value: ROLES.MANAGER, label: "Manager" },
+            { value: ROLES.OPERATIONS_MANAGER, label: "Operations Manager" },
           ]}
         />
         <Select
@@ -182,6 +204,15 @@ function AdminUsers() {
         columns={columns}
         dataSource={list}
         loading={loading}
+        onRow={(record) => {
+          return {
+            onClick: () => {
+              setSelectedStaff(record);
+              setIsDrawerVisible(true);
+            },
+            style: { cursor: "pointer" }
+          };
+        }}
         pagination={{
           current: pagination.page,
           pageSize: pagination.limit,
@@ -189,6 +220,11 @@ function AdminUsers() {
           showSizeChanger: true,
           onChange: handlePageChange,
         }}
+      />
+      <StaffDetailsDrawer
+        user={selectedStaff}
+        visible={isDrawerVisible}
+        onClose={() => setIsDrawerVisible(false)}
       />
     </Title>
   );

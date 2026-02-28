@@ -174,7 +174,7 @@ const MENU_CONFIG = [
     roles: [ROLES.ADMIN],
   },
   {
-    label: "Users",
+    label: "Staff",
     icon: UserOutlined,
     path: "/admin/users",
     roles: [ROLES.ADMIN],
