@@ -395,8 +395,18 @@ function SyllabusGalleryList({ searchQuery = '' }) {
   <title>Print Image</title>
   <style>
     @page { margin: 0; size: auto; }
-    body { margin: 0; padding: 0; background: white; }
-    img { width: 100vw; height: 100vh; object-fit: contain; display: block; page-break-after: always; break-after: page; margin: 0; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: white; }
+    img { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: contain; 
+      display: block; 
+      page-break-after: always; 
+      break-after: page; 
+      margin: 0; 
+      page-break-inside: avoid; 
+      break-inside: avoid; 
+    }
     img:last-child { page-break-after: auto; break-after: auto; }
   </style>
 </head>
@@ -418,8 +428,15 @@ function SyllabusGalleryList({ searchQuery = '' }) {
 
                                     Promise.all(imageLoadPromises).then(() => {
                                         printWindow.focus();
+
+                                        // On iPads/iOS Safari, a synchronous .close() instantly kills the tab
+                                        // before the native print dialog can properly appear.
+                                        // We use onafterprint to ensure it closes only when the user is done.
+                                        printWindow.onafterprint = () => {
+                                            printWindow.close();
+                                        };
+
                                         printWindow.print();
-                                        printWindow.close();
                                     });
                                 }}
                             >
