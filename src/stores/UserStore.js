@@ -41,7 +41,7 @@ const userStore = create((set, get) => ({
     }
   },
   logOut: async () => {
-    localStorage.setItem("jwt_token", null)
+    localStorage.removeItem("jwt_token")
     set({
       user: null,
       isAuthenticated: false

@@ -7,7 +7,7 @@ import activitiesStore from '@stores/ActivitiesStore'
 import studentStore from '@stores/StudentStore'
 import { Avatar, Button, Empty, Input, message, Modal, Skeleton, Spin, Carousel, Image, Select } from 'antd'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { DeleteOutlined, ExclamationCircleOutlined, PlusCircleOutlined, BookOutlined, PrinterOutlined } from '@ant-design/icons'
+import { DeleteOutlined, ExclamationCircleOutlined, PlusCircleOutlined, BookOutlined, PrinterOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons'
 import { useStore } from 'zustand'
 import userStore from '@stores/UserStore'
 import courseService from '@services/Course'
@@ -40,6 +40,7 @@ function SyllabusGalleryList({ searchQuery = '' }) {
     const { searchResults, loading: studentLoading } = useStore(studentStore)
     const { user } = useStore(userStore)
 
+    const carouselRef = useRef(null)
     const sentinelRef = useRef(null)
     const searchRef = useRef(searchQuery)
     const debounceRef = useRef(null)
@@ -296,25 +297,43 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                     {/* Image */}
                     <div className="w-full lg:w-1/2">
                         {selectedItem?.images && selectedItem.images.length > 1 ? (
-                            <Carousel arrows dots className="bg-gray-100 rounded-lg overflow-hidden">
-                                {selectedItem.images.map((imgUrl, i) => (
-                                    <div key={i}>
-                                        <Image
-                                            src={imgUrl}
-                                            alt={`${selectedItem?.name} - part ${i + 1}`}
-                                            className="w-full object-contain"
-                                            style={{ maxHeight: '60vh' }}
-                                            preview={{ src: imgUrl }}
-                                        />
-                                    </div>
-                                ))}
-                            </Carousel>
+                            <div className="bg-gray-100 rounded-lg overflow-hidden relative" style={{ height: '60vh' }}>
+                                <Carousel ref={carouselRef} dots style={{ height: '100%' }}>
+                                    {selectedItem.images.map((imgUrl, i) => (
+                                        <div key={i} style={{ height: '60vh' }}>
+                                            <img
+                                                src={imgUrl}
+                                                alt={`${selectedItem?.name} - part ${i + 1}`}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '60vh',
+                                                    objectFit: 'contain',
+                                                    display: 'block',
+                                                    background: '#f5f5f5',
+                                                }}
+                                            />
+                                        </div>
+                                    ))}
+                                </Carousel>
+                                {/* Custom overlay arrows — no CSS class guessing */}
+                                <button onClick={() => carouselRef.current?.prev()} style={{
+                                    position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)',
+                                    zIndex: 10, width: 36, height: 36, borderRadius: '50%',
+                                    background: 'rgba(0,0,0,0.45)', border: 'none', cursor: 'pointer',
+                                    color: '#fff', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}><LeftOutlined /></button>
+                                <button onClick={() => carouselRef.current?.next()} style={{
+                                    position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                                    zIndex: 10, width: 36, height: 36, borderRadius: '50%',
+                                    background: 'rgba(0,0,0,0.45)', border: 'none', cursor: 'pointer',
+                                    color: '#fff', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}><RightOutlined /></button>
+                            </div>
                         ) : (
                             <Image
                                 src={selectedItem?.images && selectedItem.images.length > 0 ? selectedItem.images[0] : selectedItem?.url}
                                 alt={selectedItem?.name}
-                                className="rounded-lg overflow-hidden w-full object-contain bg-gray-100"
-                                style={{ maxHeight: '60vh' }}
+                                style={{ width: '100%', maxHeight: '60vh', objectFit: 'contain', display: 'block', background: '#f5f5f5', borderRadius: 8 }}
                                 preview={{ src: selectedItem?.images && selectedItem.images.length > 0 ? selectedItem.images[0] : selectedItem?.url }}
                             />
                         )}
@@ -363,42 +382,62 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                             <Button
                                 icon={<PrinterOutlined />}
                                 onClick={() => {
-                                    // Remove any existing print iframes
-                                    const oldIframe = document.getElementById('print-iframe');
-                                    if (oldIframe) {
-                                        document.body.removeChild(oldIframe);
-                                    }
+                                    const urls = (selectedItem?.images && selectedItem.images.length > 0)
+                                        ? selectedItem.images
+                                        : [selectedItem?.url];
 
-                                    // Create a new hidden iframe
-                                    const iframe = document.createElement('iframe');
-                                    iframe.id = 'print-iframe';
-                                    iframe.style.display = 'none';
-                                    document.body.appendChild(iframe);
+                                    const printWindow = window.open('', '_blank');
+                                    if (!printWindow) return;
 
-                                    iframe.contentDocument.head.innerHTML = `
-                                        <title>Print Image</title>
-                                        <style>
-                                            @page { margin: 0; size: auto; }
-                                            body { margin: 0; padding: 0; display: block; background: white; }
-                                            img { width: 100vw; height: 100vh; object-fit: contain; display: block; page-break-after: always; break-after: page; margin: 0; }
-                                            /* Remove page break for the last image */
-                                            img:last-child { page-break-after: auto; break-after: auto; }
-                                        </style>
-                                    `;
+                                    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <title>Print Image</title>
+  <style>
+    @page { margin: 0; size: auto; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: white; }
+    img { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: contain; 
+      display: block; 
+      page-break-after: always; 
+      break-after: page; 
+      margin: 0; 
+      page-break-inside: avoid; 
+      break-inside: avoid; 
+    }
+    img:last-child { page-break-after: auto; break-after: auto; }
+  </style>
+</head>
+<body>
+  ${urls.map(url => `<img src="${url}" />`).join('')}
+</body>
+</html>`);
+                                    printWindow.document.close();
 
-                                    const imagesHTML = (selectedItem?.images && selectedItem.images.length > 0)
-                                        ? selectedItem.images.map(url => `<img src="${url}" />`).join('')
-                                        : `<img src="${selectedItem?.url}" />`;
+                                    // Wait for ALL images to load before printing
+                                    const imgs = Array.from(printWindow.document.images);
+                                    const imageLoadPromises = imgs.map(img =>
+                                        new Promise(resolve => {
+                                            if (img.complete) { resolve(); return; }
+                                            img.onload = resolve;
+                                            img.onerror = resolve; // resolve on error too so we don't hang
+                                        })
+                                    );
 
-                                    iframe.contentDocument.body.innerHTML = `
-                                        <div style="display: block; width: 100%;">
-                                            ${imagesHTML}
-                                        </div>
-                                    `;
+                                    Promise.all(imageLoadPromises).then(() => {
+                                        printWindow.focus();
 
-                                    setTimeout(() => {
-                                        window.parent.document.getElementById('print-iframe').contentWindow.print();
-                                    }, 500);
+                                        // On iPads/iOS Safari, a synchronous .close() instantly kills the tab
+                                        // before the native print dialog can properly appear.
+                                        // We use onafterprint to ensure it closes only when the user is done.
+                                        printWindow.onafterprint = () => {
+                                            printWindow.close();
+                                        };
+
+                                        printWindow.print();
+                                    });
                                 }}
                             >
                                 Print
