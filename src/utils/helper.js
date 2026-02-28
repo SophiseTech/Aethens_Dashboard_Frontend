@@ -127,8 +127,10 @@ export function getValue(obj, keys) {
 }
 
 export const getMonthRange = (date) => {
-  const firstDay = dayjs(date).startOf('month').format('YYYY-MM-DD');
-  const lastDay = dayjs(date).endOf('month').format('YYYY-MM-DD');
+  // firstDay = midnight UTC on 1st of month, lastDay = end of last day UTC.
+  // Using ISO strings so new Date() on the backend gets the correct full-day boundaries.
+  const firstDay = dayjs(date).utc().startOf('month').toISOString();
+  const lastDay = dayjs(date).utc().endOf('month').toISOString();
   return { firstDay, lastDay };
 };
 

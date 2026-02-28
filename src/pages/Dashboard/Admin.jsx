@@ -68,8 +68,8 @@ function Admin() {
     if (dates) {
       const [start, end] = dates;
       setDateRange({
-        firstDay: start.startOf("day").format("YYYY-MM-DD"),
-        lastDay: end.endOf("day").format("YYYY-MM-DD"),
+        firstDay: start.utc().startOf('day').toISOString(),
+        lastDay: end.utc().endOf('day').toISOString(),
       });
     } else {
       setDateRange(getMonthRange(new Date()));

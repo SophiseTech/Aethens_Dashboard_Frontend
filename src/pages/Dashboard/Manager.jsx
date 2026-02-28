@@ -66,10 +66,9 @@ function Manager() {
     if (dates) {
       const [start, end] = dates;
       setDateRange({
-        firstDay: start.startOf('day').format('YYYY-MM-DD'),
-        lastDay: end.endOf('day').format('YYYY-MM-DD')
+        firstDay: start.utc().startOf('day').toISOString(),
+        lastDay: end.utc().endOf('day').toISOString(),
       });
-      console.log(end.endOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'))
     } else {
       setDateRange(getMonthRange(new Date()));
     }
