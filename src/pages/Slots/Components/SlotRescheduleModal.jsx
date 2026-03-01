@@ -15,8 +15,8 @@ import { useStore } from 'zustand';
 
 function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlots = [] }) {
   const [form] = Form.useForm();
-  const { getAvailableSessions, availableSessions, loading } = useStore(SessionStore)
-  const { reschedulingSlot } = slotStore()
+  const { getAvailableSessions, availableSessions, loading: sessionLoading } = useStore(SessionStore)
+  const { reschedulingSlot, loading: submitLoading } = useStore(slotStore)
   const date = Form.useWatch("date", form)
   const { user } = useStore(userStore)
 
@@ -95,7 +95,7 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
           label={"Select New Slot"}
           showSearch
           placeholder="Select a session"
-          loading={loading}
+          loading={sessionLoading}
           // style={{ width: 300 }}
           options={slotOptions}
           className='w-full'
@@ -106,7 +106,7 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
           optionFilterProp="label"
           optionRender={(options) => sessionSlotOptionRenderer(options, user, false)}
         />
-        <CustomSubmit className='bg-primary' label='Submit' loading={loading} />
+        <CustomSubmit className='bg-primary' label='Submit' loading={submitLoading} disabled={submitLoading}/>
       </CustomForm>
     </Modal>
   )
