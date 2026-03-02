@@ -35,6 +35,7 @@ export default function ManagersPendingList() {
                 </Title>
             }
             className="sticky top-4"
+            styles={{ body: { maxHeight: 'calc(100vh - 250px)', overflowY: 'auto' } }}
             extra={
                 selectedManagerFilter && (
                     <Text
@@ -63,8 +64,8 @@ export default function ManagersPendingList() {
                         return (
                             <List.Item
                                 className={`cursor-pointer transition-all rounded-lg px-2 ${isSelected
-                                        ? "bg-green-50 border-l-4 border-[#4f651e]"
-                                        : "hover:bg-gray-50"
+                                    ? "bg-green-50 border-l-4 border-[#4f651e]"
+                                    : "hover:bg-gray-50"
                                     }`}
                                 onClick={() => handleManagerClick(item._id)}
                             >

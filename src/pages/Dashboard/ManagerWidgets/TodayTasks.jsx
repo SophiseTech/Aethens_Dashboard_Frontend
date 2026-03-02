@@ -65,6 +65,7 @@ function TodayTasks() {
     return (
         <Card
             className='border border-border w-full'
+            styles={{ body: { maxHeight: '400px', overflowY: 'auto' } }}
             title={
                 <div className="flex items-center gap-2">
                     <ClockCircleOutlined />

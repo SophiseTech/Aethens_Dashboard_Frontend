@@ -107,7 +107,7 @@ export default function TaskList() {
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[calc(100vh-250px)] overflow-y-auto px-2">
             {tasks.map((task) => {
                 const deadlineStatus = getDeadlineStatus(task.deadline, task.status);
 
