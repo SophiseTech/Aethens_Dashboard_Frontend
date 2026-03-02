@@ -17,7 +17,7 @@ export default function StudentRemarksPage() {
   const [adding, setAdding] = useState(false);
   const { remarks, loading, page, limit, total, fetchStudentRemarks, addRemark, deleteRemark, student } = useRemarks();
   const modal = useModal();
-  const user = useUser()
+  const { user } = useUser()
 
 
   useEffect(() => {

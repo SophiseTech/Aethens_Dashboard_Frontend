@@ -10,7 +10,13 @@ function SessionStatus({ student }) {
   const { user } = useStore(userStore);
 
   const handleClick = () => {
-    navigate(`/faculty/session-status/${student._id}`, { state: { student } });
+    if (user.role === 'academic_manager') {
+      navigate(`/acmanager/session-status/${student._id}`, { state: { student } });
+    } else if (user.role === 'manager' || user.role === 'admin') {
+      navigate(`/manager/session-status/${student._id}`, { state: { student } });
+    } else {
+      navigate(`/faculty/session-status/${student._id}`, { state: { student } });
+    }
   };
 
   return (

@@ -5,6 +5,7 @@ import { ROLES } from "@utils/constants";
 import { Spin } from "antd";
 import { useLocation } from "react-router-dom";
 import FinalProjectPage from "@pages/FinalProject";
+import AddSessionStatus from "@pages/Students/AddSessionStatus";
 
 const Login = lazy(() => import("@pages/Login"));
 const Dashboard = lazy(() => import("@pages/Dashboard"));
@@ -66,7 +67,7 @@ export const generalRoutes = [
     title: "Login | School Of Aethens",
   },
   {
-    element: <Protected roles={[ROLES.STUDENT, ROLES.MANAGER, ROLES.FACULTY, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]} />,
+    element: <Protected roles={[ROLES.STUDENT, ROLES.MANAGER, ROLES.FACULTY, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER]} />,
     children: [
       {
         element: <SidebarLayout />,
@@ -310,6 +311,16 @@ export const generalRoutes = [
             ),
             title: "Manage Leaves",
           },
+        ],
+      },
+    ],
+  },
+  {
+    element: <Protected roles={[ROLES.ADMIN, ROLES.ACADEMIC_MANAGER]} />,
+    children: [
+      {
+        element: <SidebarLayout />,
+        children: [
           {
             path: "/admin/users",
             element: (
@@ -501,6 +512,27 @@ export const generalRoutes = [
           },
         ],
       },
+    ],
+  },
+  {
+    element: <Protected roles={[ROLES.ACADEMIC_MANAGER]} />,
+    children: [
+      {
+        element: <SidebarLayout />,
+        children: [
+          {
+            path: "/acmanager/session-status/:studentId",
+            element: <LazyLoader><AddSessionStatus /></LazyLoader>,
+            title: "Add Session Status"
+          },
+          {
+            path: "/academic-manager/activities/student/:id",
+            element: <LazyLoader><Activities /></LazyLoader>,
+            title: "Activities",
+          },
+        ],
+      },
+
     ],
   },
 ];

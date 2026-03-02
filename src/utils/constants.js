@@ -3,7 +3,8 @@ export const ROLES = {
   MANAGER: "manager",
   ADMIN: "admin",
   FACULTY: "faculty",
-  OPERATIONS_MANAGER: "operations_manager"
+  OPERATIONS_MANAGER: "operations_manager",
+  ACADEMIC_MANAGER: "academic_manager"
 }
 
 export const imageCategories = [
@@ -254,14 +255,7 @@ export const ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES = [
   "/admin/student-of-the-week",
   "/admin/latest-videos",
   "/admin/courses",
-  "/admin/users",
-  "/admin/centers",
-  "/admin/blog-posts",
-  "/admin/newsletters",
-  "/admin/shop-items",
-  "/admin/art-works",
-  "/admin/student-of-the-week",
-  "/admin/latest-videos",
+  /^\/manager\/final-project\/student(\/.*)?$/,
 ]
 
 export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
