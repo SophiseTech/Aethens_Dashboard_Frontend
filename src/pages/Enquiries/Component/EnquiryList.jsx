@@ -41,11 +41,7 @@ function EnquiryList() {
     if (searchQuery) {
       search(10, { searchQuery }, currentPage);
     } else {
-      if ((user.role === 'admin' || user.role === 'operations_manager') && selectedCenter !== null) {
-        getEnquiries(10, currentPage, { stage: selectedView, centerId: selectedCenter });
-      } else {
-        getEnquiries(10, currentPage, { stage: selectedView });
-      }
+      getEnquiries(10, currentPage, { stage: selectedView, centerId: selectedCenter });
     }
   }, [searchQuery, getEnquiries, search, currentPage, selectedView, selectedCenter]);
 
@@ -91,7 +87,7 @@ function EnquiryList() {
     if (searchQuery) {
       search(pageSize, { searchQuery }, page);
     } else {
-      getEnquiries(pageSize, page);
+      getEnquiries(pageSize, page, { stage: selectedView, centerId: selectedCenter });
     }
   };
 
@@ -180,11 +176,11 @@ function EnquiryList() {
             onApply={(filters) => {
               // reset to page 1 and call search with filters
               updateURL(1, selectedView)
-              getEnquiries(10, 1, filters)
+              getEnquiries(10, 1, { ...filters, centerId: selectedCenter })
             }}
             onClear={() => {
               updateURL(1, selectedView)
-              getEnquiries(10, 1, { stage: selectedView })
+              getEnquiries(10, 1, { stage: selectedView, centerId: selectedCenter })
             }}
           />
 
