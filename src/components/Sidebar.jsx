@@ -18,6 +18,12 @@ import {
   CheckSquareOutlined,
   BellOutlined,
   AuditOutlined,
+  UserOutlined,
+  BankOutlined,
+  FileTextOutlined,
+  MailOutlined,
+  TrophyOutlined,
+  VideoCameraOutlined,
 } from "@ant-design/icons";
 
 import Book from "@/assets/Book";
@@ -33,7 +39,7 @@ const MENU_CONFIG = [
     label: "Dashboard",
     icon: AppstoreOutlined,
     path: "/",
-    roles: [ROLES.STUDENT, ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    roles: [ROLES.STUDENT, ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER],
   },
   {
     label: "Students",
@@ -81,7 +87,7 @@ const MENU_CONFIG = [
     label: "Students",
     icon: SolutionOutlined,
     path: "/manager/students",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER],
   },
   {
     label: "Bills",
@@ -135,7 +141,7 @@ const MENU_CONFIG = [
     label: "FDP",
     icon: FundProjectionScreenOutlined,
     path: "/manager/faculty-development-program",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
   },
   {
     label: "FDP",
@@ -165,6 +171,54 @@ const MENU_CONFIG = [
     label: "Manage Leaves",
     icon: CheckSquareOutlined,
     path: "/admin/manage-leaves",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Staff",
+    icon: UserOutlined,
+    path: "/admin/users",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Centers",
+    icon: BankOutlined,
+    path: "/admin/centers",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Blog Posts",
+    icon: FileTextOutlined,
+    path: "/admin/blog-posts",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Newsletters",
+    icon: MailOutlined,
+    path: "/admin/newsletters",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Shop Items",
+    icon: ShopOutlined,
+    path: "/admin/shop-items",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Art Works",
+    icon: PictureOutlined,
+    path: "/admin/art-works",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Student of the Week",
+    icon: TrophyOutlined,
+    path: "/admin/student-of-the-week",
+    roles: [ROLES.ADMIN],
+  },
+  {
+    label: "Latest Videos",
+    icon: VideoCameraOutlined,
+    path: "/admin/latest-videos",
     roles: [ROLES.ADMIN],
   },
   {
@@ -201,7 +255,7 @@ const MENU_CONFIG = [
     label: "Announcements",
     icon: ClockCircleOutlined,
     path: "/manager/announcements",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER],
   },
   {
     label: "Notifications",
@@ -213,7 +267,7 @@ const MENU_CONFIG = [
     label: "Holidays",
     icon: CalendarOutlined,
     path: "/manager/holidays",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER],
   },
   {
     label: "Syllabus Gallery",
@@ -231,7 +285,7 @@ const MENU_CONFIG = [
     label: "Courses",
     icon: BookOutlined,
     path: "/admin/courses",
-    roles: [ROLES.ADMIN],
+    roles: [ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
   },
   {
     label: "Announcements",
@@ -249,7 +303,7 @@ const MENU_CONFIG = [
     label: "Final Project",
     icon: ClockCircleOutlined,
     path: "/manager/final-project",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
   },
   {
     label: "Tasks",

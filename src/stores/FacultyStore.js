@@ -19,9 +19,9 @@ const facultyStore = create((set, get) => ({
       const { selectedCenter } = centersStore.getState()
       let centerId;
 
-      if(user.role === ROLES.ADMIN){
+      if (user.role === ROLES.ADMIN || user.role === ROLES.ACADEMIC_MANAGER) {
         centerId = selectedCenter;
-      }else{
+      } else {
         centerId = user.center_id;
       }
       const { users, total } = await userService.getByRoleByCenter(ROLES.FACULTY, centerId, lastRefKey, limit)

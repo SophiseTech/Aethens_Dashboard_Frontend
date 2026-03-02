@@ -15,7 +15,7 @@ function StudentChart({ dateRange }) {
   const { selectedCenter } = useStore(centersStore);
 
   const fetchData = async () => {
-    const report = await attendanceService.getGraphSummary(user.role !== 'admin' ? user.center_id : selectedCenter, firstDay, lastDay) || []
+    const report = await attendanceService.getGraphSummary((user.role !== 'admin' || user.role !== 'academic_manager') ? user.center_id : selectedCenter, firstDay, lastDay) || []
     setData(report)
   }
 

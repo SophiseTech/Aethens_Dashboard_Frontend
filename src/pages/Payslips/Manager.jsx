@@ -9,6 +9,7 @@ import { Button, Drawer, Flex } from 'antd'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useStore } from 'zustand'
 import centersStore from '@stores/CentersStore';
+import { useSearchParams } from 'react-router-dom';
 
 function ManagerPayslips() {
 
@@ -17,6 +18,8 @@ function ManagerPayslips() {
   const { user } = useStore(userStore)
   const [drawerState, setDrawerState] = useState(false);
   const { selectedCenter } = useStore(centersStore);
+  const [searchParams] = useSearchParams();
+  const preSelectedUserId = searchParams.get("user_id");
 
   const handleApprove = async (id) => {
     await approvePayslipRequest(id)
@@ -36,10 +39,15 @@ function ManagerPayslips() {
   }
 
   const fetchPayslips = (limit = 10,) => {
+    const query = {
+      center_id: user.center_id || selectedCenter
+    };
+    // If navigated from a staff drawer, filter by specific faculty
+    if (preSelectedUserId) {
+      query.faculty_id = preSelectedUserId;
+    }
     getPayslips(limit, {
-      query: {
-        center_id: user.center_id || selectedCenter
-      },
+      query,
       sort: { status: 1 },
       populate: "faculty_id manager_id"
     })
