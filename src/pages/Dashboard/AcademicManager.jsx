@@ -69,7 +69,7 @@ function AcademicManager() {
                 className="w-full tablet:w-2/3 lg:w-1/2 border-primary text-primary"
             />
             <Row gutter={[20, 20]}>
-                <Col xs={24} tablet={24} lg={8}>
+                <Col xs={24} tablet={24}>
                     <StudentChart dateRange={dateRange} />
                 </Col>
             </Row>

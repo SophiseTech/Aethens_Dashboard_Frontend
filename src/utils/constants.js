@@ -247,6 +247,7 @@ export const ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES = [
   "/manager/notifications",
   "/manager/inventory-items",
   "/admin/courses",
+  /^\/manager\/final-project\/student(\/.*)?$/,
 ]
 
 export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [

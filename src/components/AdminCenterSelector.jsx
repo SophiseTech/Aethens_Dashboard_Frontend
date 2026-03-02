@@ -21,7 +21,9 @@ const AdminCenterSelector = () => {
     setSelectedCenter(center_id);
   };
 
-  if (ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES.includes(location.pathname)) {
+  if (ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES.some(route =>
+    route instanceof RegExp ? route.test(location.pathname) : route === location.pathname
+  )) {
     return null;
   }
 
