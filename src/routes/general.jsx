@@ -26,21 +26,21 @@ const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"));
 const PhaseListPage = lazy(() => import("@pages/FinalProject/PhaseList"));
 const AdminFacultyAttendance = lazy(() => import("@pages/AdminAttendance/AdminFacultyAttendance"));
 const AdminLeaves = lazy(() => import("@pages/AdminLeaves/AdminLeaves"));
-const EditNewsletter = lazy(() => import("@pages/Admin/Newsletters/EditNewsletter"));
-const EditShopItem = lazy(() => import("@pages/Admin/ShopItems/EditShopItem"));
-const EditArtWork = lazy(() => import("@pages/Admin/ArtWorks/EditArtWork"));
-const EditStudentOfTheWeek = lazy(() => import("@pages/Admin/StudentOfTheWeek/EditStudentOfTheWeek"));
+const EditNewsletter = lazy(() => import("@pages/admin/Newsletters/EditNewsletter"));
+const EditShopItem = lazy(() => import("@pages/admin/ShopItems/EditShopItem"));
+const EditArtWork = lazy(() => import("@pages/admin/ArtWorks/EditArtWork"));
+const EditStudentOfTheWeek = lazy(() => import("@pages/admin/StudentOfTheWeek/EditStudentOfTheWeek"));
 const AdminCourses = lazy(() => import("@pages/AdminCourses"));
-const AdminUsers = lazy(() => import("@pages/Admin/Users"));
-const AdminEditUser = lazy(() => import("@pages/Admin/Users/EditUser"));
-const AdminCenters = lazy(() => import("@pages/Admin/Centers"));
-const AdminBlogPosts = lazy(() => import("@pages/Admin/BlogPosts"));
-const EditBlogPost = lazy(() => import("@pages/Admin/BlogPosts/EditBlogPost"));
-const AdminNewsletters = lazy(() => import("@pages/Admin/Newsletters"));
-const AdminShopItems = lazy(() => import("@pages/Admin/ShopItems"));
-const AdminArtWorks = lazy(() => import("@pages/Admin/ArtWorks"));
-const AdminStudentOfTheWeek = lazy(() => import("@pages/Admin/StudentOfTheWeek"));
-const AdminLatestVideos = lazy(() => import("@pages/Admin/LatestVideos"));
+const AdminUsers = lazy(() => import("@pages/admin/Users"));
+const AdminEditUser = lazy(() => import("@pages/admin/Users/EditUser"));
+const AdminCenters = lazy(() => import("@pages/admin/Centers"));
+const AdminBlogPosts = lazy(() => import("@pages/admin/BlogPosts"));
+const EditBlogPost = lazy(() => import("@pages/admin/BlogPosts/EditBlogPost"));
+const AdminNewsletters = lazy(() => import("@pages/admin/Newsletters"));
+const AdminShopItems = lazy(() => import("@pages/admin/ShopItems"));
+const AdminArtWorks = lazy(() => import("@pages/admin/ArtWorks"));
+const AdminStudentOfTheWeek = lazy(() => import("@pages/admin/StudentOfTheWeek"));
+const AdminLatestVideos = lazy(() => import("@pages/admin/LatestVideos"));
 
 const LazyLoader = ({ children }) => {
   const location = useLocation()
