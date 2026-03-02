@@ -5,10 +5,12 @@ import AssignCustomSyllabusModal from '@pages/SyllabusGallery/components/AssignC
 import syllabusGalleryService from '@services/SyllabusGalleryService'
 import activitiesStore from '@stores/ActivitiesStore'
 import studentStore from '@stores/StudentStore'
+import { useStore } from 'zustand'
+import { debounce } from 'lodash'
+import { useMemo } from 'react'
 import { Avatar, Button, Empty, Input, message, Modal, Skeleton, Spin, Carousel, Image, Select } from 'antd'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { DeleteOutlined, ExclamationCircleOutlined, PlusCircleOutlined, BookOutlined, PrinterOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons'
-import { useStore } from 'zustand'
 import userStore from '@stores/UserStore'
 import courseService from '@services/Course'
 
@@ -48,20 +50,42 @@ function SyllabusGalleryList({ searchQuery = '' }) {
 
     // Fetch courses for filter dropdown
     useEffect(() => {
-        const fetchCourses = async () => {
-            try {
-                const data = await courseService.getCourses({}, 0, 1000)
-                if (data && data.courses) {
-                    setCourses(data.courses)
-                } else if (Array.isArray(data)) {
-                    setCourses(data)
-                }
-            } catch (error) {
-                console.error("Failed to fetch courses:", error)
-            }
-        }
-        fetchCourses()
+        fetchCourses("", true)
     }, [])
+
+    const fetchCourses = async (searchQuery = "", isInitialLoad = false) => {
+        try {
+            const filters = {};
+            if (searchQuery) {
+                filters.query = { course_name: { $regex: searchQuery, $options: "i" } };
+            }
+            const data = await courseService.getCourses(filters, 0, 100)
+
+            let fetchedCourses = [];
+            if (data && data.courses) {
+                fetchedCourses = data.courses
+            } else if (Array.isArray(data)) {
+                fetchedCourses = data
+            }
+
+            setCourses(prev => {
+                // Ensure the currently selected course filter is kept in the options list so its label renders
+                if (!isInitialLoad && courseFilter !== 'all') {
+                    const existingSelected = prev.find(c => c._id === courseFilter);
+                    if (existingSelected && !fetchedCourses.find(c => c._id === courseFilter)) {
+                        return [existingSelected, ...fetchedCourses];
+                    }
+                }
+                return fetchedCourses;
+            });
+        } catch (error) {
+            console.error("Failed to fetch courses:", error)
+        }
+    }
+
+    const debouncedFetchCourses = useMemo(() => {
+        return debounce((val) => fetchCourses(val, false), 300);
+    }, [courseFilter]);
 
     // ── Fetch a single page ───────────────────────────────────
     const fetchPage = useCallback(async (pageNum, search, course, type, replace = false) => {
@@ -213,9 +237,8 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                         className="w-48"
                         value={courseFilter}
                         onChange={setCourseFilter}
-                        filterOption={(input, option) =>
-                            (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
-                        }
+                        onSearch={debouncedFetchCourses}
+                        filterOption={false}
                     >
                         <Select.Option value="all">All Courses</Select.Option>
                         {courses.map(c => (

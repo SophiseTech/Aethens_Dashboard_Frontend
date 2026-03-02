@@ -39,29 +39,7 @@ const CourseDetailsDrawer = ({ course, visible, onClose, onRefresh }) => {
     const { deleteCourse, loading } = courseStore();
     console.log(course);
 
-    // useEffect(() => {
-    //     if (visible && course?.defaultMaterialItems?.length > 0) {
-    //         fetchMaterialItems();
-    //     }
-    // }, [visible, course]);
 
-    const fetchMaterialItems = async () => {
-        try {
-            setLoadingMaterials(true);
-            // Fetch all inventory items and filter by IDs
-            const response = await inventoryService.getInventoryItems(0, 1000);
-            if (response?.items) {
-                const filtered = response.items.filter(item =>
-                    course.defaultMaterialItems.includes(item._id)
-                );
-                setMaterialItems(filtered);
-            }
-        } catch (error) {
-            console.error('Error fetching material items:', error);
-        } finally {
-            setLoadingMaterials(false);
-        }
-    };
 
     const handleEditClick = () => setIsEditModalVisible(true);
 

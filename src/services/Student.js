@@ -1,5 +1,6 @@
 import handleError from "@utils/handleError";
 import { del, get, post } from "@utils/Requests";
+import { safePaginationLimit } from '@utils/paginationHelper';
 
 class StudentService {
   async enroll({
@@ -104,7 +105,7 @@ class StudentService {
   async getCourseHistory(lastRef = 0, limit = 10, filters = {}) {
     try {
       const response = await post(
-        `/courseHistory/list/all?lastRef=${lastRef}&limit=${limit}`,
+        `/courseHistory/list/all?lastRef=${lastRef}&limit=${safePaginationLimit(limit)}`,
         { filters }
       );
       if (!response) throw new Error("An error occured. Please try again");
@@ -137,7 +138,7 @@ class StudentService {
     try {
       const response = await post(`/student/over-duration`, {
         center_id,
-        limit,
+        limit: safePaginationLimit(limit),
         skip,
       });
       if (!response) throw new Error("An error occured. Please try again");

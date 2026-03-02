@@ -92,7 +92,7 @@ function Bills() {
 
     if (itemType === "materials" && effectiveCenterId) {
       // Fetch from center's inventory (only items available in this center)
-      const response = await inventoryService.getCenterInventoryItems(effectiveCenterId, 0, 200, { type: "materials" })
+      const response = await inventoryService.getCenterInventoryItems(effectiveCenterId, 0, 50, { type: "materials" })
       if (response?.items) {
         // Map center inventory records to item format for the bill form
         const mappedItems = response.items.map(record => ({
@@ -112,7 +112,7 @@ function Bills() {
     }
     if (itemType === "gallery" && effectiveCenterId) {
       // Fetch from center's inventory (only gallery items available in this center)
-      const response = await inventoryService.getCenterInventoryItems(effectiveCenterId, 0, 200, { type: "gallery" })
+      const response = await inventoryService.getCenterInventoryItems(effectiveCenterId, 0, 50, { type: "gallery" })
       if (response?.items) {
         const mappedItems = response.items.map(record => ({
           ...record.item_id,
@@ -139,9 +139,9 @@ function Bills() {
 
   const handleSearch = async (value, itemType) => {
     let effectiveCenterId;
-    if(user.role === 'manager'){
-      effectiveCenterId =  user?.center_id
-    }else{
+    if (user.role === 'manager') {
+      effectiveCenterId = user?.center_id
+    } else {
       effectiveCenterId = selectedCenter
     }
     if (!effectiveCenterId) return;
@@ -150,7 +150,7 @@ function Bills() {
       const response = await inventoryService.getCenterInventoryItems(
         effectiveCenterId,
         0,
-        value === "" ? 200 : 0,
+        50,
         { searchQuery: value, type: "materials" }
       )
       if (response?.items) {
@@ -170,7 +170,7 @@ function Bills() {
       const response = await inventoryService.getCenterInventoryItems(
         effectiveCenterId,
         0,
-        value === "" ? 200 : 0,
+        50,
         { searchQuery: value, type: "gallery" }
       )
       if (response?.items) {

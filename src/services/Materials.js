@@ -1,10 +1,11 @@
 import handleError from "@utils/handleError"
 import { post, put } from "@utils/Requests"
+import { safePaginationLimit } from '@utils/paginationHelper';
 
 class MaterialsService {
   async getMaterials(lastRef = 0, limit = 10, filters = {}) {
     try {
-      const response = await post(`/materials/getMaterials?lastRef=${lastRef}&limit=${limit}`, { filters })
+      const response = await post(`/materials/getMaterials?lastRef=${lastRef}&limit=${safePaginationLimit(limit)}`, { filters })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {

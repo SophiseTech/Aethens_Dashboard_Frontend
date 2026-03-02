@@ -2,6 +2,7 @@ import centersStore from "@stores/CentersStore";
 import userStore from "@stores/UserStore"
 import handleError from "@utils/handleError"
 import { post, put, get, del } from "@utils/Requests"
+import { safePaginationLimit } from '@utils/paginationHelper';
 
 class InventoryService {
   /**
@@ -11,7 +12,7 @@ class InventoryService {
     try {
       const params = new URLSearchParams({
         lastRef,
-        limit,
+        limit: safePaginationLimit(limit),
       });
 
       const response = await post(
@@ -33,7 +34,7 @@ class InventoryService {
    * Get center-specific inventory (v2 - inventories are per-center)
    * Supports search and pagination
    */
-  async getCenterInventory(centerId, searchQuery = '', type = '', limit = 0, lastRef = 0) {
+  async getCenterInventory(centerId, searchQuery = '', type = '', limit = 50, lastRef = 0) {
     try {
       const { selectedCenter } = centersStore.getState();
       const effectiveCenterId = centerId || selectedCenter;
@@ -44,7 +45,7 @@ class InventoryService {
       const params = new URLSearchParams();
       if (searchQuery) params.append('searchQuery', searchQuery);
       if (type) params.append('type', type);
-      if (limit) params.append('limit', limit.toString());
+      params.append('limit', safePaginationLimit(limit).toString());
       if (lastRef) params.append('lastRef', lastRef.toString());
 
       const queryString = params.toString();
@@ -118,7 +119,7 @@ class InventoryService {
     try {
       const params = new URLSearchParams({
         lastRef,
-        limit,
+        limit: safePaginationLimit(limit),
       });
 
       const response = await post(

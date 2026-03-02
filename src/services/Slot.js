@@ -1,10 +1,11 @@
 import handleError from "@utils/handleError"
 import { del, post } from "@utils/Requests"
+import { safePaginationLimit } from '@utils/paginationHelper';
 
 class SlotService {
-  async getSlots(filters, lastRefKey, limit) {
+  async getSlots(filters, lastRefKey = 0, limit = 10) {
     try {
-      const response = await post(`/slots/getAll?lastRef=${lastRefKey}&limit=${limit}`, { filters })
+      const response = await post(`/slots/getAll?lastRef=${lastRefKey}&limit=${safePaginationLimit(limit)}`, { filters })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {
@@ -34,7 +35,7 @@ class SlotService {
 
   async getSlotRequests(filters = {}, lastRefKey = 0, limit = 10) {
     try {
-      const response = await post(`/slotRequest/list?lastRef=${lastRefKey}&limit=${limit}`, { filters })
+      const response = await post(`/slotRequest/list?lastRef=${lastRefKey}&limit=${safePaginationLimit(limit)}`, { filters })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {

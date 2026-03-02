@@ -1,10 +1,11 @@
 import handleError from "@utils/handleError"
-import { del, get, post, put } from "@utils/Requests"
+import { del, post, put } from "@utils/Requests"
+import { safePaginationLimit } from '@utils/paginationHelper';
 
 class PayslipRequestService {
   async getPayslipRequests(filters = {}, lastRefKey = 0, limit = 10) {
     try {
-      const response = await post(`/payslipRequest/list?lastRef=${lastRefKey}&limit=${limit}`, { filters })
+      const response = await post(`/payslipRequest/list?lastRef=${lastRefKey}&limit=${safePaginationLimit(limit)}`, { filters })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {

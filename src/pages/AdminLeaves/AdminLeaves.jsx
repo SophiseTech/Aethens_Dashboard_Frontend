@@ -11,6 +11,7 @@ import {
 } from "@ant-design/icons";
 import { useStore } from "zustand";
 import dayjs from "dayjs";
+import { debounce } from "lodash";
 import Title from "@components/layouts/Title";
 import leaveService from "@services/LeaveService";
 import userService from "@services/User";
@@ -40,24 +41,30 @@ function AdminLeaves() {
         fetchLeaves();
     }, [selectedCenter, statusFilter, typeFilter, facultyFilter]);
 
-    const fetchFaculties = async () => {
+    const fetchFaculties = async (searchQuery = "") => {
         try {
-            console.log("Fetching faculties for center:", selectedCenter);
             if (!selectedCenter) {
-                console.log("No center selected, skipping faculty fetch");
                 return;
             }
 
-            const response = await userService.getByRoleByCenter('faculty', selectedCenter, 0, 1000);
-            console.log("Faculty response:", response);
-            setFaculties(response?.users || []);
-            // Reset faculty filter when center changes
-            setFacultyFilter("ALL");
+            if (searchQuery) {
+                const filters = { query: { role: 'faculty' }, searchQuery };
+                if (selectedCenter !== 'all') filters.query.center_id = selectedCenter;
+                const response = await userService.search(0, 50, filters);
+                setFaculties(response?.users || []);
+            } else {
+                const response = await userService.getByRoleByCenter('faculty', selectedCenter, 0, 50);
+                setFaculties(response?.users || []);
+            }
         } catch (error) {
             console.error("Failed to load faculties:", error);
             message.error("Failed to load faculties");
         }
     };
+
+    const debouncedFetchFaculties = useMemo(() => {
+        return debounce((value) => fetchFaculties(value), 300);
+    }, [selectedCenter]);
 
     const fetchLeaves = async () => {
         try {
@@ -147,11 +154,11 @@ function AdminLeaves() {
     // Calculate stats
     const stats = useMemo(() => {
         return {
-        total: leaves.length,
-        pending: leaves.filter(l => l.status === "PENDING").length,
-        approved: leaves.filter(l => l.status === "APPROVED").length,
-        rejected: leaves.filter(l => l.status === "REJECTED").length,
-    }
+            total: leaves.length,
+            pending: leaves.filter(l => l.status === "PENDING").length,
+            approved: leaves.filter(l => l.status === "APPROVED").length,
+            rejected: leaves.filter(l => l.status === "REJECTED").length,
+        }
     }, [leaves]);
 
     const getStatusColor = (status) => {
@@ -333,9 +340,8 @@ function AdminLeaves() {
                                 onChange={setFacultyFilter}
                                 placeholder="Filter by Faculty"
                                 optionFilterProp="children"
-                                filterOption={(input, option) =>
-                                    (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
-                                }
+                                onSearch={debouncedFetchFaculties}
+                                filterOption={false}
                             >
                                 <Select.Option value="ALL">All Faculty</Select.Option>
                                 {faculties.map(faculty => (

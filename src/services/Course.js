@@ -1,5 +1,6 @@
 import handleError from "@utils/handleError"
 import { post, put, del } from "@utils/Requests"
+import { safePaginationLimit } from '@utils/paginationHelper';
 
 class CourseService {
   async getById(id, filters) {
@@ -16,7 +17,7 @@ class CourseService {
 
   async getCourses(filters = {}, lastRefKey = 0, limit = 10) {
     try {
-      const response = await post(`/course/getAll?lastRef=${lastRefKey}&limit=${limit}`, { filters })
+      const response = await post(`/course/getAll?lastRef=${lastRefKey}&limit=${safePaginationLimit(limit)}`, { filters })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {

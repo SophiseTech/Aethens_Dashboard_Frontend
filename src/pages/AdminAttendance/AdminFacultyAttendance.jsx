@@ -8,6 +8,7 @@ import {
 } from "@ant-design/icons";
 import { useStore } from "zustand";
 import dayjs from "dayjs";
+import { debounce, useMemo } from "lodash";
 import Title from "@components/layouts/Title";
 import DailySwipes from "@pages/FacultyAttendance/Components/DailySwipes";
 import AttendanceCalendar from "@pages/FacultyAttendance/Components/AttendanceCalendar";
@@ -58,7 +59,7 @@ function AdminFacultyAttendance() {
 
     // Fetch faculty list on mount and when center changes
     useEffect(() => {
-        fetchFaculties();
+        fetchFaculties("", true);
     }, [selectedCenter]);
 
     // Fetch monthly attendance data when faculty or month changes
@@ -75,20 +76,40 @@ function AdminFacultyAttendance() {
         }
     }, [selectedFaculty, selectedDate]);
 
-    const fetchFaculties = async () => {
+    const fetchFaculties = async (searchQuery = "", isInitialLoad = false) => {
         try {
             setLoading(true);
-            // Use getByRoleByCenter with 'faculty' role and selected centerId
-            const response = await userService.getByRoleByCenter('faculty', selectedCenter, 0, 1000);
-            const facultyUsers = response?.users || [];
-            setFaculties(facultyUsers);
+            let facultyUsers = [];
 
-            // Reset selected faculty when center changes
-            setSelectedFaculty(null);
+            if (searchQuery) {
+                const filters = { query: { role: 'faculty' }, searchQuery };
+                if (selectedCenter !== 'all') filters.query.center_id = selectedCenter;
+                const response = await userService.search(0, 50, filters);
+                facultyUsers = response?.users || [];
+            } else {
+                const response = await userService.getByRoleByCenter('faculty', selectedCenter, 0, 50);
+                facultyUsers = response?.users || [];
+            }
 
-            // Auto-select first faculty if available
-            if (facultyUsers.length > 0) {
-                setSelectedFaculty(facultyUsers[0]._id);
+            setFaculties(prev => {
+                // Ensure currently selected faculty stays in the list so its label renders correctly
+                if (selectedFaculty && !isInitialLoad) {
+                    const existingSelected = prev.find(f => f._id === selectedFaculty);
+                    if (existingSelected && !facultyUsers.find(f => f._id === selectedFaculty)) {
+                        return [existingSelected, ...facultyUsers];
+                    }
+                }
+                return facultyUsers;
+            });
+
+            if (isInitialLoad) {
+                // Reset selected faculty when center changes
+                setSelectedFaculty(null);
+
+                // Auto-select first faculty if available
+                if (facultyUsers.length > 0) {
+                    setSelectedFaculty(facultyUsers[0]._id);
+                }
             }
         } catch (error) {
             message.error("Failed to load faculty list");
@@ -97,6 +118,10 @@ function AdminFacultyAttendance() {
             setLoading(false);
         }
     };
+
+    const debouncedFetchFaculties = useMemo(() => {
+        return debounce((value) => fetchFaculties(value, false), 300);
+    }, [selectedCenter, selectedFaculty]);
 
     const fetchMonthlyData = async () => {
         if (!selectedFaculty) return;
@@ -233,10 +258,9 @@ function AdminFacultyAttendance() {
                                 placeholder="Select a faculty"
                                 value={selectedFaculty}
                                 onChange={setSelectedFaculty}
-                                optionFilterProp="children"
-                                filterOption={(input, option) =>
-                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                }
+                                optionFilterProp="label"
+                                onSearch={debouncedFetchFaculties}
+                                filterOption={false}
                                 options={faculties.map(faculty => ({
                                     value: faculty._id,
                                     label: `${faculty.username} (${faculty.email})`

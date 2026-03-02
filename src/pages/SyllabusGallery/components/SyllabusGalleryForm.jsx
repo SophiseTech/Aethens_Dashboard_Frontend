@@ -5,6 +5,8 @@ import { PlusOutlined, EditOutlined, InboxOutlined, DeleteOutlined } from '@ant-
 import syllabusGalleryService from '@services/SyllabusGalleryService'
 import courseService from '@services/Course'
 import s3Service from '@services/S3Service'
+import { debounce } from 'lodash'
+import { useMemo } from 'react'
 
 const { Dragger } = Upload
 
@@ -43,22 +45,44 @@ function SyllabusGalleryForm({ isCreate = true, item = null, onSuccess }) {
 
     useEffect(() => {
         if (isModalOpen) {
-            fetchCourses()
+            fetchCourses("", true)
         }
     }, [isModalOpen])
 
-    const fetchCourses = async () => {
+    const fetchCourses = async (searchQuery = "", isInitialLoad = false) => {
         try {
-            const data = await courseService.getCourses({}, 0, 1000)
-            if (data && data.courses) {
-                setCourses(data.courses)
-            } else if (Array.isArray(data)) {
-                setCourses(data)
+            const filters = {};
+            if (searchQuery) {
+                filters.query = { course_name: { $regex: searchQuery, $options: "i" } };
             }
+            const data = await courseService.getCourses(filters, 0, 100)
+
+            let fetchedCourses = [];
+            if (data && data.courses) {
+                fetchedCourses = data.courses
+            } else if (Array.isArray(data)) {
+                fetchedCourses = data
+            }
+
+            setCourses(prev => {
+                const currentCourseValue = form.getFieldValue('course');
+                // Ensure the currently selected course is kept in options so the label renders
+                if (!isInitialLoad && currentCourseValue) {
+                    const existingSelected = prev.find(c => c._id === currentCourseValue);
+                    if (existingSelected && !fetchedCourses.find(c => c._id === currentCourseValue)) {
+                        return [existingSelected, ...fetchedCourses];
+                    }
+                }
+                return fetchedCourses;
+            });
         } catch (error) {
             console.error("Failed to fetch courses:", error)
         }
     }
+
+    const debouncedFetchCourses = useMemo(() => {
+        return debounce((val) => fetchCourses(val, false), 300);
+    }, [form]);
 
     const showModal = () => {
         if (item) {
@@ -256,9 +280,8 @@ function SyllabusGalleryForm({ isCreate = true, item = null, onSuccess }) {
                             showSearch
                             placeholder="Select a course to link"
                             optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
-                            }
+                            onSearch={debouncedFetchCourses}
+                            filterOption={false}
                             allowClear
                         >
                             {courses.map(c => (

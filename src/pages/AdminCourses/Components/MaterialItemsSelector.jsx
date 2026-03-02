@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Select, Spin, Empty, Typography } from 'antd';
 import inventoryService from '@services/Inventory';
+import { debounce } from 'lodash';
+import { useMemo } from 'react';
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -14,23 +16,36 @@ function MaterialItemsSelector({ value = [], onChange }) {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        fetchInventoryItems();
+        fetchInventoryItems("", true);
     }, []);
 
-    const fetchInventoryItems = async () => {
+    const fetchInventoryItems = async (searchQuery = "", isInitialLoad = false) => {
         try {
             setLoading(true);
-            // Fetch with large limit to get all items for selection
-            const response = await inventoryService.getInventoryItems(0, 1000);
-            if (response?.items) {
-                setInventoryItems(response.items);
-            }
+            const filters = searchQuery ? { searchQuery } : {};
+            const response = await inventoryService.getInventoryItems(0, 50, filters);
+            let responseItems = response?.items || [];
+
+            setInventoryItems(prev => {
+                // Keep selected items in the list even if search filters them out to prevent raw ID display
+                if (!isInitialLoad && value?.length > 0) {
+                    const existingSelected = prev.filter(item => value.includes(item._id));
+                    const newIds = new Set(responseItems.map(item => item._id));
+                    const missingSelected = existingSelected.filter(item => !newIds.has(item._id));
+                    return [...missingSelected, ...responseItems];
+                }
+                return responseItems;
+            });
         } catch (error) {
             console.error('Error fetching inventory items:', error);
         } finally {
             setLoading(false);
         }
     };
+
+    const debouncedFetchItems = useMemo(() => {
+        return debounce((val) => fetchInventoryItems(val, false), 300);
+    }, [value]);
 
     if (loading) {
         return (
@@ -49,9 +64,8 @@ function MaterialItemsSelector({ value = [], onChange }) {
                 style={{ width: '100%' }}
                 value={value}
                 onChange={onChange}
-                filterOption={(input, option) =>
-                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                }
+                onSearch={debouncedFetchItems}
+                filterOption={false}
                 notFoundContent={inventoryItems.length === 0 ? <Empty description="No inventory items found" /> : null}
             >
                 {inventoryItems.map((item) => (

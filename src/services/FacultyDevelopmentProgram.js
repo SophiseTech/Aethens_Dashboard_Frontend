@@ -1,10 +1,11 @@
 import handleError from "@utils/handleError";
 import { del, post, put } from "@utils/Requests";
+import { safePaginationLimit } from '@utils/paginationHelper';
 
 class FacultyDevelopmentProgramService {
   async getPrograms(filters = {}, lastRefKey = 0, limit = 10) {
     try {
-      const response = await post(`/facultyDevProgram/list?lastRef=${lastRefKey}&limit=${limit}`, { filters });
+      const response = await post(`/facultyDevProgram/list?lastRef=${lastRefKey}&limit=${safePaginationLimit(limit)}`, { filters });
       if (!response || !response.data) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {

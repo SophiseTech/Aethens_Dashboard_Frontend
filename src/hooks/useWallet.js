@@ -57,9 +57,9 @@ export default function useWallet() {
       setLoading(true);
       const res = await walletService.getWalletByStudentId(studentId);
       setSelectedWallet(res);
-      // once we have the wallet, fetch its transactions using wallet id
+      // once we have the wallet, fetch page 1 of its transactions
       if (res._id) {
-        await fetchTransactions(res._id, transactionsPage, transactionsLimit);
+        await fetchTransactions(res._id, 1, transactionsLimit);
       }
       return res.data;
     } catch (err) {
@@ -68,7 +68,7 @@ export default function useWallet() {
     } finally {
       setLoading(false);
     }
-  }, [fetchTransactions, transactionsPage, transactionsLimit]);
+  }, [fetchTransactions, transactionsLimit]);
 
   const topUp = useCallback(async (studentId, payload) => {
     try {

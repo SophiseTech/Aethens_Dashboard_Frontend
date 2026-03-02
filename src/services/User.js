@@ -1,5 +1,6 @@
 import handleError from "@utils/handleError"
 import { post, put } from "@utils/Requests"
+import { safePaginationLimit } from '@utils/paginationHelper';
 
 class UserService {
   async getByRoleByCenter(role, centerId, lastRefKey = 0, limit = 10, status = null, courseIds = null, fromBranch = null, toBranch = null) {
@@ -29,7 +30,7 @@ class UserService {
         payload.toBranch = toBranch;
       }
 
-      const response = await post(`/user/getByRoleByCenter?lastRefKey=${lastRefKey}&limit=${limit}`, payload)
+      const response = await post(`/user/getByRoleByCenter?lastRefKey=${lastRefKey}&limit=${safePaginationLimit(limit)}`, payload)
       if (!role) throw new Error("Bad Data")
 
       if (!response || !response.data) throw new Error("An error occured. Please try again")
@@ -59,10 +60,10 @@ class UserService {
     }
   }
 
-  async getTodaysSessionAttendees(centerId){
+  async getTodaysSessionAttendees(centerId) {
     try {
-      if( !centerId ) throw new Error("Bad Data");
-      const response = await post(`/user/getTodaysSessionAttendees`,{centerId});
+      if (!centerId) throw new Error("Bad Data");
+      const response = await post(`/user/getTodaysSessionAttendees`, { centerId });
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {
@@ -82,7 +83,7 @@ class UserService {
 
   async search(lastRef = 0, limit = 10, filters) {
     try {
-      const response = await post(`/user/search?lastRefKey=${lastRef}&limit=${limit}`, {
+      const response = await post(`/user/search?lastRefKey=${lastRef}&limit=${safePaginationLimit(limit)}`, {
         filters
       })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
