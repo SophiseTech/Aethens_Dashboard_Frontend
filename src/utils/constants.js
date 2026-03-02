@@ -253,5 +253,6 @@ export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
   "/manager/inventory-items",
   "/admin/syllabus-gallery",
   "/admin/courses",
-  "/manager/attendance-register"
+  "/manager/attendance-register",
+  "/manager/tasks"
 ]
