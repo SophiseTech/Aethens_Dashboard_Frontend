@@ -35,8 +35,6 @@ const Tasks = lazy(() => import("@pages/Tasks"))
 const Holidays = lazy(() => import("@pages/Holidays"))
 const AttendanceRegister = lazy(() => import("@pages/AttendanceRegister"))
 const SyllabusGallery = lazy(() => import("@pages/SyllabusGallery"))
-const AdminLeaves = lazy(() => import("@pages/AdminLeaves/AdminLeaves"))
-const AdminFacultyAttendance = lazy(() => import("@pages/AdminAttendance/AdminFacultyAttendance"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -55,7 +53,7 @@ export const LazyLoader = ({ element }) => {
 
 export const managerRoutes = [
   {
-    element: <Protected roles={[ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]} />,
+    element: <Protected roles={[ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER]} />,
     children: [
       {
         element: <SidebarLayout />,
@@ -220,27 +218,6 @@ export const managerRoutes = [
             path: "/admin/syllabus-gallery",
             element: <LazyLoader element={<SyllabusGallery />} />,
             title: "Syllabus Gallery",
-          },
-        ]
-      }
-    ]
-  },
-  // Operations Manager-only routes
-  {
-    element: <Protected roles={[ROLES.OPERATIONS_MANAGER]} />,
-    children: [
-      {
-        element: <SidebarLayout />,
-        children: [
-          {
-            path: "/manager/staff-leaves",
-            element: <LazyLoader element={<AdminLeaves />} />,
-            title: "Staff Leaves",
-          },
-          {
-            path: "/manager/staff-attendance",
-            element: <LazyLoader element={<AdminFacultyAttendance />} />,
-            title: "Staff Attendance",
           },
         ]
       }

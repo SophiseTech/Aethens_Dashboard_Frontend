@@ -497,7 +497,9 @@ export const generalRoutes = [
                 <AdminCourses />
               </LazyLoader>
             ),
-            title: "Courses",
+            title: "Courses"
+          },
+          {
             path: "/admin/users",
             element: (
               <LazyLoader>
