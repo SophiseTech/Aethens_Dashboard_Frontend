@@ -25,7 +25,21 @@ const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"));
 const PhaseListPage = lazy(() => import("@pages/FinalProject/PhaseList"));
 const AdminFacultyAttendance = lazy(() => import("@pages/AdminAttendance/AdminFacultyAttendance"));
 const AdminLeaves = lazy(() => import("@pages/AdminLeaves/AdminLeaves"));
+const EditNewsletter = lazy(() => import("@pages/Admin/Newsletters/EditNewsletter"));
+const EditShopItem = lazy(() => import("@pages/Admin/ShopItems/EditShopItem"));
+const EditArtWork = lazy(() => import("@pages/Admin/ArtWorks/EditArtWork"));
+const EditStudentOfTheWeek = lazy(() => import("@pages/Admin/StudentOfTheWeek/EditStudentOfTheWeek"));
 const AdminCourses = lazy(() => import("@pages/AdminCourses"));
+const AdminUsers = lazy(() => import("@pages/Admin/Users"));
+const AdminEditUser = lazy(() => import("@pages/Admin/Users/EditUser"));
+const AdminCenters = lazy(() => import("@pages/Admin/Centers"));
+const AdminBlogPosts = lazy(() => import("@pages/Admin/BlogPosts"));
+const EditBlogPost = lazy(() => import("@pages/Admin/BlogPosts/EditBlogPost"));
+const AdminNewsletters = lazy(() => import("@pages/Admin/Newsletters"));
+const AdminShopItems = lazy(() => import("@pages/Admin/ShopItems"));
+const AdminArtWorks = lazy(() => import("@pages/Admin/ArtWorks"));
+const AdminStudentOfTheWeek = lazy(() => import("@pages/Admin/StudentOfTheWeek"));
+const AdminLatestVideos = lazy(() => import("@pages/Admin/LatestVideos"));
 
 const LazyLoader = ({ children }) => {
   const location = useLocation()
@@ -235,7 +249,45 @@ export const generalRoutes = [
     ],
   },
   {
+    element: <Protected roles={[ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER]} />,
+    children: [
+      {
+        element: <SidebarLayout />,
+        children: [
+          {
+            path: "/admin/users",
+            element: (
+              <LazyLoader>
+                <AdminUsers />
+              </LazyLoader>
+            ),
+            title: "Staff",
+          },
+          {
+            path: "/admin/users/new",
+            element: (
+              <LazyLoader>
+                <AdminEditUser />
+              </LazyLoader>
+            ),
+            title: "Add User",
+          },
+          {
+            path: "/admin/users/:id",
+            element: (
+              <LazyLoader>
+                <AdminEditUser />
+              </LazyLoader>
+            ),
+            title: "Edit User",
+          },
+        ],
+      },
+    ],
+  },
+  {
     element: <Protected roles={[ROLES.ADMIN]} />,
+
     children: [
       {
         element: <SidebarLayout />,
@@ -257,6 +309,186 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Manage Leaves",
+          },
+          {
+            path: "/admin/users",
+            element: (
+              <LazyLoader>
+                <AdminUsers />
+              </LazyLoader>
+            ),
+            title: "Users",
+          },
+          {
+            path: "/admin/users/new",
+            element: (
+              <LazyLoader>
+                <AdminEditUser />
+              </LazyLoader>
+            ),
+            title: "Add User",
+          },
+          {
+            path: "/admin/users/:id",
+            element: (
+              <LazyLoader>
+                <AdminEditUser />
+              </LazyLoader>
+            ),
+            title: "Edit User",
+          },
+          {
+            path: "/admin/centers",
+            element: (
+              <LazyLoader>
+                <AdminCenters />
+              </LazyLoader>
+            ),
+            title: "Centers",
+          },
+          {
+            path: "/admin/blog-posts",
+            element: (
+              <LazyLoader>
+                <AdminBlogPosts />
+              </LazyLoader>
+            ),
+            title: "Blog Posts",
+          },
+          {
+            path: "/admin/blog-posts/create",
+            element: (
+              <LazyLoader>
+                <EditBlogPost />
+              </LazyLoader>
+            ),
+            title: "Create Blog Post",
+          },
+          {
+            path: "/admin/blog-posts/edit/:id",
+            element: (
+              <LazyLoader>
+                <EditBlogPost />
+              </LazyLoader>
+            ),
+            title: "Edit Blog Post",
+          },
+          {
+            path: "/admin/newsletters",
+            element: (
+              <LazyLoader>
+                <AdminNewsletters />
+              </LazyLoader>
+            ),
+            title: "Newsletters",
+          },
+          {
+            path: "/admin/newsletters/create",
+            element: (
+              <LazyLoader>
+                <EditNewsletter />
+              </LazyLoader>
+            ),
+            title: "Create Newsletter",
+          },
+          {
+            path: "/admin/newsletters/edit/:id",
+            element: (
+              <LazyLoader>
+                <EditNewsletter />
+              </LazyLoader>
+            ),
+            title: "Edit Newsletter",
+          },
+          {
+            path: "/admin/shop-items",
+            element: (
+              <LazyLoader>
+                <AdminShopItems />
+              </LazyLoader>
+            ),
+            title: "Shop Items",
+          },
+          {
+            path: "/admin/shop-items/create",
+            element: (
+              <LazyLoader>
+                <EditShopItem />
+              </LazyLoader>
+            ),
+            title: "Create Shop Item",
+          },
+          {
+            path: "/admin/shop-items/edit/:id",
+            element: (
+              <LazyLoader>
+                <EditShopItem />
+              </LazyLoader>
+            ),
+            title: "Edit Shop Item",
+          },
+          {
+            path: "/admin/art-works",
+            element: (
+              <LazyLoader>
+                <AdminArtWorks />
+              </LazyLoader>
+            ),
+            title: "Art Works",
+          },
+          {
+            path: "/admin/art-works/create",
+            element: (
+              <LazyLoader>
+                <EditArtWork />
+              </LazyLoader>
+            ),
+            title: "Create Art Work",
+          },
+          {
+            path: "/admin/art-works/edit/:id",
+            element: (
+              <LazyLoader>
+                <EditArtWork />
+              </LazyLoader>
+            ),
+            title: "Edit Art Work",
+          },
+          {
+            path: "/admin/student-of-the-week",
+            element: (
+              <LazyLoader>
+                <AdminStudentOfTheWeek />
+              </LazyLoader>
+            ),
+            title: "Student of the Week",
+          },
+          {
+            path: "/admin/student-of-the-week/create",
+            element: (
+              <LazyLoader>
+                <EditStudentOfTheWeek />
+              </LazyLoader>
+            ),
+            title: "Add Student of the Week",
+          },
+          {
+            path: "/admin/student-of-the-week/edit/:id",
+            element: (
+              <LazyLoader>
+                <EditStudentOfTheWeek />
+              </LazyLoader>
+            ),
+            title: "Edit Student of the Week",
+          },
+          {
+            path: "/admin/latest-videos",
+            element: (
+              <LazyLoader>
+                <AdminLatestVideos />
+              </LazyLoader>
+            ),
+            title: "Latest Videos",
           },
           {
             path: "/admin/courses",
