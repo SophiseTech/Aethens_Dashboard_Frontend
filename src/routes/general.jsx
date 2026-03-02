@@ -5,6 +5,7 @@ import { ROLES } from "@utils/constants";
 import { Spin } from "antd";
 import { useLocation } from "react-router-dom";
 import FinalProjectPage from "@pages/FinalProject";
+import AddSessionStatus from "@pages/Students/AddSessionStatus";
 
 const Login = lazy(() => import("@pages/Login"));
 const Dashboard = lazy(() => import("@pages/Dashboard"));
@@ -279,6 +280,27 @@ export const generalRoutes = [
           },
         ],
       },
+    ],
+  },
+  {
+    element: <Protected roles={[ROLES.ACADEMIC_MANAGER]} />,
+    children: [
+      {
+        element: <SidebarLayout />,
+        children: [
+          {
+            path: "/acmanager/session-status/:studentId",
+            element: <LazyLoader><AddSessionStatus /></LazyLoader>,
+            title: "Add Session Status"
+          },
+          {
+            path: "/academic-manager/activities/student/:id",
+            element: <LazyLoader><Activities /></LazyLoader>,
+            title: "Activities",
+          },
+        ],
+      },
+
     ],
   },
 ];

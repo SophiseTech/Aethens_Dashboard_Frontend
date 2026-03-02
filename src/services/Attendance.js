@@ -10,7 +10,7 @@ class AttendanceService {
     const { user } = userStore.getState();
     const { selectedCenter } = centersStore.getState();
 
-    if (user.role === 'admin' && selectedCenter) {
+    if ((user.role === 'admin' || user.role === 'academic_manager') && selectedCenter) {
       return `${path}?${centerVariable}=${selectedCenter}&`
     } else if (user.role === ROLES.MANAGER) {
       return `${path}?${centerVariable}=${user.center_id}&`

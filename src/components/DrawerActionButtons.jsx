@@ -207,7 +207,7 @@ const AcademicManagerActionButtons = ({ userDetails }) => {
   };
 
   const handleViewActivities = (student_id) => {
-    nav(`/faculty/activities/student/${student_id}`)
+    nav(`/academic-manager/activities/student/${student_id}`)
   }
 
   const handleViewSession = () => {
@@ -228,6 +228,7 @@ const AcademicManagerActionButtons = ({ userDetails }) => {
       <Button onClick={() => handleViewRemarks(userDetails?._id)} variant='filled' color='cyan'>
         View Remarks
       </Button>
+      <SessionStatus student={userDetails} />
       <Button onClick={() => handleViewFinalProject(userDetails?._id, userDetails?.details_id?.course_id)} variant='filled' color='orange'>
         View Final Project
       </Button>

@@ -3,6 +3,7 @@ import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
 import { Spin } from 'antd';
 import { lazy, Suspense } from 'react';
+import AcademicManager from './AcademicManager';
 
 // ✅ Define lazy imports ONCE here
 const Student = lazy(() => import('@pages/Dashboard/Student'));
@@ -26,7 +27,7 @@ function Dashboard() {
       case ROLES.OPERATIONS_MANAGER:
         return <Admin />;
       case ROLES.ACADEMIC_MANAGER:
-        return <Admin />;
+        return <AcademicManager />;
       default:
         return <p>404</p>;
     }
