@@ -52,10 +52,12 @@ function MigrateCourse({ student }) {
    */
   const [generateFeeAccount, setGenerateFeeAccount] = useState(true);
   const [paymentType, setPaymentType] = useState('single');
+  const [courseFee, setCourseFee] = useState(null);
   const [regFee, setRegFee] = useState(3500);
   const [paidAmountPartial, setPaidAmountPartial] = useState(null);
   const [numberOfInstallments, setNumberOfInstallments] = useState(null);
   const [startDate, setStartDate] = useState(null);
+  const [isCourseCompleted, setIsCourseCompleted] = useState(false);
 
   useEffect(() => {
     if (!isModalOpen) return;
@@ -102,17 +104,20 @@ function MigrateCourse({ student }) {
     setSelectedCourseData(null);
     setGenerateFeeAccount(true);
     setPaymentType('single');
+    setCourseFee(null);
     setRegFee(3500);
     setPaidAmountPartial(null);
     setNumberOfInstallments(null);
     setStartDate(null);
     setPendingFees(null);
+    setIsCourseCompleted(false);
   };
 
   const handleCourseChange = (value) => {
     setSelectedCourse(value);
     const course = courses.find((c) => c._id === value);
     setSelectedCourseData(course || null);
+    setCourseFee(course?.rate || null);
   };
 
   const buildFeeAccountData = () => {
@@ -124,8 +129,9 @@ function MigrateCourse({ student }) {
       course_id: selectedCourse,
       center_id: student.details_id?.center_id || student.center_id,
       type: paymentType,
-      total_course_fee: selectedCourseData?.rate || 0,
+      total_course_fee: courseFee ?? selectedCourseData?.rate ?? 0,
       reg_fee: regFee,
+      isCourseCompleted,
     };
 
     if (paymentType === 'partial') return { ...base, paidAmount: paidAmountPartial || 0 };
@@ -239,14 +245,14 @@ function MigrateCourse({ student }) {
                 </Space>
               }
             />
-          ) : fullyPaid ? (
+          ) : fullyPaid && !isCourseCompleted ? (
             <Alert
               type="success"
               showIcon
               message="All fees cleared on current course"
               description={
                 <Text>
-                  Paid amount (₦{pendingFees.amountPaid?.toLocaleString()}) will be credited to the student&apos;s wallet if you choose to create a new fee account.
+                  Paid amount (₹{pendingFees.amountPaid?.toLocaleString()}) will be credited to the student&apos;s wallet if you choose to create a new fee account (unless marked as Course Completed).
                 </Text>
               }
             />
@@ -274,23 +280,41 @@ function MigrateCourse({ student }) {
           {/* Fee Account Checkbox */}
           <div>
             <Checkbox
-              checked={generateFeeAccount}
-              onChange={(e) => setGenerateFeeAccount(e.target.checked)}
+              checked={!generateFeeAccount}
+              onChange={(e) => setGenerateFeeAccount(!e.target.checked)}
             >
-              <Text strong>Create a new fee account for the new course</Text>
+              <Text strong>Use old fee structure</Text>
             </Checkbox>
             <div style={{ marginTop: 4, paddingLeft: 24 }}>
-              {generateFeeAccount ? (
+              {!generateFeeAccount ? (
                 <Text type="secondary" style={{ fontSize: 12 }}>
-                  Old account will be closed, any paid amount credited to wallet, and a fresh fee account will be created.
+                  New fee account will follow same bill and fee status. New course fee same as old course fee.
                 </Text>
               ) : (
                 <Text type="secondary" style={{ fontSize: 12 }}>
-                  Old account will be closed and copied to the new course. Old unpaid bills will be marked as closed.
+                  New fee account and refund of all paid bills to wallet.
                 </Text>
               )}
             </div>
+
+            {/* Course Completed Checkbox (Only if fully paid & creating new fee account) */}
+            {fullyPaid && generateFeeAccount && (
+              <div style={{ marginTop: 12 }}>
+                <Checkbox
+                  checked={isCourseCompleted}
+                  onChange={(e) => setIsCourseCompleted(e.target.checked)}
+                >
+                  <Text strong>Course Completed</Text>
+                </Checkbox>
+                <div style={{ paddingLeft: 24, marginTop: 4 }}>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    Only for upgradation, the previously paid fees (₹{pendingFees?.amountPaid?.toLocaleString()}) will <Text strong type="danger">NOT</Text> be refunded to the wallet.
+                  </Text>
+                </div>
+              </div>
+            )}
           </div>
+
 
           {/* New fee account fields (Path A only) */}
           {generateFeeAccount && (
@@ -324,6 +348,21 @@ function MigrateCourse({ student }) {
                   />
                 </div>
 
+                {/* Course Fee */}
+                <div>
+                  <Text strong style={{ display: 'block', marginBottom: 6 }}>Course Fee</Text>
+                  <InputNumber
+                    style={{ width: '100%' }}
+                    placeholder="Course fee"
+                    value={courseFee}
+                    onChange={(val) => setCourseFee(val)}
+                    min={0}
+                    prefix="₹"
+                    formatter={(v) => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                    parser={(v) => v.replace(/₹\s?|(,*)/g, '')}
+                  />
+                </div>
+
                 {/* Partial — upfront paid amount */}
                 {paymentType === 'partial' && (
                   <div>
@@ -334,7 +373,7 @@ function MigrateCourse({ student }) {
                       value={paidAmountPartial}
                       onChange={(val) => setPaidAmountPartial(val)}
                       min={0}
-                      max={selectedCourseData?.rate || undefined}
+                      max={courseFee ?? selectedCourseData?.rate ?? undefined}
                       prefix="₹"
                       formatter={(v) => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                       parser={(v) => v.replace(/₦\s?|(,*)/g, '')}
