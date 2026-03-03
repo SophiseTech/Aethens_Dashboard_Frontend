@@ -5,7 +5,8 @@ import CustomSelect from '@components/form/CustomSelect'
 import CustomDatePicker from '@components/form/CustomDatePicker'
 import { age_categories, closing_remarks, demoStatuses, EnquiryModeOptions, foundUsOptions } from '@utils/constants'
 import CustomCheckbox from '@components/form/CustomCheckBox'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
+import courseStore from '@stores/CourseStore'
 
 /**
  * ViewWiseFilters
@@ -16,6 +17,17 @@ import { useEffect } from 'react'
  */
 function ViewWiseFilters({ selectedView = 'All', onApply = () => { }, onClear = () => { }, viewsConfig = null }) {
   const [form] = Form.useForm()
+  const { courses, getCourses } = courseStore()
+
+  // Fetch courses once for the dropdown
+  useEffect(() => {
+    if (!courses || courses.length === 0) getCourses(100)
+  }, [])
+
+  const courseOptions = useMemo(
+    () => (courses || []).map(c => ({ label: c.course_name, value: c._id })),
+    [courses]
+  )
 
   useEffect(() => {
     form.resetFields()
@@ -24,7 +36,7 @@ function ViewWiseFilters({ selectedView = 'All', onApply = () => { }, onClear = 
   const defaultViewsConfig = {
     All: [
       { name: 'phoneNumber', label: 'Name or Phone', type: 'input' },
-      { name: 'course', label: 'Course', type: 'input' },
+      { name: 'courseId', label: 'Course', type: 'select', options: courseOptions },
       { name: 'startDate', label: 'From', type: 'date' },
       { name: 'endDate', label: 'To', type: 'date' },
     ],
@@ -43,7 +55,7 @@ function ViewWiseFilters({ selectedView = 'All', onApply = () => { }, onClear = 
       { name: 'phoneNumber', label: 'Phone', type: 'input' },
       { name: 'demo_startDate', label: 'Demo From', type: 'date' },
       { name: 'demo_endDate', label: 'Demo To', type: 'date' },
-      { name: 'demoSlot.status', label: 'Status', type: 'select', options: demoStatuses },
+      { name: 'demoSlotStatus', label: 'Status', type: 'select', options: demoStatuses },
       { name: 'showStaleDemo', label: 'Show Only Stale Enquiries', type: 'checkbox' },
     ],
     Enrolled: [
@@ -62,11 +74,29 @@ function ViewWiseFilters({ selectedView = 'All', onApply = () => { }, onClear = 
   const cfg = viewsConfig || defaultViewsConfig
 
   const handleFinish = (values) => {
-    // const normalizer = normalize || defaultNormalize
-    // const normalized = normalizer(values)
     // include stage when a specific view is selected
     if (selectedView && selectedView !== 'All') values.stage = selectedView
-    onApply(values)
+
+    // Normalize filters before sending to the API
+    const normalized = {}
+    for (const [key, val] of Object.entries(values)) {
+      if (val === undefined || val === null || val === '') continue
+
+      // Convert Dayjs objects (from Ant Design DatePicker) to ISO strings
+      if (val && typeof val === 'object' && typeof val.toISOString === 'function') {
+        normalized[key] = val.toISOString()
+      } else {
+        normalized[key] = val
+      }
+    }
+
+    // Remap demoSlotStatus back to the dot-notation key the backend expects
+    if (normalized.demoSlotStatus !== undefined) {
+      normalized['demoSlot.status'] = normalized.demoSlotStatus
+      delete normalized.demoSlotStatus
+    }
+
+    onApply(normalized)
   }
 
   const handleReset = () => {

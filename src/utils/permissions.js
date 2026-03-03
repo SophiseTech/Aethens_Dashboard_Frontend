@@ -20,15 +20,15 @@ const permissions = {
     view_bill: [ROLES.MANAGER, ROLES.STUDENT]
   },
   bills: {
-    add: [ROLES.MANAGER, ROLES.ADMIN],
+    add: [ROLES.MANAGER],
     record_payment: [ROLES.MANAGER, ROLES.ADMIN],
     delete: [ROLES.ADMIN]
   },
   fda: {
-    mark_don: [ROLES.MANAGER]
+    mark_don: [ROLES.MANAGER, ROLES.ACADEMIC_MANAGER]
   },
   holidays: {
-    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.STUDENT, ROLES.OPERATIONS_MANAGER],
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.STUDENT, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER],
     add: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     edit: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     delete: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]
@@ -57,6 +57,52 @@ const permissions = {
     addToCenter: [ROLES.MANAGER],
     request: [ROLES.MANAGER],
     approve: [ROLES.ADMIN]
+  },
+  // Admin-only content management (dashboard frontend)
+  adminUsers: {
+    view: [ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER],
+    add: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    edit: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    delete: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]
+  },
+  adminCenters: {
+    view: [ROLES.ADMIN]
+  },
+  adminBlogPost: {
+    view: [ROLES.ADMIN],
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN]
+  },
+  adminNewsletter: {
+    view: [ROLES.ADMIN],
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN]
+  },
+  adminShopItem: {
+    view: [ROLES.ADMIN],
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN]
+  },
+  adminArtWork: {
+    view: [ROLES.ADMIN],
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN]
+  },
+  adminStudentOfTheWeek: {
+    view: [ROLES.ADMIN],
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN]
+  },
+  adminLatestVideos: {
+    view: [ROLES.ADMIN],
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN]
   },
   session_status: {
     delete: [ROLES.ADMIN]
@@ -93,16 +139,16 @@ const permissions = {
     delete: [ROLES.MANAGER, ROLES.ADMIN]
   },
   sessions: {
-    view: [ROLES.MANAGER, ROLES.ADMIN],
-    add: [ROLES.MANAGER, ROLES.ADMIN],
-    edit: [ROLES.MANAGER, ROLES.ADMIN],
-    delete: [ROLES.MANAGER, ROLES.ADMIN]
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
+    add: [ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
+    edit: [ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
+    delete: [ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER]
   },
   remarks: {
-    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY],
-    add: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY],
-    edit: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY],
-    delete: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY]
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY, ROLES.ACADEMIC_MANAGER],
+    add: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY, ROLES.ACADEMIC_MANAGER],
+    edit: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY, ROLES.ACADEMIC_MANAGER],
+    delete: [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY, ROLES.ACADEMIC_MANAGER]
   }
 }
 

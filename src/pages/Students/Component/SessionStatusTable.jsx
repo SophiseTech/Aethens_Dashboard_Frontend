@@ -6,8 +6,8 @@ import { formatDate } from '@utils/helper'
 import permissions from '@utils/permissions'
 import { Button, Image, Input, Select, Space, Table } from 'antd'
 import React, { useEffect, useState, useMemo } from 'react'
-import { useStore } from 'zustand'
 import userStore from '@stores/UserStore'
+import { useStore } from 'zustand'
 
 const { Search } = Input;
 
@@ -38,6 +38,12 @@ function SessionStatusTable({ student }) {
     if (statusFilter && statusFilter !== 'all') {
       filters.status = statusFilter;
     }
+    // getFacultyRemarks({ query: { student_id: student._id, course_id: student?.details_id?.course_id?._id || student?.details_id?.course_id }, populate: "faculty_id" })
+    // if (!facultyRemarks || facultyRemarks.length === 0) {
+    // }
+    // }, [student])
+
+
 
     if (searchText) {
       filters.search = searchText;

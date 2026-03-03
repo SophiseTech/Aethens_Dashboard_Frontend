@@ -15,6 +15,7 @@ import Title from "@components/layouts/Title";
 import leaveService from "@services/LeaveService";
 import userService from "@services/User";
 import centerStore from "@stores/CentersStore";
+import { useSearchParams } from "react-router-dom";
 
 const { confirm } = Modal;
 
@@ -24,8 +25,11 @@ function AdminLeaves() {
     const [loading, setLoading] = useState(false);
     const [statusFilter, setStatusFilter] = useState("PENDING"); // Default to pending
     const [typeFilter, setTypeFilter] = useState("ALL");
-    const [facultyFilter, setFacultyFilter] = useState("ALL");
     const [actionLoading, setActionLoading] = useState({});
+    const [searchParams] = useSearchParams();
+
+    // Initialise faculty filter from URL query param (e.g. ?user_id=...)
+    const [facultyFilter, setFacultyFilter] = useState(searchParams.get("user_id") || "ALL");
 
     // Get selected center from store
     const { selectedCenter } = useStore(centerStore);
@@ -147,11 +151,11 @@ function AdminLeaves() {
     // Calculate stats
     const stats = useMemo(() => {
         return {
-        total: leaves.length,
-        pending: leaves.filter(l => l.status === "PENDING").length,
-        approved: leaves.filter(l => l.status === "APPROVED").length,
-        rejected: leaves.filter(l => l.status === "REJECTED").length,
-    }
+            total: leaves.length,
+            pending: leaves.filter(l => l.status === "PENDING").length,
+            approved: leaves.filter(l => l.status === "APPROVED").length,
+            rejected: leaves.filter(l => l.status === "REJECTED").length,
+        }
     }, [leaves]);
 
     const getStatusColor = (status) => {

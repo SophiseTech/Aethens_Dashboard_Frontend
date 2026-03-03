@@ -11,7 +11,7 @@ function useProjectsView() {
 
   const viewContext = {
     userRole: user.role,
-    isManagerView: user.role === 'manager',
+    isManagerView: user.role === 'manager' || user.role === 'academic_manager' || user.role === 'operations_manager',
     targetStudentId: studentId || user._id,
   }
 

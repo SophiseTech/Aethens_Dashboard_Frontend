@@ -3,7 +3,8 @@ export const ROLES = {
   MANAGER: "manager",
   ADMIN: "admin",
   FACULTY: "faculty",
-  OPERATIONS_MANAGER: "operations_manager"
+  OPERATIONS_MANAGER: "operations_manager",
+  ACADEMIC_MANAGER: "academic_manager"
 }
 
 export const imageCategories = [
@@ -245,13 +246,32 @@ export const ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES = [
   "/manager/holidays",
   "/manager/notifications",
   "/manager/inventory-items",
+  "/admin/users",
+  "/admin/centers",
+  "/admin/blog-posts",
+  "/admin/newsletters",
+  "/admin/shop-items",
+  "/admin/art-works",
+  "/admin/student-of-the-week",
+  "/admin/latest-videos",
   "/admin/courses",
+  /^\/manager\/final-project\/student(\/.*)?$/,
 ]
 
 export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
   "/manager/holidays",
   "/manager/inventory-items",
+  // Admin content pages: show Add/other title buttons without requiring center selection
+  "/admin/users",
+  "/admin/centers",
+  "/admin/blog-posts",
+  "/admin/newsletters",
+  "/admin/shop-items",
+  "/admin/art-works",
+  "/admin/student-of-the-week",
+  "/admin/latest-videos",
   "/admin/syllabus-gallery",
   "/admin/courses",
-  "/manager/attendance-register"
+  "/manager/attendance-register",
+  "/manager/tasks"
 ]
