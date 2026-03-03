@@ -10,6 +10,7 @@ import AttendanceStats from "@pages/Attendance/Components/AttendanceStats";
 import AttendanceTrend from "@pages/Attendance/Components/AttendanceTrend";
 import { useStore } from "zustand";
 import userStore from "@stores/UserStore";
+import { getMonthRange } from "@utils/helper";
 
 function Attendance() {
   const { getSlots, loading, slots, getSlotStats, slotStats } = slotStore();
@@ -19,8 +20,7 @@ function Attendance() {
   const { courseId } = useParams()
 
   useEffect(() => {
-    const start = selectedFilter.startOf("month").toISOString();
-    const end = selectedFilter.endOf("month").toISOString();
+    const { firstDay: start, lastDay: end } = getMonthRange(selectedFilter);
 
     getSlots(0, {
       sort: { start_date: -1 },

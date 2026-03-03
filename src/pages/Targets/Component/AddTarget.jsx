@@ -9,6 +9,7 @@ import { useState, useMemo } from 'react';
 import { useStore } from 'zustand';
 import centersStore from '@stores/CentersStore';
 import useTargetStore from '@stores/TargetStore';
+import { toISTEndOfDayISO, toISTStartOfDayISO } from '@utils/helper';
 
 function AddTarget() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -45,8 +46,8 @@ function AddTarget() {
             title: values.title,
             description: values.description,
             center_id: values.center,
-            start_date: values.startDate?.toISOString(),
-            end_date: values.endDate?.toISOString(),
+            start_date: values.startDate ? toISTStartOfDayISO(values.startDate) : undefined,
+            end_date: values.endDate ? toISTEndOfDayISO(values.endDate) : undefined,
             metrics: {
                 [values.targetType]: values.targetValue
             }

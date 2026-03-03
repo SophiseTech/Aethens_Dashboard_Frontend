@@ -6,7 +6,7 @@ import userStore from '@stores/UserStore';
 import centerStore from '@stores/CentersStore';
 import { useStore } from 'zustand';
 import dayjs from 'dayjs';
-import { getMonthRange } from '@utils/helper';
+import { getMonthRange, toISTDateString } from '@utils/helper';
 import { post } from '@utils/Requests';
 
 const { RangePicker } = DatePicker;
@@ -82,8 +82,8 @@ function AttendanceReport({ dateRange: dashboardDateRange, onDateRangeChange }) 
     }
 
     const nextRange = {
-      firstDay: firstDay.format('YYYY-MM-DD'),
-      lastDay: lastDay.format('YYYY-MM-DD'),
+      firstDay: toISTDateString(firstDay),
+      lastDay: toISTDateString(lastDay),
     };
 
     setDateRange(nextRange);

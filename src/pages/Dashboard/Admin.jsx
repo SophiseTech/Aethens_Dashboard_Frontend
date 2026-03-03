@@ -13,7 +13,7 @@ import billStore from "@stores/BillStore";
 import payslipStore from "@stores/PayslipStore";
 import userStore from "@stores/UserStore";
 import centerStore from "@stores/CentersStore";
-import { getMonthRange } from "@utils/helper";
+import { getMonthRange, toISTDateString } from "@utils/helper";
 import { Col, Flex, Grid, Row, DatePicker, Select, Card } from "antd";
 import _ from "lodash";
 import dayjs from "dayjs";
@@ -68,8 +68,8 @@ function Admin() {
     if (dates) {
       const [start, end] = dates;
       setDateRange({
-        firstDay: start.utc().startOf('day').toISOString(),
-        lastDay: end.utc().endOf('day').toISOString(),
+        firstDay: toISTDateString(start),
+        lastDay: toISTDateString(end),
       });
     } else {
       setDateRange(getMonthRange(new Date()));

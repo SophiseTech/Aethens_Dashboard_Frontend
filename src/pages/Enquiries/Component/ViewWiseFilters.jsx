@@ -7,6 +7,7 @@ import { age_categories, closing_remarks, demoStatuses, EnquiryModeOptions, foun
 import CustomCheckbox from '@components/form/CustomCheckBox'
 import { useEffect, useMemo } from 'react'
 import courseStore from '@stores/CourseStore'
+import { toISTDateString } from '@utils/helper'
 
 /**
  * ViewWiseFilters
@@ -84,7 +85,7 @@ function ViewWiseFilters({ selectedView = 'All', onApply = () => { }, onClear = 
 
       // Convert Dayjs objects (from Ant Design DatePicker) to ISO strings
       if (val && typeof val === 'object' && typeof val.toISOString === 'function') {
-        normalized[key] = val.toISOString()
+        normalized[key] = toISTDateString(val)
       } else {
         normalized[key] = val
       }

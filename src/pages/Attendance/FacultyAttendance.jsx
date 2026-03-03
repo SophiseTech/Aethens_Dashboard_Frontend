@@ -8,6 +8,7 @@ import dayjs from "dayjs";
 import AttendanceFilter from "@pages/Attendance/Components/AttendanceFilter";
 import AttendanceStats from "@pages/Attendance/Components/AttendanceStats";
 import AttendanceTrend from "@pages/Attendance/Components/AttendanceTrend";
+import { getMonthRange } from "@utils/helper";
 
 function FacultyAttendance() {
   const { getSlots, loading, slots, getSlotStats, slotStats } = slotStore();
@@ -16,8 +17,7 @@ function FacultyAttendance() {
   const [selectedFilter, setSelectedFilter] = useState(dayjs().startOf("month"));
 
   useEffect(() => {
-    const start = selectedFilter.startOf("month").toISOString();
-    const end = selectedFilter.endOf("month").toISOString();
+    const { firstDay: start, lastDay: end } = getMonthRange(selectedFilter);
 
     getSlots(0, {
       sort: { start_date: -1 },
