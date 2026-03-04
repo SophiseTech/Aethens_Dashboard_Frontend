@@ -112,7 +112,7 @@ function SessionDateRow({
     // Only call once per unique date to avoid duplicate calls
     if (!hasCalledRef.current.has(dateStr)) {
       hasCalledRef.current.add(dateStr);
-      getAvailableSessions(dateValue);
+      getAvailableSessions(dateValue, null, 'booking');
     }
   }, [dateValue, getAvailableSessions]);
 
