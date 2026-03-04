@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { DeleteOutlined, ExclamationCircleOutlined, PlusCircleOutlined, BookOutlined, PrinterOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons'
 import { useStore } from 'zustand'
 import userStore from '@stores/UserStore'
+import permissions from '@utils/permissions'
 import courseService from '@services/Course'
 
 const { confirm } = Modal
@@ -353,7 +354,7 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                         </div>
 
                         <div className="flex flex-wrap gap-2 mt-auto">
-                            {user?.role === 'admin' && (
+                            {permissions.syllabusGallery.upload.includes(user?.role) && (
                                 <SyllabusGalleryForm
                                     isCreate={false}
                                     item={selectedItem}
@@ -462,7 +463,7 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                             >
                                 Print
                             </Button>
-                            {user?.role === 'admin' && (
+                            {permissions.syllabusGallery.delete.includes(user?.role) && (
                                 <Button
                                     danger
                                     icon={<DeleteOutlined />}
