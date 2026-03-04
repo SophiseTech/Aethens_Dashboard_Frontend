@@ -8,6 +8,7 @@ import Title from "@components/layouts/Title";
 import studentOfTheWeekService from "@services/StudentOfTheWeek";
 import userService from "@services/User";
 import s3Service from "@/services/S3Service";
+import { toISTStartOfDayISO } from "@utils/helper";
 
 const { TextArea } = Input;
 
@@ -211,7 +212,7 @@ function EditStudentOfTheWeek() {
                 body: values.body,
                 student_id: values.student_id.value, // Extract ID from Select value object
                 image,
-                awarded_at: values.awarded_at ? values.awarded_at.toISOString() : undefined,
+                awarded_at: values.awarded_at ? toISTStartOfDayISO(values.awarded_at) : undefined,
             };
 
             if (isEditMode) {

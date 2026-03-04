@@ -6,6 +6,7 @@ import centersStore from '@stores/CentersStore';
 import inventoryStore from '@stores/InventoryStore';
 import { post } from '@utils/Requests';
 import handleInternalError from '@utils/handleInternalError';
+import { toISTStartOfDayISO } from '@utils/helper';
 
 const { TextArea } = Input;
 
@@ -51,7 +52,7 @@ function CreateAuditModal({ open, onClose }) {
             const payload = {
                 center_id: centerId,
                 auditor_id: values.auditor_id,
-                audit_date: values.audit_date?.toISOString(),
+                audit_date: values.audit_date ? toISTStartOfDayISO(values.audit_date) : undefined,
                 remarks: values.remarks || '',
             };
 

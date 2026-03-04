@@ -4,9 +4,9 @@ import handleError from "@utils/handleError"
 import { get, post } from "@utils/Requests"
 
 class SessionService {
-  async getAvailableSessionByDate(date, center_id) {
+  async getAvailableSessionByDate(date, center_id, sessionDisabledModule) {
     try {
-      const response = await post("/sessions/availableSessions", { date, center_id })
+      const response = await post("/sessions/availableSessions", { date, center_id, moduleId: sessionDisabledModule })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response
     } catch (error) {

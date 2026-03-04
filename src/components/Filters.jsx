@@ -2,6 +2,7 @@ import { Input, Select, DatePicker, Button, Flex, notification } from 'antd';
 import _ from 'lodash';
 import React, { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
+import { toISTEndOfDayISO, toISTStartOfDayISO } from '@utils/helper';
 
 const { RangePicker } = DatePicker;
 
@@ -65,8 +66,8 @@ const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defau
       // Single Date
       if (dayjs.isDayjs(value)) {
         formattedFilters[key] = {
-          $gte: dayjs(value).startOf('day').toISOString(),
-          $lte: dayjs(value).endOf('day').toISOString()
+          $gte: toISTStartOfDayISO(value),
+          $lte: toISTEndOfDayISO(value)
         };
       }
 
@@ -74,10 +75,10 @@ const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defau
       if (Array.isArray(value) && value.length === 2) {
         formattedFilters[key] = {}
         if (value[0] && dayjs.isDayjs(value[0])) {
-          formattedFilters[key].$gte = dayjs(value[0]).startOf('day').toISOString()
+          formattedFilters[key].$gte = toISTStartOfDayISO(value[0])
         }
         if (value[1] && dayjs.isDayjs(value[1])) {
-          formattedFilters[key].$lte = dayjs(value[1]).endOf('day').toISOString()
+          formattedFilters[key].$lte = toISTEndOfDayISO(value[1])
         }
       }
     });

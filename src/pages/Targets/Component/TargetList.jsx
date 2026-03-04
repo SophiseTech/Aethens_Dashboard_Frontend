@@ -5,7 +5,7 @@ import { EyeOutlined } from "@ant-design/icons";
 import useTargetStore from "@stores/TargetStore";
 import userStore from "@stores/UserStore";
 import centersStore from "@stores/CentersStore";
-import { formatDate } from "@utils/helper";
+import { formatDate, toISTEndOfDayISO, toISTStartOfDayISO } from "@utils/helper";
 import Chip from "@components/Chips/Chip";
 import CustomDatePicker from '@components/form/CustomDatePicker';
 import TargetDashboard from "./TargetDashboard";
@@ -191,8 +191,8 @@ function TargetList() {
                     layout="vertical"
                     onFinish={(values) => {
                         const filters = {};
-                        if (values.start_date) filters.start_date = values.start_date.startOf('day').toISOString();
-                        if (values.end_date) filters.end_date = values.end_date.endOf('day').toISOString();
+                        if (values.start_date) filters.start_date = toISTStartOfDayISO(values.start_date);
+                        if (values.end_date) filters.end_date = toISTEndOfDayISO(values.end_date);
                         setDateFilters(filters);
                     }}
                 >
@@ -247,8 +247,8 @@ function TargetList() {
                             <Button type="primary" htmlType="submit" onClick={() => {
                                 const values = form.getFieldsValue();
                                 const filters = {};
-                                if (values.start_date) filters.start_date = values.start_date.startOf('day').toISOString();
-                                if (values.end_date) filters.end_date = values.end_date.endOf('day').toISOString();
+                                if (values.start_date) filters.start_date = toISTStartOfDayISO(values.start_date);
+                                if (values.end_date) filters.end_date = toISTEndOfDayISO(values.end_date);
                                 setDateFilters(filters);
                                 setStatusFilter(values.status || null);
                             }}>

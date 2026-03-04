@@ -13,19 +13,37 @@ dayjs.extend(timezone);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
+export const IST_TIMEZONE = "Asia/Kolkata";
+
 export const formatDate = (date) => {
   if (!date) return "";
-  // Add 5 hours 30 minutes to convert to UTC+5:30, then format
   return dayjs(date)
-    .tz("Asia/Kolkata")
+    .tz(IST_TIMEZONE)
     .format("D MMM, YYYY");
 };
 
 export const formatTime = (time) => {
   if (!time) return ""
 
-  return dayjs(time).format("h:mm A")
+  return dayjs(time).tz(IST_TIMEZONE).format("h:mm A")
 };
+
+export const formatDateTime = (date) => {
+  if (!date) return "";
+  return dayjs(date).tz(IST_TIMEZONE).format("DD MMM YYYY, hh:mm A");
+};
+
+export const toISTStartOfDayISO = (value) => (
+  dayjs(value).tz(IST_TIMEZONE).startOf("day").utc().toISOString()
+);
+
+export const toISTEndOfDayISO = (value) => (
+  dayjs(value).tz(IST_TIMEZONE).endOf("day").utc().toISOString()
+);
+
+export const toISTDateString = (value) => (
+  dayjs(value).tz(IST_TIMEZONE).format("YYYY-MM-DD")
+);
 
 export const calculateAge = (dob) => {
   if (!dob) return null;
@@ -127,10 +145,9 @@ export function getValue(obj, keys) {
 }
 
 export const getMonthRange = (date) => {
-  // firstDay = midnight UTC on 1st of month, lastDay = end of last day UTC.
-  // Using ISO strings so new Date() on the backend gets the correct full-day boundaries.
-  const firstDay = dayjs(date).utc().startOf('month').toISOString();
-  const lastDay = dayjs(date).utc().endOf('month').toISOString();
+  // Build month boundaries from IST calendar, then convert to UTC ISO.
+  const firstDay = dayjs(date).tz(IST_TIMEZONE).startOf('month').utc().toISOString();
+  const lastDay = dayjs(date).tz(IST_TIMEZONE).endOf('month').utc().toISOString();
   return { firstDay, lastDay };
 };
 

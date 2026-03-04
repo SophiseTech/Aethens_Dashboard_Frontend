@@ -1,11 +1,8 @@
-import React, { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Flex, Button, message } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 import Title from '@components/layouts/Title';
 import useAttendanceRegister from '@hooks/useAttendanceRegister';
-import { ROLES } from '@utils/constants';
-import { useStore } from 'zustand';
-import userStore from '@stores/UserStore';
 import dayjs from 'dayjs';
 import AttendanceRegisterFilter from './Components/AttendanceRegisterFilter';
 import AttendanceRegisterTable from './Components/AttendanceRegisterTable';
@@ -13,7 +10,6 @@ import AttendanceStats from './Components/AttendanceStats';
 import { exportToCSV } from './utils';
 
 function AttendanceRegister() {
-  const { user } = useStore(userStore);
 
   const {
     students,
@@ -27,13 +23,6 @@ function AttendanceRegister() {
     setPage,
     fetchStudentsAttendance
   } = useAttendanceRegister();
-
-  // Check authorization
-  useEffect(() => {
-    if (![ROLES.MANAGER, ROLES.ADMIN].includes(user?.role)) {
-      return;
-    }
-  }, [user]);
 
   // Auto-fetch on mount
 

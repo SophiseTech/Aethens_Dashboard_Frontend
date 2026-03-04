@@ -11,6 +11,7 @@ import inventoryStore from '@stores/InventoryStore'
 import studentStore from '@stores/StudentStore'
 import userStore from '@stores/UserStore'
 import { ROLES } from '@utils/constants'
+import { toISTStartOfDayISO } from '@utils/helper'
 import permissions from '@utils/permissions'
 import dayjs from 'dayjs'
 import _ from 'lodash'
@@ -133,7 +134,7 @@ function Bills() {
   const customerOptions = useMemo(() => students?.map(item => ({ label: item.username, value: item._id, data: item?.wallet })), [students])
 
   const handleOnSave = async (values) => {
-    values.generated_on = values.generated_on.toISOString()
+    values.generated_on = toISTStartOfDayISO(values.generated_on)
     await createBill(values)
   }
 

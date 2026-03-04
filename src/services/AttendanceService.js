@@ -1,5 +1,6 @@
 import handleError from "@utils/handleError";
 import { get } from "@utils/Requests";
+import { toISTDateString } from "@utils/helper";
 
 class AttendanceService {
     /**
@@ -71,7 +72,7 @@ class AttendanceService {
     async getTodaySwipes(facultyId = null) {
         try {
             const now = new Date();
-            const date = now.toISOString().split('T')[0]; // YYYY-MM-DD
+            const date = toISTDateString(now);
             return await this.getDailySwipes(date, facultyId);
         } catch (error) {
             handleError(error);

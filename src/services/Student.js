@@ -76,15 +76,18 @@ class StudentService {
     }
   }
 
-  async migrateStudentCourse(userId, studentId, newCourseId, migrateSlot) {
+  async migrateStudentCourse(userId, studentId, newCourseId, migrateSlot, feeOptions = {}) {
     try {
       const response = await post("/student/migrateStudentCourse", {
         userId,
         studentId,
         newCourseId,
         migrateSlot,
+        generateFeeAccount: feeOptions.generateFeeAccount ?? false,
+        feeAccountData: feeOptions.feeAccountData ?? null,
       });
       if (!response) throw new Error("An error occured. Please try again");
+      return response.data;
     } catch (error) {
       handleError(error);
     }

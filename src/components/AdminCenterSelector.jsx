@@ -8,14 +8,13 @@ import { ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES } from "@utils/constants";
 
 const AdminCenterSelector = () => {
   const location = useLocation();
-  const { Option } = Select;
   const { centers, getCenters, selectedCenter, setSelectedCenter } =
     useStore(centerStore);
   const { user } = useStore(userStore);
 
   useEffect(() => {
-    getCenters();
-  }, []);
+    getCenters(0);
+  }, [getCenters]);
 
   const handleCenterChange = (center_id) => {
     setSelectedCenter(center_id);

@@ -24,7 +24,7 @@ import {
     EditOutlined,
     DeleteOutlined,
 } from "@ant-design/icons";
-import { formatDate } from "@utils/helper";
+import { formatDate, toISTEndOfDayISO, toISTStartOfDayISO } from "@utils/helper";
 import Chip from "@components/Chips/Chip";
 import userStore from "@stores/UserStore";
 import permissions from "@utils/permissions";
@@ -129,8 +129,8 @@ const TargetProgressDrawer = ({ target, visible, onClose, loading }) => {
             title: values.title,
             description: values.description,
             center: values.center,
-            start_date: values.startDate?.toISOString(),
-            end_date: values.endDate?.toISOString(),
+            start_date: values.startDate ? toISTStartOfDayISO(values.startDate) : undefined,
+            end_date: values.endDate ? toISTEndOfDayISO(values.endDate) : undefined,
             status: values.status,
             metrics: {
                 [values.targetType]: values.targetValue

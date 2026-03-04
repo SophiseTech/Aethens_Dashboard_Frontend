@@ -3,7 +3,7 @@ import { Modal, Table, Spin, Alert, Row, Col, Statistic, Tag, Button, InputNumbe
 import { WalletOutlined, DollarOutlined, CheckCircleOutlined, FileDoneOutlined, CheckSquareOutlined } from '@ant-design/icons';
 import { useStore } from 'zustand';
 import feeStore from '@stores/FeeStore';
-import { formatDate } from '@utils/helper';
+import { formatDate, toISTStartOfDayISO } from '@utils/helper';
 import CustomInput from '@components/form/CustomInput';
 import { paymentMethods } from '@utils/constants';
 import permissions from '@utils/permissions';
@@ -87,7 +87,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
           paidAmount: values.paidAmount,
           bill_id: selectedBill._id,
           payment_method: values.payment_method,
-          payment_date: values.payment_date?.toISOString(),
+          payment_date: values.payment_date ? toISTStartOfDayISO(values.payment_date) : undefined,
           useWallet,
           walletDeduction,
           excessPayment,
@@ -98,7 +98,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       } else {
         const payload = {
           payment_method: values.payment_method,
-          payment_date: values.payment_date?.toISOString(),
+          payment_date: values.payment_date ? toISTStartOfDayISO(values.payment_date) : undefined,
           useWallet,
           walletDeduction,
           excessPayment,
