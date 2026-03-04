@@ -38,7 +38,7 @@ const attendanceRegisterStore = create((set, get) => ({
       set({ loading: true, error: null });
       const { user } = userStore.getState();
       let center_id;
-      if(user.role === ROLES.ADMIN){
+      if(user.role === ROLES.ADMIN || user.role === ROLES.ACADEMIC_MANAGER || user.role === ROLES.OPERATIONS_MANAGER) {
         center_id = centersStore.getState().selectedCenter;
       }
       const { selectedMonth, selectedCourse, pagination } = get();

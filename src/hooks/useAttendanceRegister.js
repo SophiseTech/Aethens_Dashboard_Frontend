@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useStore } from 'zustand';
 import attendanceRegisterStore from '@stores/AttendanceRegisterStore';
+import centersStore from '@stores/CentersStore';
 
 function useAttendanceRegister() {
   const {
@@ -16,11 +17,12 @@ function useAttendanceRegister() {
     fetchStudentsAttendance,
     reset
   } = useStore(attendanceRegisterStore);
+  const { selectedCenter } = centersStore()
 
   // Auto-fetch when month or course changes
   useEffect(() => {
     fetchStudentsAttendance(1);
-  }, [selectedMonth, selectedCourse]);
+  }, [selectedMonth, selectedCourse, selectedCenter]);
 
   // Auto-fetch when page changes
   useEffect(() => {

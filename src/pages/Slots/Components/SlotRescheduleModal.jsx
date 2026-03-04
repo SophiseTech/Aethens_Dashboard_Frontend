@@ -23,7 +23,7 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
   const today = dayjs().startOf("day");
 
   useEffect(() => {
-    getAvailableSessions(date)
+    getAvailableSessions(date, null, 'reschedule')
   }, [date])
 
   const initialValues = {

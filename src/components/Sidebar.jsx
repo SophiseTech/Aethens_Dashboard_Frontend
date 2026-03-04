@@ -315,7 +315,7 @@ const MENU_CONFIG = [
     label: "Attendance Register",
     icon: CheckSquareOutlined,
     path: "/manager/attendance-register",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
   },
 ];
 
