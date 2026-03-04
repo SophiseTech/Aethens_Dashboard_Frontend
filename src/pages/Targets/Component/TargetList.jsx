@@ -10,11 +10,13 @@ import Chip from "@components/Chips/Chip";
 import CustomDatePicker from '@components/form/CustomDatePicker';
 import TargetDashboard from "./TargetDashboard";
 import TargetProgressDrawer from "./TargetProgressDrawer";
+import permissions from "@utils/permissions";
 
 function TargetList() {
     const { targets, loading, getTargets } = useTargetStore();
     const { user } = userStore();
     const { selectedCenter, centers, getCenters } = centersStore();
+    const canViewProgress = permissions.targets?.view?.includes(user?.role);
 
     const nav = useNavigate();
     const location = useLocation();
@@ -157,19 +159,21 @@ function TargetList() {
             dataIndex: "_id",
             key: "progress",
             render: (id) => (
-                <Button
-                    type="link"
-                    icon={<EyeOutlined />}
-                    onClick={async () => {
-                        setProgressLoading(true);
-                        setDrawerVisible(true);
-                        const progressData = await getTargetProgress(id);
-                        setSelectedTargetProgress(progressData);
-                        setProgressLoading(false);
-                    }}
-                >
-                    View
-                </Button>
+                canViewProgress ? (
+                    <Button
+                        type="link"
+                        icon={<EyeOutlined />}
+                        onClick={async () => {
+                            setProgressLoading(true);
+                            setDrawerVisible(true);
+                            const progressData = await getTargetProgress(id);
+                            setSelectedTargetProgress(progressData);
+                            setProgressLoading(false);
+                        }}
+                    >
+                        View
+                    </Button>
+                ) : null
             ),
         },
     ];

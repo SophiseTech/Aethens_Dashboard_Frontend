@@ -27,6 +27,7 @@ import {
 import { formatDate, toISTEndOfDayISO, toISTStartOfDayISO } from "@utils/helper";
 import Chip from "@components/Chips/Chip";
 import userStore from "@stores/UserStore";
+import permissions from "@utils/permissions";
 import useTargetStore from "@stores/TargetStore";
 import centersStore from "@stores/CentersStore";
 import CustomForm from "@components/form/CustomForm";
@@ -45,7 +46,8 @@ const TargetProgressDrawer = ({ target, visible, onClose, loading }) => {
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [form] = Form.useForm();
 
-    const isAdmin = user?.role === 'admin';
+    const canEdit = permissions.targets?.edit?.includes(user?.role);
+    const canDelete = permissions.targets?.delete?.includes(user?.role);
 
     // Center options for select
     const centerOptions = useMemo(
@@ -163,32 +165,36 @@ const TargetProgressDrawer = ({ target, visible, onClose, loading }) => {
                 headerStyle={{ background: "#f0f2f5" }}
                 bodyStyle={{ padding: 20 }}
                 extra={
-                    isAdmin && (
+                    (canEdit || canDelete) && (
                         <Space>
-                            <Button
-                                type="primary"
-                                icon={<EditOutlined />}
-                                onClick={handleEdit}
-                                disabled={target.target?.status === 'completed'}
-                                title={target.target?.status === 'completed' ? "Completed targets cannot be edited" : ""}
-                            >
-                                Edit
-                            </Button>
-                            <Popconfirm
-                                title="Delete Target"
-                                description="Are you sure you want to delete this target?"
-                                onConfirm={handleDelete}
-                                okText="Yes, Delete"
-                                cancelText="Cancel"
-                                okButtonProps={{ danger: true }}
-                            >
+                            {canEdit && (
                                 <Button
-                                    danger
-                                    icon={<DeleteOutlined />}
+                                    type="primary"
+                                    icon={<EditOutlined />}
+                                    onClick={handleEdit}
+                                    disabled={target.target?.status === 'completed'}
+                                    title={target.target?.status === 'completed' ? "Completed targets cannot be edited" : ""}
                                 >
-                                    Delete
+                                    Edit
                                 </Button>
-                            </Popconfirm>
+                            )}
+                            {canDelete && (
+                                <Popconfirm
+                                    title="Delete Target"
+                                    description="Are you sure you want to delete this target?"
+                                    onConfirm={handleDelete}
+                                    okText="Yes, Delete"
+                                    cancelText="Cancel"
+                                    okButtonProps={{ danger: true }}
+                                >
+                                    <Button
+                                        danger
+                                        icon={<DeleteOutlined />}
+                                    >
+                                        Delete
+                                    </Button>
+                                </Popconfirm>
+                            )}
                         </Space>
                     )
                 }

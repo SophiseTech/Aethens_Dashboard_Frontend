@@ -5,6 +5,7 @@ import EChart from "@pages/Dashboard/Chart/EChart";
 import useTargetStore from "@stores/TargetStore";
 import userStore from "@stores/UserStore";
 import centersStore from "@stores/CentersStore";
+import permissions from "@utils/permissions";
 
 const { Title, Text } = Typography;
 
@@ -69,8 +70,9 @@ export default function TargetDashboard() {
     };
 
     // Determine view label based on role and selected center
+    const canViewAll = permissions.targets?.view?.includes(user?.role) && user?.role !== 'manager';
     const getViewLabel = () => {
-        if (user.role !== 'admin') {
+        if (!canViewAll) {
             return 'Center View';
         }
         if (selectedCenterName) {
@@ -221,8 +223,8 @@ export default function TargetDashboard() {
                 </Col>
             </Row>
 
-            {/* Center Performance (Admin Only) */}
-            {user.role === 'admin' && centerStats && centerStats.length > 0 && (
+            {/* Center Performance (Admin / Operations Manager) */}
+            {canViewAll && centerStats && centerStats.length > 0 && (
                 <Card className="rounded-xl shadow-sm">
                     <Title level={4}>Center Performance</Title>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
