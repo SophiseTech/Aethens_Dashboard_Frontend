@@ -156,6 +156,12 @@ function SessionStatusTable({ student }) {
         key: "remarks"
       },
       {
+        title: "Added On",
+        dataIndex: "createdAt",
+        key: "addedOn",
+        render: (value) => value ? formatDate(value) : "—"
+      },
+      {
         title: "Completed On",
         dataIndex: "completedOn",
         key: "completedOn",
