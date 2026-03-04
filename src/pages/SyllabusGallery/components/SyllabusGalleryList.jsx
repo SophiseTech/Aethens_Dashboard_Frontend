@@ -386,58 +386,78 @@ function SyllabusGalleryList({ searchQuery = '' }) {
                                         ? selectedItem.images
                                         : [selectedItem?.url];
 
-                                    const printWindow = window.open('', '_blank');
-                                    if (!printWindow) return;
-
-                                    printWindow.document.write(`<!DOCTYPE html>
+                                    const printHtml = `<!DOCTYPE html>
 <html>
 <head>
   <title>Print Image</title>
   <style>
     @page { margin: 0; size: auto; }
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: white; }
-    img { 
-      width: 100%; 
-      height: 100%; 
-      object-fit: contain; 
-      display: block; 
-      page-break-after: always; 
-      break-after: page; 
-      margin: 0; 
-      page-break-inside: avoid; 
-      break-inside: avoid; 
+    html, body { margin: 0; padding: 0; background: white; }
+    .page {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      page-break-after: always;
+      break-after: page;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      box-sizing: border-box;
+      padding: 16px;
     }
-    img:last-child { page-break-after: auto; break-after: auto; }
+    .page:last-child { page-break-after: auto; break-after: auto; }
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+    }
   </style>
 </head>
 <body>
-  ${urls.map(url => `<img src="${url}" />`).join('')}
+  ${urls.map(url => `<div class="page"><img src="${url}" /></div>`).join('')}
 </body>
-</html>`);
-                                    printWindow.document.close();
+</html>`;
 
-                                    // Wait for ALL images to load before printing
-                                    const imgs = Array.from(printWindow.document.images);
-                                    const imageLoadPromises = imgs.map(img =>
-                                        new Promise(resolve => {
+                                    const waitForImages = (docRef, onReady) => {
+                                        const imgs = Array.from(docRef.images);
+                                        Promise.all(imgs.map(img => new Promise(resolve => {
                                             if (img.complete) { resolve(); return; }
                                             img.onload = resolve;
-                                            img.onerror = resolve; // resolve on error too so we don't hang
-                                        })
-                                    );
+                                            img.onerror = resolve;
+                                        }))).then(onReady);
+                                    };
 
-                                    Promise.all(imageLoadPromises).then(() => {
-                                        printWindow.focus();
+                                    // Android Chrome/WebView blocks window.open() as a popup.
+                                    // Use a hidden iframe for Android, window.open for iOS/iPad/desktop.
+                                    const isAndroid = /android/i.test(navigator.userAgent);
 
-                                        // On iPads/iOS Safari, a synchronous .close() instantly kills the tab
-                                        // before the native print dialog can properly appear.
-                                        // We use onafterprint to ensure it closes only when the user is done.
-                                        printWindow.onafterprint = () => {
-                                            printWindow.close();
-                                        };
-
-                                        printWindow.print();
-                                    });
+                                    if (isAndroid) {
+                                        const iframe = document.createElement('iframe');
+                                        Object.assign(iframe.style, { position: 'fixed', right: '0', bottom: '0', width: '0', height: '0', border: '0' });
+                                        document.body.appendChild(iframe);
+                                        const doc = iframe.contentWindow.document;
+                                        doc.open();
+                                        doc.write(printHtml);
+                                        doc.close();
+                                        waitForImages(doc, () => {
+                                            iframe.contentWindow.focus();
+                                            iframe.contentWindow.print();
+                                            iframe.contentWindow.onafterprint = () => document.body.removeChild(iframe);
+                                            setTimeout(() => { if (document.body.contains(iframe)) document.body.removeChild(iframe); }, 60000);
+                                        });
+                                    } else {
+                                        const printWindow = window.open('', '_blank');
+                                        if (!printWindow) return;
+                                        printWindow.document.write(printHtml);
+                                        printWindow.document.close();
+                                        waitForImages(printWindow.document, () => {
+                                            printWindow.focus();
+                                            printWindow.onafterprint = () => printWindow.close();
+                                            printWindow.print();
+                                        });
+                                    }
                                 }}
                             >
                                 Print

@@ -12,6 +12,7 @@ import jsPDF from 'jspdf';
 import { downloadPdf } from '@utils/helper';
 import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
 import InvoicePdf from '@pages/Bills/Components/Invoice';
+import InvoiceHtml from '@pages/Bills/Components/InvoiceHtml';
 
 function BillDetails() {
   const { bills, editBill, id, deleteBill, editMaterials } = useOutletContext();
@@ -86,11 +87,17 @@ function BillDetails() {
         </div>
       </div>
       <div className='lg:flex-1 lg:overflow-auto h-auto lg:h-full | p-5 lg:p-10'>
-        {/* <Invoice bill={bill} type={"materials"} downloadRef={invoiceRef} /> */}
-
-        <PDFViewer width="100%" height="1000">
-          <InvoicePdf bill={bill} />
-        </PDFViewer>
+        {/android/i.test(navigator.userAgent) ? (
+          // Android Chrome cannot render blob: PDFs inside iframes — shows "Open in" instead.
+          // Use a plain HTML preview for Android; PDFViewer works fine on iOS/iPad/desktop.
+          <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'auto', minHeight: 600 }}>
+            <InvoiceHtml bill={bill} />
+          </div>
+        ) : (
+          <PDFViewer width="100%" height="1000">
+            <InvoicePdf bill={bill} />
+          </PDFViewer>
+        )}
       </div>
     </div>
   );
