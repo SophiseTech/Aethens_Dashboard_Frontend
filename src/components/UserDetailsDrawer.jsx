@@ -20,8 +20,10 @@ import {
   PhoneOutlined,
   SwapRightOutlined,
   EnvironmentOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons";
 import { formatDate, calculateAge } from "@utils/helper"; // Your date formatting utility
+import CustomImageUploadWithCrop from "@components/form/CustomImageUploadWithCrop"; // Added import
 import EditUserModal from "./EditUserModal"; // Import the new EditUserModal component
 import studentStore from "@stores/StudentStore";
 import { useStore } from "zustand";
@@ -42,6 +44,8 @@ const UserDetailsDrawer = ({
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const { editUser } = useStore(studentStore);
   const { user: loggedinUser } = useStore(userStore);
+  const [profileImageLoading, setProfileImageLoading] = useState(false); // Added state
+
   // Open the edit modal
   const handleEditClick = () => {
     setIsEditModalVisible(true);
@@ -53,6 +57,13 @@ const UserDetailsDrawer = ({
     await editUser(user._id, values);
     setIsEditModalVisible(false); // Close the modal
     // message.success('User details updated successfully!');
+  };
+
+  const handleProfileImageUpload = async (newImageUrl) => {
+    if (newImageUrl && user?._id) {
+      await editUser(user._id, { profile_img: newImageUrl });
+      window.location.reload();
+    }
   };
   return (
     <>
@@ -90,12 +101,36 @@ const UserDetailsDrawer = ({
         >
           <Row align="middle" gutter={16}>
             <Col>
-              <Avatar
-                size={64}
-                src={user?.profile_img}
-                icon={<UserOutlined />}
-                style={{ backgroundColor: "#87d068" }}
-              />
+              {user?._id === loggedinUser?._id ? (
+                <div className='relative w-fit group'>
+                  <CustomImageUploadWithCrop
+                    name="profile_img"
+                    customUploadButton={<EditOutlined className='group-hover:text-white transition-all text-xl' />}
+                    showUploadList={false}
+                    listType='text'
+                    cropImage
+                    squareCrop
+                    className="absolute inset-0 z-10 flex items-center justify-center hover:bg-black/50 transition-colors rounded-full hover:text-white cursor-pointer opacity-0 group-hover:opacity-100"
+                    path={`uploads/profile_img/${user?._id}`}
+                    form={{ setFieldValue: (name, value) => handleProfileImageUpload(value) }}
+                    loading={profileImageLoading}
+                    setLoading={setProfileImageLoading}
+                  />
+                  <Avatar
+                    size={64}
+                    src={user?.profile_img}
+                    icon={profileImageLoading ? <LoadingOutlined /> : <UserOutlined />}
+                    style={{ backgroundColor: "#87d068" }}
+                  />
+                </div>
+              ) : (
+                <Avatar
+                  size={64}
+                  src={user?.profile_img}
+                  icon={<UserOutlined />}
+                  style={{ backgroundColor: "#87d068" }}
+                />
+              )}
             </Col>
             <Col>
               <Title level={4} style={{ marginBottom: 0 }}>

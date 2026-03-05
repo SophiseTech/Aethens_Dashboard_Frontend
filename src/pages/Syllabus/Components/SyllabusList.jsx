@@ -14,7 +14,9 @@ function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, se
   const { user } = useStore(userStore);
 
   // Handle general syllabus type (existing logic)
-  const modules = syllabusData?.modules || syllabusData || []; // Backward compatibility
+  const modules = Array.isArray(syllabusData?.modules) ? syllabusData.modules
+    : Array.isArray(syllabusData) ? syllabusData
+      : [];
 
   // Transform syllabus data into a flat table format
   // NO MORE FILTERING - Backend handles it
@@ -27,7 +29,7 @@ function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, se
     let dataIndex = 0;
     const formattedData = [];
 
-    modules?.forEach((module) => {
+    (Array.isArray(modules) ? modules : []).forEach((module) => {
       let moduleAdded = false;
 
       module.units?.forEach((unit) => {
