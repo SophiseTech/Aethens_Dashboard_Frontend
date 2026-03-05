@@ -1,23 +1,31 @@
 import Title from '@components/layouts/Title'
 import CourseList from '@pages/Courses/Components/CourseList'
 import courseStore from '@stores/CourseStore'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useStore } from 'zustand'
 
-function FacultyCourses() {
+const PAGE_SIZE = 10
 
-  const { getCourses, courses } = useStore(courseStore)
+function FacultyCourses() {
+  const { getCoursesForAdmin } = useStore(courseStore)
+  const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
-    if (!courses || courses.length === 0) {
-      getCourses()
-    }
+    getCoursesForAdmin(PAGE_SIZE, 1)
   }, [])
 
-  
+  const handlePageChange = (page) => {
+    setCurrentPage(page)
+    getCoursesForAdmin(PAGE_SIZE, page)
+  }
+
   return (
     <Title title={"Courses"}>
-      <CourseList />
+      <CourseList
+        currentPage={currentPage}
+        pageSize={PAGE_SIZE}
+        onPageChange={handlePageChange}
+      />
     </Title>
   )
 }

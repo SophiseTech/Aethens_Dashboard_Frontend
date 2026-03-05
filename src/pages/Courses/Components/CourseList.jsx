@@ -5,9 +5,9 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from 'zustand'
 
-function CourseList() {
+function CourseList({ currentPage = 1, pageSize = 10, onPageChange }) {
 
-  const { courses, loading } = useStore(courseStore)
+  const { courses, loading, total } = useStore(courseStore)
   const { user } = useStore(userStore)
   const nav = useNavigate()
 
@@ -40,10 +40,21 @@ function CourseList() {
       )
     }
   ]
+
   return (
-    <Table columns={columns} dataSource={courses} loading={loading}
-      scroll={{
-        x: 'max-content',
+    <Table
+      columns={columns}
+      dataSource={courses}
+      loading={loading}
+      rowKey="_id"
+      scroll={{ x: 'max-content' }}
+      pagination={{
+        current: currentPage,
+        pageSize: pageSize,
+        total: total,
+        onChange: onPageChange,
+        showTotal: (t) => `Total ${t} courses`,
+        showSizeChanger: false,
       }}
     />
   )
