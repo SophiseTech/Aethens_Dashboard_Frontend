@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Table, Button, Flex, Modal, Form, Input, message } from "antd";
+import { Table, Button, Flex, Modal, Form, Input, InputNumber, message } from "antd";
 import Title from "@components/layouts/Title";
 import userStore from "@stores/UserStore";
 import permissions from "@utils/permissions";
@@ -46,6 +46,7 @@ function AdminCenters() {
       center_name: record.center_name,
       location: record.location,
       center_initial: record.center_initial,
+      maxCount: record.maxCount,
     });
     setModalOpen(true);
   };
@@ -94,6 +95,7 @@ function AdminCenters() {
     { title: "Center name", dataIndex: "center_name", key: "center_name" },
     { title: "Location", dataIndex: "location", key: "location" },
     { title: "Initial", dataIndex: "center_initial", key: "center_initial" },
+    { title: "Max Count", dataIndex: "maxCount", key: "maxCount", render: (val) => val ?? "—" },
     {
       title: "Actions",
       key: "actions",
@@ -142,6 +144,9 @@ function AdminCenters() {
           </Form.Item>
           <Form.Item name="center_initial" label="Center initial" rules={[{ max: 5 }]}>
             <Input placeholder="e.g. SOA" maxLength={5} />
+          </Form.Item>
+          <Form.Item name="maxCount" label="Max Count" rules={[{ type: "number", min: 0, message: "Must be a positive number" }]}>
+            <InputNumber min={0} placeholder="e.g. 30" style={{ width: "100%" }} />
           </Form.Item>
         </Form>
       </Modal>
