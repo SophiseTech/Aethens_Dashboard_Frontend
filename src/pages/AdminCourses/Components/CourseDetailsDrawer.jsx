@@ -23,10 +23,13 @@ import {
     BookOutlined,
     FileImageOutlined,
     ToolOutlined,
+    ProjectOutlined,
 } from '@ant-design/icons';
 import courseStore from '@stores/CourseStore';
 import inventoryService from '@services/Inventory';
 import EditCourseModal from './EditCourseModal';
+import permissions from '@utils/permissions';
+import userStore from '@stores/UserStore';
 
 const { Title, Text, Paragraph } = Typography;
 const { confirm } = Modal;
@@ -37,7 +40,7 @@ const CourseDetailsDrawer = ({ course, visible, onClose, onRefresh }) => {
     const [materialItems, setMaterialItems] = useState([]);
     const [loadingMaterials, setLoadingMaterials] = useState(false);
     const { deleteCourse, loading } = courseStore();
-    console.log(course);
+    const { user } = userStore()
 
     // useEffect(() => {
     //     if (visible && course?.defaultMaterialItems?.length > 0) {
@@ -105,14 +108,14 @@ const CourseDetailsDrawer = ({ course, visible, onClose, onRefresh }) => {
                 bodyStyle={{ padding: 20 }}
                 extra={
                     <div className="flex gap-2">
-                        <Button
+                        {permissions.courses.edit.includes(user.role) && <Button
                             type="primary"
                             icon={<EditOutlined />}
                             onClick={handleEditClick}
                         >
                             Edit
-                        </Button>
-                        <Button
+                        </Button>}
+                        {permissions.courses.delete.includes(user.role) && <Button
                             variant="solid"
                             color="danger"
                             icon={<DeleteOutlined />}
@@ -121,6 +124,7 @@ const CourseDetailsDrawer = ({ course, visible, onClose, onRefresh }) => {
                         >
                             Delete
                         </Button>
+                        }
                     </div>
                 }
             >
@@ -355,6 +359,39 @@ const CourseDetailsDrawer = ({ course, visible, onClose, onRefresh }) => {
                                     {course.defaultMaterialItems.length > 1 ? 's' : ''} configured
                                 </Text>
                             )}
+                        </Card>
+                    </>
+                )}
+
+                {/* Project Phases */}
+                {course.projectPhases && course.projectPhases.length > 0 && (
+                    <>
+                        <Divider />
+                        <Card bordered={false}>
+                            <Title level={5}>
+                                <ProjectOutlined /> Project Phases ({course.projectPhases.length})
+                            </Title>
+                            <List
+                                dataSource={course.projectPhases}
+                                renderItem={(phase, index) => (
+                                    <List.Item key={phase._id || index}>
+                                        <div style={{ width: '100%' }}>
+                                            <div className="flex items-center gap-2">
+                                                <Tag color="blue">{index + 1}</Tag>
+                                                <Text strong>{phase.title}</Text>
+                                                {phase.requiresSubject && (
+                                                    <Tag color="orange" className="text-xs">Requires Subject</Tag>
+                                                )}
+                                            </div>
+                                            {phase.description && (
+                                                <Paragraph type="secondary" className="mt-1 mb-0 ml-8" style={{ marginBottom: 0 }}>
+                                                    {phase.description}
+                                                </Paragraph>
+                                            )}
+                                        </div>
+                                    </List.Item>
+                                )}
+                            />
                         </Card>
                     </>
                 )}
