@@ -38,7 +38,7 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
       <p>Paid On: <strong>{formatDate(bill.payment_date)}</strong></p>
       <p className='capitalize'>Mode: <strong>{bill.payment_method?.replace("_", " ")}</strong></p>
     </div>,
-    total: `₹ ${bill.total}`,
+    total: `₹ ${Math.round(bill.applyWallet ? bill.finalTotal : bill.total)}`,
     chipStatus: <Status status={bill?.status} />
   })), [bills])
 
