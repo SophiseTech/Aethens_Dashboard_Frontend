@@ -54,7 +54,8 @@ function AddStudent() {
     paidAmount: 0,
     numberOfInstallments: 6,
     isFeeEnabled: true,
-    reg_fee: 3500
+    reg_fee: 3500,
+    start_date: null
   }
 
   useEffect(() => {
@@ -97,9 +98,13 @@ function AddStudent() {
       values.paidAmount = values.total_course_fee
     }
 
-    // Set start_date to first session date for monthly installments
-    if (values.type === "monthly" && values.sessionSchedule?.length > 0) {
-      values.start_date = dayjs(values.sessionSchedule[0].date).toDate();
+    // Set start_date to first session date for monthly installments if not explicitly provided
+    if (values.type === "monthly") {
+      if (values.start_date) {
+        values.start_date = dayjs(values.start_date).toDate();
+      } else if (values.sessionSchedule?.length > 0) {
+        values.start_date = dayjs(values.sessionSchedule[0].date).toDate();
+      }
     }
 
     // Transform sessionSchedule array to sessions format for backend
@@ -130,6 +135,7 @@ function AddStudent() {
       case "monthly":
         return (
           <>
+            <CustomDatePicker name={"start_date"} label={"Installment Start Date"} className='w-full' />
             <CustomInput name={"numberOfInstallments"} label={"Number of installments"} />
           </>
         )

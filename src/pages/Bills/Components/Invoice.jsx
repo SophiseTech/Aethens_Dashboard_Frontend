@@ -189,12 +189,16 @@ const InvoicePdf = ({ bill }) => {
                     <Text style={styles.companyAddress}>Whitefield, Bengaluru, 560066</Text>
                     <Text style={[styles.companyAddress, styles.fontBold]}>GSTIN: 29AFBFS0754B1Z8</Text>
                   </View>
-                  <Text style={styles.invoiceTitle}>TAX INVOICE</Text>
+                  <Text style={styles.invoiceTitle}>{bill?.status === 'draft' ? "DRAFT INVOICE" : "TAX INVOICE"}</Text>
                 </View>
               </View>
 
               <View style={styles.row}>
-                <Text style={[styles.fontBold]}>Invoice: {bill?.center_initial || 'SOA'}{bill?.invoiceNo}/{year}</Text>
+                <Text style={[styles.fontBold]}>
+                  {bill?.status === 'draft'
+                    ? "Invoice: DRAFT"
+                    : `Invoice: ${(bill?.center_initial || bill?.center_id?.center_initial || '')}${bill?.invoiceNo ?? 'Draft'}/${year}`}
+                </Text>
                 <Text>Date: {dayjs(bill?.generated_on).format("DD/MM/YYYY")}</Text>
               </View>
 

@@ -1,12 +1,15 @@
 import Title from '@components/layouts/Title';
 import AddCourseModal from '@pages/AdminCourses/Components/AddCourseModal';
 import CourseList from '@pages/AdminCourses/Components/CourseList';
+import userStore from '@stores/UserStore';
+import permissions from '@utils/permissions';
 import { Skeleton } from 'antd';
 import { lazy, Suspense } from 'react';
 
 function AdminCourses() {
+    const { user } = userStore()
     return (
-        <Title title="Courses" button={<AddCourseModal />}>
+        <Title title="Courses" button={permissions.courses.add.includes(user.role) && <AddCourseModal />}>
             <Suspense fallback={<Loader />}>
                 <CourseList />
             </Suspense>

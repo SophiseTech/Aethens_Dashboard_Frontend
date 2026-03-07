@@ -1,11 +1,106 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Form, Input, InputNumber, Switch, Button, message, Spin, Card, Space, Divider } from "antd";
-import { ArrowLeftOutlined, PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Form, Input, InputNumber, Switch, Button, message, Spin, Card, Space, Divider, Upload, Image } from "antd";
+import { ArrowLeftOutlined, PlusOutlined, DeleteOutlined, UploadOutlined } from "@ant-design/icons";
 import Title from "@components/layouts/Title";
 import blogService from "@services/Blog";
+import s3Service from "@/services/S3Service";
 
 const { TextArea } = Input;
+
+/**
+ * Helper: upload a file to S3 via base64 encoding.
+ * Returns the public URL string.
+ */
+const uploadFileToS3 = async (file, path = "blog-images") => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async () => {
+            try {
+                const fileUrls = await s3Service.uploadFiles({
+                    files: [{
+                        data: reader.result,
+                        fileName: file.name,
+                        fileType: file.type,
+                        path,
+                    }],
+                });
+                if (!fileUrls || fileUrls.length === 0) throw new Error("Upload failed");
+                resolve(fileUrls[0]);
+            } catch (err) {
+                reject(err);
+            }
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+};
+
+/**
+ * Image upload field with S3 upload + thumbnail preview + URL paste fallback.
+ */
+function ImageUploadField({ label, value, onChange, path = "blog-images" }) {
+    const [uploading, setUploading] = useState(false);
+    const [previewOpen, setPreviewOpen] = useState(false);
+
+    const handleUpload = async (options) => {
+        const { file, onSuccess, onError } = options;
+        setUploading(true);
+        try {
+            const url = await uploadFileToS3(file, path);
+            onChange(url);
+            onSuccess(url);
+            message.success(`${label} uploaded successfully`);
+        } catch (err) {
+            onError(err);
+            message.error(`${label} upload failed`);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    return (
+        <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">{label}</label>
+            <div className="flex items-start gap-4">
+                {value && (
+                    <div className="flex-shrink-0">
+                        <Image
+                            src={value}
+                            alt={label}
+                            width={100}
+                            height={100}
+                            style={{ objectFit: "cover", borderRadius: 8, border: "1px solid #d9d9d9" }}
+                            preview={{
+                                visible: previewOpen,
+                                onVisibleChange: setPreviewOpen,
+                            }}
+                            fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN88P/BfwAJhAPkEl0jSAAAAABJRU5ErkJggg=="
+                        />
+                    </div>
+                )}
+                <div className="flex flex-col gap-2 flex-1">
+                    <Upload
+                        accept="image/*"
+                        showUploadList={false}
+                        customRequest={handleUpload}
+                        maxCount={1}
+                    >
+                        <Button icon={<UploadOutlined />} loading={uploading}>
+                            {value ? "Replace Image" : "Upload Image"}
+                        </Button>
+                    </Upload>
+                    <Input
+                        placeholder="Or paste image URL"
+                        value={value || ""}
+                        onChange={(e) => onChange(e.target.value)}
+                        size="small"
+                    />
+                </div>
+            </div>
+        </div>
+    );
+}
 
 function EditBlogPost() {
     const { id } = useParams();
@@ -14,6 +109,7 @@ function EditBlogPost() {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [sections, setSections] = useState([]);
+    const [featuredImage, setFeaturedImage] = useState("");
     const isEditMode = !!id;
 
     useEffect(() => {
@@ -31,6 +127,9 @@ function EditBlogPost() {
             // Set sections state
             setSections(blog.sections || []);
 
+            // Set featured image state
+            setFeaturedImage(blog.image || "");
+
             // Set form values
             form.setFieldsValue({
                 title: blog.title,
@@ -38,7 +137,6 @@ function EditBlogPost() {
                 authorImage: blog.authorImage,
                 slug: blog.slug,
                 readTime: blog.readTime,
-                image: blog.image,
                 is_published: blog.is_published,
                 tags: blog.tags?.join(", ") || "",
             });
@@ -58,9 +156,10 @@ function EditBlogPost() {
             // Validate sections - each must have content
             const validSections = sections.filter(s => s.content && s.content.trim());
 
-            // Process tags and sections
+            // Process tags, sections, and featured image
             const processedValues = {
                 ...values,
+                image: featuredImage,
                 tags: values.tags ? values.tags.split(",").map(tag => tag.trim()).filter(Boolean) : [],
                 sections: validSections,
             };
@@ -155,12 +254,13 @@ function EditBlogPost() {
                         </Form.Item>
                     </div>
 
-                    <Form.Item
-                        name="image"
-                        label="Featured Image URL"
-                    >
-                        <Input placeholder="https://example.com/image.jpg" />
-                    </Form.Item>
+                    <Divider>Featured Image</Divider>
+                    <ImageUploadField
+                        label="Featured Image"
+                        value={featuredImage}
+                        onChange={setFeaturedImage}
+                        path="blog-images"
+                    />
 
                     <div className="grid grid-cols-2 gap-4">
                         <Form.Item
