@@ -4,6 +4,7 @@ import courseStore from '@stores/CourseStore';
 import ModulesFormSection from './ModulesFormSection';
 import ImagesSelector from './ImagesSelector';
 import MaterialItemsSelector from './MaterialItemsSelector';
+import ProjectPhasesFormSection from './ProjectPhasesFormSection';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -28,6 +29,12 @@ function EditCourseModal({ course, visible, onCancel, onSave }) {
                 defaultMaterialItems: (course.defaultMaterialItems || []).map(item =>
                     typeof item === 'object' ? item._id : item
                 ),
+                projectPhases: (course.projectPhases || []).map(phase => ({
+                    _id: phase._id,
+                    title: phase.title || '',
+                    description: phase.description || '',
+                    requiresSubject: phase.requiresSubject || false,
+                })),
             };
 
             form.setFieldsValue(formValues);
@@ -93,6 +100,14 @@ function EditCourseModal({ course, visible, onCancel, onSave }) {
                 courseData.defaultMaterialItems = [];
             }
 
+            // Always send projectPhases so backend can sync (add/update/remove)
+            courseData.projectPhases = (values.projectPhases || []).map(phase => ({
+                _id: phase._id || undefined,
+                title: phase.title,
+                description: phase.description || '',
+                requiresSubject: phase.requiresSubject || false,
+            }));
+
             await updateCourse(course._id, courseData);
             message.success('Course updated successfully');
             onSave();
@@ -126,7 +141,7 @@ function EditCourseModal({ course, visible, onCancel, onSave }) {
             >
                 <Tabs defaultActiveKey="1">
                     {/* Basic Information Tab */}
-                    <TabPane tab="Basic Info" key="1">
+                    <TabPane tab="Basic Info" key="1" forceRender>
                         <Form.Item
                             name="course_name"
                             label="Course Name"
@@ -189,7 +204,7 @@ function EditCourseModal({ course, visible, onCancel, onSave }) {
                     </TabPane>
 
                     {/* Syllabus Configuration Tab */}
-                    <TabPane tab="Syllabus" key="2">
+                    <TabPane tab="Syllabus" key="2" forceRender>
                         <Form.Item
                             name="syllabusType"
                             label="Syllabus Type"
@@ -212,7 +227,7 @@ function EditCourseModal({ course, visible, onCancel, onSave }) {
 
                     {/* Modules Tab - Only for General Type */}
                     {syllabusType === 'general' && (
-                        <TabPane tab="Modules" key="3">
+                        <TabPane tab="Modules" key="3" forceRender>
                             <Form.Item
                                 name="modules"
                                 label="Course Modules"
@@ -223,13 +238,18 @@ function EditCourseModal({ course, visible, onCancel, onSave }) {
                     )}
 
                     {/* Materials Tab */}
-                    <TabPane tab="Materials" key="4">
+                    <TabPane tab="Materials" key="4" forceRender>
                         <Form.Item
                             name="defaultMaterialItems"
                             label="Default Materials"
                         >
                             <MaterialItemsSelector />
                         </Form.Item>
+                    </TabPane>
+
+                    {/* Project Phases Tab */}
+                    <TabPane tab="Project Phases" key="5" forceRender>
+                        <ProjectPhasesFormSection />
                     </TabPane>
                 </Tabs>
             </Form>

@@ -5,6 +5,7 @@ import courseStore from '@stores/CourseStore';
 import ModulesFormSection from './ModulesFormSection';
 import ImagesSelector from './ImagesSelector';
 import MaterialItemsSelector from './MaterialItemsSelector';
+import ProjectPhasesFormSection from './ProjectPhasesFormSection';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -73,6 +74,10 @@ function AddCourseModal() {
                 courseData.defaultMaterialItems = values.defaultMaterialItems;
             }
 
+            if (values.projectPhases && values.projectPhases.length > 0) {
+                courseData.projectPhases = values.projectPhases;
+            }
+
             await createCourse(courseData);
             message.success('Course created successfully');
             handleCancel();
@@ -113,7 +118,7 @@ function AddCourseModal() {
                 >
                     <Tabs defaultActiveKey="1">
                         {/* Basic Information Tab */}
-                        <TabPane tab="Basic Info" key="1">
+                        <TabPane tab="Basic Info" key="1" forceRender>
                             <Form.Item
                                 name="course_name"
                                 label="Course Name"
@@ -176,7 +181,7 @@ function AddCourseModal() {
                         </TabPane>
 
                         {/* Syllabus Configuration Tab */}
-                        <TabPane tab="Syllabus" key="2">
+                        <TabPane tab="Syllabus" key="2" forceRender>
                             <Form.Item
                                 name="syllabusType"
                                 label="Syllabus Type"
@@ -199,7 +204,7 @@ function AddCourseModal() {
 
                         {/* Modules Tab - Only for General Type */}
                         {syllabusType === 'general' && (
-                            <TabPane tab="Modules" key="3">
+                            <TabPane tab="Modules" key="3" forceRender>
                                 <Form.Item
                                     name="modules"
                                     label="Course Modules"
@@ -210,13 +215,18 @@ function AddCourseModal() {
                         )}
 
                         {/* Materials Tab */}
-                        <TabPane tab="Materials" key="4">
+                        <TabPane tab="Materials" key="4" forceRender>
                             <Form.Item
                                 name="defaultMaterialItems"
                                 label="Default Materials"
                             >
                                 <MaterialItemsSelector />
                             </Form.Item>
+                        </TabPane>
+
+                        {/* Project Phases Tab */}
+                        <TabPane tab="Project Phases" key="5" forceRender>
+                            <ProjectPhasesFormSection />
                         </TabPane>
                     </Tabs>
                 </Form>

@@ -31,9 +31,11 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
     }
   }
 
-  const formattedBills = useMemo(() => bills?.map(bill => {
-    const prefix = bill.center_initial || bill.center_id?.center_initial || '';
-    const invoiceLabel = bill.invoiceNo ? `${prefix}${bill.invoiceNo}` : 'Draft';
+  const formatBill = (bill) => {
+    const prefix = bill.center_initial || bill.center_id?.center_initial || ''
+    const invoiceLabel = bill.invoiceNo ? `${prefix}${bill.invoiceNo}` : 'Draft'
+    const payableTotal = Math.round(bill.applyWallet ? bill.finalTotal : bill.total)
+
     return {
       ...bill,
       description: <div>
@@ -41,10 +43,12 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
         <p>Paid On: <strong>{formatDate(bill.payment_date)}</strong></p>
         <p className='capitalize'>Mode: <strong>{bill.payment_method?.replace("_", " ")}</strong></p>
       </div>,
-      total: `₹ ${bill.total}`,
+      total: `₹ ${payableTotal}`,
       chipStatus: <Status status={bill?.status} />
     }
-  }), [bills])
+  }
+
+  const formattedBills = useMemo(() => bills?.map(formatBill), [bills])
 
   const customFilters = [
     { key: 'invoice_search', type: 'input', placeholder: 'Search Invoice (e.g., WFD1001)' },

@@ -156,6 +156,12 @@ const permissions = {
     view: [ROLES.ADMIN, ROLES.ACADEMIC_MANAGER, ROLES.FACULTY],
     upload: [ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
     delete: [ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
+  },
+  courses: {
+    view: [ROLES.ADMIN, ROLES.ACADEMIC_MANAGER, ROLES.FACULTY],
+    add: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN]
   }
 }
 
