@@ -46,9 +46,9 @@ function BillsList({ bills, loading, total, onLoadMore = () => { }, fields = {},
             <Link to={`${item._id}${location.search}`} className='w-1/4'>
               <List.Item className={`!p-4 rounded-2xl mb-2 hover:bg-stone-200/70 transition-colors ${isActive(item) ? "bg-stone-200/70" : "bg-card"}`}>
                 <List.Item.Meta
-                  title={<p className='font-bold capitalize | 2xl:text-lg'>{getValue(item, fields.title)}</p>}
+                  title={<div className='font-bold capitalize | 2xl:text-lg p'>{getValue(item, fields.title)}</div>}
                   description={<div className='font-normal text-gray-500 flex flex-col gap-2'>
-                    <p className='| max-2xl:text-xs'>{getValue(item, fields.description)}</p>
+                    <div className='| max-2xl:text-xs'>{getValue(item, fields.description)}</div>
                     {getValue(item, fields.status)}
                   </div>}
                 />
@@ -62,12 +62,12 @@ function BillsList({ bills, loading, total, onLoadMore = () => { }, fields = {},
       <div className='overflow-auto w-full lg:hidden'>
         <div className='flex gap-4 w-max'>
           {bills.map((bill, index) => (
-            <Link to={`${bill._id}${location.search}`}>
-              <div key={index} className={`!p-4 rounded-2xl mb-2 hover:bg-stone-200/70 transition-colors ${isActive(bill) ? "bg-stone-200/70" : "bg-card"} w-fit flex gap-5`}>
+            <Link key={index} to={`${bill._id}${location.search}`}>
+              <div className={`!p-4 rounded-2xl mb-2 hover:bg-stone-200/70 transition-colors ${isActive(bill) ? "bg-stone-200/70" : "bg-card"} w-fit flex gap-5`}>
                 <div>
-                  <p className='font-bold capitalize | 2xl:text-lg'>{getValue(bill, fields.title)}</p>
+                  <div className='font-bold capitalize | 2xl:text-lg p'>{getValue(bill, fields.title)}</div>
                   <div className='font-normal text-gray-500 flex flex-col gap-2'>
-                    <p className='| max-2xl:text-xs'>{getValue(bill, fields.description)}</p>
+                    <div className='| max-2xl:text-xs'>{getValue(bill, fields.description)}</div>
                     {getValue(bill, fields.status)}
                   </div>
                 </div>

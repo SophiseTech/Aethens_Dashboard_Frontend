@@ -154,21 +154,21 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
         extra={
           parentPage === "enquiryList" && !isClosed ? (
             <div className="flex gap-2">
-              {permissions.enquiries.edit.includes(user.role) && <Button
+              {permissions.enquiries.edit.includes(user.role) ? <Button
                 type="primary"
                 icon={<EditOutlined />}
                 onClick={handleEditClick}
               >
                 Edit
-              </Button>}
-              {permissions.enquiries.delete.includes(user.role) && <Button
+              </Button> : null}
+              {permissions.enquiries.delete.includes(user.role) ? <Button
                 variant="solid"
                 color="danger"
                 icon={<DeleteOutlined />}
                 onClick={handleCloseClick}
               >
                 Close
-              </Button>}
+              </Button> : null}
             </div>
           ) : null
         }
@@ -186,7 +186,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
             <Col>
               <Title level={4} style={{ marginBottom: 0 }} className="flex items-center">
                 {enquiry?.name}
-                {enquiry?.isTransferred && (<Tag style={{ marginLeft: 8 }} color="blue">Transferred</Tag>)}
+                {enquiry?.isTransferred ? (<Tag style={{ marginLeft: 8 }} color="blue">Transferred</Tag>) : null}
               </Title>
               <Text>Enquiry No: {enquiry?.enquiryNumber}</Text><br />
               <Text>{age_categories.find(item => item.value == enquiry?.ageCategory)?.label}</Text>
@@ -237,7 +237,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
 
 
         {/* Courses */}
-        {enquiry?.selectedCourses?.length > 0 && (
+        {enquiry?.selectedCourses?.length > 0 ? (
           <>
             <Divider />
 
@@ -250,12 +250,12 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
               ))}
             </Card>
           </>
-        )}
+        ) : null}
 
         <Divider />
 
         {/* Enrolled Student Details */}
-        {enquiry?.stage === "Enrolled" && (
+        {enquiry?.stage === "Enrolled" ? (
           <>
             <Card>
               <Title level={5}>Enrolled Details</Title>
@@ -265,12 +265,12 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
               <Text>{(formatDate(enquiry?.enrollmentDate))}</Text>
             </Card>
           </>
-        )}
+        ) : null}
 
         {/* Demo Slot */}
-        {enquiry?.demoSlot && enquiry?.stage === "Demo" && (
+        {enquiry?.demoSlot && enquiry?.stage === "Demo" ? (
           <>
-            {enquiry.demoSlotHistory?.length > 0 && (
+            {enquiry.demoSlotHistory?.length > 0 ? (
               <Card bordered={false}>
                 <Title level={5}>Demo Slot</Title>
                 <Text strong>Scheduled At:</Text>{" "}
@@ -280,15 +280,15 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
                 <Tag color="cyan">{enquiry?.demoSlot?.status}</Tag>
                 <br />
                 {
-                  enquiry?.demoSlot?.notes && (
+                  enquiry?.demoSlot?.notes ? (
                     <>
                       <Text strong>Notes:</Text>{" "}
                       <Text>{enquiry?.demoSlot?.notes}</Text>
                     </>
-                  )
+                  ) : null
                 }
                 <br />
-                {enquiry?.demoSlotHistory?.length > 1 && (
+                {enquiry?.demoSlotHistory?.length > 1 ? (
                   <div className="mt-2">
                     <Text strong>
                       History
@@ -296,47 +296,47 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
                     {enquiry?.demoSlotHistory?.slice(0, -1).map((item, index) => (
                       <Card key={item._id || index} className="mb-2">
                         <Text strong>Date : {formatDate(item?.scheduledAt)}, {formatTime(item?.scheduledAt)}</Text>
-                        {item?.reason && (<>
+                        {item?.reason ? (<>
                           <Text strong>Reason:</Text>{" "}
                           <Text>{item?.reason || "-"}</Text>
                           <br />
-                        </>)}
-                        {item?.remarks && (<>
+                        </>) : null}
+                        {item?.remarks ? (<>
                           <br />
                           <Text strong>Remarks:</Text>{" "}
                           <Text>{item?.remarks || "-"}</Text>
-                        </>)}
+                        </>) : null}
                       </Card>
                     ))}
                   </div>
-                )}
+                ) : null}
               </Card>
-            )}
+            ) : null}
           </>
-        )}
+        ) : null}
 
         {/* Follow Up Details for new state */}
-        {parentPage === "enquiryList" && (enquiry?.stage === "New" || enquiry?.stage === "Demo") && (
+        {parentPage === "enquiryList" && (enquiry?.stage === "New" || enquiry?.stage === "Demo") ? (
           <>
-            {enquiry?.followUpHistory?.length > 0 && (
+            {enquiry?.followUpHistory?.length > 0 ? (
               <Card>
                 <Title level={5}>Follow Up's</Title>
 
-                {enquiry?.followUpDate && (
+                {enquiry?.followUpDate ? (
                   <>
                     <Text strong>Next Follow Up Date : </Text>
                     <Text>{formatDate(enquiry.followUpDate)}</Text>
                     <br />
                   </>
-                )}
+                ) : null}
 
-                {enquiry?.followUpRemarks && (
+                {enquiry?.followUpRemarks ? (
                   <>
                     <Text strong>Remarks:</Text>{" "}
                     <Text>{enquiry.followUpRemarks}</Text>
                     <br />
                   </>
-                )}
+                ) : null}
 
                 {enquiry?.followUpHistory.map((item, index) => (
                   <Card key={item._id || index} className="mb-2">
@@ -352,11 +352,11 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
                   </Card>
                 ))}
               </Card>
-            )}
+            ) : null}
           </>
-        )}
+        ) : null}
 
-        {enquiry?.centerTransfers?.length > 0 && (
+        {enquiry?.centerTransfers?.length > 0 ? (
           <>
             <Divider />
 
@@ -365,66 +365,66 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
               transfers={enquiry?.centerTransfers}
             />
           </>
-        )}
+        ) : null}
 
 
-        {enquiry?.remarks && (
+        {enquiry?.remarks ? (
           <>
             <Divider />
             <Card className="mb-2">
               <Title level={5}>Remarks</Title>
               <Text>{enquiry?.remarks}</Text>
             </Card>
-          </>)}
+          </>) : null}
 
         <Divider />
 
         {/* Action Buttons Based on Parent Page */}
         {/* Case where enquiry is in new and not changed to demo */}
-        {parentPage === "enquiryList" && (
+        {parentPage === "enquiryList" ? (
           <div className="flex gap-2 items-center mb-2">
             {(enquiry?.stage === "New" || enquiry?.stage === "Demo") &&
-              (permissions.enquiries.edit.includes(user?.role) && <Button
+              permissions.enquiries.edit.includes(user?.role) ? <Button
                 variant="filled"
                 color="orange"
                 onClick={() => setFollowUpVisible(true)}
               >
-                Change Follow Up Date
-              </Button>)
+              Change Follow Up Date
+            </Button> : null
             }
             {enquiry?.stage === "New" &&
-              (permissions.enquiries.edit.includes(user?.role) && <Button
+              permissions.enquiries.edit.includes(user?.role) ? <Button
                 type="primary"
                 onClick={() => setIsBookSlotModalVisible(true)}
               >
-                Book Demo Slot
-              </Button>)
+              Book Demo Slot
+            </Button> : null
             }
           </div>
-        )}
+        ) : null}
 
         {/* case where item is in demo state */}
         {(parentPage === "slotlist" || parentPage === "enquiryList") &&
           enquiry?.stage === "Demo" &&
-          enquiry?.demoSlot?.status !== "Completed" && (
-            <div className="flex gap-2 items-center">
-              {permissions.enquiries.edit.includes(user?.role) && <Button type="primary" onClick={() => setReschduleSlot(true)}>
-                Reschedule Slot
-              </Button>}
-              {permissions.enquiries.edit.includes(user?.role) && <Button type="primary" danger onClick={handleMarkCompleted}>
-                Mark As Completed
-              </Button>}
-            </div>
-          )}
+          enquiry?.demoSlot?.status !== "Completed" ? (
+          <div className="flex gap-2 items-center">
+            {permissions.enquiries.edit.includes(user?.role) ? <Button type="primary" onClick={() => setReschduleSlot(true)}>
+              Reschedule Slot
+            </Button> : null}
+            {permissions.enquiries.edit.includes(user?.role) ? <Button type="primary" danger onClick={handleMarkCompleted}>
+              Mark As Completed
+            </Button> : null}
+          </div>
+        ) : null}
 
         {/* case where demo is completed */}
         {(parentPage === "slotlist" || parentPage === "enquiryList") &&
           enquiry?.stage === "Demo" &&
-          enquiry?.demoSlot?.status === "Completed" && (
-            permissions.enquiries.edit.includes(user?.role) && <Button type="primary" block onClick={() => setEnrolled(true)}>
-              Enroll Student
-            </Button>
-          )}
+          enquiry?.demoSlot?.status === "Completed" &&
+          permissions.enquiries.edit.includes(user?.role) ? <Button type="primary" block onClick={() => setEnrolled(true)}>
+          Enroll Student
+        </Button> : null
+        }
       </Drawer>
 
       {/* Edit Modal */}
