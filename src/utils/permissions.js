@@ -22,7 +22,9 @@ const permissions = {
   bills: {
     add: [ROLES.MANAGER],
     record_payment: [ROLES.MANAGER, ROLES.ADMIN],
-    delete: [ROLES.ADMIN]
+    delete: [ROLES.ADMIN],
+    finalize: [ROLES.MANAGER, ROLES.ADMIN],
+    edit_draft: [ROLES.MANAGER, ROLES.ADMIN],
   },
   fda: {
     mark_don: [ROLES.MANAGER, ROLES.ACADEMIC_MANAGER]

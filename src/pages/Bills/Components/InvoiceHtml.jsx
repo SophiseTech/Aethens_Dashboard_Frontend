@@ -36,12 +36,18 @@ const InvoiceHtml = ({ bill }) => {
                     <div style={{ fontSize: 11 }}>Whitefield, Bengaluru, 560066</div>
                     <div style={{ fontSize: 11, fontWeight: 'bold' }}>GSTIN: 29AFBFS0754B1Z8</div>
                 </div>
-                <div style={{ fontSize: 22, fontWeight: 'bold', color: '#fff' }}>TAX INVOICE</div>
+                <div style={{ fontSize: 22, fontWeight: 'bold', color: '#fff' }}>
+                    {bill?.status === 'draft' ? "DRAFT INVOICE" : "TAX INVOICE"}
+                </div>
             </div>
 
             {/* Invoice meta */}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                <span style={{ fontWeight: 'bold' }}>Invoice: {bill?.center_initial || 'SOA'}{bill?.invoiceNo}/{year}</span>
+                <span style={{ fontWeight: 'bold' }}>
+                    {bill?.status === 'draft'
+                        ? "Invoice: DRAFT"
+                        : `Invoice: ${(bill?.center_initial || bill?.center_id?.center_initial || '')}${bill?.invoiceNo ?? 'Draft'}/${year}`}
+                </span>
                 <span>Date: {dayjs(bill?.generated_on).format('DD/MM/YYYY')}</span>
             </div>
 

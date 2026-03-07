@@ -24,6 +24,16 @@ class BillServices {
     }
   }
 
+  async finalizeBill(id, updateData) {
+    try {
+      const response = await put(`/bills/${id}/finalize`, updateData);
+      if (!response || !response.data) throw new Error("An error occurred. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
   async deleteBill(id) {
     try {
       const response = await del(`/bills/${id}`)

@@ -5,7 +5,7 @@ import CustomSelect from "@components/form/CustomSelect";
 import CustomSubmit from "@components/form/CustomSubmit";
 import ItemsInputTable from "@pages/Bills/Components/ItemsInputTable";
 import { sumFromObjects } from "@utils/helper";
-import { Form, Modal, Table, Checkbox, Card, Divider, Tag, Space, Alert } from "antd";
+import { Form, Modal, Table, Checkbox, Card, Divider, Tag, Space, Alert, Button } from "antd";
 import { WalletOutlined, DollarOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
@@ -23,6 +23,7 @@ function GenerateBill({
   center_initial = '',
   loadInitData = () => { },
   onSave = async () => { },
+  bill = null,
   handleCancel,
   isModalOpen,
   handleOk,
@@ -38,18 +39,40 @@ function GenerateBill({
   const selectedCustomer = Form.useWatch("generated_for", form);
   const { centers, getCenters, setSelectedCenter, selectedCenter } = useStore(centersStore);
   const { user } = useStore(userStore);
+  const [savingAsDraft, setSavingAsDraft] = useState(false);
+  const isEditMode = Boolean(bill);
+  const isEditDraft = isEditMode && bill?.status === 'draft';
 
   // Format invoice number for display (e.g., "WFD1001")
-  const formattedInvoiceNo = `${center_initial}${invoiceNo}`;
+  const formattedInvoiceNo = `${center_initial || bill?.center_initial || bill?.center_id?.center_initial || ''}${invoiceNo || bill?.invoiceNo || ''}`;
 
-  const initialValues = {
+  const defaultInitialValues = useMemo(() => ({
     invoiceNo: invoiceNo || 0,
     items: [],
     generated_for: "",
     subject: "",
     generated_on: dayjs(),
     discountType: "percentage",
-  };
+    centerId: selectedCenter
+  }), [invoiceNo, selectedCenter]);
+
+  const initialValues = useMemo(() => {
+    if (!bill) return defaultInitialValues;
+    return {
+      invoiceNo: bill.invoiceNo || 0,
+      items: bill.items?.map((item) => ({
+        ...item,
+        itemName: item.name,
+        taxMode: item.taxMode || 'exclusive',
+        discountType: item.discountType || 'percentage'
+      })) || [],
+      generated_for: bill.generated_for?._id || bill.generated_for || "",
+      subject: bill.subject || "",
+      generated_on: bill.generated_on ? dayjs(bill.generated_on) : dayjs(),
+      discountType: bill.discountType || "percentage",
+      centerId: bill.center_id || bill.centerId || selectedCenter
+    }
+  }, [bill, defaultInitialValues, selectedCenter]);
   const loading = false;
 
   const subjectOptions = [
@@ -108,6 +131,35 @@ function GenerateBill({
     setPaymentAmount(totals?.total || 0);
   }, [totals])
 
+  useEffect(() => {
+    if (!isModalOpen) return;
+    form.setFieldsValue(initialValues);
+
+    if (bill?.items?.length) {
+      const mappedSelected = {};
+      bill.items.forEach((item, index) => {
+        mappedSelected[index] = { ...item, _id: item.item || item._id };
+      });
+      setSelectedItem(mappedSelected);
+      setTotals({
+        undiscountedTotal: bill.undiscountedTotal,
+        subtotal: bill.subtotal,
+        total_tax: bill.total_tax,
+        total: bill.total,
+        total_discount: bill.total_discount
+      });
+      setApplyWallet(Boolean(bill.applyWallet));
+      if (bill.paymentAmount) {
+        setPaymentAmount(Number(bill.paymentAmount));
+      }
+    } else {
+      setSelectedItem({});
+      setTotals({});
+      setApplyWallet(false);
+      setPaymentAmount(0);
+    }
+  }, [isModalOpen, bill, initialValues]);
+
 
   // Submit function
   const onSubmit = async (values) => {
@@ -116,11 +168,13 @@ function GenerateBill({
       item.name = selectedItem[index]?.name;
       item.item_type = getItemType(selectedSubject);
     });
-    console.log(values);
+    const shouldSaveAsDraft = isEditDraft || savingAsDraft;
     await onSave({
       ...values,
       ...totals,
-      center_initial: center_initial,  // Include center initial for storage
+      status: isEditDraft ? 'draft' : values.status,
+      saveAsDraft: shouldSaveAsDraft,
+      center_initial: bill?.center_initial || center_initial,  // Include center initial for storage
       walletBalance: walletBalance,
       applyWallet: applyWallet,
       walletAmountDeducted: walletAmountDeducted,
@@ -131,6 +185,7 @@ function GenerateBill({
       walletId: selectedCustomerData?._id
     });
     handleOk();
+    setSavingAsDraft(false);
   };
 
   const columns2 = [
@@ -201,7 +256,7 @@ function GenerateBill({
   return (
     <>
       <Modal
-        title={"Generate Bill"}
+        title={isEditDraft ? "Edit Draft" : isEditMode ? "Edit Bill" : "Generate Bill"}
         open={isModalOpen}
         footer={null}
         onCancel={handleCancel}
@@ -379,7 +434,44 @@ function GenerateBill({
               </div>
             )}
           </div>
-          <CustomSubmit className="bg-primary" label="Save" loading={loading} />
+          <div className="flex justify-end gap-3 mt-4">
+            {isEditDraft ? (
+              <Button
+                type="primary"
+                className="bg-primary"
+                onClick={() => {
+                  setSavingAsDraft(true);
+                  form.submit();
+                }}
+                loading={loading}
+              >
+                Save Draft Changes
+              </Button>
+            ) : (
+              <>
+                <Button
+                  onClick={() => {
+                    setSavingAsDraft(true);
+                    form.submit();
+                  }}
+                  loading={loading}
+                >
+                  Save as Draft
+                </Button>
+                <Button
+                  type="primary"
+                  className="bg-primary"
+                  onClick={() => {
+                    setSavingAsDraft(false);
+                    form.submit();
+                  }}
+                  loading={loading}
+                >
+                  Generate Invoice
+                </Button>
+              </>
+            )}
+          </div>
         </CustomForm>
       </Modal>
     </>

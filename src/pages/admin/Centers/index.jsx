@@ -47,6 +47,7 @@ function AdminCenters() {
       location: record.location,
       center_initial: record.center_initial,
       maxCount: record.maxCount,
+      rescheduleAutoApprovalMaxCount: record.rescheduleAutoApprovalMaxCount,
     });
     setModalOpen(true);
   };
@@ -96,6 +97,7 @@ function AdminCenters() {
     { title: "Location", dataIndex: "location", key: "location" },
     { title: "Initial", dataIndex: "center_initial", key: "center_initial" },
     { title: "Max Count", dataIndex: "maxCount", key: "maxCount", render: (val) => val ?? "—" },
+    { title: "Auto Approve Limit", dataIndex: "rescheduleAutoApprovalMaxCount", key: "rescheduleAutoApprovalMaxCount", render: (val) => val ?? "—" },
     {
       title: "Actions",
       key: "actions",
@@ -147,6 +149,25 @@ function AdminCenters() {
           </Form.Item>
           <Form.Item name="maxCount" label="Max Count" rules={[{ type: "number", min: 0, message: "Must be a positive number" }]}>
             <InputNumber min={0} placeholder="e.g. 30" style={{ width: "100%" }} />
+          </Form.Item>
+          <Form.Item
+            name="rescheduleAutoApprovalMaxCount"
+            label="Auto Approve Limit"
+            dependencies={['maxCount']}
+            rules={[
+              { type: "number", min: 0, message: "Must be a positive number" },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  const max = getFieldValue('maxCount');
+                  if (!value || typeof max !== 'number' || value <= max) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('Auto Approve Limit cannot exceed Max Count'));
+                },
+              })
+            ]}
+          >
+            <InputNumber min={0} placeholder="e.g. 2" style={{ width: "100%" }} />
           </Form.Item>
         </Form>
       </Modal>

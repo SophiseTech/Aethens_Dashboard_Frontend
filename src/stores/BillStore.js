@@ -37,12 +37,12 @@ const billStore = create((set, get) => ({
         })
       }
       if (customFilters) {
-        const filters =  _.cloneDeep({ ...stateFilters, ...customFilters })
-        if(filters.generated_on){
-          if(!filters.generated_on.$lte){
+        const filters = _.cloneDeep({ ...stateFilters, ...customFilters })
+        if (filters.generated_on) {
+          if (!filters.generated_on.$lte) {
             delete filters.generated_on.$lte
           }
-          if(!filters.generated_on.$gte){
+          if (!filters.generated_on.$gte) {
             delete filters.generated_on.$gte
           }
         }
@@ -99,14 +99,41 @@ const billStore = create((set, get) => ({
       const newBill = await billService.createBill(data)
       if (newBill) {
         const updatedBills = [newBill, ...bills]
-        set({ bills: updatedBills, invoiceNo: invoiceNo + 1 })
-        handleSuccess("Invoice Created Succesfully")
+        set({
+          bills: updatedBills,
+          // Only increment local invoiceNo if it wasn't saved as a draft
+          invoiceNo: data.saveAsDraft ? invoiceNo : invoiceNo + 1
+        })
+        handleSuccess(data.saveAsDraft ? "Draft Saved Successfully" : "Invoice Created Succesfully")
         return newBill
       }
     } catch (error) {
       handleInternalError(error)
     } finally {
       set({ createLoading: false })
+    }
+  },
+  finalizeBill: async (id, data) => {
+    try {
+      set({ createLoading: true });
+      if (!id || !data) throw new Error("Bad Data");
+      const { bills, invoiceNo } = get();
+      const finalizedBill = await billService.finalizeBill(id, data);
+      if (finalizedBill) {
+        const updatedBills = bills.map(item => (
+          item._id === finalizedBill._id ? finalizedBill : item
+        ));
+        set({
+          bills: updatedBills,
+          invoiceNo: invoiceNo + 1
+        });
+        handleSuccess("Draft Finalized Successfully");
+        return finalizedBill;
+      }
+    } catch (error) {
+      handleInternalError(error);
+    } finally {
+      set({ createLoading: false });
     }
   },
   getInvoiceNo: async (centerId) => {
