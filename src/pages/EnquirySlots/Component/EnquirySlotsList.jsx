@@ -5,6 +5,7 @@ import enquiryStore from "@stores/EnquiryStore";
 import Chip from "@components/Chips/Chip";
 import userStore from "@stores/UserStore";
 import centersStore from "@stores/CentersStore";
+import { formatDateTime } from "@utils/helper";
 
 function EnquirySlotsList() {
   const {
@@ -65,7 +66,7 @@ function EnquirySlotsList() {
     {
       title: "Demo Date",
       dataIndex: ["start_date"],
-      render: (date) => (date ? new Date(date).toLocaleString() : "N/A"),
+      render: (date) => (date ? formatDateTime(date) : "N/A"),
     },
     {
       title: "Status",
