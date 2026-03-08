@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Modal, Table, Spin, Alert, Row, Col, Statistic, Tag, Button, InputNumber, Form, DatePicker, Select, Card, Checkbox, Space, Divider, Flex, Popconfirm, message } from 'antd';
-import { WalletOutlined, DollarOutlined, CheckCircleOutlined, FileDoneOutlined, CheckSquareOutlined } from '@ant-design/icons';
+import { WalletOutlined, DollarOutlined, CheckCircleOutlined, FileDoneOutlined, CheckSquareOutlined, PrinterOutlined, DownloadOutlined } from '@ant-design/icons';
+import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
+import InvoicePdf from '@pages/Bills/Components/Invoice';
+import { isAndroid } from 'react-device-detect';
 import { useStore } from 'zustand';
 import feeStore from '@stores/FeeStore';
 import { formatDate, toISTStartOfDayISO } from '@utils/helper';
@@ -27,6 +30,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
   const [selectedBill, setSelectedBill] = useState(null);
   const [form] = Form.useForm();
   const [useWallet, setUseWallet] = useState(false);
+  const [viewBill, setViewBill] = useState(null);
   const paidAmount = Form.useWatch('paidAmount', form);
   const isPartialPayment = feeDetails?.feeAccount?.type === 'partial';
   const isInstallment = feeDetails?.feeAccount?.isInstallment;
@@ -264,11 +268,26 @@ const FeeTracker = ({ student, visible, onCancel }) => {
 
         if (!permissions.fee_tracker.edit.includes(user?.role)) return;
 
-        if (record.status === 'paid') {
-          return <Tag color="green" icon={<CheckCircleOutlined />}>Paid</Tag>;
-        }
-
         const bill = getBillForInstallment(record);
+
+        if (record.status === 'paid') {
+          return (
+            <Space>
+              <Tag color="green" icon={<CheckCircleOutlined />}>Paid</Tag>
+              {bill && (
+                <Button
+                  type="primary"
+                  size="small"
+                  ghost
+                  icon={<PrinterOutlined />}
+                  onClick={() => setViewBill(bill)}
+                >
+                  View / Print
+                </Button>
+              )}
+            </Space>
+          );
+        }
 
         return (
           <Space>
@@ -376,7 +395,23 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       key: 'action',
       render: (_, record) => {
         if (!record.isBalance) {
-          return <Tag color="green" icon={<CheckCircleOutlined />}>Paid</Tag>;
+          const historicalBill = getBillForInstallment(record);
+          return (
+            <Space>
+              <Tag color="green" icon={<CheckCircleOutlined />}>Paid</Tag>
+              {historicalBill && (
+                <Button
+                  type="primary"
+                  size="small"
+                  ghost
+                  icon={<PrinterOutlined />}
+                  onClick={() => setViewBill(historicalBill)}
+                >
+                  View / Print
+                </Button>
+              )}
+            </Space>
+          );
         }
 
         if (!permissions.fee_tracker.edit.includes(user?.role)) return null;
@@ -452,12 +487,26 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       render: (_, record) => {
         if (!permissions.fee_tracker.edit.includes(user?.role)) return null;
         if (record.subject !== 'course') return null;
+
+        if (record.status === 'paid') {
+          return (
+            <Button
+              type="primary"
+              size="small"
+              ghost
+              icon={<PrinterOutlined />}
+              onClick={() => setViewBill(record)}
+            >
+              View / Print
+            </Button>
+          );
+        }
+
         return (
           <Button
             type="primary"
             size="small"
             onClick={() => handleMarkAsPaid(record)}
-            disabled={record.status === 'paid'}
           >
             Mark as Paid
           </Button>
@@ -556,8 +605,48 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         )}
       </Modal>
 
-      {/* Payment Modal */}
+      {/* View Bill Modal */}
       <Modal
+        title={`Invoice ${viewBill?.center_initial || ''}${viewBill?.invoiceNo || ''}`}
+        visible={!!viewBill}
+        onCancel={() => setViewBill(null)}
+        footer={null}
+        width={1000}
+        style={{ top: 20 }}
+        destroyOnClose
+      >
+        {viewBill && (
+          <div style={{ height: isAndroid ? 'auto' : '80vh' }}>
+            {isAndroid ? (
+              <div className="flex flex-col items-center justify-center py-10 gap-4">
+                <Alert
+                  message="Preview Not Available"
+                  description="PDF preview is not supported on Android browsers. Please download the invoice to view it."
+                  type="info"
+                  showIcon
+                />
+                <PDFDownloadLink
+                  document={<InvoicePdf bill={viewBill} />}
+                  fileName={`INV-${viewBill?.center_initial || ''}${viewBill?.invoiceNo || 'Untitled'}.pdf`}
+                >
+                  {({ loading: pdfLoading }) => (
+                    <Button type="primary" size="large" loading={pdfLoading} icon={<DownloadOutlined />}>
+                      {pdfLoading ? 'Preparing PDF...' : 'Download Invoice'}
+                    </Button>
+                  )}
+                </PDFDownloadLink>
+              </div>
+            ) : (
+              <PDFViewer width="100%" height="100%">
+                <InvoicePdf bill={viewBill} />
+              </PDFViewer>
+            )}
+          </div>
+        )}
+      </Modal >
+
+      {/* Payment Modal */}
+      < Modal
         title={`Payment - Invoice ${selectedBill?.invoiceNo}`}
         visible={paymentModal}
         onCancel={() => {
@@ -674,7 +763,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
             <DatePicker style={{ width: '100%' }} />
           </Form.Item>
         </Form>
-      </Modal>
+      </Modal >
     </>
   );
 };
