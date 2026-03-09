@@ -115,7 +115,7 @@ function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = (
         title: col.title,
         name: name,
         index,
-        options: col.options || options,
+        options: col.getOptions ? col.getOptions(record, index) : (col.options || options),
         onSelect,
         onSearch: col.onSearch,
         selectAfter: col.selectAfter,
@@ -213,7 +213,7 @@ const EditableCell = ({
     : inputType === "autocomplete" ?
       <Select
         options={effectiveOptions}
-        onSelect={(value, option) => onSelect(value, index, option)}
+        onSelect={(value, option) => onSelect(value, index, option, dataIndex)}
         filterOption={itemType !== "course" ? false : (input, option) => {
           return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
         }}
@@ -230,8 +230,8 @@ const EditableCell = ({
         : inputType === "select" ?
           <Select
             options={options}
-          >
-          </Select>
+            onChange={(value, option) => onSelect(value, index, option, dataIndex)}
+          />
           : <Input />;
 
   return (
