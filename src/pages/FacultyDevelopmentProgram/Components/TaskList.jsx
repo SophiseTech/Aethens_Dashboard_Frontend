@@ -3,8 +3,9 @@ import facultyDevProgramStore from "@stores/FacultyDevelopmentProgramStore"
 import userStore from "@stores/UserStore"
 import { formatDate } from "@utils/helper"
 import permissions from "@utils/permissions"
-import { Button, Flex, Table } from "antd"
+import { Button, Flex, Table, Image } from "antd"
 import { useStore } from "zustand"
+import { ROLES } from "@utils/constants"
 
 function TaskList({ tasks, loading }) {
 
@@ -12,7 +13,7 @@ function TaskList({ tasks, loading }) {
   const { user } = useStore(userStore)
 
   const handleMarkDone = async (id) => {
-    if (!permissions.fda.mark_don.includes(user.role)) return
+    if (!permissions.fdp.mark_don.includes(user.role)) return
     await editProgram(id, { status: "completed" })
   }
 
@@ -26,6 +27,26 @@ function TaskList({ tasks, loading }) {
       title: "Task",
       dataIndex: "details",
       // width: "60%"
+    },
+    {
+      title: "Attachments",
+      dataIndex: "attachments",
+      render: (attachments) => (
+        <Image.PreviewGroup>
+          <Flex gap={4} wrap="wrap">
+            {attachments?.map((file, index) => (
+              <Image
+                key={index}
+                width={40}
+                height={40}
+                src={file.fileUrl}
+                fallback="/images/placeholder-image.png" // Fallback for broken links
+                style={{ objectFit: 'cover', borderRadius: '4px' }}
+              />
+            ))}
+          </Flex>
+        </Image.PreviewGroup>
+      )
     },
     {
       title: "Status",
@@ -43,21 +64,22 @@ function TaskList({ tasks, loading }) {
     {
       title: "Action",
       dataIndex: "action",
+      hidden: user.role === ROLES.FACULTY,
       render: (_, record) => (
         <Flex>
-          {permissions.fda.mark_don.includes(user.role) &&
+          {permissions.fdp.mark_don.includes(user.role) &&
             <Button variant="filled" color="green" disabled={record.status === "completed"} onClick={() => handleMarkDone(record._id)}>Mark Done</Button>
           }
         </Flex>
       )
     },
-  ]
+  ].filter(col => !col.hidden) // Ensure hidden columns are actually removed from the Table
 
   return (
     <Table dataSource={tasks} columns={columns} loading={loading}
-      // scroll={{
-      //   x: "max-content",
-      // }}
+    // scroll={{
+    //   x: "max-content",
+    // }}
     />
   )
 }
