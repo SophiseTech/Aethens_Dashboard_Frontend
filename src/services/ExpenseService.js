@@ -1,13 +1,13 @@
 import handleError from "@utils/handleError";
-import { post, get } from "@utils/Requests";
+import { post, get, put, del } from "@utils/Requests";
 
 class ExpenseService {
     /**
-     * Fetch all ledgers (for the dropdown in the expense form)
+     * Fetch all ledgers (for the sidebar / dropdown)
      */
-    async getLedgers(filters = {}) {
+    async getLedgers(filters = {}, lastRef = 0, limit = 20) {
         try {
-            const response = await post(`/v2/ledgers/getLedgers`, { filters });
+            const response = await post(`/v2/ledgers/getLedgers?lastRef=${lastRef}&limit=${limit}`, { filters });
             if (response && response.data) return response.data;
             return { ledgers: [], total: 0 };
         } catch (error) {
@@ -16,7 +16,7 @@ class ExpenseService {
     }
 
     /**
-     * Create a new ledger (auto-created when a user types a new name)
+     * Create a new ledger
      */
     async createLedger(data) {
         try {
@@ -29,12 +29,25 @@ class ExpenseService {
     }
 
     /**
-     * Fetch expenses list with pagination and optional date range
+     * Update a ledger (name, status, vendor_name)
      */
-    async getExpenses(filters = {}, page = 1, limit = 10) {
+    async updateLedger(id, data) {
+        try {
+            const response = await put(`/v2/ledgers/${id}`, data);
+            if (response && response.data) return response.data;
+            throw new Error("Failed to update ledger");
+        } catch (error) {
+            return handleError(error);
+        }
+    }
+
+    /**
+     * Fetch expenses list with pagination and optional filters
+     */
+    async getExpenses(filters = {}, lastRef = 0, limit = 20) {
         try {
             const response = await post(
-                `/v2/expenses/getExpenses?limit=${limit}&lastRef=${(page - 1) * limit}`,
+                `/v2/expenses/getExpenses?limit=${limit}&lastRef=${lastRef}`,
                 filters
             );
             if (response && response.data) return response.data;
@@ -58,7 +71,33 @@ class ExpenseService {
     }
 
     /**
-     * Get expense summary (category-wise totals) for the dashboard
+     * Update an expense record
+     */
+    async updateExpense(id, data) {
+        try {
+            const response = await put(`/v2/expenses/${id}`, data);
+            if (response && response.data) return response.data;
+            throw new Error("Failed to update expense");
+        } catch (error) {
+            return handleError(error);
+        }
+    }
+
+    /**
+     * Delete an expense record
+     */
+    async deleteExpense(id) {
+        try {
+            const response = await del(`/v2/expenses/${id}`);
+            if (!response) throw new Error("Failed to delete expense");
+            return response;
+        } catch (error) {
+            return handleError(error);
+        }
+    }
+
+    /**
+     * Get expense summary (category-wise totals)
      */
     async getExpenseSummary(filters = {}) {
         try {
@@ -73,3 +112,4 @@ class ExpenseService {
 
 const expenseService = new ExpenseService();
 export default expenseService;
+
