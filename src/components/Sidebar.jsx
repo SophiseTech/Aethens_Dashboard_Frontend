@@ -141,7 +141,7 @@ const MENU_CONFIG = [
     label: "FDP",
     icon: FundProjectionScreenOutlined,
     path: "/manager/faculty-development-program",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
+    roles: [ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
   },
   {
     label: "FDP",
