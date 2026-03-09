@@ -35,6 +35,7 @@ const Tasks = lazy(() => import("@pages/Tasks"))
 const Holidays = lazy(() => import("@pages/Holidays"))
 const AttendanceRegister = lazy(() => import("@pages/AttendanceRegister"))
 const SyllabusGallery = lazy(() => import("@pages/SyllabusGallery"))
+const Expenses = lazy(() => import("@pages/Expenses"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -218,6 +219,11 @@ export const managerRoutes = [
             path: "/admin/syllabus-gallery",
             element: <LazyLoader element={<SyllabusGallery />} />,
             title: "Syllabus Gallery",
+          },
+          {
+            path: "/manager/expenses",
+            element: <LazyLoader element={<Expenses />} />,
+            title: "Expenses",
           },
         ]
       }

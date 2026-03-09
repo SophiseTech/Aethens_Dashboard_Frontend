@@ -24,6 +24,7 @@ import {
   MailOutlined,
   TrophyOutlined,
   VideoCameraOutlined,
+  AccountBookOutlined,
 } from "@ant-design/icons";
 
 import Book from "@/assets/Book";
@@ -316,6 +317,12 @@ const MENU_CONFIG = [
     icon: CheckSquareOutlined,
     path: "/manager/attendance-register",
     roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
+  },
+  {
+    label: "Expenses",
+    icon: AccountBookOutlined,
+    path: "/manager/expenses",
+    roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER],
   },
 ];
 

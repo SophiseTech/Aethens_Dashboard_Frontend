@@ -162,6 +162,11 @@ const permissions = {
     add: [ROLES.ADMIN],
     delete: [ROLES.ADMIN],
     edit: [ROLES.ADMIN]
+  },
+  expenses: {
+    view: [ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER],
+    add: [ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER],
+    edit: [ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER],
   }
 }
 
