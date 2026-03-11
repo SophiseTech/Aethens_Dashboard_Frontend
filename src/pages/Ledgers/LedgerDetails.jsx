@@ -153,7 +153,7 @@ function LedgerDetails({ onEditClick }) {
                             value={grandTotal}
                             precision={2}
                             prefix="₹"
-                            valueStyle={{ color: '#ef4444', fontWeight: 700 }}
+                            valueStyle={{ color: '#ef4444', fontWeight: 700, whiteSpace: 'nowrap', fontSize: '20px' }}
                         />
                     </Card>
                     <Card className="rounded-xl shadow-none border border-gray-100 bg-white">

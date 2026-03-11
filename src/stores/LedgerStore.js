@@ -1,5 +1,6 @@
 import expenseService from "@services/ExpenseService";
 import userStore from "@stores/UserStore";
+import centersStore from "@stores/CentersStore";
 import handleInternalError from "@utils/handleInternalError";
 import handleSuccess from "@utils/handleSuccess";
 import _ from "lodash";
@@ -47,8 +48,11 @@ const ledgerStore = create((set, get) => ({
     selectLedger: (ledger) => {
         set({ selectedLedger: ledger, expenses: [], expenseLastRefKey: 0, expenseFilters: {} });
         if (ledger?._id) {
+            const { user } = userStore.getState();
+            const { selectedCenter } = centersStore.getState();
+            const effectiveCenterId = user?.center_id || (selectedCenter !== 'all' ? selectedCenter : undefined);
             get().getExpenses({ query: { ledger_id: ledger._id } });
-            get().getExpenseSummary({ ledger_id: ledger._id });
+            get().getExpenseSummary({ ledger_id: ledger._id, center_id: effectiveCenterId });
         } else {
             // If clearing selection, maybe load global summary or nothing
             set({ expenseSummary: { summary: [], grandTotal: 0 } });
@@ -128,7 +132,10 @@ const ledgerStore = create((set, get) => ({
                 }));
                 // Refresh summary
                 const { selectedLedger } = get();
-                if (selectedLedger) get().getExpenseSummary({ ledger_id: selectedLedger._id });
+                const { user } = userStore.getState();
+                const { selectedCenter } = centersStore.getState();
+                const effectiveCenterId = user?.center_id || (selectedCenter !== 'all' ? selectedCenter : undefined);
+                if (selectedLedger) get().getExpenseSummary({ ledger_id: selectedLedger._id, center_id: effectiveCenterId });
                 handleSuccess("Expense logged successfully");
                 return newExpense;
             }
@@ -148,7 +155,10 @@ const ledgerStore = create((set, get) => ({
                     expenses: state.expenses.map((e) => (e._id === id ? { ...e, ...updated } : e)),
                 }));
                 const { selectedLedger } = get();
-                if (selectedLedger) get().getExpenseSummary({ ledger_id: selectedLedger._id });
+                const { user } = userStore.getState();
+                const { selectedCenter } = centersStore.getState();
+                const effectiveCenterId = user?.center_id || (selectedCenter !== 'all' ? selectedCenter : undefined);
+                if (selectedLedger) get().getExpenseSummary({ ledger_id: selectedLedger._id, center_id: effectiveCenterId });
                 handleSuccess("Expense updated successfully");
                 return updated;
             }
@@ -168,7 +178,10 @@ const ledgerStore = create((set, get) => ({
                 expenseTotal: state.expenseTotal - 1,
             }));
             const { selectedLedger } = get();
-            if (selectedLedger) get().getExpenseSummary({ ledger_id: selectedLedger._id });
+            const { user } = userStore.getState();
+            const { selectedCenter } = centersStore.getState();
+            const effectiveCenterId = user?.center_id || (selectedCenter !== 'all' ? selectedCenter : undefined);
+            if (selectedLedger) get().getExpenseSummary({ ledger_id: selectedLedger._id, center_id: effectiveCenterId });
             handleSuccess("Expense deleted successfully");
         } catch (error) {
             handleInternalError(error);

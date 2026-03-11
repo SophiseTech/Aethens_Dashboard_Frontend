@@ -5,6 +5,7 @@ import Title from '@components/layouts/Title'
 import permissions from '@utils/permissions'
 import userStore from '@stores/UserStore'
 import ledgerStore from '@stores/LedgerStore'
+import centersStore from '@stores/CentersStore'
 import dayjs from 'dayjs'
 import SummaryCard from './SummaryCard'
 import AddExpenseDrawer from './AddExpenseDrawer'
@@ -26,6 +27,7 @@ const CATEGORY_COLORS = {
 
 function Expenses() {
     const { user } = userStore()
+    const { selectedCenter } = centersStore()
     const {
         ledgers, ledgersLoading, getLedgers,
         expenses, expenseLoading, expenseTotal,
@@ -63,13 +65,16 @@ function Expenses() {
         if (range?.[0]) filters.from_date = range[0].startOf('day').toISOString()
         if (range?.[1]) filters.to_date = range[1].endOf('day').toISOString()
         if (category) query.category = category
+        // Compute effective center_id for admin (use selectedCenter if user has no center_id)
+        const effectiveCenterId = user?.center_id || (selectedCenter !== 'all' ? selectedCenter : undefined)
         getExpenses(filters)
         getExpenseSummary({
             ledger_id: ledgerId || undefined,
             from_date: filters.from_date,
             to_date: filters.to_date,
+            center_id: effectiveCenterId,
         })
-    }, [getExpenses, getExpenseSummary])
+    }, [getExpenses, getExpenseSummary, user, selectedCenter])
 
     useEffect(() => {
         applyFilters(selectedLedgerId, dateRange, categoryFilter)

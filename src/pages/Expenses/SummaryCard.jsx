@@ -1,7 +1,6 @@
 import ledgerStore from '@stores/LedgerStore'
 import { ArrowUpOutlined, WalletOutlined } from '@ant-design/icons'
 import { Progress } from 'antd'
-import { useStore } from 'zustand'
 
 const CATEGORY_COLORS = {
     rent: '#ef4444', salary: '#f97316', food: '#eab308',
@@ -16,7 +15,7 @@ const CATEGORY_LABELS = {
 }
 
 function SummaryCard() {
-    const { expenseSummary } = useStore(ledgerStore)
+    const { expenseSummary } = ledgerStore()
     const { summary = [], grandTotal = 0 } = expenseSummary
     const top5 = summary.slice(0, 5)
     const topCategory = summary[0]
