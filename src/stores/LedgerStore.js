@@ -24,7 +24,7 @@ const ledgerStore = create((set, get) => ({
     expenseFilters: {},
 
     // ── Ledger actions ─────────────────────────────────────────────────────────
-    getLedgers: async () => {
+    getLedgers: async (options = {}) => {
         try {
             set({ ledgersLoading: true });
             const result = await expenseService.getLedgers({});
@@ -33,8 +33,8 @@ const ledgerStore = create((set, get) => ({
                     ledgers: result.ledgers || [],
                     ledgerTotal: result.total || 0,
                 });
-                // Auto-select first ledger if none selected
-                if (result.ledgers?.length > 0 && !get().selectedLedger) {
+                // Auto-select first ledger if none selected (skip if options.skipAutoSelect is true)
+                if (!options.skipAutoSelect && result.ledgers?.length > 0 && !get().selectedLedger) {
                     get().selectLedger(result.ledgers[0]);
                 }
             }

@@ -54,7 +54,7 @@ function Expenses() {
 
     // Fetch ledgers on mount (for the dropdown filter)
     useEffect(() => {
-        getLedgers()
+        getLedgers({ skipAutoSelect: true })
     }, [])
 
     // Refetch expenses when any filter changes
