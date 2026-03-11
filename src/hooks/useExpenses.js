@@ -1,20 +1,13 @@
 import { useCallback, useState } from "react";
 import useAlert from "@hooks/useAlert";
 import expenseService from "@services/ExpenseService";
-import userStore from "@stores/UserStore";
-import centersStore from "@stores/CentersStore";
 
 /**
  * useExpenses hook
- * Handles loading expenses list, ledger Auto-create/reuse logic,
+ * Handles loading expenses list, ledger auto-create/reuse logic,
  * and creating new expenses.
  */
 export default function useExpenses() {
-    const { user } = userStore();
-    const { selectedCenter } = centersStore();
-
-    // For admin users who have no center_id, fall back to the globally selected center
-    const effectiveCenterId = user?.center_id || (selectedCenter !== "all" ? selectedCenter : undefined);
     const [expenses, setExpenses] = useState([]);
     const [loading, setLoading] = useState(false);
     const [total, setTotal] = useState(0);
@@ -69,7 +62,6 @@ export default function useExpenses() {
             const newLedger = await expenseService.createLedger({
                 name: ledgerName || ledgerValue,
                 type: ledgerType || "external",
-                center_id: effectiveCenterId,
                 on_model: onModel,
                 entity_id: entityId,
                 vendor_name: vendorName,
@@ -100,7 +92,6 @@ export default function useExpenses() {
 
                 const payload = {
                     ledger_id,
-                    center_id: effectiveCenterId,
                     subtotal: formValues.subtotal,
                     tax_amount: formValues.tax_amount || 0,
                     total_amount:

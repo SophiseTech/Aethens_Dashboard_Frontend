@@ -48,11 +48,8 @@ const ledgerStore = create((set, get) => ({
     selectLedger: (ledger) => {
         set({ selectedLedger: ledger, expenses: [], expenseLastRefKey: 0, expenseFilters: {} });
         if (ledger?._id) {
-            const { user } = userStore.getState();
-            const { selectedCenter } = centersStore.getState();
-            const effectiveCenterId = user?.center_id || (selectedCenter !== 'all' ? selectedCenter : undefined);
             get().getExpenses({ query: { ledger_id: ledger._id } });
-            get().getExpenseSummary({ ledger_id: ledger._id, center_id: effectiveCenterId });
+            get().getExpenseSummary({ ledger_id: ledger._id });
         } else {
             // If clearing selection, maybe load global summary or nothing
             set({ expenseSummary: { summary: [], grandTotal: 0 } });
@@ -62,8 +59,7 @@ const ledgerStore = create((set, get) => ({
     createLedger: async (data) => {
         try {
             set({ createLoading: true });
-            const { user } = userStore.getState();
-            const newLedger = await expenseService.createLedger({ ...data, center_id: user?.center_id });
+            const newLedger = await expenseService.createLedger(data);
             if (newLedger) {
                 set((state) => ({ ledgers: [newLedger, ...state.ledgers] }));
                 handleSuccess("Ledger created successfully");
