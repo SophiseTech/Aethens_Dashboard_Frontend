@@ -1,11 +1,13 @@
-import { Table, Button, Tag, Space, Tooltip, Statistic, Card, Tabs, Empty, Popconfirm } from 'antd'
+import { Table, Button, Tag, Space, Tooltip, Statistic, Card, Tabs, Empty, Popconfirm, Select } from 'antd'
+import { useState, useCallback, useEffect } from 'react'
 import {
     EditOutlined,
     DeleteOutlined,
     HistoryOutlined,
     InfoCircleOutlined,
     WalletOutlined,
-    FileTextOutlined
+    FileTextOutlined,
+    FilterOutlined
 } from '@ant-design/icons'
 import ledgerStore from '@stores/LedgerStore'
 import userStore from '@stores/UserStore'
@@ -31,8 +33,30 @@ function LedgerDetails({ onEditClick }) {
         expenses,
         expenseLoading,
         expenseSummary,
+        expenseTotal,
         deleteExpense,
+        getExpenses,
     } = ledgerStore()
+
+    const [categoryFilter, setCategoryFilter] = useState(null)
+
+    const categoryOptions = [
+        { value: '', label: 'All Categories' },
+        ...Object.entries(CATEGORY_LABELS).map(([value, label]) => ({ value, label }))
+    ]
+
+    const handleCategoryChange = useCallback((value) => {
+        setCategoryFilter(value || null)
+        if (selectedLedger?._id) {
+            const query = { ledger_id: selectedLedger._id }
+            if (value) query.category = value
+            getExpenses({ query })
+        }
+    }, [selectedLedger, getExpenses])
+
+    useEffect(() => {
+        setCategoryFilter(null)
+    }, [selectedLedger?._id])
 
     const canEdit = permissions.ledger?.edit?.includes(user?.role)
     const canDeleteExpense = permissions.ledger?.delete?.includes(user?.role)
@@ -186,6 +210,23 @@ function LedgerDetails({ onEditClick }) {
                             label: <span className="px-2">Transactions</span>,
                             children: (
                                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden mt-2">
+                                    <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                                        <Select
+                                            value={categoryFilter}
+                                            onChange={handleCategoryChange}
+                                            options={categoryOptions}
+                                            placeholder="Filter by category"
+                                            allowClear
+                                            style={{ width: 180 }}
+                                            suffixIcon={<FilterOutlined />}
+                                            className={categoryFilter ? 'border-blue-500' : ''}
+                                        />
+                                        {categoryFilter && (
+                                            <span className="text-xs text-gray-500">
+                                                Showing {expenses.length} of {expenseTotal || expenses.length} transactions
+                                            </span>
+                                        )}
+                                    </div>
                                     <Table
                                         dataSource={expenses}
                                         columns={columns}

@@ -1,6 +1,8 @@
-import { useEffect } from 'react'
-import { Modal, Form, Input, Select, Radio, Divider, Space } from 'antd'
+import { useEffect, useState, useRef } from 'react'
+import { Modal, Form, Input, Select, Radio, Divider, Space, Spin } from 'antd'
 import { UserOutlined, ShopOutlined } from '@ant-design/icons'
+import centersService from '@services/Centers'
+import userService from '@services/User'
 
 const { Option } = Select
 
@@ -16,6 +18,13 @@ const { Option } = Select
 function LedgerForm({ open, ledger, onClose, onSave, loading }) {
     const [form] = Form.useForm()
     const ledgerType = Form.useWatch('type', form)
+    const onModel = Form.useWatch('on_model', form)
+
+    const [centers, setCenters] = useState([])
+    const [centersLoading, setCentersLoading] = useState(false)
+    const [users, setUsers] = useState([])
+    const [usersLoading, setUsersLoading] = useState(false)
+    const searchTimeoutRef = useRef(null)
 
     useEffect(() => {
         if (open) {
@@ -30,8 +39,52 @@ function LedgerForm({ open, ledger, onClose, onSave, loading }) {
                 form.resetFields()
                 form.setFieldValue('type', 'external')
             }
+            setCenters([])
+            setUsers([])
         }
     }, [open, ledger, form])
+
+    useEffect(() => {
+        if (ledgerType === 'internal' && onModel === 'Center' && open && centers.length === 0) {
+            const fetchCenters = async () => {
+                setCentersLoading(true)
+                try {
+                    const res = await centersService.getCenters({ status: 'active' }, 0, 1000)
+                    const centersList = res?.centers || (Array.isArray(res) ? res : [])
+                    setCenters(centersList)
+                } catch (error) {
+                    console.error(error)
+                } finally {
+                    setCentersLoading(false)
+                }
+            }
+            fetchCenters()
+        }
+    }, [ledgerType, onModel, open, centers.length])
+
+    const handleUserSearch = (search) => {
+        if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
+        if (!search) {
+            setUsers([])
+            return
+        }
+        searchTimeoutRef.current = setTimeout(async () => {
+            setUsersLoading(true)
+            try {
+                const results = await userService.searchUsersV2(search)
+                setUsers(Array.isArray(results) ? results : [])
+            } catch (err) {
+                console.error(err)
+            } finally {
+                setUsersLoading(false)
+            }
+        }, 400)
+    }
+
+    const handleOnModelChange = () => {
+        form.setFieldsValue({ entity_id: undefined })
+        setUsers([])
+    }
 
     const handleOk = () => form.submit()
 
@@ -111,6 +164,63 @@ function LedgerForm({ open, ledger, onClose, onSave, loading }) {
                     <Form.Item name="vendor_name" label="Vendor Name (optional)">
                         <Input placeholder="e.g. ACME Corp" />
                     </Form.Item>
+                )}
+
+                {/* Internal: entity selection */}
+                {ledgerType === 'internal' && (
+                    <>
+                        <Form.Item
+                            name="on_model"
+                            label="Entity Type"
+                            rules={[{ required: true, message: 'Please select entity type' }]}
+                        >
+                            <Select placeholder="Select entity type" onChange={handleOnModelChange}>
+                                <Option value="User">User</Option>
+                                <Option value="Center">Center</Option>
+                            </Select>
+                        </Form.Item>
+
+                        {onModel === 'Center' && (
+                            <Form.Item
+                                name="entity_id"
+                                label="Select Center"
+                                rules={[{ required: true, message: 'Please select a center' }]}
+                            >
+                                <Select
+                                    placeholder="Select Center"
+                                    loading={centersLoading}
+                                    optionLabelProp="label"
+                                    options={centers.map(c => ({ label: c.center_name || c.name, value: String(c._id) }))}
+                                    showSearch
+                                    filterOption={(input, option) =>
+                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                    }
+                                />
+                            </Form.Item>
+                        )}
+
+                        {onModel === 'User' && (
+                            <Form.Item
+                                name="entity_id"
+                                label="Select User"
+                                rules={[{ required: true, message: 'Please select a user' }]}
+                            >
+                                <Select
+                                    placeholder="Search User..."
+                                    showSearch
+                                    filterOption={false}
+                                    loading={usersLoading}
+                                    onSearch={handleUserSearch}
+                                    optionLabelProp="label"
+                                    options={users.map(u => ({
+                                        label: `${u.username || u.name} ${u.role ? `(${u.role})` : ''}`,
+                                        value: String(u._id)
+                                    }))}
+                                    notFoundContent={usersLoading ? <Spin size="small" /> : null}
+                                />
+                            </Form.Item>
+                        )}
+                    </>
                 )}
 
                 {/* Edit mode: status toggle */}
