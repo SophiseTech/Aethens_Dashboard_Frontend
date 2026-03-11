@@ -44,7 +44,7 @@ const UserDetailsDrawer = ({
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const { editUser } = useStore(studentStore);
   const { user: loggedinUser } = useStore(userStore);
-  const [profileImageLoading, setProfileImageLoading] = useState(false); // Added state
+  const [profileImageLoading, setProfileImageLoading] = useState(false);
 
   // Open the edit modal
   const handleEditClick = () => {

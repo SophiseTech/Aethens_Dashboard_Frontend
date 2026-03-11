@@ -20,6 +20,7 @@ const MyAttendance = lazy(() => import("@pages/FacultyAttendance/MyAttendance"))
 const MyLeaves = lazy(() => import("@pages/FacultyLeaves/MyLeaves"))
 const AddSessionStatus = lazy(() => import("@pages/Students/AddSessionStatus"))
 const SyllabusGallery = lazy(() => import("@pages/SyllabusGallery"))
+const StudentSyllabus = lazy(() => import("@pages/Syllabus/StudentSyllabus"))
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
   return (<Suspense
@@ -124,6 +125,11 @@ export const facultyRoutes = [
             path: "/faculty/syllabus-gallery",
             element: <LazyLoader element={<SyllabusGallery />} />,
             title: "Syllabus Gallery",
+          },
+          {
+            path: "/faculty/student-syllabus",
+            element: <LazyLoader element={<StudentSyllabus />} />,
+            title: "Student Syllabus",
           },
         ]
       }

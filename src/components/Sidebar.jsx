@@ -276,9 +276,21 @@ const MENU_CONFIG = [
     roles: [ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
   },
   {
+    label: "Student Syllabus",
+    icon: BookOutlined,
+    path: "/academic-manager/student-syllabus",
+    roles: [ROLES.ACADEMIC_MANAGER],
+  },
+  {
     label: "Syllabus Gallery",
     icon: PictureOutlined,
     path: "/faculty/syllabus-gallery",
+    roles: [ROLES.FACULTY],
+  },
+  {
+    label: "Student Syllabus",
+    icon: BookOutlined,
+    path: "/faculty/student-syllabus",
     roles: [ROLES.FACULTY],
   },
   {
