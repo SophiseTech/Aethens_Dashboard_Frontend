@@ -111,6 +111,20 @@ class ExpenseService {
             return handleError(error);
         }
     }
+
+    /**
+     * Get expense summary by ledger (top 10 ledgers by expense)
+     * @param {object} filters - Filter parameters (from_date, to_date)
+     */
+    async getExpenseByLedger(filters = {}) {
+        try {
+            const response = await post(`/v2/expenses/by-ledger`, filters);
+            if (response && response.data) return response.data;
+            return { summary: [], grandTotal: 0 };
+        } catch (error) {
+            return handleError(error);
+        }
+    }
 }
 
 const expenseService = new ExpenseService();
