@@ -108,7 +108,7 @@ function LedgerForm({ open, ledger, onClose, onSave, loading }) {
                 form={form}
                 layout="vertical"
                 onFinish={handleFinish}
-                className="mt-4"
+                className="mt-4 pb-10"
             >
                 {/* Name */}
                 <Form.Item

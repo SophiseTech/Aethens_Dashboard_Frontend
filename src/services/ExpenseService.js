@@ -97,11 +97,28 @@ class ExpenseService {
     }
 
     /**
-     * Get expense summary (category-wise totals)
+     * Get expense summary (category-wise totals or date-based grouping)
+     * @param {object} filters - Filter parameters (from_date, to_date, center_id, ledger_id)
+     * @param {string|null} range - Date grouping range: 'day', 'month', 'year', or null for category grouping
      */
-    async getExpenseSummary(filters = {}) {
+    async getExpenseSummary(filters = {}, range = null) {
         try {
-            const response = await post(`/v2/expenses/summary`, filters);
+            const params = range ? { ...filters, range } : filters;
+            const response = await post(`/v2/expenses/summary`, params);
+            if (response && response.data) return response.data;
+            return { summary: [], groupedResult: [], grandTotal: 0 };
+        } catch (error) {
+            return handleError(error);
+        }
+    }
+
+    /**
+     * Get expense summary by ledger (top 10 ledgers by expense)
+     * @param {object} filters - Filter parameters (from_date, to_date)
+     */
+    async getExpenseByLedger(filters = {}) {
+        try {
+            const response = await post(`/v2/expenses/by-ledger`, filters);
             if (response && response.data) return response.data;
             return { summary: [], grandTotal: 0 };
         } catch (error) {

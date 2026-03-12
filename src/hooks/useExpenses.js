@@ -1,20 +1,13 @@
 import { useCallback, useState } from "react";
 import useAlert from "@hooks/useAlert";
 import expenseService from "@services/ExpenseService";
-import userStore from "@stores/UserStore";
-import centersStore from "@stores/CentersStore";
 
 /**
  * useExpenses hook
- * Handles loading expenses list, ledger Auto-create/reuse logic,
+ * Handles loading expenses list, ledger auto-create/reuse logic,
  * and creating new expenses.
  */
 export default function useExpenses() {
-    const { user } = userStore();
-    const { selectedCenter } = centersStore();
-
-    // For admin users who have no center_id, fall back to the globally selected center
-    const effectiveCenterId = user?.center_id || (selectedCenter !== "all" ? selectedCenter : undefined);
     const [expenses, setExpenses] = useState([]);
     const [loading, setLoading] = useState(false);
     const [total, setTotal] = useState(0);
@@ -23,6 +16,9 @@ export default function useExpenses() {
 
     const [ledgers, setLedgers] = useState([]);
     const [ledgersLoading, setLedgersLoading] = useState(false);
+    const [ledgersTotal, setLedgersTotal] = useState(0);
+    const [ledgersPage, setLedgersPage] = useState(0);
+    const LEDGERS_LIMIT = 10;
 
     const [createLoading, setCreateLoading] = useState(false);
 
@@ -42,17 +38,27 @@ export default function useExpenses() {
         }
     }, []);
 
-    const fetchLedgers = useCallback(async () => {
+    const fetchLedgers = useCallback(async (loadMore = false) => {
         try {
-            setLedgersLoading(true);
-            const res = await expenseService.getLedgers();
-            setLedgers(res?.ledgers || []);
+            if (loadMore) {
+                if (ledgers.length >= ledgersTotal) return;
+                setLedgersLoading(true);
+            } else {
+                setLedgersLoading(true);
+                setLedgers([]);
+            }
+            const lastRef = loadMore ? ledgers.length : 0;
+            const res = await expenseService.getLedgers({}, lastRef, LEDGERS_LIMIT);
+            const newLedgers = res?.ledgers || [];
+            setLedgers(prev => loadMore ? [...prev, ...newLedgers] : newLedgers);
+            setLedgersTotal(res?.total || 0);
+            setLedgersPage(prev => loadMore ? prev + 1 : 1);
         } catch (err) {
             console.error(err);
         } finally {
             setLedgersLoading(false);
         }
-    }, []);
+    }, [ledgers.length, ledgersTotal]);
 
     /**
      * Core ledger resolution logic:
@@ -69,15 +75,14 @@ export default function useExpenses() {
             const newLedger = await expenseService.createLedger({
                 name: ledgerName || ledgerValue,
                 type: ledgerType || "external",
-                center_id: effectiveCenterId,
                 on_model: onModel,
                 entity_id: entityId,
                 vendor_name: vendorName,
             });
             if (!newLedger?._id) throw new Error("Failed to create ledger");
 
-            // Refresh ledger list so dropdown stays in sync
-            fetchLedgers();
+            // Add new ledger to existing list (don't reset pagination)
+            setLedgers(prev => [newLedger, ...prev]);
             return newLedger._id;
         },
         [fetchLedgers]
@@ -100,7 +105,6 @@ export default function useExpenses() {
 
                 const payload = {
                     ledger_id,
-                    center_id: effectiveCenterId,
                     subtotal: formValues.subtotal,
                     tax_amount: formValues.tax_amount || 0,
                     total_amount:
@@ -151,6 +155,7 @@ export default function useExpenses() {
         // Ledgers
         ledgers,
         ledgersLoading,
+        ledgersTotal,
         fetchLedgers,
 
         // Create

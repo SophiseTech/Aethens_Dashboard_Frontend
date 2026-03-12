@@ -56,39 +56,37 @@ function CustomSyllabusList({ images, loading, statusFilter, setStatusFilter, se
         },
     ];
 
-    // Add Sessions and Status columns only for students
-    if (user.role === ROLES.STUDENT) {
-        columns.push(
-            {
-                title: 'Sessions',
-                dataIndex: 'sessionCount',
-                key: 'sessionCount',
-                render: (sessionCount) => {
-                    return (
-                        <span className="text-sm">
-                            <span className="font-semibold">{sessionCount}</span>
-                        </span>
-                    );
-                },
+    columns.push(
+        {
+            title: 'Sessions',
+            dataIndex: 'sessionCount',
+            key: 'sessionCount',
+            render: (sessionCount) => {
+                return (
+                    <span className="text-sm">
+                        <span className="font-semibold">{sessionCount}</span>
+                    </span>
+                );
             },
-            {
-                title: 'Status',
-                dataIndex: 'status',
-                key: 'status',
-                render: (_, record) => {
-                    const { completed, sessionCount } = record;
+        },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            render: (_, record) => {
+                const { completed, sessionCount } = record;
 
-                    if (completed) {
-                        return <Tag color="success">Completed</Tag>;
-                    } else if (sessionCount >= 1) {
-                        return <Tag color="processing">Ongoing</Tag>;
-                    } else {
-                        return <Tag color="default">Not Started</Tag>;
-                    }
-                },
-            }
-        );
-    }
+                if (completed) {
+                    return <Tag color="success">Completed</Tag>;
+                } else if (sessionCount >= 1) {
+                    return <Tag color="processing">Ongoing</Tag>;
+                } else {
+                    return <Tag color="default">Not Started</Tag>;
+                }
+            },
+        }
+    );
+
 
     // Transform images into table data - NO MORE FILTERING
     const tableData = (images || []).map((image, index) => ({
