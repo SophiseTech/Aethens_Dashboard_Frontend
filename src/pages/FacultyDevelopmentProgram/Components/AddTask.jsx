@@ -17,10 +17,10 @@ function AddTask({ isModalOpen, handleOk, handleCancel }) {
   const { getFacultiesByCenter, faculties, total } = useStore(facultyStore)
   const { createProgram, loading } = useStore(facultyDevProgramStore)
   const { user } = useStore(userStore)
-  const {selectedCenter} = useStore(centersStore);
+  const { selectedCenter } = useStore(centersStore);
 
   const initialValues = {
-    faculty_id: "",
+    faculty_ids: [],
     details: "",
     remarks: "",
     upload: [],
@@ -29,8 +29,6 @@ function AddTask({ isModalOpen, handleOk, handleCancel }) {
 
   useEffect(() => {
     getFacultiesByCenter(0)
-    // if (!faculties || total === 0 || faculties.length < total) {
-    // }
   }, [selectedCenter])
 
   const facultyOptions = faculties?.map(faculty => ({
@@ -38,9 +36,16 @@ function AddTask({ isModalOpen, handleOk, handleCancel }) {
     value: faculty._id,
   })) || []
 
+  const allFacultyIds = facultyOptions.map(opt => opt.value);
+
   const onSubmit = async (values) => {
-    if(user.role === ROLES.ADMIN && selectedCenter === "all"){
+    if ((user.role === ROLES.ADMIN || user.role === ROLES.ACADEMIC_MANAGER) && selectedCenter === "all") {
       alert("Change center from all to any specific center.")
+      return;
+    }
+
+    if (!values.faculty_ids || values.faculty_ids.length === 0) {
+      alert("Please select at least one faculty.")
       return;
     }
 
@@ -50,15 +55,17 @@ function AddTask({ isModalOpen, handleOk, handleCancel }) {
       fileType: file.type?.split('/').pop() || "",
       fileSize: file.size
     }))
-    if(user.role === ROLES.ADMIN){
+
+    if (user.role === ROLES.ADMIN || user.role === ROLES.ACADEMIC_MANAGER) {
       values.center_id = selectedCenter;
-    }else{
+    } else {
       values.center_id = user.center_id
     }
-    console.log(values);
+
+    // Backend will handle the array faculty_ids or we can loop here if preferred. 
+    // Plan: Handle array on backend for cleaner single request.
     await createProgram(values)
     handleOk()
-
   }
 
   return (
@@ -67,9 +74,43 @@ function AddTask({ isModalOpen, handleOk, handleCancel }) {
       open={isModalOpen}
       footer={null}
       onCancel={handleCancel}
+      width={600}
     >
       <CustomForm form={form} initialValues={initialValues} action={onSubmit}>
-        <CustomSelect label={"Select faculty"} name={"faculty_id"} options={facultyOptions} />
+        <CustomSelect
+          label={"Select faculty"}
+          name={"faculty_ids"}
+          mode="multiple"
+          options={facultyOptions}
+          placeholder="Select one or more faculties"
+          maxTagCount="responsive"
+          dropdownRender={(menu) => (
+            <>
+              <div
+                style={{
+                  padding: '8px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  borderBottom: '1px solid #f0f0f0',
+                }}
+              >
+                <a
+                  style={{ fontSize: '12px' }}
+                  onClick={() => form.setFieldsValue({ faculty_ids: allFacultyIds })}
+                >
+                  Select All
+                </a>
+                <a
+                  style={{ fontSize: '12px' }}
+                  onClick={() => form.setFieldsValue({ faculty_ids: [] })}
+                >
+                  Clear All
+                </a>
+              </div>
+              {menu}
+            </>
+          )}
+        />
         <CustomInput label={"Describe the task"} placeholder={"Describe the task"} name={"details"} type='text' />
         <CustomFileUpload
           name="upload"
@@ -77,7 +118,7 @@ function AddTask({ isModalOpen, handleOk, handleCancel }) {
           maxCount={3}
           multiple
           form={form}
-          path={"uploads/fda"}
+          path={"uploads/fdp"}
           required={false}
           beforeUpload={(file) => {
             // Add custom validation logic here

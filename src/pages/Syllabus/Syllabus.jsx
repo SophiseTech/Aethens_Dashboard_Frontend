@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom'
 import { useStore } from 'zustand'
 
 function Syllabus() {
-  const { id } = useParams();
+  const { courseId, studentId } = useParams();
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchText, setSearchText] = useState('');
 
@@ -18,28 +18,45 @@ function Syllabus() {
   const { user } = useStore(userStore);
   const { getStudentSyllabus, syllabus, syllabusLoading } = useStore(studentStore);
 
+  const isViewingOtherStudent = studentId && studentId !== user?._id;
+  const shouldFetchStudentSyllabus = user?.role === ROLES.STUDENT 
+    ? user._id 
+    : studentId;
+
   useEffect(() => {
-    if (!user || !user._id) return; // Avoid unnecessary calls if user is undefined
+    if (!user || !user._id) return;
+    
     if (user.role === ROLES.STUDENT) {
       getStudentSyllabus(user._id, {
         status: statusFilter,
         search: searchText
       });
-      if (id) {
-        getCourse(id, { select: "-modules" });
+      if (courseId) {
+        getCourse(courseId, { select: "-modules" });
       }
-    } else if (id) {
-      getCourse(id);
+    } else if (studentId) {
+      getStudentSyllabus(studentId, {
+        status: statusFilter,
+        search: searchText
+      });
+      if (courseId) {
+        getCourse(courseId, { select: "-modules" });
+      }
+    } else if (courseId) {
+      getCourse(courseId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?._id, user?.role, id, statusFilter, searchText]); // Re-fetch when filters change
+  }, [user?._id, user?.role, courseId, studentId, statusFilter, searchText]);
+
+  const syllabusData = shouldFetchStudentSyllabus ? syllabus : course;
+  const isLoading = shouldFetchStudentSyllabus ? syllabusLoading : loading;
 
   return (
     <Title title="Syllabus">
       <div className="flex gap-10 | max-lg:flex-col-reverse">
         <SyllabusList
-          syllabusData={user?.role === ROLES.STUDENT ? syllabus : course}
-          loading={user?.role === ROLES.STUDENT ? syllabusLoading : loading}
+          syllabusData={syllabusData}
+          loading={isLoading}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
           searchText={searchText}

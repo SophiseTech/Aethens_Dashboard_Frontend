@@ -214,8 +214,17 @@ const AcademicManagerActionButtons = ({ userDetails }) => {
     setIsModalOpen(true);
   };
 
+  const handleViewSyllabus = (userDetails) => {
+    const courseId = userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id;
+    const studentId = userDetails?._id;
+    nav(`/syllabus/${courseId}/${studentId}`);
+  };
+
   return (
     <Flex wrap gap={10}>
+      <Button onClick={() => handleViewSyllabus(userDetails)} variant="filled" color="purple">
+        Syllabus
+      </Button>
       <Button onClick={() => handleViewAttendance(userDetails._id, userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id)} variant="filled" color="orange">
         View Attendance
       </Button>
@@ -270,9 +279,18 @@ const FacultyActionButton = ({ userDetails }) => {
     showModal()
   }
 
+  const handleViewSyllabus = (userDetails) => {
+    const courseId = userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id;
+    const studentId = userDetails?._id;
+    nav(`/syllabus/${courseId}/${studentId}`)
+  }
+
   return (
     <>
       <Flex wrap gap={10}>
+        <Button onClick={() => handleViewSyllabus(userDetails)} variant="filled" color="purple">
+          Syllabus
+        </Button>
         <Button onClick={() => handleViewAttendance(userDetails._id, userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id)} variant='filled' color='cyan'>
           View Attendance
         </Button>

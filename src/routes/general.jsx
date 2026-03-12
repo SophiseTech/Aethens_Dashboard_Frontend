@@ -15,6 +15,7 @@ const Activities = lazy(() => import("@pages/Activities"));
 const Slots = lazy(() => import("@pages/Slots"));
 const ManagerMaterials = lazy(() => import("@pages/ManagerMaterials"));
 const Syllabus = lazy(() => import("@pages/Syllabus/Syllabus"));
+const StudentSyllabus = lazy(() => import("@pages/Syllabus/StudentSyllabus"));
 const Attendance = lazy(() => import("@pages/Attendance"));
 const Bills = lazy(() => import("@pages/Bills"));
 const BillDetails = lazy(() => import("@pages/Bills/Components/BillDetails"));
@@ -123,13 +124,13 @@ export const generalRoutes = [
     ],
   },
   {
-    element: <Protected roles={[ROLES.FACULTY, ROLES.STUDENT]} />,
+    element: <Protected roles={[ROLES.FACULTY, ROLES.STUDENT, ROLES.ACADEMIC_MANAGER]} />,
     children: [
       {
         element: <SidebarLayout />,
         children: [
           {
-            path: "/syllabus/:id",
+            path: "/syllabus/:courseId/:studentId?",
             element: (
               <LazyLoader>
                 <Syllabus />
@@ -529,6 +530,11 @@ export const generalRoutes = [
             path: "/academic-manager/activities/student/:id",
             element: <LazyLoader><Activities /></LazyLoader>,
             title: "Activities",
+          },
+          {
+            path: "/academic-manager/student-syllabus",
+            element: <LazyLoader><StudentSyllabus /></LazyLoader>,
+            title: "Student Syllabus",
           },
         ],
       },
