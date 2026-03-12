@@ -4,16 +4,16 @@ import expenseService from '@/services/ExpenseService';
 import { useEffect, useState } from 'react';
 
 const LEDGER_COLORS = [
-  '#FF6B6B',
-  '#4ECDC4',
-  '#45B7D1',
-  '#96CEB4',
-  '#FFEAA7',
-  '#DDA0DD',
-  '#98D8C8',
-  '#F7DC6F',
-  '#BB8FCE',
-  '#85C1E9',
+  '#C0392B',
+  '#2980B9',
+  '#D35400',
+  '#27AE60',
+  '#8E44AD',
+  '#16A085',
+  '#E67E22',
+  '#2C3E50',
+  '#C0392B',
+  '#27AE60',
 ];
 
 function ExpenseLedgerPie({ dateRange }) {
@@ -62,31 +62,40 @@ function ExpenseLedgerPie({ dateRange }) {
       type: 'bar',
       toolbar: { show: false },
       fontFamily: 'inherit',
+      animations: {
+        enabled: false,
+      },
     },
     plotOptions: {
       bar: {
         horizontal: true,
         borderRadius: 4,
-        barHeight: '60%',
+        barHeight: '70%',
         distributed: true,
-        dataLabels: {
-          position: 'top',
-        },
       },
     },
     dataLabels: {
       enabled: true,
-      offsetX: 30,
-      formatter: function (val, opt) {
+      offsetX: 60,
+      formatter: function (val) {
         return '₹' + parseInt(val).toLocaleString();
       },
       style: {
-        fontSize: '12px',
+        fontSize: '11px',
         colors: ['#333'],
       },
     },
     legend: {
-      show: false,
+      show: true,
+      position: 'bottom',
+      fontSize: '11px',
+      markers: {
+        radius: 3,
+      },
+      itemMargin: {
+        horizontal: 8,
+        vertical: 4,
+      },
     },
     xaxis: {
       categories: labels,
@@ -94,10 +103,12 @@ function ExpenseLedgerPie({ dateRange }) {
         show: true,
         style: {
           colors: '#333',
-          fontSize: '11px',
+          fontSize: '10px',
         },
         formatter: function (val) {
-          return '₹' + parseInt(val).toLocaleString();
+          if (val >= 100000) return '₹' + (val / 100000).toFixed(1) + 'L';
+          if (val >= 1000) return '₹' + (val / 1000).toFixed(0) + 'K';
+          return '₹' + val;
         },
       },
     },
@@ -114,6 +125,11 @@ function ExpenseLedgerPie({ dateRange }) {
       },
     },
     colors: LEDGER_COLORS.slice(0, data.summary.length),
+    stroke: {
+      show: true,
+      width: 1,
+      colors: ['#fff'],
+    },
   };
 
   return (
@@ -122,7 +138,7 @@ function ExpenseLedgerPie({ dateRange }) {
         series={series}
         options={options}
         type="bar"
-        height={300}
+        height={350}
       />
     </Card>
   );

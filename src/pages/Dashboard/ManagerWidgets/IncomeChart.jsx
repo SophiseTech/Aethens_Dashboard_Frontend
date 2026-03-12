@@ -5,22 +5,17 @@ import { Row, Col, Typography } from "antd";
 import { useStore } from 'zustand';
 import billStore from '@stores/BillStore';
 import expensesStore from '@stores/ExpensesStore';
-import userStore from '@stores/UserStore';
-import centersStore from '@stores/CentersStore';
 import dayjs from 'dayjs';
 const { Title, Paragraph } = Typography;
 
 function IncomeChart() {
-  const { user } = userStore()
-  const { selectedCenter } = centersStore()
   const { summary: incomeSummary } = useStore(billStore)
   const { expenseSummary, getExpenseSummary } = useStore(expensesStore)
 
   // Fetch expense summary with date range grouping
   useEffect(() => {
-    const effectiveCenterId = user?.center_id || (selectedCenter !== 'all' ? selectedCenter : undefined);
-    getExpenseSummary({ center_id: effectiveCenterId }, 'day');
-  }, [selectedCenter, user, getExpenseSummary]);
+    getExpenseSummary({}, 'day');
+  }, [getExpenseSummary]);
 
   const allDates = useMemo(() => {
     if (incomeSummary && expenseSummary) {

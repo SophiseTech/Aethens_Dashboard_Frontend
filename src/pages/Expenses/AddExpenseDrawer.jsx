@@ -53,8 +53,10 @@ const PAYMENT_METHODS = [
  *   loading      - boolean
  *   ledgers      - array of existing ledger docs
  *   ledgersLoading - boolean
+ *   ledgersTotal - total number of ledgers
+ *   onLoadMoreLedgers - fn to load more ledgers
  */
-function AddExpenseDrawer({ open, onClose, onSubmit, loading, ledgers = [], ledgersLoading }) {
+function AddExpenseDrawer({ open, onClose, onSubmit, loading, ledgers = [], ledgersLoading, ledgersTotal, onLoadMoreLedgers }) {
     const [form] = Form.useForm();
     const [totalAmount, setTotalAmount] = useState(0);
     // Track if the user picked a new ledger name (not an existing id)
@@ -164,7 +166,14 @@ function AddExpenseDrawer({ open, onClose, onSubmit, loading, ledgers = [], ledg
     // Build options: existing ledgers + "Create new" if typed name doesn't match
     const ledgerOptions = ledgers.map((l) => ({
         value: l._id,
-        label: l.name,
+        label: (
+            <span>
+                {l.name}
+                <span style={{ opacity: 0.5, fontSize: '11px', marginLeft: '8px' }}>
+                    {`[${l.type}]`}
+                </span>
+            </span>
+        ),
     }));
 
     const matchExists = ledgers.some(
@@ -220,6 +229,22 @@ function AddExpenseDrawer({ open, onClose, onSubmit, loading, ledgers = [], ledg
                         onChange={handleLedgerChange}
                         options={ledgerOptions}
                         optionLabelProp="label"
+                        dropdownRender={(menu) => (
+                            <>
+                                {menu}
+                                {ledgers.length > 0 && ledgers.length < ledgersTotal && (
+                                    <div className="p-2 text-center border-t">
+                                        <Button
+                                            type="link"
+                                            loading={ledgersLoading}
+                                            onClick={onLoadMoreLedgers}
+                                        >
+                                            Load more ({ledgers.length}/{ledgersTotal})
+                                        </Button>
+                                    </div>
+                                )}
+                            </>
+                        )}
                     />
                 </Form.Item>
 

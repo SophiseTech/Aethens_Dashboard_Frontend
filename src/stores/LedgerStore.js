@@ -1,6 +1,4 @@
 import expenseService from "@services/ExpenseService";
-import userStore from "@stores/UserStore";
-import centersStore from "@stores/CentersStore";
 import handleInternalError from "@utils/handleInternalError";
 import handleSuccess from "@utils/handleSuccess";
 import _ from "lodash";
@@ -26,16 +24,28 @@ const ledgerStore = create((set, get) => ({
     // ── Ledger actions ─────────────────────────────────────────────────────────
     getLedgers: async (options = {}) => {
         try {
-            set({ ledgersLoading: true });
-            const result = await expenseService.getLedgers({});
+            const isLoadMore = options.loadMore;
+            const LEDGERS_LIMIT = 10;
+            
+            if (isLoadMore) {
+                if (get().ledgers.length >= get().ledgerTotal) return;
+                set({ ledgersLoading: true });
+            } else {
+                set({ ledgersLoading: true, ledgers: [] });
+            }
+
+            const lastRef = isLoadMore ? get().ledgers.length : 0;
+            const result = await expenseService.getLedgers({}, lastRef, LEDGERS_LIMIT);
+            
             if (result) {
+                const newLedgers = result.ledgers || [];
                 set({
-                    ledgers: result.ledgers || [],
+                    ledgers: isLoadMore ? [...get().ledgers, ...newLedgers] : newLedgers,
                     ledgerTotal: result.total || 0,
                 });
                 // Auto-select first ledger if none selected (skip if options.skipAutoSelect is true)
-                if (!options.skipAutoSelect && result.ledgers?.length > 0 && !get().selectedLedger) {
-                    get().selectLedger(result.ledgers[0]);
+                if (!options.skipAutoSelect && newLedgers?.length > 0 && !get().selectedLedger) {
+                    get().selectLedger(newLedgers[0]);
                 }
             }
         } catch (error) {
@@ -128,10 +138,7 @@ const ledgerStore = create((set, get) => ({
                 }));
                 // Refresh summary
                 const { selectedLedger } = get();
-                const { user } = userStore.getState();
-                const { selectedCenter } = centersStore.getState();
-                const effectiveCenterId = user?.center_id || (selectedCenter !== 'all' ? selectedCenter : undefined);
-                if (selectedLedger) get().getExpenseSummary({ ledger_id: selectedLedger._id, center_id: effectiveCenterId });
+                if (selectedLedger) get().getExpenseSummary({ ledger_id: selectedLedger._id });
                 handleSuccess("Expense logged successfully");
                 return newExpense;
             }
@@ -151,10 +158,7 @@ const ledgerStore = create((set, get) => ({
                     expenses: state.expenses.map((e) => (e._id === id ? { ...e, ...updated } : e)),
                 }));
                 const { selectedLedger } = get();
-                const { user } = userStore.getState();
-                const { selectedCenter } = centersStore.getState();
-                const effectiveCenterId = user?.center_id || (selectedCenter !== 'all' ? selectedCenter : undefined);
-                if (selectedLedger) get().getExpenseSummary({ ledger_id: selectedLedger._id, center_id: effectiveCenterId });
+                if (selectedLedger) get().getExpenseSummary({ ledger_id: selectedLedger._id });
                 handleSuccess("Expense updated successfully");
                 return updated;
             }
@@ -174,10 +178,7 @@ const ledgerStore = create((set, get) => ({
                 expenseTotal: state.expenseTotal - 1,
             }));
             const { selectedLedger } = get();
-            const { user } = userStore.getState();
-            const { selectedCenter } = centersStore.getState();
-            const effectiveCenterId = user?.center_id || (selectedCenter !== 'all' ? selectedCenter : undefined);
-            if (selectedLedger) get().getExpenseSummary({ ledger_id: selectedLedger._id, center_id: effectiveCenterId });
+            if (selectedLedger) get().getExpenseSummary({ ledger_id: selectedLedger._id });
             handleSuccess("Expense deleted successfully");
         } catch (error) {
             handleInternalError(error);

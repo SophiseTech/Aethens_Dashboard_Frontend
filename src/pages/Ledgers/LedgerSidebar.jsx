@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Input, Button, Tag, Tooltip, Spin, Empty } from 'antd'
-import { SearchOutlined, PlusOutlined, BankOutlined, ShopOutlined, FilterOutlined } from '@ant-design/icons'
+import { SearchOutlined, PlusOutlined, BankOutlined, ShopOutlined, FilterOutlined, LoadingOutlined } from '@ant-design/icons'
 import ledgerStore from '@stores/LedgerStore'
 import userStore from '@stores/UserStore'
 import permissions from '@utils/permissions'
@@ -12,13 +12,19 @@ const TYPE_ICON = {
 
 function LedgerSidebar({ onAddClick }) {
     const { user } = userStore()
-    const { ledgers, ledgersLoading, selectedLedger, selectLedger } = ledgerStore()
+    const { ledgers, ledgersLoading, ledgerTotal, selectedLedger, selectLedger, getLedgers } = ledgerStore()
     const [search, setSearch] = useState('')
 
     const filtered = ledgers.filter(l =>
         l.name.toLowerCase().includes(search.toLowerCase()) ||
         l.vendor_name?.toLowerCase().includes(search.toLowerCase())
     )
+
+    const hasMore = ledgers.length < ledgerTotal
+
+    const handleLoadMore = () => {
+        getLedgers({ loadMore: true })
+    }
 
     return (
         <div className="flex flex-col h-full bg-white border-r border-gray-100 w-80 lg:w-96">
@@ -46,9 +52,6 @@ function LedgerSidebar({ onAddClick }) {
                         onChange={e => setSearch(e.target.value)}
                         className="rounded-lg bg-gray-50 border-none"
                     />
-                    <Tooltip title="Filters">
-                        <Button icon={<FilterOutlined />} className="rounded-lg border-none bg-gray-50 text-gray-400" />
-                    </Tooltip>
                 </div>
             </div>
 
@@ -101,6 +104,20 @@ function LedgerSidebar({ onAddClick }) {
                             </button>
                         )
                     })
+                )}
+
+                {/* Load More Button */}
+                {hasMore && (
+                    <div className="p-3 border-t border-gray-100 text-center">
+                        <Button
+                            type="link"
+                            onClick={handleLoadMore}
+                            loading={ledgersLoading}
+                            className="text-primary"
+                        >
+                            Load more ({ledgers.length}/{ledgerTotal})
+                        </Button>
+                    </div>
                 )}
             </div>
         </div>

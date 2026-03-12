@@ -41,6 +41,7 @@ function Expenses() {
         createLoading: hookCreateLoading,
         ledgers: hookLedgers,
         ledgersLoading: hookLedgersLoading,
+        ledgersTotal: hookLedgersTotal,
     } = useExpenses()
 
     // Local state
@@ -79,7 +80,7 @@ function Expenses() {
 
     // ── Handlers ──────────────────────────────────────────────────────────────
     const handleOpenDrawer = () => {
-        hookFetchLedgers()
+        hookFetchLedgers(false)
         setDrawerOpen(true)
     }
 
@@ -272,6 +273,8 @@ function Expenses() {
                 loading={hookCreateLoading}
                 ledgers={hookLedgers}
                 ledgersLoading={hookLedgersLoading}
+                ledgersTotal={hookLedgersTotal}
+                onLoadMoreLedgers={() => hookFetchLedgers(true)}
             />
         </Title>
     )

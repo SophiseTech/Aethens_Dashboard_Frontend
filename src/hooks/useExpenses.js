@@ -16,6 +16,9 @@ export default function useExpenses() {
 
     const [ledgers, setLedgers] = useState([]);
     const [ledgersLoading, setLedgersLoading] = useState(false);
+    const [ledgersTotal, setLedgersTotal] = useState(0);
+    const [ledgersPage, setLedgersPage] = useState(0);
+    const LEDGERS_LIMIT = 10;
 
     const [createLoading, setCreateLoading] = useState(false);
 
@@ -35,17 +38,27 @@ export default function useExpenses() {
         }
     }, []);
 
-    const fetchLedgers = useCallback(async () => {
+    const fetchLedgers = useCallback(async (loadMore = false) => {
         try {
-            setLedgersLoading(true);
-            const res = await expenseService.getLedgers();
-            setLedgers(res?.ledgers || []);
+            if (loadMore) {
+                if (ledgers.length >= ledgersTotal) return;
+                setLedgersLoading(true);
+            } else {
+                setLedgersLoading(true);
+                setLedgers([]);
+            }
+            const lastRef = loadMore ? ledgers.length : 0;
+            const res = await expenseService.getLedgers({}, lastRef, LEDGERS_LIMIT);
+            const newLedgers = res?.ledgers || [];
+            setLedgers(prev => loadMore ? [...prev, ...newLedgers] : newLedgers);
+            setLedgersTotal(res?.total || 0);
+            setLedgersPage(prev => loadMore ? prev + 1 : 1);
         } catch (err) {
             console.error(err);
         } finally {
             setLedgersLoading(false);
         }
-    }, []);
+    }, [ledgers.length, ledgersTotal]);
 
     /**
      * Core ledger resolution logic:
@@ -68,8 +81,8 @@ export default function useExpenses() {
             });
             if (!newLedger?._id) throw new Error("Failed to create ledger");
 
-            // Refresh ledger list so dropdown stays in sync
-            fetchLedgers();
+            // Add new ledger to existing list (don't reset pagination)
+            setLedgers(prev => [newLedger, ...prev]);
             return newLedger._id;
         },
         [fetchLedgers]
@@ -142,6 +155,7 @@ export default function useExpenses() {
         // Ledgers
         ledgers,
         ledgersLoading,
+        ledgersTotal,
         fetchLedgers,
 
         // Create

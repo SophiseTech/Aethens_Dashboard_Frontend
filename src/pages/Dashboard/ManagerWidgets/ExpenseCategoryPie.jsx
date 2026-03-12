@@ -2,8 +2,6 @@ import { Card, Empty } from 'antd';
 import EChart from '@pages/Dashboard/Chart/EChart';
 import expenseService from '@/services/ExpenseService';
 import { useEffect, useState } from 'react';
-import userStore from '@stores/UserStore';
-import centersStore from '@stores/CentersStore';
 
 const CATEGORY_COLORS = {
   rent: '#C0392B',
@@ -28,8 +26,6 @@ const CATEGORY_LABELS = {
 };
 
 function ExpenseCategoryPie({ dateRange }) {
-  const { user } = userStore();
-  const { selectedCenter } = centersStore();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
 
