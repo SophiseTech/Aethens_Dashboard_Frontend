@@ -1,17 +1,21 @@
 import EChart from '@pages/Dashboard/Chart/EChart';
 import { Card } from 'antd';
-import React, { useMemo } from 'react'
+import React, { useMemo, useEffect } from 'react'
 import { Row, Col, Typography } from "antd";
 import { useStore } from 'zustand';
 import billStore from '@stores/BillStore';
-import payslipStore from '@stores/PayslipStore';
+import expensesStore from '@stores/ExpensesStore';
 import dayjs from 'dayjs';
 const { Title, Paragraph } = Typography;
 
 function IncomeChart() {
-
   const { summary: incomeSummary } = useStore(billStore)
-  const { summary: expenseSummary } = useStore(payslipStore)
+  const { expenseSummary, getExpenseSummary } = useStore(expensesStore)
+
+  // Fetch expense summary with date range grouping
+  useEffect(() => {
+    getExpenseSummary({}, 'day');
+  }, [getExpenseSummary]);
 
   const allDates = useMemo(() => {
     if (incomeSummary && expenseSummary) {

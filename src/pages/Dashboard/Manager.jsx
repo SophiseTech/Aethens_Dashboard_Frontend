@@ -10,9 +10,12 @@ import IncomeReport from '@pages/Dashboard/ManagerWidgets/IncomeReport'
 import AttendanceReport from '@pages/Dashboard/ManagerWidgets/AttendanceReport'
 import OverDurationStudents from '@pages/Dashboard/ManagerWidgets/OverDurationStudents'
 import FinancialSummary from '@pages/Dashboard/ManagerWidgets/FinancialSummary'
+import ExpenseCategoryPie from '@pages/Dashboard/ManagerWidgets/ExpenseCategoryPie'
+import ExpenseLedgerPie from '@pages/Dashboard/ManagerWidgets/ExpenseLedgerPie'
 import billStore from '@stores/BillStore'
 import payslipStore from '@stores/PayslipStore'
 import userStore from '@stores/UserStore'
+import permissions from '@utils/permissions'
 import { getMonthRange, toISTDateString } from '@utils/helper'
 import { Col, Flex, Grid, Row, DatePicker } from 'antd'
 import _ from 'lodash'
@@ -26,6 +29,8 @@ function Manager() {
   const { getSummary, summary, user } = useStore(userStore)
   const { getSummary: getBillsSummary, summary: billSummary } = useStore(billStore)
   const { getSummary: getPayslipSummary, summary: payslipummary } = useStore(payslipStore)
+  
+  const canViewExpenses = permissions.expenses?.view?.includes(user?.role)
 
   useEffect(() => {
     const { firstDay, lastDay } = dateRange;
@@ -107,6 +112,16 @@ function Manager() {
           <FinancialSummary />
         </Col>
       </Row>
+      {canViewExpenses && (
+        <Row gutter={[20, 20]}>
+          <Col xs={24} tablet={24} lg={12}>
+            <ExpenseCategoryPie dateRange={dateRange} />
+          </Col>
+          <Col xs={24} tablet={24} lg={12}>
+            <ExpenseLedgerPie dateRange={dateRange} />
+          </Col>
+        </Row>
+      )}
       <Row gutter={[20, 20]} align={'stretch'}>
         <Col xs={24} tablet={24} lg={8}>
           <TodayTasks />
