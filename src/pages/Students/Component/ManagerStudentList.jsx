@@ -7,6 +7,7 @@ import UserDetailsDrawer from '@components/UserDetailsDrawer';
 import { useStore } from 'zustand';
 import Chip from '@components/Chips/Chip';
 import userStore from '@stores/UserStore';
+import facultyAssignmentStore from '@stores/FacultyAssignmentStore';
 
 function StudentList() {
   const {
@@ -25,6 +26,7 @@ function StudentList() {
   } = useStore(studentStore);
 
   const { user } = useStore(userStore);
+  const { unassignedStudents, getUnassignedStudents } = useStore(facultyAssignmentStore);
 
   const nav = useNavigate();
   const location = useLocation();
@@ -39,10 +41,23 @@ function StudentList() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedView, setSelectedView] = useState(initialView);
+  const segmentOptions = useMemo(() => {
+    if (user?.role === ROLES.FACULTY) {
+      return ["Current Students", "All Students", "Todays Students"];
+    }
+    return ["Current Students", "Unassigned Students", "All Students", "Todays Students"];
+  }, [user?.role]);
 
   useEffect(() => {
     fetchStudents();
   }, [selectedView, searchQuery, currentPage]);
+
+  useEffect(() => {
+    if (!segmentOptions.includes(selectedView)) {
+      setSelectedView(segmentOptions[0]);
+      setCurrentPage(1);
+    }
+  }, [segmentOptions, selectedView]);
 
   const fetchStudents = () => {
     if (selectedView === "All Students") {
@@ -54,6 +69,8 @@ function StudentList() {
       setVisitedPages(new Set([1]));
     }else if (selectedView === "Todays Students") {
       getTodaysSessionAttendees(user, user.center_id);
+    } else if (selectedView === "Unassigned Students" && user?.role !== ROLES.FACULTY) {
+      getUnassignedStudents(user.center_id);
     }
      else {
       getCurrentSessionAttendees();
@@ -84,13 +101,14 @@ function StudentList() {
 
   const studentsToDisplay = useMemo(() => {
     if (selectedView === "Current Students") return currentSessionAttendees;
+    if (selectedView === "Unassigned Students") return unassignedStudents;
 
     if (selectedView === "Todays Students") {
       return todaysSessionAttendees;
     }
 
     return searchQuery ? searchResults : students;
-  }, [students, searchResults, searchQuery, currentSessionAttendees, selectedView, todaysSessionAttendees]);
+  }, [students, searchResults, searchQuery, currentSessionAttendees, selectedView, todaysSessionAttendees, unassignedStudents]);
 
   const columns = [
     {
@@ -122,6 +140,14 @@ function StudentList() {
     })
   }
 
+  if (selectedView === "Unassigned Students") {
+    columns.push({
+      title: "Marked At",
+      dataIndex: "assignedAt",
+      render: (value) => value ? new Date(value).toLocaleString() : "-",
+    });
+  }
+
   const loadMore = (page, pageSize) => {
     if (selectedView === "All Students") {
       if (searchQuery) {
@@ -136,7 +162,7 @@ function StudentList() {
   return (
     <>
       <Segmented
-        options={["Current Students", "All Students","Todays Students"]}
+        options={segmentOptions}
         className='w-fit'
         value={selectedView}
         onChange={handleSegmentChange}

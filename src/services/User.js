@@ -121,6 +121,16 @@ class UserService {
     }
   }
 
+  async getFacultyAssignmentStats(centerId) {
+    try {
+      const response = await post(`/user/facultyAssignmentStats`, { centerId: centerId || "all" });
+      if (!response || !response.data) throw new Error("An error occurred. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
   async searchUsersV2(search, limit = 10) {
     try {
       const params = new URLSearchParams({
