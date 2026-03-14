@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback, useRef } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Avatar, Menu } from "antd";
 import {
   AppstoreOutlined,
@@ -7,26 +7,15 @@ import {
   CalendarOutlined,
   ClockCircleOutlined,
   DollarOutlined,
-  FundProjectionScreenOutlined,
   LogoutOutlined,
   MenuUnfoldOutlined,
   MoneyCollectOutlined,
   PictureOutlined,
-  ShopOutlined,
   SolutionOutlined,
-  MessageOutlined,
-  CheckSquareOutlined,
-  BellOutlined,
-  AuditOutlined,
   UserOutlined,
-  BankOutlined,
   FileTextOutlined,
-  MailOutlined,
-  TrophyOutlined,
-  VideoCameraOutlined,
 } from "@ant-design/icons";
 
-import Book from "@/assets/Book";
 import Target from "@/assets/Target";
 import SubMenu from "@components/SubMenu";
 import UserDetailsDrawer from "@components/UserDetailsDrawer";
@@ -44,6 +33,12 @@ const getMenuConfig = (role) => {
   ];
 
   const adminItems = [
+    {
+      label: "Students",
+      icon: <SolutionOutlined />,
+      key: "students",
+      path: "/manager/students",
+    },
     {
       label: "Academics",
       icon: <BookOutlined />,
@@ -135,12 +130,9 @@ const getMenuConfig = (role) => {
       icon: <BookOutlined />,
       key: "academics",
       children: [
-        { label: "Courses", key: "courses", path: "/admin/courses" },
-        { label: "Syllabus Gallery", key: "syllabus-gallery", path: "/admin/syllabus-gallery" },
         { label: "Final Project", key: "final-project", path: "/manager/final-project" },
         { label: "Tasks", key: "tasks", path: "/manager/tasks" },
         { label: "Attendance Register", key: "attendance-register", path: "/manager/attendance-register" },
-        { label: "Materials", key: "materials", path: "/manager/materials" },
       ],
     },
     {
@@ -149,7 +141,9 @@ const getMenuConfig = (role) => {
       key: "finance",
       children: [
         { label: "Bills", key: "bills", path: "/manager/bills" },
+        { label: "Payslips", key: "payslips", path: "/manager/payslips" },
         { label: "Inventory", key: "inventory", path: "/manager/inventory" },
+        { label: "Audits", key: "audits", path: "/manager/audits" },
       ],
     },
     {
@@ -190,10 +184,15 @@ const getMenuConfig = (role) => {
         { label: "Syllabus Gallery", key: "syllabus-gallery", path: "/admin/syllabus-gallery" },
         { label: "Student Syllabus", key: "student-syllabus", path: "/academic-manager/student-syllabus" },
         { label: "Final Project", key: "final-project", path: "/manager/final-project" },
-        { label: "Tasks", key: "tasks", path: "/manager/tasks" },
         { label: "Attendance Register", key: "attendance-register", path: "/manager/attendance-register" },
-        { label: "Session Status", key: "session-status", path: "/acmanager/session-status" },
-        { label: "Activities", key: "activities", path: "/academic-manager/activities/student" },
+      ],
+    },
+    {
+      label: "Faculty",
+      icon: <SolutionOutlined />,
+      key: "faculty",
+      children: [
+        { label: "FDP", key: "fdp", path: "/manager/faculty-development-program" },
       ],
     },
     {
@@ -204,12 +203,6 @@ const getMenuConfig = (role) => {
         { label: "Announcements", key: "announcements", path: "/manager/announcements" },
         { label: "Holidays", key: "holidays", path: "/manager/holidays" },
       ],
-    },
-    {
-      label: "Gallery",
-      icon: <PictureOutlined />,
-      key: "gallery",
-      path: "/gallery",
     },
   ];
 
@@ -228,9 +221,6 @@ const getMenuConfig = (role) => {
         { label: "Courses", key: "courses", path: "/faculty/courses" },
         { label: "Syllabus Gallery", key: "syllabus-gallery", path: "/faculty/syllabus-gallery" },
         { label: "Student Syllabus", key: "student-syllabus", path: "/faculty/student-syllabus" },
-        { label: "Course History", key: "course-history", path: "/faculty/courseHistory" },
-        { label: "Activities", key: "activities", path: "/faculty/activities" },
-        { label: "Attendance", key: "attendance", path: "/faculty/attendance" },
       ],
     },
     {
@@ -241,7 +231,6 @@ const getMenuConfig = (role) => {
         { label: "FDP", key: "fdp", path: "/faculty/faculty-development-program" },
         { label: "My Attendance", key: "my-attendance", path: "/faculty/my-attendance" },
         { label: "My Leaves", key: "my-leaves", path: "/faculty/my-leaves" },
-        { label: "Session Status", key: "session-status", path: "/faculty/session-status" },
       ],
     },
     {
@@ -283,6 +272,7 @@ const getMenuConfig = (role) => {
         { label: "Announcements", key: "announcements", path: "/manager/announcements" },
         { label: "Notifications", key: "notifications", path: "/manager/notifications" },
         { label: "Holidays", key: "holidays", path: "/manager/holidays" },
+        { label: "Tasks", key: "tasks", path: "/manager/tasks" },
       ],
     },
     {
@@ -295,21 +285,9 @@ const getMenuConfig = (role) => {
         { label: "Inventory", key: "inventory", path: "/manager/inventory" },
       ],
     },
-    {
-      label: "Gallery",
-      icon: <PictureOutlined />,
-      key: "gallery",
-      path: "/gallery",
-    },
   ];
 
   const studentItems = [
-    {
-      label: "Dashboard",
-      icon: <AppstoreOutlined />,
-      key: "dashboard",
-      path: "/",
-    },
     {
       label: "My Studies",
       icon: <BookOutlined />,
@@ -360,7 +338,7 @@ const getMenuConfig = (role) => {
     case ROLES.ACADEMIC_MANAGER:
       return [...commonItems, ...academicManagerItems];
     case ROLES.FACULTY:
-      return [...commonItems, ...facultyItems];
+      return facultyItems;
     case ROLES.OPERATIONS_MANAGER:
       return [...commonItems, ...operationsManagerItems];
     case ROLES.STUDENT:
@@ -457,7 +435,7 @@ function Sidebar({ children }) {
   }, [pathname, menuConfig]);
 
   const openKeys = useMemo(() => {
-    const findOpenKey = (items, parentKey = "") => {
+    const findOpenKey = (items) => {
       for (const item of items) {
         if (item.children) {
           const hasActiveChild = (children) => {
