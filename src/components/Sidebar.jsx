@@ -9,6 +9,15 @@ import {
   DollarOutlined,
   LogoutOutlined,
   MenuUnfoldOutlined,
+  BankOutlined,
+  AimOutlined,
+  MessageOutlined,
+  AccountBookOutlined,
+  WalletOutlined,
+  BellOutlined,
+  ShopOutlined,
+  FundProjectionScreenOutlined,
+  CheckSquareOutlined,
   MoneyCollectOutlined,
   PictureOutlined,
   SolutionOutlined,
@@ -40,18 +49,6 @@ const getMenuConfig = (role) => {
       path: "/manager/students",
     },
     {
-      label: "Academics",
-      icon: <BookOutlined />,
-      key: "academics",
-      children: [
-        { label: "Courses", key: "courses", path: "/admin/courses" },
-        { label: "Syllabus Gallery", key: "syllabus-gallery", path: "/admin/syllabus-gallery" },
-        { label: "Final Project", key: "final-project", path: "/manager/final-project" },
-        { label: "Tasks", key: "tasks", path: "/manager/tasks" },
-        { label: "Attendance Register", key: "attendance-register", path: "/manager/attendance-register" },
-      ],
-    },
-    {
       label: "Finance",
       icon: <DollarOutlined />,
       key: "finance",
@@ -59,41 +56,22 @@ const getMenuConfig = (role) => {
         { label: "Bills", key: "bills", path: "/manager/bills" },
         { label: "Payslips", key: "payslips", path: "/manager/payslips" },
         { label: "Inventory", key: "inventory", path: "/manager/inventory" },
-        { label: "Inventory Items", key: "inventory-items", path: "/manager/inventory-items" },
+        {
+          label: "Inventory Items",
+          key: "inventory-items",
+          path: "/manager/inventory-items",
+        },
         { label: "Audits", key: "audits", path: "/manager/audits" },
-      ],
-    },
-    {
-      label: "Faculty",
-      icon: <SolutionOutlined />,
-      key: "faculty",
-      children: [
-        { label: "FDP", key: "fdp", path: "/manager/faculty-development-program" },
-        { label: "Faculty Attendance", key: "faculty-attendance", path: "/admin/faculty-attendance" },
-        { label: "Manage Leaves", key: "manage-leaves", path: "/admin/manage-leaves" },
-
-      ],
-    },
-    {
-      label: "Staff",
-      icon: <UserOutlined />,
-      key: "staff",
-      children: [
-        { label: "Users", key: "users", path: "/admin/users" },
-        { label: "Centers", key: "centers", path: "/admin/centers" },
-      ],
-    },
-    {
-      label: "Content",
-      icon: <FileTextOutlined />,
-      key: "content",
-      children: [
-        { label: "Blog Posts", key: "blog-posts", path: "/admin/blog-posts" },
-        { label: "Newsletters", key: "newsletters", path: "/admin/newsletters" },
-        { label: "Shop Items", key: "shop-items", path: "/admin/shop-items" },
-        { label: "Art Works", key: "art-works", path: "/admin/art-works" },
-        { label: "Student of the Week", key: "student-of-week", path: "/admin/student-of-the-week" },
-        { label: "Latest Videos", key: "latest-videos", path: "/admin/latest-videos" },
+        {
+          label: "Expenses",
+          key: "expenses",
+          path: "/manager/expenses",
+        },
+        {
+          label: "Ledgers",
+          key: "ledgers",
+          path: "/manager/ledgers",
+        },
       ],
     },
     {
@@ -102,14 +80,111 @@ const getMenuConfig = (role) => {
       key: "operations",
       children: [
         { label: "Enquiries", key: "enquiries", path: "/manager/enquiries" },
-        { label: "Enquiry Slots", key: "enquiry-slots", path: "/manager/enquiry-slots" },
+        {
+          label: "Enquiry Slots",
+          key: "enquiry-slots",
+          path: "/manager/enquiry-slots",
+        },
         { label: "Targets", key: "targets", path: "/manager/targets" },
         { label: "Slots", key: "slots", path: "/manager/slots" },
-        { label: "Announcements", key: "announcements", path: "/manager/announcements" },
-        { label: "Notifications", key: "notifications", path: "/manager/notifications" },
+        {
+          label: "Announcements",
+          key: "announcements",
+          path: "/manager/announcements",
+        },
+        {
+          label: "Notifications",
+          key: "notifications",
+          path: "/manager/notifications",
+        },
         { label: "Holidays", key: "holidays", path: "/manager/holidays" },
       ],
     },
+    {
+      label: "Academics",
+      icon: <BookOutlined />,
+      key: "academics",
+      children: [
+        { label: "Courses", key: "courses", path: "/admin/courses" },
+        {
+          label: "Syllabus Gallery",
+          key: "syllabus-gallery",
+          path: "/admin/syllabus-gallery",
+        },
+        {
+          label: "Final Project",
+          key: "final-project",
+          path: "/manager/final-project",
+        },
+        { label: "Tasks", key: "tasks", path: "/manager/tasks" },
+        {
+          label: "Attendance Register",
+          key: "attendance-register",
+          path: "/manager/attendance-register",
+        },
+      ],
+    },
+
+    {
+      label: "Faculty",
+      icon: <SolutionOutlined />,
+      key: "faculty",
+      children: [
+        {
+          label: "FDP",
+          key: "fdp",
+          path: "/manager/faculty-development-program",
+        },
+        {
+          label: "Faculty Attendance",
+          key: "faculty-attendance",
+          path: "/admin/faculty-attendance",
+        },
+        {
+          label: "Manage Leaves",
+          key: "manage-leaves",
+          path: "/admin/manage-leaves",
+        },
+      ],
+    },
+    {
+      label: "Staff",
+      icon: <UserOutlined />,
+      key: "staff",
+      path: "/admin/users",
+    },
+    {
+      label: "Centers",
+      icon: <BankOutlined />,
+      key: "centers",
+      path: "/admin/centers",
+    },
+    {
+      label: "Content",
+      icon: <FileTextOutlined />,
+      key: "content",
+      children: [
+        { label: "Blog Posts", key: "blog-posts", path: "/admin/blog-posts" },
+        {
+          label: "Newsletters",
+          key: "newsletters",
+          path: "/admin/newsletters",
+        },
+        { label: "Shop Items", key: "shop-items", path: "/admin/shop-items" },
+        { label: "Art Works", key: "art-works", path: "/admin/art-works" },
+        {
+          label: "Student of the Week",
+          key: "student-of-week",
+          path: "/admin/student-of-the-week",
+        },
+        {
+          label: "Latest Videos",
+          key: "latest-videos",
+          path: "/admin/latest-videos",
+        },
+      ],
+    },
+
     {
       label: "Gallery",
       icon: <PictureOutlined />,
@@ -126,13 +201,21 @@ const getMenuConfig = (role) => {
       path: "/manager/students",
     },
     {
+      label: "Tasks",
+      icon: <CheckSquareOutlined />,
+      key: "tasks",
+      path: "/manager/tasks",
+    },
+    {
       label: "Academics",
       icon: <BookOutlined />,
       key: "academics",
       children: [
-        { label: "Final Project", key: "final-project", path: "/manager/final-project" },
-        { label: "Tasks", key: "tasks", path: "/manager/tasks" },
-        { label: "Attendance Register", key: "attendance-register", path: "/manager/attendance-register" },
+        {
+          label: "Attendance Register",
+          key: "attendance-register",
+          path: "/manager/attendance-register",
+        },
       ],
     },
     {
@@ -141,9 +224,18 @@ const getMenuConfig = (role) => {
       key: "finance",
       children: [
         { label: "Bills", key: "bills", path: "/manager/bills" },
-        { label: "Payslips", key: "payslips", path: "/manager/payslips" },
         { label: "Inventory", key: "inventory", path: "/manager/inventory" },
         { label: "Audits", key: "audits", path: "/manager/audits" },
+        {
+          label: "Expenses",
+          key: "expenses",
+          path: "/manager/expenses",
+        },
+        {
+          label: "Ledgers",
+          key: "ledgers",
+          path: "/manager/ledgers",
+        },
       ],
     },
     {
@@ -152,11 +244,23 @@ const getMenuConfig = (role) => {
       key: "operations",
       children: [
         { label: "Enquiries", key: "enquiries", path: "/manager/enquiries" },
-        { label: "Enquiry Slots", key: "enquiry-slots", path: "/manager/enquiry-slots" },
+        {
+          label: "Enquiry Slots",
+          key: "enquiry-slots",
+          path: "/manager/enquiry-slots",
+        },
         { label: "Targets", key: "targets", path: "/manager/targets" },
         { label: "Slots", key: "slots", path: "/manager/slots" },
-        { label: "Announcements", key: "announcements", path: "/manager/announcements" },
-        { label: "Notifications", key: "notifications", path: "/manager/notifications" },
+        {
+          label: "Announcements",
+          key: "announcements",
+          path: "/manager/announcements",
+        },
+        {
+          label: "Notifications",
+          key: "notifications",
+          path: "/manager/notifications",
+        },
         { label: "Holidays", key: "holidays", path: "/manager/holidays" },
       ],
     },
@@ -176,33 +280,58 @@ const getMenuConfig = (role) => {
       path: "/manager/students",
     },
     {
-      label: "Academics",
+      label: "Courses",
       icon: <BookOutlined />,
-      key: "academics",
-      children: [
-        { label: "Courses", key: "courses", path: "/admin/courses" },
-        { label: "Syllabus Gallery", key: "syllabus-gallery", path: "/admin/syllabus-gallery" },
-        { label: "Student Syllabus", key: "student-syllabus", path: "/academic-manager/student-syllabus" },
-        { label: "Final Project", key: "final-project", path: "/manager/final-project" },
-        { label: "Attendance Register", key: "attendance-register", path: "/manager/attendance-register" },
-      ],
+      key: "courses",
+      path: "/admin/courses",
     },
     {
-      label: "Faculty",
-      icon: <SolutionOutlined />,
-      key: "faculty",
-      children: [
-        { label: "FDP", key: "fdp", path: "/manager/faculty-development-program" },
-      ],
+      label: "Syllabus Gallery",
+      icon: <PictureOutlined />,
+      key: "syllabus-gallery",
+      path: "/admin/syllabus-gallery",
     },
     {
-      label: "Operations",
+      label: "Student Syllabus",
+      icon: <BookOutlined />,
+      key: "student-syllabus",
+      path: "/academic-manager/student-syllabus",
+    },
+    {
+      label: "Slots",
       icon: <ClockCircleOutlined />,
-      key: "operations",
-      children: [
-        { label: "Announcements", key: "announcements", path: "/manager/announcements" },
-        { label: "Holidays", key: "holidays", path: "/manager/holidays" },
-      ],
+      key: "slots",
+      path: "/manager/slots",
+    },
+    {
+      label: "Final Project",
+      icon: <ClockCircleOutlined />,
+      key: "final-project",
+      path: "/manager/final-project",
+    },
+    {
+      label: "Attendance Register",
+      icon: <CheckSquareOutlined />,
+      key: "attendance-register",
+      path: "/manager/attendance-register",
+    },
+    {
+      label: "FDP",
+      icon: <FundProjectionScreenOutlined />,
+      key: "fdp",
+      path: "/manager/faculty-development-program",
+    },
+    {
+      label: "Announcements",
+      icon: <ClockCircleOutlined />,
+      key: "announcements",
+      path: "/manager/announcements",
+    },
+    {
+      label: "Holidays",
+      icon: <CalendarOutlined />,
+      key: "holidays",
+      path: "/manager/holidays",
     },
   ];
 
@@ -214,31 +343,42 @@ const getMenuConfig = (role) => {
       path: "/",
     },
     {
-      label: "Academics",
+      label: "Courses",
       icon: <BookOutlined />,
-      key: "academics",
-      children: [
-        { label: "Courses", key: "courses", path: "/faculty/courses" },
-        { label: "Syllabus Gallery", key: "syllabus-gallery", path: "/faculty/syllabus-gallery" },
-        { label: "Student Syllabus", key: "student-syllabus", path: "/faculty/student-syllabus" },
-      ],
+      key: "courses",
+      path: "/faculty/courses",
     },
     {
-      label: "Faculty",
-      icon: <SolutionOutlined />,
-      key: "faculty",
-      children: [
-        { label: "FDP", key: "fdp", path: "/faculty/faculty-development-program" },
-        { label: "My Attendance", key: "my-attendance", path: "/faculty/my-attendance" },
-        { label: "My Leaves", key: "my-leaves", path: "/faculty/my-leaves" },
-      ],
+      label: "Syllabus Gallery",
+      icon: <PictureOutlined />,
+      key: "syllabus-gallery",
+      path: "/faculty/syllabus-gallery",
     },
     {
-      label: "Materials",
+      label: "Student Syllabus",
       icon: <BookOutlined />,
-      key: "materials",
-      path: "/faculty/materials",
+      key: "student-syllabus",
+      path: "/faculty/student-syllabus",
     },
+    {
+      label: "FDP",
+      icon: <FundProjectionScreenOutlined />,
+      key: "fdp",
+      path: "/faculty/faculty-development-program",
+    },
+    {
+      label: "My Attendance",
+      icon: <CheckSquareOutlined />,
+      key: "my-attendance",
+      path: "/faculty/my-attendance",
+    },
+    {
+      label: "My Leaves",
+      icon: <CalendarOutlined />,
+      key: "my-leaves",
+      path: "/faculty/my-leaves",
+    },
+
     {
       label: "Payslips",
       icon: <MoneyCollectOutlined />,
@@ -251,6 +391,12 @@ const getMenuConfig = (role) => {
       key: "slots",
       path: "/faculty/slots",
     },
+    {
+      label: "Gallery",
+      icon: <PictureOutlined />,
+      key: "gallery",
+      path: "/gallery",
+    },
   ];
 
   const operationsManagerItems = [
@@ -261,46 +407,113 @@ const getMenuConfig = (role) => {
       path: "/manager/students",
     },
     {
-      label: "Operations",
-      icon: <ClockCircleOutlined />,
-      key: "operations",
-      children: [
-        { label: "Enquiries", key: "enquiries", path: "/manager/enquiries" },
-        { label: "Enquiry Slots", key: "enquiry-slots", path: "/manager/enquiry-slots" },
-        { label: "Targets", key: "targets", path: "/manager/targets" },
-        { label: "Slots", key: "slots", path: "/manager/slots" },
-        { label: "Announcements", key: "announcements", path: "/manager/announcements" },
-        { label: "Notifications", key: "notifications", path: "/manager/notifications" },
-        { label: "Holidays", key: "holidays", path: "/manager/holidays" },
-        { label: "Tasks", key: "tasks", path: "/manager/tasks" },
-      ],
+      label: "Enquiries",
+      icon: <MessageOutlined />,
+      key: "enquiries",
+      path: "/manager/enquiries",
     },
     {
-      label: "Finance",
+      label: "Enquiry Slots",
+      icon: <MessageOutlined />,
+      key: "enquiry-slots",
+      path: "/manager/enquiry-slots",
+    },
+    {
+      label: "Targets",
+      icon: <AimOutlined />,
+      key: "targets",
+      path: "/manager/targets",
+    },
+    {
+      label: "Slots",
+      icon: <ClockCircleOutlined />,
+      key: "slots",
+      path: "/manager/slots",
+    },
+    {
+      label: "Staff",
+      icon: <UserOutlined />,
+      key: "staff",
+      path: "/admin/users",
+    },
+    {
+      label: "Announcements",
+      icon: <ClockCircleOutlined />,
+      key: "announcements",
+      path: "/manager/announcements",
+    },
+    {
+      label: "Notifications",
+      icon: <BellOutlined />,
+      key: "notifications",
+      path: "/manager/notifications",
+    },
+    {
+      label: "Holidays",
+      icon: <CalendarOutlined />,
+      key: "holidays",
+      path: "/manager/holidays",
+    },
+    {
+      label: "Tasks",
+      icon: <CheckSquareOutlined />,
+      key: "tasks",
+      path: "/manager/tasks",
+    },
+    {
+      label: "Bills",
       icon: <DollarOutlined />,
-      key: "finance",
-      children: [
-        { label: "Bills", key: "bills", path: "/manager/bills" },
-        { label: "Payslips", key: "payslips", path: "/manager/payslips" },
-        { label: "Inventory", key: "inventory", path: "/manager/inventory" },
-      ],
+      key: "bills",
+      path: "/manager/bills",
+    },
+    {
+      label: "Payslips",
+      icon: <MoneyCollectOutlined />,
+      key: "payslips",
+      path: "/manager/payslips",
+    },
+    {
+      label: "Inventory",
+      icon: <ShopOutlined />,
+      key: "inventory",
+      path: "/manager/inventory",
+    },
+    {
+      label: "Expenses",
+      icon: <AccountBookOutlined />,
+      key: "expenses",
+      path: "/manager/expenses",
+    },
+    {
+      label: "Ledgers",
+      icon: <WalletOutlined />,
+      key: "ledgers",
+      path: "/manager/ledgers",
     },
   ];
 
   const studentItems = [
     {
-      label: "My Studies",
+      label: "Materials",
       icon: <BookOutlined />,
-      key: "my-studies",
-      children: [
-        { label: "Materials", key: "materials", path: "/materials" },
-        { label: "Attendance", key: "attendance", path: "/attendance" },
-        { label: "Course History", key: "course-history", path: "/courseHistory" },
-      ],
+      key: "materials",
+      path: "/materials",
+    },
+    {
+      label: "Attendance",
+      icon: <FundProjectionScreenOutlined />,
+      key: "attendance",
+      path: "/attendance",
+    },
+    {
+      label: "Course History",
+      icon: <ClockCircleOutlined />,
+      key: "course-history",
+      path: "/courseHistory",
     },
     {
       label: "Activities",
-      icon: <Target />,
+      icon: <AimOutlined />,
       key: "activities",
       path: "/activities",
     },
@@ -352,12 +565,12 @@ const SidebarLogo = () => (
   <img
     src="/images/logo.png"
     alt="Logo"
-    className="self-center p-5 px-0 max-2xl:w-3/4 max-2xl:mx-auto 2xl:p-10"
+    className="self-center p-5 px-0 max-2xl:w-3/4 max-2xl:mx-auto 2xl:p-5"
   />
 );
 
 const UserProfile = ({ user, onProfileClick, onLogout }) => (
-  <div className="p-3 m-5 bg-card rounded-full flex gap-2 justify-between items-center shadow-sm hover:shadow-md transition-shadow duration-200">
+  <div className="p-3 my-5 ml-2 bg-card rounded-full flex gap-2 justify-between items-center shadow-sm hover:shadow-md transition-shadow duration-200">
     <div className="flex gap-2 cursor-pointer flex-1" onClick={onProfileClick}>
       <Avatar src={user?.profile_img} className="flex-shrink-0">
         {user?.username?.charAt(0)?.toUpperCase()}
@@ -404,15 +617,26 @@ function Sidebar({ children }) {
   const menuConfig = useMemo(() => {
     let config = getMenuConfig(user?.role);
     if (user?.role === ROLES.STUDENT && user?.details_id?.course_id) {
-      const myStudiesIndex = config.findIndex(item => item.key === 'my-studies');
-      if (myStudiesIndex !== -1) {
-        config[myStudiesIndex] = {
-          ...config[myStudiesIndex],
-          children: [
-            { label: "Syllabus", key: "syllabus", path: `/syllabus/${user.details_id.course_id}` },
-            ...(config[myStudiesIndex].children || [])
-          ]
-        };
+      const syllabusItem = {
+        label: "Syllabus",
+        icon: <BookOutlined />,
+        key: "syllabus",
+        path: `/syllabus/${user.details_id.course_id}`,
+      };
+      const hasSyllabus = config.some((item) => item.key === "syllabus");
+      if (!hasSyllabus) {
+        const materialsIndex = config.findIndex(
+          (item) => item.key === "materials",
+        );
+        if (materialsIndex !== -1) {
+          config = [
+            ...config.slice(0, materialsIndex),
+            syllabusItem,
+            ...config.slice(materialsIndex),
+          ];
+        } else {
+          config = [...config, syllabusItem];
+        }
       }
     }
     return config;
@@ -421,7 +645,10 @@ function Sidebar({ children }) {
   const selectedKeys = useMemo(() => {
     const findKey = (items) => {
       for (const item of items) {
-        if (item.path && (pathname === item.path || pathname.startsWith(item.path + "/"))) {
+        if (
+          item.path &&
+          (pathname === item.path || pathname.startsWith(item.path + "/"))
+        ) {
           return [item.key];
         }
         if (item.children) {
@@ -440,7 +667,11 @@ function Sidebar({ children }) {
         if (item.children) {
           const hasActiveChild = (children) => {
             for (const child of children) {
-              if (child.path && (pathname === child.path || pathname.startsWith(child.path + "/"))) {
+              if (
+                child.path &&
+                (pathname === child.path ||
+                  pathname.startsWith(child.path + "/"))
+              ) {
                 return true;
               }
             }
@@ -498,13 +729,22 @@ function Sidebar({ children }) {
           </Menu.SubMenu>
         );
       }
-      return <Menu.Item key={item.key} icon={item.icon}>{item.label}</Menu.Item>;
+      return (
+        <Menu.Item key={item.key} icon={item.icon}>
+          {item.label}
+        </Menu.Item>
+      );
     });
   };
 
   return (
     <div className="drawer h-full lg:drawer-open">
-      <input ref={drawerRef} id="my-drawer" type="checkbox" className="drawer-toggle" />
+      <input
+        ref={drawerRef}
+        id="my-drawer"
+        type="checkbox"
+        className="drawer-toggle"
+      />
 
       <div className="drawer-content">
         <MobileMenuButton />
@@ -514,7 +754,7 @@ function Sidebar({ children }) {
       <div className="drawer-side z-20 no-scrollbar">
         <label htmlFor="my-drawer" className="drawer-overlay" />
 
-        <aside className="h-full flex flex-col bg-white max-sm:w-80 w-64 shadow-lg">
+        <aside className="h-full flex flex-col bg-white max-sm:w-80 w-64 shadow-lg px-1">
           <div className="flex-shrink-0 border-b border-gray-100">
             <SidebarLogo />
           </div>
@@ -525,7 +765,7 @@ function Sidebar({ children }) {
               selectedKeys={selectedKeys}
               defaultOpenKeys={openKeys}
               onClick={handleMenuClick}
-              style={{ border: 'none' }}
+              style={{ border: "none" }}
               inlineCollapsed={false}
             >
               {renderMenuItems(menuConfig)}
