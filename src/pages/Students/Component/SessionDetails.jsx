@@ -1,31 +1,43 @@
-import { Button, Modal, Table, DatePicker, Space, Typography, Card, Flex, Tag, message, Empty, Popconfirm } from 'antd';
+import { Button, Modal, Table, DatePicker, Space, Typography, Card, Flex, Tag, message, Empty, Popconfirm, Descriptions, Select } from 'antd';
 import studentStore from '@stores/StudentStore';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { isUserActive } from '@utils/helper';
 import slotService from '@/services/Slot';
 import sessionService from '@/services/Session'; // Assuming you have a session service
-import { render } from 'react-dom';
 import permissions from '@utils/permissions';
 import userStore from '@stores/UserStore';
+import facultyAssignmentStore from '@stores/FacultyAssignmentStore';
+import centersStore from '@stores/CentersStore';
+import { useStore } from 'zustand';
 
-const { Text, Title } = Typography;
+const { Title } = Typography;
 
 function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
   const [selectedMonth, setSelectedMonth] = useState(dayjs().startOf('month'));
   const [slots, setSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [loadingSessions, setLoadingSessions] = useState(false);
-  const [deallocating, setDeallocating] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [deallocating, setDeallocating] = useState(false);
+  const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
 
-  const { user } = userStore();
+  const { user } = useStore(userStore);
+  const { selectedCenter } = useStore(centersStore);
+  const {
+    currentAssignment,
+    assignments,
+    facultyCandidates,
+    loading: assignmentLoading,
+    submitLoading,
+    getStudentAssignment,
+    reassignStudent,
+    resetAssignment,
+  } = useStore(facultyAssignmentStore);
+  const [selectedSlotId, setSelectedSlotId] = useState(null);
+  const assignmentCenterId = selectedCenter || student?.center_id?._id || student?.center_id || user?.center_id || null;
+  const canManualOverrideCap = ["manager", "admin", "academic_manager", "operations_manager"].includes(user?.role);
 
   const { getActiveSessions } = studentStore();
-  const activeStudentSessions = studentStore((state) => state.activeStudentSessions);
-  const studentActiveSession = activeStudentSessions[student._id] || [];
-
-  const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -33,6 +45,11 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
         try {
           setLoadingSessions(true);
           await getActiveSessions(student._id);
+          if (permissions.student.edit.includes(user?.role) || user?.role === "academic_manager" || user?.role === "operations_manager") {
+            const response = await getStudentAssignment(student._id, assignmentCenterId);
+            const firstSlotId = response?.assignment?.slotId || response?.assignment?.slot?._id || null;
+            setSelectedSlotId(firstSlotId);
+          }
         } catch (error) {
           console.error('Error fetching sessions:', error);
           message.error('Failed to load sessions');
@@ -41,14 +58,19 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
         }
       }
     };
-    // fetchSessions();
-    fetchSlots()
-  }, [isModalOpen]);
+    fetchSessions();
+    if (isModalOpen) {
+      fetchSlots();
+    }
+  }, [isModalOpen, student._id, assignmentCenterId, user?.role]);
 
   const handleCancel = () => {
     setIsModalOpen(false);
     setSlots([]);
     setSelectedMonth(dayjs().startOf('month'));
+    setAssignmentModalOpen(false);
+    setSelectedSlotId(null);
+    resetAssignment();
   };
 
   const fetchSlots = async () => {
@@ -177,6 +199,79 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
     }
   };
 
+  const handleReassign = async (facultyId) => {
+    if (!selectedSlotId) {
+      message.error("Select a slot to assign");
+      return;
+    }
+    const response = await reassignStudent(student._id, facultyId, selectedSlotId, assignmentCenterId);
+    if (response) {
+      setAssignmentModalOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+    if (!selectedSlotId) return;
+    getStudentAssignment(student._id, assignmentCenterId, selectedSlotId);
+  }, [selectedSlotId]);
+
+  const assignmentColumns = [
+    {
+      title: 'Faculty',
+      dataIndex: 'username',
+      key: 'username',
+      render: (value, record) => (
+        <Flex align="center" gap={8}>
+          <img className="rounded-full aspect-square w-8 border border-border" src={record?.profile_img || '/images/default.jpg'} alt={value} />
+          <div>
+            <div>{value}</div>
+            <div style={{ fontSize: 12, color: '#888' }}>{record?.email}</div>
+          </div>
+        </Flex>
+      ),
+    },
+    {
+      title: 'Assigned',
+      dataIndex: 'assignedCount',
+      key: 'assignedCount',
+    },
+    {
+      title: 'Cap',
+      dataIndex: 'dailyAssignmentCap',
+      key: 'dailyAssignmentCap',
+    },
+    {
+      title: 'Available',
+      dataIndex: 'availableCapacity',
+      key: 'availableCapacity',
+    },
+    {
+      title: 'Status',
+      key: 'status',
+      render: (_, record) => {
+        if (record.isAssigned) return <Tag color="blue">Assigned</Tag>;
+        if (record.isEligible) return <Tag color="green">Available</Tag>;
+        if (canManualOverrideCap) return <Tag color="orange">Cap full (override allowed)</Tag>;
+        return <Tag color="red">Full</Tag>;
+      },
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_, record) => (
+        <Button
+          type="primary"
+          disabled={!record.isEligible && !record.isAssigned && !canManualOverrideCap}
+          loading={submitLoading}
+          onClick={() => handleReassign(record._id)}
+        >
+          Assign
+        </Button>
+      ),
+    },
+  ];
+
   const columns = [
     {
       title: 'Date',
@@ -271,6 +366,57 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
       destroyOnClose
     >
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+        {(permissions.student.edit.includes(user?.role) || user?.role === "academic_manager" || user?.role === "operations_manager") && (
+          <Card loading={assignmentLoading} size="small" title="Today's Faculty Assignment">
+            {!currentAssignment ? (
+              <Flex vertical gap={12}>
+                <Empty description="No assignment found for today" />
+                {!!assignments?.length && (
+                  <Select
+                    value={selectedSlotId}
+                    onChange={setSelectedSlotId}
+                    options={assignments.map((item) => ({
+                      label: `${dayjs(item?.slot?.start_date).format("DD MMM h:mm A")} (${item?.slot?.status || "-"})`,
+                      value: item?.slotId || item?.slot?._id,
+                    }))}
+                  />
+                )}
+                <Flex justify="end">
+                  <Button type="primary" onClick={() => setAssignmentModalOpen(true)}>
+                    Assign Faculty
+                  </Button>
+                </Flex>
+              </Flex>
+            ) : (
+              <Flex vertical gap={12}>
+                <Select
+                  value={selectedSlotId || currentAssignment?.slotId || currentAssignment?.slot?._id}
+                  onChange={setSelectedSlotId}
+                  options={(assignments || []).map((item) => ({
+                    label: `${dayjs(item?.slot?.start_date).format("DD MMM h:mm A")} (${item?.slot?.status || "-"})`,
+                    value: item?.slotId || item?.slot?._id,
+                  }))}
+                />
+                <Descriptions size="small" column={1} bordered>
+                  <Descriptions.Item label="Status">{currentAssignment?.assignmentStatus}</Descriptions.Item>
+                  <Descriptions.Item label="Source">{currentAssignment?.assignmentSource}</Descriptions.Item>
+                  <Descriptions.Item label="Assigned Faculty">
+                    {currentAssignment?.faculty?.username || 'Unassigned'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Assigned At">
+                    {currentAssignment?.assignedAt ? dayjs(currentAssignment.assignedAt).format('DD MMM YYYY h:mm A') : '-'}
+                  </Descriptions.Item>
+                </Descriptions>
+                <Flex justify="end">
+                  <Button type="primary" onClick={() => setAssignmentModalOpen(true)}>
+                    Reassign Faculty
+                  </Button>
+                </Flex>
+              </Flex>
+            )}
+          </Card>
+        )}
+
         {/* <Flex gap={10} wrap>
           {loadingSessions ? (
             <Card loading={true} style={{ width: '100%' }} />
@@ -341,15 +487,25 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
           </Space>
 
           <Space size="middle">
-            {permissions.sessions.delete.includes(user?.role) && <Button
-              variant='solid'
-              color='danger'
-              onClick={handleSyncSlots}
-              loading={syncing}
-              disabled={syncing || loadingSessions}
-            >
-              Deallocate Session
-            </Button>}
+            {permissions.sessions.edit.includes(user?.role) && (
+              <Button
+                onClick={handleSyncSlots}
+                loading={syncing}
+                disabled={syncing || loadingSessions}
+              >
+                Sync Slots
+              </Button>
+            )}
+            {permissions.sessions.delete.includes(user?.role) && (
+              <Button
+                danger
+                onClick={handleDeallocateSessions}
+                loading={deallocating}
+                disabled={deallocating || loadingSessions}
+              >
+                Deallocate Sessions
+              </Button>
+            )}
           </Space>
         </Flex>
 
@@ -362,6 +518,22 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
           scroll={{ x: true }}
           bordered
         />
+        <Modal
+          title="Reassign Faculty"
+          open={assignmentModalOpen}
+          footer={null}
+          onCancel={() => setAssignmentModalOpen(false)}
+          width={760}
+          destroyOnClose
+        >
+          <Table
+            rowKey="_id"
+            columns={assignmentColumns}
+            dataSource={facultyCandidates}
+            pagination={false}
+            loading={assignmentLoading}
+          />
+        </Modal>
       </Space>
     </Modal>
   );

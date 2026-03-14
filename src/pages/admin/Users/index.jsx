@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { Table, Button, Flex, Modal, Input, Select, message, Tag } from "antd";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Table, Button, Flex, Modal, Input, Select, message, Tag, InputNumber } from "antd";
 import { useNavigate } from "react-router-dom";
 import Title from "@components/layouts/Title";
 import StaffDetailsDrawer from "@components/StaffDetailsDrawer";
@@ -9,6 +9,7 @@ import usersV2Service from "@services/UsersV2";
 import centersService from "@services/Centers";
 import { useStore } from "zustand";
 import { ROLES } from "@utils/constants";
+import facultyAssignmentStore from "@stores/FacultyAssignmentStore";
 
 function AdminUsers() {
   const { user } = useStore(userStore);
@@ -20,6 +21,10 @@ function AdminUsers() {
   const [filters, setFilters] = useState({ search: "", role: "", status: "", center_id: "" });
   const [selectedStaff, setSelectedStaff] = useState({});
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+  const [capModalOpen, setCapModalOpen] = useState(false);
+  const [selectedFaculty, setSelectedFaculty] = useState(null);
+  const [dailyAssignmentCap, setDailyAssignmentCap] = useState(0);
+  const { facultyStats, getFacultyStats, updateFacultyCap, submitLoading } = useStore(facultyAssignmentStore);
 
   const canView = permissions.adminUsers?.view?.includes(user?.role);
   const canAdd = permissions.adminUsers?.add?.includes(user?.role);
@@ -64,6 +69,12 @@ function AdminUsers() {
     if (canView) fetchUsers();
   }, [canView, pagination.page, pagination.limit, filters.search, filters.role, filters.status, filters.center_id]);
 
+  useEffect(() => {
+    if (canView) {
+      getFacultyStats(filters.center_id || "all");
+    }
+  }, [canView, filters.center_id, getFacultyStats]);
+
   const handlePageChange = (page, pageSize) => {
     setPagination((p) => ({ ...p, page, limit: pageSize || p.limit }));
   };
@@ -87,6 +98,27 @@ function AdminUsers() {
   };
 
   const onSearch = () => fetchUsers();
+
+  const facultyStatsMap = useMemo(
+    () => new Map((facultyStats || []).map((item) => [item._id, item])),
+    [facultyStats]
+  );
+
+  const openCapModal = (record) => {
+    const stats = facultyStatsMap.get(record._id);
+    setSelectedFaculty(record);
+    setDailyAssignmentCap(stats?.dailyAssignmentCap ?? record?.details_id?.dailyAssignmentCap ?? 0);
+    setCapModalOpen(true);
+  };
+
+  const handleCapUpdate = async () => {
+    if (!selectedFaculty) return;
+    const response = await updateFacultyCap(selectedFaculty._id, dailyAssignmentCap, filters.center_id || selectedFaculty.center_id?._id || selectedFaculty.center_id);
+    if (response) {
+      setCapModalOpen(false);
+      fetchUsers();
+    }
+  };
 
   if (!canView) {
     return <div className="p-4 text-center">You don&apos;t have permission to view users.</div>;
@@ -125,7 +157,32 @@ function AdminUsers() {
     {
       title: "Center",
       key: "center",
-      render: (_, r) => r.center_id?.center_name ?? r.center_id ?? "—",
+      render: (_, r) => r.center_id?.center_name ?? r.center_id ?? "-",
+    },
+    {
+      title: "Daily Cap",
+      key: "dailyAssignmentCap",
+      render: (_, record) => {
+        if (record.role !== ROLES.FACULTY) return "-";
+        const stats = facultyStatsMap.get(record._id);
+        return (
+          <Flex gap={8} align="center">
+            <span>{stats?.dailyAssignmentCap ?? 0}</span>
+            <Tag color="blue">{stats?.assignedCount ?? 0} assigned</Tag>
+            {(user?.role === ROLES.ADMIN || user?.role === ROLES.MANAGER || user?.role === ROLES.OPERATIONS_MANAGER || user?.role === ROLES.ACADEMIC_MANAGER) && (
+              <Button
+                size="small"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  openCapModal(record);
+                }}
+              >
+                Edit Cap
+              </Button>
+            )}
+          </Flex>
+        );
+      },
     },
     ...(canEdit || canDelete
       ? [
@@ -226,6 +283,23 @@ function AdminUsers() {
         visible={isDrawerVisible}
         onClose={() => setIsDrawerVisible(false)}
       />
+      <Modal
+        title={selectedFaculty ? `Update Cap: ${selectedFaculty.username}` : "Update Cap"}
+        open={capModalOpen}
+        onOk={handleCapUpdate}
+        onCancel={() => setCapModalOpen(false)}
+        confirmLoading={submitLoading}
+      >
+        <Flex vertical gap={12}>
+          <div>Set the maximum number of students this faculty can receive from attendance auto-assignment in one day.</div>
+          <InputNumber
+            min={0}
+            style={{ width: "100%" }}
+            value={dailyAssignmentCap}
+            onChange={(value) => setDailyAssignmentCap(Number(value || 0))}
+          />
+        </Flex>
+      </Modal>
     </Title>
   );
 }
