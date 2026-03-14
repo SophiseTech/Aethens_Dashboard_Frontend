@@ -256,6 +256,8 @@ export const ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES = [
   "/admin/latest-videos",
   "/admin/courses",
   /^\/manager\/final-project\/student(\/.*)?$/,
+  "/manager/expenses",
+  "/manager/ledgers"
 ]
 
 export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
@@ -273,5 +275,7 @@ export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
   "/admin/syllabus-gallery",
   "/admin/courses",
   "/manager/attendance-register",
-  "/manager/tasks"
+  "/manager/tasks",
+  "/manager/expenses",
+  "/manager/ledgers"
 ]
