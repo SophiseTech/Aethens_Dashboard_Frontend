@@ -168,7 +168,7 @@ function StudentList() {
   };
 
   const handleNameClick = (record) => {
-    setSelectedUser(record);
+    setSelectedUser(record?.student || record);
     setActiveStudent(record)
     setDrawerVisible(true);
   };
