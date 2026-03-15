@@ -64,6 +64,16 @@ const feeStore = create((set) => ({
       throw error;
     }
   },
+  addExtraSession: async (feeAccountId, payload) => {
+    set({ loading: true, error: null });
+    try {
+      await FeeService.addExtraSession(feeAccountId, payload);
+      set({ loading: false });
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
 }));
 
 export default feeStore;

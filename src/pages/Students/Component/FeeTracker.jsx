@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Modal, Table, Spin, Alert, Row, Col, Statistic, Tag, Button, InputNumber, Form, DatePicker, Select, Card, Checkbox, Space, Divider, Flex, Popconfirm, message } from 'antd';
-import { WalletOutlined, DollarOutlined, CheckCircleOutlined, FileDoneOutlined, CheckSquareOutlined, PrinterOutlined, DownloadOutlined } from '@ant-design/icons';
+import { WalletOutlined, DollarOutlined, CheckCircleOutlined, FileDoneOutlined, CheckSquareOutlined, PrinterOutlined, DownloadOutlined, PlusOutlined } from '@ant-design/icons';
 import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
 import InvoicePdf from '@pages/Bills/Components/Invoice';
 import { isAndroid } from 'react-device-detect';
@@ -23,17 +23,21 @@ const FeeTracker = ({ student, visible, onCancel }) => {
     generateInstallmentBill,
     generatePartialBalanceBill,
     markInstallmentAsPaid,
+    addExtraSession,
   } = useStore(feeStore);
 
   const { user } = useStore(userStore);
   const [paymentModal, setPaymentModal] = useState(false);
   const [selectedBill, setSelectedBill] = useState(null);
   const [form] = Form.useForm();
+  const [extraSessionModal, setExtraSessionModal] = useState(false);
+  const [extraSessionForm] = Form.useForm();
   const [useWallet, setUseWallet] = useState(false);
   const [viewBill, setViewBill] = useState(null);
   const paidAmount = Form.useWatch('paidAmount', form);
   const isPartialPayment = feeDetails?.feeAccount?.type === 'partial';
   const isInstallment = feeDetails?.feeAccount?.isInstallment;
+  const isFullyPaid = (feeDetails?.summary?.balance ?? 1) <= 0;
 
   // Build items array for partial payments
   const partialItems = useMemo(() => {
@@ -207,6 +211,22 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       refreshFeeDetails();
     } catch (err) {
       message.error(err?.message || 'Failed to generate bill');
+    }
+  };
+
+  const handleAddExtraSession = async () => {
+    try {
+      const values = await extraSessionForm.validateFields();
+      await addExtraSession(feeDetails.feeAccount._id, {
+        amount: values.amount,
+        sessionName: values.sessionName,
+      });
+      message.success('Extra session added and bill generated!');
+      setExtraSessionModal(false);
+      extraSessionForm.resetFields();
+      refreshFeeDetails();
+    } catch (err) {
+      message.error(err?.response?.data?.message || err?.message || 'Failed to add extra session');
     }
   };
 
@@ -548,6 +568,23 @@ const FeeTracker = ({ student, visible, onCancel }) => {
               </Col>
             </Row>
 
+            {/* Add Extra Session button — only when fully paid and user has edit permissions */}
+            {isFullyPaid && permissions.fee_tracker.edit.includes(user?.role) && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    const lastBill = feeDetails.bills?.[0];
+                    extraSessionForm.setFieldsValue({ amount: lastBill?.subtotal ? Number(lastBill.subtotal.toFixed(2)) : undefined });
+                    setExtraSessionModal(true);
+                  }}
+                >
+                  Add Extra Session
+                </Button>
+              </div>
+            )}
+
             <div className='bg-[#fff1f0] flex gap-3 p-3 justify-evenly mb-[20px] rounded-lg'>
               <div className='flex flex-col gap-1 items-center'>
                 <p className='text-stone-500'>Course Fee</p>
@@ -764,6 +801,79 @@ const FeeTracker = ({ student, visible, onCancel }) => {
           </Form.Item>
         </Form>
       </Modal >
+
+      {/* Add Extra Session Modal */}
+      <Modal
+        title="Add Extra Session"
+        open={extraSessionModal}
+        onCancel={() => {
+          setExtraSessionModal(false);
+          extraSessionForm.resetFields();
+        }}
+        onOk={handleAddExtraSession}
+        okText="Add Session & Generate Bill"
+        confirmLoading={loading}
+        width={480}
+      >
+        <Alert
+          message="This will add an extra month/session to this student's fee account and generate a new invoice."
+          type="info"
+          showIcon
+          style={{ marginBottom: 16 }}
+        />
+        <Form form={extraSessionForm} layout="vertical">
+          <Form.Item
+            name="sessionName"
+            label="Bill Item Name"
+            help="This will appear as the item name on the generated invoice (e.g. 'Extra Month - April 2025')"
+            rules={[{ required: true, message: 'Please enter a bill item name' }]}
+          >
+            <CustomInput name="sessionName" label="" placeholder="e.g. Extra Month - April 2025" />
+          </Form.Item>
+          <Form.Item
+            name="amount"
+            label="Amount (before tax)"
+            rules={[
+              { required: true, message: 'Please enter an amount' },
+              {
+                validator: (_, value) =>
+                  value > 0 ? Promise.resolve() : Promise.reject(new Error('Amount must be greater than 0')),
+              },
+            ]}
+          >
+            <InputNumber
+              style={{ width: '100%' }}
+              min={1}
+              prefix="₹"
+              placeholder="Enter base amount (tax will be applied automatically)"
+            />
+          </Form.Item>
+
+          {/* Read-only tax rate display */}
+          {(() => {
+            const lastBill = feeDetails?.bills?.[0];
+            const taxRate = lastBill?.subtotal > 0
+              ? Math.round((lastBill.total_tax / lastBill.subtotal) * 100)
+              : null;
+            if (taxRate === null) return null;
+            return (
+              <div style={{
+                background: '#f5f5f5',
+                border: '1px solid #d9d9d9',
+                borderRadius: 6,
+                padding: '8px 12px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginTop: -8,
+              }}>
+                <span style={{ color: '#595959', fontSize: 13 }}>Applicable Tax Rate</span>
+                <span style={{ fontWeight: 600, fontSize: 14 }}>{taxRate}%</span>
+              </div>
+            );
+          })()}
+        </Form>
+      </Modal>
     </>
   );
 };

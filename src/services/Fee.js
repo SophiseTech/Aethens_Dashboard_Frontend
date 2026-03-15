@@ -25,4 +25,8 @@ export const FeeService = {
   markInstallmentAsPaid: (feeAccountId, installmentId, payload = {}) => {
     return post(`/fees/${feeAccountId}/installment/${installmentId}/mark-paid`, payload);
   },
+  // New: add an extra session (month) to a fully paid fee account
+  addExtraSession: (feeAccountId, payload) => {
+    return post(`/fees/${feeAccountId}/extra-session`, payload);
+  },
 };
