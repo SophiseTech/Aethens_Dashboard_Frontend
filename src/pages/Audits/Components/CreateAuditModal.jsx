@@ -14,15 +14,24 @@ function CreateAuditModal({ open, onClose }) {
     const [form] = Form.useForm();
     const { createAudit, createLoading } = inventoryAuditStore();
     const { user } = userStore();
-    const { selectedCenter } = centersStore();
+    const { selectedCenter, centers, getCenters } = centersStore();
     const { inventory, getCenterInventory } = inventoryStore();
     const [managers, setManagers] = useState([]);
     const [autoPopulate, setAutoPopulate] = useState(true);
 
+
+    // Pre-fill center_id from the top selector when modal opens
     useEffect(() => {
         if (open) {
             fetchManagers();
-            loadInventory();
+            getCenters(0);
+            // Pre-populate center field if a specific center is already selected
+            if (selectedCenter && selectedCenter !== 'all') {
+                form.setFieldValue('center_id', selectedCenter);
+                getCenterInventory(selectedCenter);
+            } else {
+                form.setFieldValue('center_id', undefined);
+            }
         }
     }, [open]);
 
@@ -37,20 +46,16 @@ function CreateAuditModal({ open, onClose }) {
         }
     };
 
-    const loadInventory = () => {
-        const centerId = selectedCenter === 'all' ? null : selectedCenter || user.center_id;
-        if (centerId) {
-            getCenterInventory(centerId);
-        }
+    const handleCenterChange = (centerId) => {
+        getCenterInventory(centerId);
     };
 
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            const centerId = selectedCenter === 'all' ? values.center_id : selectedCenter || user.center_id;
 
             const payload = {
-                center_id: centerId,
+                center_id: values.center_id,
                 auditor_id: values.auditor_id,
                 audit_date: values.audit_date ? toISTStartOfDayISO(values.audit_date) : undefined,
                 remarks: values.remarks || '',
@@ -92,6 +97,24 @@ function CreateAuditModal({ open, onClose }) {
             width={600}
         >
             <Form form={form} layout="vertical">
+                <Form.Item
+                    name="center_id"
+                    label="Center"
+                    rules={[{ required: true, message: 'Please select a center' }]}
+                >
+                    <Select
+                        placeholder="Select Center"
+                        showSearch
+                        optionFilterProp="children"
+                        onChange={handleCenterChange}
+                    >
+                        {(Array.isArray(centers) ? centers : []).map((center) => (
+                            <Select.Option key={center._id} value={center._id}>
+                                {center.center_name}
+                            </Select.Option>
+                        ))}
+                    </Select>
+                </Form.Item>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item

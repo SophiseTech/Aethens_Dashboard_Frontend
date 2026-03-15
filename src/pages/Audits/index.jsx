@@ -4,6 +4,7 @@ import CreateAuditModal from '@pages/Audits/Components/CreateAuditModal';
 import ConductAudit from '@pages/Audits/Components/ConductAudit';
 import AuditDetails from '@pages/Audits/Components/AuditDetails';
 import inventoryAuditStore from '@stores/InventoryAuditStore';
+import centersStore from '@stores/CentersStore';
 import userStore from '@stores/UserStore';
 import permissions from '@utils/permissions';
 import { Button, Flex } from 'antd';
@@ -13,6 +14,7 @@ import { useEffect, useState } from 'react';
 function Audits() {
     const { getAudits } = inventoryAuditStore();
     const { user } = userStore();
+    const { selectedCenter } = centersStore();
     const [createAuditModalOpen, setCreateAuditModalOpen] = useState(false);
     const [conductAuditDrawerOpen, setConductAuditDrawerOpen] = useState(false);
     const [auditDetailsDrawerOpen, setAuditDetailsDrawerOpen] = useState(false);
@@ -22,12 +24,15 @@ function Audits() {
 
     useEffect(() => {
         loadAudits();
-    }, []);
+    }, [selectedCenter]);
 
     const loadAudits = () => {
         const filters = {};
         if (user.role === 'manager') {
             filters.auditor_id = user._id;
+        }
+        if (selectedCenter && selectedCenter !== 'all') {
+            filters.center_id = selectedCenter;
         }
         getAudits(filters);
     };
