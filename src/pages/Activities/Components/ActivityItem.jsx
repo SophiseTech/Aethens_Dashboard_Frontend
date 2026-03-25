@@ -64,7 +64,13 @@ const Document = ({ type, fileName, fileSize, url }) => {
       const blob = await response.blob();
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = fileName;
+      
+      let downloadName = fileName;
+      if (type && !downloadName.toLowerCase().endsWith(`.${type.toLowerCase()}`)) {
+        downloadName += `.${type.toLowerCase()}`;
+      }
+      
+      link.download = downloadName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

@@ -27,7 +27,7 @@ function FinalProjectManagerView() {
   const { user } = useStore(userStore);
 
   useEffect(() => {
-    if (user.role === ROLES.ADMIN && selectedCenter) {
+    if ((user.role === ROLES.ADMIN || user.role === ROLES.ACADEMIC_MANAGER) && selectedCenter) {
       fetchPendingSubmissions({ center_id: selectedCenter }, projectId);
     } else {
       fetchPendingSubmissions({}, projectId);
@@ -37,7 +37,7 @@ function FinalProjectManagerView() {
   useEffect(() => {
     let query = { status: selectedView };
 
-    if (user.role === ROLES.ADMIN && selectedCenter) {
+    if ((user.role === ROLES.ADMIN || user.role === ROLES.ACADEMIC_MANAGER) && selectedCenter) {
       query.centerId = selectedCenter;
     }
 
