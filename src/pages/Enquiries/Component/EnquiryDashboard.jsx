@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Row, Col, Typography, Tag, Divider, Spin, Alert, Button, Select } from "antd";
+import { Card, Row, Col, Typography, Tag, Divider, Spin, Alert, Button, Select, DatePicker } from "antd";
+import dayjs from "dayjs";
 import EChart from "@pages/Dashboard/Chart/EChart";
 import enquiryService from "@/services/Enquiry";
 import centersStore from "@stores/CentersStore";
@@ -12,31 +13,41 @@ export default function EnquiryDashboard() {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(false);
   const [period, setPeriod] = useState("last_month");
+  const [dateRange, setDateRange] = useState(null); // { start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' }
   const [error, setError] = useState(null);
 
-  /* ----------------------------------------------------------
-     MANUAL LOAD TRIGGER
-  ---------------------------------------------------------- */
-  const handleLoadMetrics = async () => {
-    setLoading(true);
-    setError(null);
-    setMetrics(null);
+/* ----------------------------------------------------------
+   MANUAL LOAD TRIGGER
+---------------------------------------------------------- */
+const handleLoadMetrics = async () => {
+  setLoading(true);
+  setError(null);
+  setMetrics(null);
 
-    try {
-      const res = await enquiryService.getEnquiryKPI(period, undefined, undefined, selectedCenter);
-
-      if (!res) {
-        throw new Error("No response received from server.");
-      }
-
-      setMetrics(res);
-    } catch (err) {
-      console.error("KPI Load Error:", err);
-      setError(err.message || "Failed to fetch KPI metrics.");
-    } finally {
-      setLoading(false);
+  try {
+    let startDate = undefined;
+    let endDate = undefined;
+    
+    // If date range is selected, use it; otherwise use period
+    if (dateRange && dateRange.start && dateRange.end) {
+      startDate = dateRange.start;
+      endDate = dateRange.end;
     }
-  };
+    
+    const res = await enquiryService.getEnquiryKPI(period, startDate, endDate, selectedCenter);
+
+    if (!res) {
+      throw new Error("No response received from server.");
+    }
+
+    setMetrics(res);
+  } catch (err) {
+    console.error("KPI Load Error:", err);
+    setError(err.message || "Failed to fetch KPI metrics.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* ----------------------------------------------------------
      INITIAL VIEW (before clicking load)
@@ -56,30 +67,55 @@ export default function EnquiryDashboard() {
             className="mt-4"
           />
 
-          {/* Period Selector */}
-          <div className="mt-6 flex items-center gap-3">
-            <Select
-              value={period}
-              onChange={(value) => setPeriod(value)}
-              className="min-w-[150px]"
-              size="middle"
-              options={[
-                { label: "This Week", value: "this_week" },
-                { label: "Last Week", value: "last_week" },
-                { label: "This Month", value: "this_month" },
-                { label: "Last Month", value: "last_month" },
-                { label: "Last Quarter", value: "last_quarter" },
-              ]}
-            />
+           {/* Period Selector and Date Range */}
+           <div className="mt-6 flex items-center gap-3 wrap">
+             <Select
+               value={period}
+               onChange={(value) => {
+                 setPeriod(value);
+                 // Clear date range when switching to predefined period
+                 setDateRange(null);
+               }}
+               className="min-w-[150px]"
+               size="middle"
+               options={[
+                 { label: "This Week", value: "this_week" },
+                 { label: "Last Week", value: "last_week" },
+                 { label: "This Month", value: "this_month" },
+                 { label: "Last Month", value: "last_month" },
+                 { label: "Last Quarter", value: "last_quarter" },
+               ]}
+             />
+             
+              <DatePicker.RangePicker
+                placeholder={["Start Date", "End Date"]}
+                value={dateRange && dateRange.start && dateRange.end ? 
+                  [dayjs(dateRange.start), dayjs(dateRange.end)] : null}
+                onChange={([start, end]) => {
+                  if (start && end) {
+                    setDateRange({
+                      start: start.format('YYYY-MM-DD'),
+                      end: end.format('YYYY-MM-DD')
+                    });
+                    // Clear period when selecting custom date range
+                    setPeriod('last_month'); // Reset to default, but it won't be used
+                  } else {
+                    setDateRange(null);
+                  }
+                }}
+                className="min-w-[250px]"
+                size="middle"
+                disabled={loading}
+              />
 
-            <Button
-              type="primary"
-              onClick={handleLoadMetrics}
-              loading={loading}
-            >
-              Generate Report
-            </Button>
-          </div>
+             <Button
+               type="primary"
+               onClick={handleLoadMetrics}
+               loading={loading}
+             >
+               Generate Report
+             </Button>
+           </div>
 
           {error && (
             <Alert
@@ -229,16 +265,24 @@ export default function EnquiryDashboard() {
 
   return (
     <div className="p-4 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <Title level={3} className="!mb-0">
-          Enquiry Insights Dashboard
-        </Title>
+       {/* Header */}
+       <div className="flex items-center justify-between">
+         <Title level={3} className="!mb-0">
+           Enquiry Insights Dashboard
+           {dateRange && (
+             <Text type="secondary" className="ml-2">
+               ({dateRange.start} to {dateRange.end})
+             </Text>
+           )}
+         </Title>
 
         <div className="flex gap-3">
           <Select
             value={period}
-            onChange={(value) => setPeriod(value)}
+            onChange={(value) => {
+              setPeriod(value);
+              setDateRange(null);
+            }}
             className="min-w-[150px]"
             size="middle"
             options={[
@@ -248,6 +292,26 @@ export default function EnquiryDashboard() {
               { label: "Last Month", value: "last_month" },
               { label: "Last Quarter", value: "last_quarter" },
             ]}
+          />
+
+          <DatePicker.RangePicker
+            placeholder={["Start Date", "End Date"]}
+            value={dateRange && dateRange.start && dateRange.end ? 
+              [dayjs(dateRange.start), dayjs(dateRange.end)] : null}
+            onChange={([start, end]) => {
+              if (start && end) {
+                setDateRange({
+                  start: start.format('YYYY-MM-DD'),
+                  end: end.format('YYYY-MM-DD')
+                });
+                setPeriod('last_month');
+              } else {
+                setDateRange(null);
+              }
+            }}
+            className="min-w-[250px]"
+            size="middle"
+            disabled={loading}
           />
 
           <Button type="primary" onClick={handleLoadMetrics}>
