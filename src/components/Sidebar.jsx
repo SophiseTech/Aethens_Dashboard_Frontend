@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useRef } from "react";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Avatar, Menu } from "antd";
 import {
@@ -28,8 +28,12 @@ import {
 import Target from "@/assets/Target";
 import SubMenu from "@components/SubMenu";
 import UserDetailsDrawer from "@components/UserDetailsDrawer";
+import StudentContextHoverDrawer from "@components/StudentContextHoverDrawer";
 import userStore from "@stores/UserStore";
+import studentStore from "@stores/StudentStore";
 import { ROLES } from "@utils/constants";
+import { getStudentDrawerContext } from "@utils/studentDrawerContext";
+import { isStudentDrawerContextRoute } from "@/config/studentDrawerContextRoutes";
 
 const getMenuConfig = (role) => {
   const commonItems = [
@@ -604,11 +608,40 @@ const MobileMenuButton = () => (
 );
 
 function Sidebar({ children }) {
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname, search, state } = location;
   const navigate = useNavigate();
   const { user, logOut } = userStore();
+  const { activeStudent, getStudentById } = studentStore();
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [studentContextDrawerVisible, setStudentContextDrawerVisible] = useState(false);
+  const [studentContextId, setStudentContextId] = useState(null);
   const drawerRef = useRef(null);
+
+  useEffect(() => {
+    const studentDrawerContext = getStudentDrawerContext(state);
+    const fromStudentDrawer = Boolean(studentDrawerContext?.enabled);
+    const isAllowedRoute = isStudentDrawerContextRoute(pathname);
+    const searchParams = new URLSearchParams(search);
+    const queryStudentId = searchParams.get("student_id");
+    const contextStudentId = studentDrawerContext?.studentId || queryStudentId;
+
+    const shouldEnableStudentContextDrawer =
+      fromStudentDrawer && isAllowedRoute && Boolean(contextStudentId);
+
+    if (!shouldEnableStudentContextDrawer) {
+      setStudentContextDrawerVisible(false);
+      setStudentContextId(null);
+      return;
+    }
+
+    setStudentContextId(contextStudentId);
+    setStudentContextDrawerVisible(true);
+
+    if (activeStudent?._id !== contextStudentId) {
+      getStudentById(contextStudentId);
+    }
+  }, [pathname, search, state, activeStudent?._id, getStudentById]);
 
   const closeSidebar = useCallback(() => {
     if (drawerRef.current) drawerRef.current.checked = false;
@@ -786,6 +819,13 @@ function Sidebar({ children }) {
         user={user}
         visible={drawerVisible}
         onClose={handleDrawerClose}
+      />
+      <StudentContextHoverDrawer
+        enabled={Boolean(studentContextId && activeStudent?._id === studentContextId)}
+        open={studentContextDrawerVisible}
+        onOpen={() => setStudentContextDrawerVisible(true)}
+        onClose={() => setStudentContextDrawerVisible(false)}
+        student={activeStudent}
       />
     </div>
   );
