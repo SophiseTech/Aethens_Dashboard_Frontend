@@ -12,7 +12,7 @@ export const usePhaseView = () => {
   // Determine view context
   const viewContext = {
     userRole: user.role,
-    isManagerView: user.role === ROLES.MANAGER && studentId,
+    isManagerView: (user.role === ROLES.MANAGER || user.role === ROLES.ACADEMIC_MANAGER || user.role === ROLES.OPERATIONS_MANAGER || user.role === ROLES.ADMIN) && studentId,
     targetStudentId: studentId || user._id,
     canSubmit: user.role === ROLES.STUDENT,
     isStudent: user.role === ROLES.STUDENT

@@ -9,6 +9,7 @@ import courseService from "@/services/Course";
 import Chip from "@components/Chips/Chip";
 import { useStore } from "zustand";
 import centersStore from "@stores/CentersStore";
+import facultyAssignmentStore from "@stores/FacultyAssignmentStore";
 
 function StudentList() {
   const {
@@ -32,6 +33,10 @@ function StudentList() {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const { selectedCenter } = useStore(centersStore);
+  const { unassignedStudents, getUnassignedStudents } = useStore(facultyAssignmentStore);
+  const unassignedCenterId = (
+    user?.role === ROLES.ADMIN || user?.role === ROLES.OPERATIONS_MANAGER || user?.role === ROLES.ACADEMIC_MANAGER
+  ) ? selectedCenter : user?.center_id;
 
   // Get initial view and page from query parameters
   const initialView = queryParams.get("view") || "Current Students";
@@ -148,6 +153,8 @@ function StudentList() {
         }
       } else if (selectedView === "Todays Students") {
         getTodaysSessionAttendees(user, selectedCenter);
+      } else if (selectedView === "Unassigned Students") {
+        getUnassignedStudents(unassignedCenterId);
       } else {
         getCurrentSessionAttendees();
       }
@@ -161,7 +168,7 @@ function StudentList() {
   };
 
   const handleNameClick = (record) => {
-    setSelectedUser(record);
+    setSelectedUser(record?.student || record);
     setActiveStudent(record)
     setDrawerVisible(true);
   };
@@ -220,6 +227,8 @@ function StudentList() {
 
     if (selectedView === "Current Students") {
       data = currentSessionAttendees;
+    } else if (selectedView === "Unassigned Students") {
+      data = unassignedStudents;
     } else {
       data = searchQuery ? searchResults : students;
     }
@@ -257,6 +266,7 @@ function StudentList() {
     user?.center_id,
     user?.role,
     todaysSessionAttendees,
+    unassignedStudents,
   ]);
 
   console.log("search query: ", searchQuery, searchResults, currentPage);
@@ -297,8 +307,10 @@ function StudentList() {
       title: "Course",
       dataIndex: ["details_id", "course", "course_name"],
       key: "course_name",
-      filters: courseFilters,
-      filteredValue: selectedCourses.length > 0 ? selectedCourses : null,
+      filters: selectedView === "All Students" || selectedView === "Active Students" ? courseFilters : undefined,
+      filteredValue: selectedView === "All Students" || selectedView === "Active Students"
+        ? (selectedCourses.length > 0 ? selectedCourses : null)
+        : null,
     },
     {
       title: "Email",
@@ -342,6 +354,23 @@ function StudentList() {
     )
   }
 
+  if (selectedView === "Unassigned Students") {
+    columns.push(
+      {
+        title: "Marked At",
+        dataIndex: "assignedAt",
+        key: "assignedAt",
+        render: (value) => value ? new Date(value).toLocaleString() : "-",
+      },
+      {
+        title: "Assignment",
+        dataIndex: "assignmentStatus",
+        key: "assignmentStatus",
+        render: () => <Chip type="warning" label="Unassigned" glow={false} />,
+      }
+    );
+  }
+
   const handleTableChange = (pagination, filters) => {
     // Handle course filter change
     const newCourseFilters = filters.course_name && filters.course_name.length > 0 ? filters.course_name : [];
@@ -364,10 +393,12 @@ function StudentList() {
       setViewTotals((prev) => ({ ...prev, [selectedView]: count }));
     } else if (selectedView === 'Current Students') {
       setViewTotals((prev) => ({ ...prev, [selectedView]: currentSessionAttendees?.length ?? 0 }));
+    } else if (selectedView === 'Unassigned Students') {
+      setViewTotals((prev) => ({ ...prev, [selectedView]: unassignedStudents?.length ?? 0 }));
     } else if (selectedView === 'Todays Students') {
       setViewTotals((prev) => ({ ...prev, [selectedView]: todaysSessionAttendees?.length ?? 0 }));
     }
-  }, [total, searchTotal, searchQuery, selectedView, currentSessionAttendees?.length, todaysSessionAttendees?.length]);
+  }, [total, searchTotal, searchQuery, selectedView, currentSessionAttendees?.length, todaysSessionAttendees?.length, unassignedStudents?.length]);
 
   const segmentOptions = useMemo(() => {
     const countFor = (view) => viewTotals[view] ?? 0;
@@ -385,6 +416,9 @@ function StudentList() {
     );
 
     const views = ['Current Students', 'Active Students', 'All Students'];
+    if (user?.role === ROLES.MANAGER || user?.role === ROLES.ADMIN || user?.role === ROLES.OPERATIONS_MANAGER || user?.role === ROLES.ACADEMIC_MANAGER) {
+      views.splice(1, 0, 'Unassigned Students');
+    }
     if (user?.role === ROLES.ADMIN || user?.role === ROLES.FACULTY || user?.role === ROLES.OPERATIONS_MANAGER || user.role === ROLES.ACADEMIC_MANAGER) {
       views.push('Todays Students');
     }
@@ -396,7 +430,8 @@ function StudentList() {
   return (
     <>
       {/* Migration Filters - positioned below search, above view selector */}
-      <div className="flex gap-3 mb-4 items-center flex-wrap">
+      {selectedView !== "Unassigned Students" && (
+        <div className="flex gap-3 mb-4 items-center flex-wrap">
         <Select
           placeholder="From Branch"
           value={tempFromBranch}
@@ -449,7 +484,8 @@ function StudentList() {
         >
           Clear Filters
         </Button>
-      </div>
+        </div>
+      )}
 
       {/* View Selector */}
       <Segmented

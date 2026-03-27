@@ -15,6 +15,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from 'zustand'
 import PropTypes from 'prop-types'
+import { buildStudentDrawerState } from '@utils/studentDrawerContext'
 
 function DrawerActionButtons({ userDetails }) {
   const { user } = useStore(userStore)
@@ -36,32 +37,36 @@ const ManagerActionButtons = ({ userDetails }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { handleCancel: handleFeeCancel, isModalOpen: isFeeModalOpen, handleOk: handleFeeOk, showModal: showFeeModal } = useModal()
 
+  const navigateWithStudentContext = (path, studentId) => {
+    nav(path, { state: buildStudentDrawerState(studentId) });
+  };
+
   const handleViewBills = (student_id) => {
-    nav(`/manager/bills?student_id=${student_id}`);
+    navigateWithStudentContext(`/manager/bills?student_id=${student_id}`, student_id);
   };
 
   const handleViewMaterials = (student_id, course_id) => {
-    nav(`/manager/materials?student_id=${student_id}&course_id=${course_id}`);
+    navigateWithStudentContext(`/manager/materials?student_id=${student_id}&course_id=${course_id}`, student_id);
   };
 
   const handleViewAttendance = (student_id, course_id) => {
-    nav(`/manager/attendance/${student_id}/c/${course_id}`);
+    navigateWithStudentContext(`/manager/attendance/${student_id}/c/${course_id}`, student_id);
   };
 
   const handleViewCourseHistory = (student_id) => {
-    nav(`/manager/courseHistory/${student_id}`);
+    navigateWithStudentContext(`/manager/courseHistory/${student_id}`, student_id);
   };
 
   const handleViewRemarks = (student_id) => {
-    nav(`/manager/remarks/s/${student_id}`);
+    navigateWithStudentContext(`/manager/remarks/s/${student_id}`, student_id);
   };
 
   const handleViewFinalProject = (student_id) => {
-    nav(`/manager/final-project/student/${student_id}/details`);
+    navigateWithStudentContext(`/manager/final-project/student/${student_id}/details`, student_id);
   };
 
   const handleViewWallet = (student_id) => {
-    nav(`/manager/wallets/s/${student_id}`)
+    navigateWithStudentContext(`/manager/wallets/s/${student_id}`, student_id)
   }
 
   const handleViewSession = () => {
@@ -118,32 +123,36 @@ const OperationsManagerActionButtons = ({ userDetails }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { handleCancel: handleFeeCancel, isModalOpen: isFeeModalOpen, handleOk: handleFeeOk, showModal: showFeeModal } = useModal()
 
+  const navigateWithStudentContext = (path, studentId) => {
+    nav(path, { state: buildStudentDrawerState(studentId) });
+  };
+
   const handleViewBills = (student_id) => {
-    nav(`/manager/bills?student_id=${student_id}`);
+    navigateWithStudentContext(`/manager/bills?student_id=${student_id}`, student_id);
   };
 
   const handleViewMaterials = (student_id, course_id) => {
-    nav(`/manager/materials?student_id=${student_id}&course_id=${course_id}`);
+    navigateWithStudentContext(`/manager/materials?student_id=${student_id}&course_id=${course_id}`, student_id);
   };
 
   const handleViewAttendance = (student_id, course_id) => {
-    nav(`/manager/attendance/${student_id}/c/${course_id}`);
+    navigateWithStudentContext(`/manager/attendance/${student_id}/c/${course_id}`, student_id);
   };
 
   const handleViewCourseHistory = (student_id) => {
-    nav(`/manager/courseHistory/${student_id}`);
+    navigateWithStudentContext(`/manager/courseHistory/${student_id}`, student_id);
   };
 
   const handleViewRemarks = (student_id) => {
-    nav(`/manager/remarks/s/${student_id}`);
+    navigateWithStudentContext(`/manager/remarks/s/${student_id}`, student_id);
   };
 
   const handleViewFinalProject = (student_id) => {
-    nav(`/manager/final-project/student/${student_id}/details`);
+    navigateWithStudentContext(`/manager/final-project/student/${student_id}/details`, student_id);
   };
 
   const handleViewWallet = (student_id) => {
-    nav(`/manager/wallets/s/${student_id}`)
+    navigateWithStudentContext(`/manager/wallets/s/${student_id}`, student_id)
   }
 
   const handleViewSession = () => {
@@ -190,24 +199,28 @@ const AcademicManagerActionButtons = ({ userDetails }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { handleCancel: handleFeeCancel, isModalOpen: isFeeModalOpen, handleOk: handleFeeOk, showModal: showFeeModal } = useModal()
 
+  const navigateWithStudentContext = (path, studentId) => {
+    nav(path, { state: buildStudentDrawerState(studentId) });
+  };
+
   const handleViewAttendance = (student_id, course_id) => {
-    nav(`/manager/attendance/${student_id}/c/${course_id}`);
+    navigateWithStudentContext(`/manager/attendance/${student_id}/c/${course_id}`, student_id);
   };
 
   const handleViewCourseHistory = (student_id) => {
-    nav(`/manager/courseHistory/${student_id}`);
+    navigateWithStudentContext(`/manager/courseHistory/${student_id}`, student_id);
   };
 
   const handleViewRemarks = (student_id) => {
-    nav(`/manager/remarks/s/${student_id}`);
+    navigateWithStudentContext(`/manager/remarks/s/${student_id}`, student_id);
   };
 
   const handleViewFinalProject = (student_id) => {
-    nav(`/manager/final-project/student/${student_id}/details`);
+    navigateWithStudentContext(`/manager/final-project/student/${student_id}/details`, student_id);
   };
 
   const handleViewActivities = (student_id) => {
-    nav(`/academic-manager/activities/student/${student_id}`)
+    navigateWithStudentContext(`/academic-manager/activities/student/${student_id}`, student_id)
   }
 
   const handleViewSession = () => {
@@ -217,7 +230,7 @@ const AcademicManagerActionButtons = ({ userDetails }) => {
   const handleViewSyllabus = (userDetails) => {
     const courseId = userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id;
     const studentId = userDetails?._id;
-    nav(`/syllabus/${courseId}/${studentId}`);
+    navigateWithStudentContext(`/syllabus/${courseId}/${studentId}`, studentId);
   };
 
   return (
@@ -258,20 +271,24 @@ const FacultyActionButton = ({ userDetails }) => {
   const { handleCancel: handleFeeCancel, isModalOpen: isFeeModalOpen, handleOk: handleFeeOk, showModal: showFeeModal } = useModal()
   const [selectedStudent, setSelectedStudent] = useState(null)
 
+  const navigateWithStudentContext = (path, studentId) => {
+    nav(path, { state: buildStudentDrawerState(studentId) });
+  };
+
   const handleViewAttendance = (student_id, course_id) => {
-    nav(`/faculty/attendance/${student_id}/c/${course_id}`)
+    navigateWithStudentContext(`/faculty/attendance/${student_id}/c/${course_id}`, student_id)
   }
 
   const handleViewMaterials = (student_id, course_id) => {
-    nav(`/faculty/materials?student_id=${student_id}&course_id=${course_id}`)
+    navigateWithStudentContext(`/faculty/materials?student_id=${student_id}&course_id=${course_id}`, student_id)
   }
 
   const handleViewActivities = (student_id) => {
-    nav(`/faculty/activities/student/${student_id}`)
+    navigateWithStudentContext(`/faculty/activities/student/${student_id}`, student_id)
   }
 
   const handleViewCourseHistory = (student_id) => {
-    nav(`/faculty/courseHistory/${student_id}`);
+    navigateWithStudentContext(`/faculty/courseHistory/${student_id}`, student_id);
   };
 
   const handleViewProject = (student_id) => {
@@ -282,7 +299,7 @@ const FacultyActionButton = ({ userDetails }) => {
   const handleViewSyllabus = (userDetails) => {
     const courseId = userDetails?.details_id?.course_id?._id || userDetails?.details_id?.course_id;
     const studentId = userDetails?._id;
-    nav(`/syllabus/${courseId}/${studentId}`)
+    navigateWithStudentContext(`/syllabus/${courseId}/${studentId}`, studentId)
   }
 
   return (

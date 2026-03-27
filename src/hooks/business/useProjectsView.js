@@ -1,5 +1,6 @@
 import { useFinalProject } from "@hooks/useFinalProject";
 import useUser from "@hooks/useUser";
+import { ROLES } from "@utils/constants";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -11,7 +12,7 @@ function useProjectsView() {
 
   const viewContext = {
     userRole: user.role,
-    isManagerView: user.role === 'manager' || user.role === 'academic_manager' || user.role === 'operations_manager',
+    isManagerView: user.role === ROLES.MANAGER || user.role === ROLES.ACADEMIC_MANAGER || user.role === ROLES.OPERATIONS_MANAGER || user.role === ROLES.ADMIN,
     targetStudentId: studentId || user._id,
   }
 
