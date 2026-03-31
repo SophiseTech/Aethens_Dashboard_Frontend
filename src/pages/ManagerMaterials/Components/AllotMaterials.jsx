@@ -15,7 +15,7 @@ function AllotMaterials({ student_id, handleOk, course_id }) {
   const { getItems, loading: itemsLoading, total: inventoryTotal } = inventoryStore()
   const [selecteItems, setSelecteItems] = useState({})
   const [totals, setTotals] = useState({})
-  const { getInvoiceNo, createBill, createLoading: billLoading } = billStore()
+  const { createBill, createLoading: billLoading } = billStore()
   const [items, setItems] = useState([])
 
   console.log(student_id);
@@ -51,9 +51,6 @@ function AllotMaterials({ student_id, handleOk, course_id }) {
 
   const onSubmitWithInvoice = async (values) => {
     await form.validateFields()
-    const invoiceData = await getInvoiceNo()
-    const invoiceNo = invoiceData?.invoiceNo || 0;
-    const center_initial = invoiceData?.center_initial || '';
 
     const items = values.items?.map((item, index) => ({
       ...item,
@@ -63,8 +60,6 @@ function AllotMaterials({ student_id, handleOk, course_id }) {
     }))
     const data = {
       ...totals,
-      invoiceNo,
-      center_initial,
       items,
       status: "unpaid",
       generated_on: new Date(),
