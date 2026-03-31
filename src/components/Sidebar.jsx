@@ -1,400 +1,580 @@
-import { useMemo, useState, useCallback, useRef } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Avatar } from "antd";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Avatar, Menu } from "antd";
 import {
   AppstoreOutlined,
   BookOutlined,
   CalendarOutlined,
   ClockCircleOutlined,
   DollarOutlined,
-  FundProjectionScreenOutlined,
   LogoutOutlined,
   MenuUnfoldOutlined,
-  MoneyCollectOutlined,
-  PictureOutlined,
-  ShopOutlined,
-  SolutionOutlined,
-  MessageOutlined,
-  CheckSquareOutlined,
-  BellOutlined,
-  AuditOutlined,
-  UserOutlined,
   BankOutlined,
-  FileTextOutlined,
-  MailOutlined,
-  TrophyOutlined,
-  VideoCameraOutlined,
+  AimOutlined,
+  MessageOutlined,
   AccountBookOutlined,
   WalletOutlined,
+  BellOutlined,
+  ShopOutlined,
+  FundProjectionScreenOutlined,
+  CheckSquareOutlined,
+  MoneyCollectOutlined,
+  PictureOutlined,
+  SolutionOutlined,
+  UserOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 
-import Book from "@/assets/Book";
 import Target from "@/assets/Target";
 import SubMenu from "@components/SubMenu";
 import UserDetailsDrawer from "@components/UserDetailsDrawer";
+import StudentContextHoverDrawer from "@components/StudentContextHoverDrawer";
 import userStore from "@stores/UserStore";
+import studentStore from "@stores/StudentStore";
 import { ROLES } from "@utils/constants";
+import { getStudentDrawerContext } from "@utils/studentDrawerContext";
+import { isStudentDrawerContextRoute } from "@/config/studentDrawerContextRoutes";
 
-// Constants - Move menu configuration outside component
-const MENU_CONFIG = [
-  {
-    label: "Dashboard",
-    icon: AppstoreOutlined,
-    path: "/",
-    roles: [ROLES.STUDENT, ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER],
-  },
-  {
-    label: "Students",
-    icon: SolutionOutlined,
-    path: "/",
-    roles: [ROLES.FACULTY],
-  },
-  {
-    label: "Enquiries",
-    icon: MessageOutlined,
-    path: "/manager/enquiries",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-  },
-  {
-    label: "Enquiry Slots",
-    icon: MessageOutlined,
-    path: "/manager/enquiry-slots",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-  },
-  {
-    label: "Targets",
-    icon: Target,
-    path: "/manager/targets",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-  },
-  {
-    label: "Materials",
-    icon: Book,
-    path: "/materials",
-    roles: [ROLES.STUDENT],
-  },
-  {
-    label: "Activities",
-    icon: Target,
-    path: "/activities",
-    roles: [ROLES.STUDENT],
-  },
-  {
-    label: "Slots",
-    icon: CalendarOutlined,
-    path: "/slots",
-    roles: [ROLES.STUDENT],
-  },
-  {
-    label: "Students",
-    icon: SolutionOutlined,
-    path: "/manager/students",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER],
-  },
-  {
-    label: "Bills",
-    icon: DollarOutlined,
-    path: "/manager/bills",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-  },
-  {
-    label: "Bills",
-    icon: DollarOutlined,
-    path: "/bills",
-    roles: [ROLES.STUDENT],
-  },
-  {
-    label: "Inventory",
-    icon: ShopOutlined,
-    path: "/manager/inventory",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-  },
-  {
-    label: "Inventory Items",
-    icon: ShopOutlined,
-    path: "/manager/inventory-items",
-    roles: [ROLES.ADMIN],
-  },
-  {
-    label: "Audits",
-    icon: AuditOutlined,
-    path: "/manager/audits",
-    roles: [ROLES.MANAGER, ROLES.ADMIN],
-  },
-  {
-    label: "Payslips",
-    icon: MoneyCollectOutlined,
-    path: "/manager/payslips",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-  },
-  {
-    label: "Courses",
-    icon: BookOutlined,
-    path: "/faculty/courses",
-    roles: [ROLES.FACULTY],
-  },
-  {
-    label: "Payslips",
-    icon: MoneyCollectOutlined,
-    path: "/faculty/payslips",
-    roles: [ROLES.FACULTY],
-  },
-  {
-    label: "FDP",
-    icon: FundProjectionScreenOutlined,
-    path: "/manager/faculty-development-program",
-    roles: [ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
-  },
-  {
-    label: "FDP",
-    icon: FundProjectionScreenOutlined,
-    path: "/faculty/faculty-development-program",
-    roles: [ROLES.FACULTY],
-  },
-  {
-    label: "My Attendance",
-    icon: CheckSquareOutlined,
-    path: "/faculty/my-attendance",
-    roles: [ROLES.FACULTY],
-  },
-  {
-    label: "My Leaves",
-    icon: CalendarOutlined,
-    path: "/faculty/my-leaves",
-    roles: [ROLES.FACULTY],
-  },
-  {
-    label: "Faculty Attendance",
-    icon: ClockCircleOutlined,
-    path: "/admin/faculty-attendance",
-    roles: [ROLES.ADMIN],
-  },
-  {
-    label: "Manage Leaves",
-    icon: CheckSquareOutlined,
-    path: "/admin/manage-leaves",
-    roles: [ROLES.ADMIN],
-  },
-  {
-    label: "Staff",
-    icon: UserOutlined,
-    path: "/admin/users",
-    roles: [ROLES.ADMIN],
-  },
-  {
-    label: "Centers",
-    icon: BankOutlined,
-    path: "/admin/centers",
-    roles: [ROLES.ADMIN],
-  },
-  {
-    label: "Blog Posts",
-    icon: FileTextOutlined,
-    path: "/admin/blog-posts",
-    roles: [ROLES.ADMIN],
-  },
-  {
-    label: "Newsletters",
-    icon: MailOutlined,
-    path: "/admin/newsletters",
-    roles: [ROLES.ADMIN],
-  },
-  {
-    label: "Shop Items",
-    icon: ShopOutlined,
-    path: "/admin/shop-items",
-    roles: [ROLES.ADMIN],
-  },
-  {
-    label: "Art Works",
-    icon: PictureOutlined,
-    path: "/admin/art-works",
-    roles: [ROLES.ADMIN],
-  },
-  {
-    label: "Student of the Week",
-    icon: TrophyOutlined,
-    path: "/admin/student-of-the-week",
-    roles: [ROLES.ADMIN],
-  },
-  {
-    label: "Latest Videos",
-    icon: VideoCameraOutlined,
-    path: "/admin/latest-videos",
-    roles: [ROLES.ADMIN],
-  },
-  {
-    label: "Attendance",
-    icon: FundProjectionScreenOutlined,
-    path: "/attendance",
-    roles: [ROLES.STUDENT],
-  },
-  {
-    label: "Gallery",
-    icon: PictureOutlined,
-    path: "/gallery",
-    roles: [ROLES.MANAGER, ROLES.FACULTY, ROLES.ADMIN],
-  },
-  {
-    label: "Slots",
-    icon: ClockCircleOutlined,
-    path: "/manager/slots",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-  },
-  {
-    label: "Slots",
-    icon: ClockCircleOutlined,
-    path: "/faculty/slots",
-    roles: [ROLES.FACULTY],
-  },
-  {
-    label: "Course History",
-    icon: ClockCircleOutlined,
-    path: "/courseHistory",
-    roles: [ROLES.STUDENT],
-  },
-  {
-    label: "Announcements",
-    icon: ClockCircleOutlined,
-    path: "/manager/announcements",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER],
-  },
-  {
-    label: "Notifications",
-    icon: BellOutlined,
-    path: "/manager/notifications",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-  },
-  {
-    label: "Holidays",
-    icon: CalendarOutlined,
-    path: "/manager/holidays",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER],
-  },
-  {
-    label: "Syllabus Gallery",
-    icon: PictureOutlined,
-    path: "/admin/syllabus-gallery",
-    roles: [ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
-  },
-  {
-    label: "Student Syllabus",
-    icon: BookOutlined,
-    path: "/academic-manager/student-syllabus",
-    roles: [ROLES.ACADEMIC_MANAGER],
-  },
-  {
-    label: "Syllabus Gallery",
-    icon: PictureOutlined,
-    path: "/faculty/syllabus-gallery",
-    roles: [ROLES.FACULTY],
-  },
-  {
-    label: "Student Syllabus",
-    icon: BookOutlined,
-    path: "/faculty/student-syllabus",
-    roles: [ROLES.FACULTY],
-  },
-  {
-    label: "Courses",
-    icon: BookOutlined,
-    path: "/admin/courses",
-    roles: [ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
-  },
-  {
-    label: "Announcements",
-    icon: ClockCircleOutlined,
-    path: "/student/announcements",
-    roles: [ROLES.STUDENT],
-  },
-  {
-    label: "Final Project",
-    icon: ClockCircleOutlined,
-    path: "/student/final-project",
-    roles: [ROLES.STUDENT],
-  },
-  {
-    label: "Final Project",
-    icon: ClockCircleOutlined,
-    path: "/manager/final-project",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
-  },
-  {
-    label: "Tasks",
-    icon: CheckSquareOutlined,
-    path: "/manager/tasks",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-  },
-  {
-    label: "Attendance Register",
-    icon: CheckSquareOutlined,
-    path: "/manager/attendance-register",
-    roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
-  },
-  {
-    label: "Expenses",
-    icon: AccountBookOutlined,
-    path: "/manager/expenses",
-    roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER],
-  },
-  {
-    label: "Ledgers",
-    icon: WalletOutlined,
-    path: "/manager/ledgers",
-    roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER],
-  },
-];
+const getMenuConfig = (role) => {
+  const commonItems = [
+    {
+      label: "Dashboard",
+      icon: <AppstoreOutlined />,
+      key: "dashboard",
+      path: "/",
+    },
+  ];
 
-// Utility function for dynamic paths
-const getDynamicPath = (path, user) => {
-  if (path.includes("${user?.details_id?.course_id}")) {
-    return path.replace(
-      "${user?.details_id?.course_id}",
-      user?.details_id?.course_id || ""
-    );
+  const adminItems = [
+    {
+      label: "Students",
+      icon: <SolutionOutlined />,
+      key: "students",
+      path: "/manager/students",
+    },
+    {
+      label: "Finance",
+      icon: <DollarOutlined />,
+      key: "finance",
+      children: [
+        { label: "Bills", key: "bills", path: "/manager/bills" },
+        { label: "Payslips", key: "payslips", path: "/manager/payslips" },
+        { label: "Inventory", key: "inventory", path: "/manager/inventory" },
+        {
+          label: "Inventory Items",
+          key: "inventory-items",
+          path: "/manager/inventory-items",
+        },
+        { label: "Audits", key: "audits", path: "/manager/audits" },
+        {
+          label: "Expenses",
+          key: "expenses",
+          path: "/manager/expenses",
+        },
+        {
+          label: "Ledgers",
+          key: "ledgers",
+          path: "/manager/ledgers",
+        },
+      ],
+    },
+    {
+      label: "Operations",
+      icon: <ClockCircleOutlined />,
+      key: "operations",
+      children: [
+        { label: "Enquiries", key: "enquiries", path: "/manager/enquiries" },
+        {
+          label: "Enquiry Slots",
+          key: "enquiry-slots",
+          path: "/manager/enquiry-slots",
+        },
+        { label: "Targets", key: "targets", path: "/manager/targets" },
+        { label: "Slots", key: "slots", path: "/manager/slots" },
+        {
+          label: "Announcements",
+          key: "announcements",
+          path: "/manager/announcements",
+        },
+        {
+          label: "Notifications",
+          key: "notifications",
+          path: "/manager/notifications",
+        },
+        { label: "Holidays", key: "holidays", path: "/manager/holidays" },
+      ],
+    },
+    {
+      label: "Academics",
+      icon: <BookOutlined />,
+      key: "academics",
+      children: [
+        { label: "Courses", key: "courses", path: "/admin/courses" },
+        {
+          label: "Syllabus Gallery",
+          key: "syllabus-gallery",
+          path: "/admin/syllabus-gallery",
+        },
+        {
+          label: "Final Project",
+          key: "final-project",
+          path: "/manager/final-project",
+        },
+        { label: "Tasks", key: "tasks", path: "/manager/tasks" },
+        {
+          label: "Attendance Register",
+          key: "attendance-register",
+          path: "/manager/attendance-register",
+        },
+      ],
+    },
+
+    {
+      label: "Faculty",
+      icon: <SolutionOutlined />,
+      key: "faculty",
+      children: [
+        {
+          label: "FDP",
+          key: "fdp",
+          path: "/manager/faculty-development-program",
+        },
+        {
+          label: "Faculty Attendance",
+          key: "faculty-attendance",
+          path: "/admin/faculty-attendance",
+        },
+        {
+          label: "Manage Leaves",
+          key: "manage-leaves",
+          path: "/admin/manage-leaves",
+        },
+      ],
+    },
+    {
+      label: "Staff",
+      icon: <UserOutlined />,
+      key: "staff",
+      path: "/admin/users",
+    },
+    {
+      label: "Centers",
+      icon: <BankOutlined />,
+      key: "centers",
+      path: "/admin/centers",
+    },
+    {
+      label: "Content",
+      icon: <FileTextOutlined />,
+      key: "content",
+      children: [
+        { label: "Blog Posts", key: "blog-posts", path: "/admin/blog-posts" },
+        {
+          label: "Newsletters",
+          key: "newsletters",
+          path: "/admin/newsletters",
+        },
+        { label: "Shop Items", key: "shop-items", path: "/admin/shop-items" },
+        { label: "Art Works", key: "art-works", path: "/admin/art-works" },
+        {
+          label: "Student of the Week",
+          key: "student-of-week",
+          path: "/admin/student-of-the-week",
+        },
+        {
+          label: "Latest Videos",
+          key: "latest-videos",
+          path: "/admin/latest-videos",
+        },
+      ],
+    },
+
+    {
+      label: "Gallery",
+      icon: <PictureOutlined />,
+      key: "gallery",
+      path: "/gallery",
+    },
+  ];
+
+  const managerItems = [
+    {
+      label: "Students",
+      icon: <SolutionOutlined />,
+      key: "students",
+      path: "/manager/students",
+    },
+    {
+      label: "Tasks",
+      icon: <CheckSquareOutlined />,
+      key: "tasks",
+      path: "/manager/tasks",
+    },
+    {
+      label: "Academics",
+      icon: <BookOutlined />,
+      key: "academics",
+      children: [
+        {
+          label: "Attendance Register",
+          key: "attendance-register",
+          path: "/manager/attendance-register",
+        },
+      ],
+    },
+    {
+      label: "Finance",
+      icon: <DollarOutlined />,
+      key: "finance",
+      children: [
+        { label: "Bills", key: "bills", path: "/manager/bills" },
+        { label: "Inventory", key: "inventory", path: "/manager/inventory" },
+        { label: "Audits", key: "audits", path: "/manager/audits" },
+        {
+          label: "Expenses",
+          key: "expenses",
+          path: "/manager/expenses",
+        },
+        {
+          label: "Ledgers",
+          key: "ledgers",
+          path: "/manager/ledgers",
+        },
+      ],
+    },
+    {
+      label: "Operations",
+      icon: <ClockCircleOutlined />,
+      key: "operations",
+      children: [
+        { label: "Enquiries", key: "enquiries", path: "/manager/enquiries" },
+        {
+          label: "Enquiry Slots",
+          key: "enquiry-slots",
+          path: "/manager/enquiry-slots",
+        },
+        { label: "Targets", key: "targets", path: "/manager/targets" },
+        { label: "Slots", key: "slots", path: "/manager/slots" },
+        {
+          label: "Announcements",
+          key: "announcements",
+          path: "/manager/announcements",
+        },
+        {
+          label: "Notifications",
+          key: "notifications",
+          path: "/manager/notifications",
+        },
+        { label: "Holidays", key: "holidays", path: "/manager/holidays" },
+      ],
+    },
+    {
+      label: "Gallery",
+      icon: <PictureOutlined />,
+      key: "gallery",
+      path: "/gallery",
+    },
+  ];
+
+  const academicManagerItems = [
+    {
+      label: "Students",
+      icon: <SolutionOutlined />,
+      key: "students",
+      path: "/manager/students",
+    },
+    {
+      label: "Courses",
+      icon: <BookOutlined />,
+      key: "courses",
+      path: "/admin/courses",
+    },
+    {
+      label: "Syllabus Gallery",
+      icon: <PictureOutlined />,
+      key: "syllabus-gallery",
+      path: "/admin/syllabus-gallery",
+    },
+    {
+      label: "Student Syllabus",
+      icon: <BookOutlined />,
+      key: "student-syllabus",
+      path: "/academic-manager/student-syllabus",
+    },
+    {
+      label: "Slots",
+      icon: <ClockCircleOutlined />,
+      key: "slots",
+      path: "/manager/slots",
+    },
+    {
+      label: "Final Project",
+      icon: <ClockCircleOutlined />,
+      key: "final-project",
+      path: "/manager/final-project",
+    },
+    {
+      label: "Attendance Register",
+      icon: <CheckSquareOutlined />,
+      key: "attendance-register",
+      path: "/manager/attendance-register",
+    },
+    {
+      label: "FDP",
+      icon: <FundProjectionScreenOutlined />,
+      key: "fdp",
+      path: "/manager/faculty-development-program",
+    },
+    {
+      label: "Announcements",
+      icon: <ClockCircleOutlined />,
+      key: "announcements",
+      path: "/manager/announcements",
+    },
+    {
+      label: "Holidays",
+      icon: <CalendarOutlined />,
+      key: "holidays",
+      path: "/manager/holidays",
+    },
+  ];
+
+  const facultyItems = [
+    {
+      label: "Students",
+      icon: <SolutionOutlined />,
+      key: "students",
+      path: "/",
+    },
+    {
+      label: "Courses",
+      icon: <BookOutlined />,
+      key: "courses",
+      path: "/faculty/courses",
+    },
+    {
+      label: "Syllabus Gallery",
+      icon: <PictureOutlined />,
+      key: "syllabus-gallery",
+      path: "/faculty/syllabus-gallery",
+    },
+    {
+      label: "Student Syllabus",
+      icon: <BookOutlined />,
+      key: "student-syllabus",
+      path: "/faculty/student-syllabus",
+    },
+    {
+      label: "FDP",
+      icon: <FundProjectionScreenOutlined />,
+      key: "fdp",
+      path: "/faculty/faculty-development-program",
+    },
+    {
+      label: "My Attendance",
+      icon: <CheckSquareOutlined />,
+      key: "my-attendance",
+      path: "/faculty/my-attendance",
+    },
+    {
+      label: "My Leaves",
+      icon: <CalendarOutlined />,
+      key: "my-leaves",
+      path: "/faculty/my-leaves",
+    },
+
+    {
+      label: "Payslips",
+      icon: <MoneyCollectOutlined />,
+      key: "payslips",
+      path: "/faculty/payslips",
+    },
+    {
+      label: "Slots",
+      icon: <CalendarOutlined />,
+      key: "slots",
+      path: "/faculty/slots",
+    },
+    {
+      label: "Gallery",
+      icon: <PictureOutlined />,
+      key: "gallery",
+      path: "/gallery",
+    },
+  ];
+
+  const operationsManagerItems = [
+    {
+      label: "Students",
+      icon: <SolutionOutlined />,
+      key: "students",
+      path: "/manager/students",
+    },
+    {
+      label: "Enquiries",
+      icon: <MessageOutlined />,
+      key: "enquiries",
+      path: "/manager/enquiries",
+    },
+    {
+      label: "Enquiry Slots",
+      icon: <MessageOutlined />,
+      key: "enquiry-slots",
+      path: "/manager/enquiry-slots",
+    },
+    {
+      label: "Targets",
+      icon: <AimOutlined />,
+      key: "targets",
+      path: "/manager/targets",
+    },
+    {
+      label: "Slots",
+      icon: <ClockCircleOutlined />,
+      key: "slots",
+      path: "/manager/slots",
+    },
+    {
+      label: "Staff",
+      icon: <UserOutlined />,
+      key: "staff",
+      path: "/admin/users",
+    },
+    {
+      label: "Announcements",
+      icon: <ClockCircleOutlined />,
+      key: "announcements",
+      path: "/manager/announcements",
+    },
+    {
+      label: "Notifications",
+      icon: <BellOutlined />,
+      key: "notifications",
+      path: "/manager/notifications",
+    },
+    {
+      label: "Holidays",
+      icon: <CalendarOutlined />,
+      key: "holidays",
+      path: "/manager/holidays",
+    },
+    {
+      label: "Tasks",
+      icon: <CheckSquareOutlined />,
+      key: "tasks",
+      path: "/manager/tasks",
+    },
+    {
+      label: "Bills",
+      icon: <DollarOutlined />,
+      key: "bills",
+      path: "/manager/bills",
+    },
+    {
+      label: "Payslips",
+      icon: <MoneyCollectOutlined />,
+      key: "payslips",
+      path: "/manager/payslips",
+    },
+    {
+      label: "Inventory",
+      icon: <ShopOutlined />,
+      key: "inventory",
+      path: "/manager/inventory",
+    },
+    {
+      label: "Expenses",
+      icon: <AccountBookOutlined />,
+      key: "expenses",
+      path: "/manager/expenses",
+    },
+    {
+      label: "Ledgers",
+      icon: <WalletOutlined />,
+      key: "ledgers",
+      path: "/manager/ledgers",
+    },
+  ];
+
+  const studentItems = [
+    {
+      label: "Materials",
+      icon: <BookOutlined />,
+      key: "materials",
+      path: "/materials",
+    },
+    {
+      label: "Attendance",
+      icon: <FundProjectionScreenOutlined />,
+      key: "attendance",
+      path: "/attendance",
+    },
+    {
+      label: "Course History",
+      icon: <ClockCircleOutlined />,
+      key: "course-history",
+      path: "/courseHistory",
+    },
+    {
+      label: "Activities",
+      icon: <AimOutlined />,
+      key: "activities",
+      path: "/activities",
+    },
+    {
+      label: "Slots",
+      icon: <CalendarOutlined />,
+      key: "slots",
+      path: "/slots",
+    },
+    {
+      label: "Bills",
+      icon: <DollarOutlined />,
+      key: "bills",
+      path: "/bills",
+    },
+    {
+      label: "Announcements",
+      icon: <ClockCircleOutlined />,
+      key: "announcements",
+      path: "/student/announcements",
+    },
+    {
+      label: "Final Project",
+      icon: <ClockCircleOutlined />,
+      key: "final-project",
+      path: "/student/final-project",
+    },
+  ];
+
+  switch (role) {
+    case ROLES.ADMIN:
+      return [...commonItems, ...adminItems];
+    case ROLES.MANAGER:
+      return [...commonItems, ...managerItems];
+    case ROLES.ACADEMIC_MANAGER:
+      return [...commonItems, ...academicManagerItems];
+    case ROLES.FACULTY:
+      return facultyItems;
+    case ROLES.OPERATIONS_MANAGER:
+      return [...commonItems, ...operationsManagerItems];
+    case ROLES.STUDENT:
+      return [...commonItems, ...studentItems];
+    default:
+      return commonItems;
   }
-  return path;
 };
 
-// Separate components for better organization
 const SidebarLogo = () => (
   <img
     src="/images/logo.png"
     alt="Logo"
-    className="self-center p-5 px-0 max-2xl:w-3/4 max-2xl:mx-auto 2xl:p-10"
+    className="self-center p-5 px-0 max-2xl:w-3/4 max-2xl:mx-auto 2xl:p-5"
   />
 );
 
-const MenuItem = ({ item, isActive, user, onNavigate }) => {
-  const IconComponent = item.icon;
-  const dynamicPath = getDynamicPath(item.path, user);
-
-  return (
-    <Link to={dynamicPath} className="block" onClick={onNavigate}>
-      <div className="flex gap-10 items-center group hover:bg-gray-50 transition-colors duration-200 rounded-r-xl">
-        <div
-          className={`rounded-r-xl bg-secondary transition-opacity duration-200 w-1 h-9 2xl:w-1.5 2xl:h-12 ${isActive ? "opacity-100" : "opacity-0"
-            }`}
-        />
-        <div className="flex items-center gap-3 2xl:gap-5 py-2">
-          <IconComponent
-            className="text-sm 2xl:text-xl w-[15px] 2xl:w-auto transition-all duration-200"
-            style={{ strokeWidth: isActive ? 3 : 2 }}
-          />
-          <p
-            className={`transition-all duration-200 text-sm 2xl:text-lg ${isActive ? "font-bold text-primary" : "font-normal text-gray-700"
-              }`}
-          >
-            {item.label}
-          </p>
-        </div>
-      </div>
-    </Link>
-  );
-};
-
 const UserProfile = ({ user, onProfileClick, onLogout }) => (
-  <div className="p-3 m-5 bg-card rounded-full flex gap-2 justify-between items-center shadow-sm hover:shadow-md transition-shadow duration-200">
+  <div className="p-3 my-5 ml-2 bg-card rounded-full flex gap-2 justify-between items-center shadow-sm hover:shadow-md transition-shadow duration-200">
     <div className="flex gap-2 cursor-pointer flex-1" onClick={onProfileClick}>
       <Avatar src={user?.profile_img} className="flex-shrink-0">
         {user?.username?.charAt(0)?.toUpperCase()}
@@ -428,47 +608,138 @@ const MobileMenuButton = () => (
 );
 
 function Sidebar({ children }) {
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname, search, state } = location;
   const navigate = useNavigate();
   const { user, logOut } = userStore();
+  const { activeStudent, getStudentById } = studentStore();
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [studentContextDrawerVisible, setStudentContextDrawerVisible] = useState(false);
+  const [studentContextId, setStudentContextId] = useState(null);
   const drawerRef = useRef(null);
+
+  useEffect(() => {
+    const studentDrawerContext = getStudentDrawerContext(state);
+    const fromStudentDrawer = Boolean(studentDrawerContext?.enabled);
+    const isAllowedRoute = isStudentDrawerContextRoute(pathname);
+    const searchParams = new URLSearchParams(search);
+    const queryStudentId = searchParams.get("student_id");
+    const contextStudentId = studentDrawerContext?.studentId || queryStudentId;
+
+    const shouldEnableStudentContextDrawer =
+      fromStudentDrawer && isAllowedRoute && Boolean(contextStudentId);
+
+    if (!shouldEnableStudentContextDrawer) {
+      setStudentContextDrawerVisible(false);
+      setStudentContextId(null);
+      return;
+    }
+
+    setStudentContextId(contextStudentId);
+    setStudentContextDrawerVisible(true);
+
+    if (activeStudent?._id !== contextStudentId) {
+      getStudentById(contextStudentId);
+    }
+  }, [pathname, search, state, activeStudent?._id, getStudentById]);
 
   const closeSidebar = useCallback(() => {
     if (drawerRef.current) drawerRef.current.checked = false;
   }, []);
 
-  // Memoized filtered menu items
-  const visibleMenuItems = useMemo(
-    () => MENU_CONFIG.filter((item) => item.roles.includes(user?.role)),
-    [user?.role]
-  );
-
-  // Add syllabus dynamically if user is student
-  const menuItems = useMemo(() => {
-    const items = [...visibleMenuItems];
+  const menuConfig = useMemo(() => {
+    let config = getMenuConfig(user?.role);
     if (user?.role === ROLES.STUDENT && user?.details_id?.course_id) {
-      items.push({
+      const syllabusItem = {
         label: "Syllabus",
-        icon: BookOutlined,
+        icon: <BookOutlined />,
+        key: "syllabus",
         path: `/syllabus/${user.details_id.course_id}`,
-        roles: [ROLES.STUDENT],
-      });
+      };
+      const hasSyllabus = config.some((item) => item.key === "syllabus");
+      if (!hasSyllabus) {
+        const materialsIndex = config.findIndex(
+          (item) => item.key === "materials",
+        );
+        if (materialsIndex !== -1) {
+          config = [
+            ...config.slice(0, materialsIndex),
+            syllabusItem,
+            ...config.slice(materialsIndex),
+          ];
+        } else {
+          config = [...config, syllabusItem];
+        }
+      }
     }
-    return items;
-  }, [visibleMenuItems, user]);
+    return config;
+  }, [user?.role, user?.details_id?.course_id]);
 
-  // Optimized active check
-  const isActive = useCallback(
-    (path) => {
-      if (path === "/") return pathname === "/";
-      // Exact match or followed by a slash (to avoid /manager/inventory matching /manager/inventory-items)
-      return pathname === path || pathname.startsWith(path + "/");
-    },
-    [pathname]
-  );
+  const selectedKeys = useMemo(() => {
+    const findKey = (items) => {
+      for (const item of items) {
+        if (
+          item.path &&
+          (pathname === item.path || pathname.startsWith(item.path + "/"))
+        ) {
+          return [item.key];
+        }
+        if (item.children) {
+          const childKey = findKey(item.children);
+          if (childKey) return childKey;
+        }
+      }
+      return [];
+    };
+    return findKey(menuConfig);
+  }, [pathname, menuConfig]);
 
-  // Event handlers
+  const openKeys = useMemo(() => {
+    const findOpenKey = (items) => {
+      for (const item of items) {
+        if (item.children) {
+          const hasActiveChild = (children) => {
+            for (const child of children) {
+              if (
+                child.path &&
+                (pathname === child.path ||
+                  pathname.startsWith(child.path + "/"))
+              ) {
+                return true;
+              }
+            }
+            return false;
+          };
+          if (hasActiveChild(item.children)) {
+            return [item.key];
+          }
+        }
+      }
+      return [];
+    };
+    return findOpenKey(menuConfig);
+  }, [pathname, menuConfig]);
+
+  const handleMenuClick = ({ key }) => {
+    const findPath = (items) => {
+      for (const item of items) {
+        if (item.key === key && item.path) {
+          return item.path;
+        }
+        if (item.children) {
+          const path = findPath(item.children);
+          if (path) return path;
+        }
+      }
+      return null;
+    };
+    const path = findPath(menuConfig);
+    if (path) {
+      navigate(path);
+      closeSidebar();
+    }
+  };
+
   const handleLogout = useCallback(() => {
     logOut();
     window.location.replace("/auth/login");
@@ -482,9 +753,31 @@ function Sidebar({ children }) {
     setDrawerVisible(false);
   }, []);
 
+  const renderMenuItems = (items) => {
+    return items.map((item) => {
+      if (item.children) {
+        return (
+          <Menu.SubMenu key={item.key} icon={item.icon} title={item.label}>
+            {renderMenuItems(item.children)}
+          </Menu.SubMenu>
+        );
+      }
+      return (
+        <Menu.Item key={item.key} icon={item.icon}>
+          {item.label}
+        </Menu.Item>
+      );
+    });
+  };
+
   return (
     <div className="drawer h-full lg:drawer-open">
-      <input ref={drawerRef} id="my-drawer" type="checkbox" className="drawer-toggle" />
+      <input
+        ref={drawerRef}
+        id="my-drawer"
+        type="checkbox"
+        className="drawer-toggle"
+      />
 
       <div className="drawer-content">
         <MobileMenuButton />
@@ -494,26 +787,24 @@ function Sidebar({ children }) {
       <div className="drawer-side z-20 no-scrollbar">
         <label htmlFor="my-drawer" className="drawer-overlay" />
 
-        <aside className="h-full flex flex-col bg-white max-sm:w-80 w-96 shadow-lg">
-          {/* Fixed Header - Logo */}
+        <aside className="h-full flex flex-col bg-white max-sm:w-80 w-64 shadow-lg px-1">
           <div className="flex-shrink-0 border-b border-gray-100">
             <SidebarLogo />
           </div>
 
-          {/* Scrollable Navigation Menu */}
-          <nav className="flex-1 overflow-y-auto no-scrollbar flex flex-col 2xl:gap-3 px-2 py-4">
-            {menuItems.map((item, index) => (
-              <MenuItem
-                key={`${item.path}-${index}`}
-                item={item}
-                isActive={isActive(item.path)}
-                user={user}
-                onNavigate={closeSidebar}
-              />
-            ))}
+          <nav className="flex-1 overflow-y-auto no-scrollbar py-2">
+            <Menu
+              mode="inline"
+              selectedKeys={selectedKeys}
+              defaultOpenKeys={openKeys}
+              onClick={handleMenuClick}
+              style={{ border: "none" }}
+              inlineCollapsed={false}
+            >
+              {renderMenuItems(menuConfig)}
+            </Menu>
           </nav>
 
-          {/* Fixed Footer - User Profile */}
           <div className="flex-shrink-0 border-t border-gray-100">
             <UserProfile
               user={user}
@@ -528,6 +819,13 @@ function Sidebar({ children }) {
         user={user}
         visible={drawerVisible}
         onClose={handleDrawerClose}
+      />
+      <StudentContextHoverDrawer
+        enabled={Boolean(studentContextId && activeStudent?._id === studentContextId)}
+        open={studentContextDrawerVisible}
+        onOpen={() => setStudentContextDrawerVisible(true)}
+        onClose={() => setStudentContextDrawerVisible(false)}
+        student={activeStudent}
       />
     </div>
   );

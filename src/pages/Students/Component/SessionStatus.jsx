@@ -4,6 +4,7 @@ import { Button } from 'antd';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from 'zustand';
+import { buildStudentDrawerState } from '@utils/studentDrawerContext';
 
 function SessionStatus({ student }) {
   const navigate = useNavigate();
@@ -11,11 +12,11 @@ function SessionStatus({ student }) {
 
   const handleClick = () => {
     if (user.role === 'academic_manager') {
-      navigate(`/acmanager/session-status/${student._id}`, { state: { student } });
+      navigate(`/acmanager/session-status/${student._id}`, { state: buildStudentDrawerState(student._id, { student }) });
     } else if (user.role === 'manager' || user.role === 'admin') {
-      navigate(`/manager/session-status/${student._id}`, { state: { student } });
+      navigate(`/manager/session-status/${student._id}`, { state: buildStudentDrawerState(student._id, { student }) });
     } else {
-      navigate(`/faculty/session-status/${student._id}`, { state: { student } });
+      navigate(`/faculty/session-status/${student._id}`, { state: buildStudentDrawerState(student._id, { student }) });
     }
   };
 

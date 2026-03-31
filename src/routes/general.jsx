@@ -358,6 +358,7 @@ export const generalRoutes = [
             ),
             title: "Centers",
           },
+
           {
             path: "/admin/blog-posts",
             element: (
