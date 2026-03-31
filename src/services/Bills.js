@@ -54,9 +54,9 @@ class BillServices {
     }
   }
 
-  async getInvoiceNumber(center_id) {
+  async getInvoiceNumber() {
     try {
-      const response = await get(`/bills/invoiceNo?center_id=${center_id}`)
+      const response = await get(`/bills/invoiceNo`)
       return response.data
     } catch (error) {
       handleError(error)

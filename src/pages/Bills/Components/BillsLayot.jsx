@@ -35,11 +35,29 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
     const prefix = bill.center_initial || bill.center_id?.center_initial || ''
     const invoiceLabel = bill.invoiceNo ? `${prefix}${bill.invoiceNo}` : 'Draft'
     const payableTotal = Math.round(bill.applyWallet ? bill.finalTotal : bill.total)
+    const fy = bill.financial_year
 
     return {
       ...bill,
       description: <div>
-        <p>{`${invoiceLabel} | ${dayjs(bill.generated_on).format("D MMM, YYYY")}`}</p>
+        <p className='flex items-center gap-2'>
+          <span>{`${invoiceLabel} | ${dayjs(bill.generated_on).format("D MMM, YYYY")}`}</span>
+          {fy && (
+            <span style={{
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              lineHeight: 1,
+              padding: '2px 6px',
+              borderRadius: '999px',
+              background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+              color: '#fff',
+              letterSpacing: '0.03em',
+              whiteSpace: 'nowrap',
+            }}>
+              FY '{fy}
+            </span>
+          )}
+        </p>
         <p>Paid On: <strong>{formatDate(bill.payment_date)}</strong></p>
         <p className='capitalize'>Mode: <strong>{bill.payment_method?.replace("_", " ")}</strong></p>
       </div>,

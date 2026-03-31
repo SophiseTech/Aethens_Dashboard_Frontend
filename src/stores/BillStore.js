@@ -95,14 +95,12 @@ const billStore = create((set, get) => ({
     try {
       set({ createLoading: true })
       if (!data) throw new Error("Bad Data")
-      const { bills, invoiceNo } = get()
+      const { bills } = get()
       const newBill = await billService.createBill(data)
       if (newBill) {
-        const updatedBills = [newBill, ...bills]
         set({
-          bills: updatedBills,
-          // Only increment local invoiceNo if it wasn't saved as a draft
-          invoiceNo: data.saveAsDraft ? invoiceNo : invoiceNo + 1
+          bills: [newBill, ...bills],
+          invoiceNo: data.saveAsDraft ? get().invoiceNo : (newBill.invoiceNo || get().invoiceNo)
         })
         handleSuccess(data.saveAsDraft ? "Draft Saved Successfully" : "Invoice Created Succesfully")
         return newBill
@@ -117,15 +115,15 @@ const billStore = create((set, get) => ({
     try {
       set({ createLoading: true });
       if (!id || !data) throw new Error("Bad Data");
-      const { bills, invoiceNo } = get();
+      const { bills } = get();
       const finalizedBill = await billService.finalizeBill(id, data);
       if (finalizedBill) {
-        const updatedBills = bills.map(item => (
+        const updatedBills = bills.map(item =>
           item._id === finalizedBill._id ? finalizedBill : item
-        ));
+        );
         set({
           bills: updatedBills,
-          invoiceNo: invoiceNo + 1
+          invoiceNo: finalizedBill.invoiceNo || get().invoiceNo
         });
         handleSuccess("Draft Finalized Successfully");
         return finalizedBill;
@@ -136,23 +134,18 @@ const billStore = create((set, get) => ({
       set({ createLoading: false });
     }
   },
-  getInvoiceNo: async (centerId) => {
+  getInvoiceNo: async () => {
     try {
       set({ loading: true })
-      const { user } = userStore.getState()
-      const effectiveCenterId = centerId ?? user.center_id;
-      const invoiceDoc = await billService.getInvoiceNumber(effectiveCenterId)
+      const invoiceDoc = await billService.getInvoiceNumber()
       if (invoiceDoc && invoiceDoc.invoiceNo) {
-        const center_initial = invoiceDoc.center_initial || ''
         set({
           invoiceNo: invoiceDoc.invoiceNo,
-          center_initial: center_initial
+          center_initial: ''
         })
-        // Return both values - format for display where needed
         return {
           invoiceNo: invoiceDoc.invoiceNo,
-          center_initial: center_initial,
-          formatted: `${center_initial}${invoiceDoc.invoiceNo}`  // e.g., "WFD1001"
+          currentFY: invoiceDoc.currentFY,
         }
       }
     } catch (error) {

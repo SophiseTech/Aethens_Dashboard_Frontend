@@ -85,13 +85,19 @@ const studentStore = create((set, get) => ({
           selectedCenter
         );
         if (users) {
-          users.sort((a, b) => b.isPresent - a.isPresent);
+          users.sort((a, b) => {
+            if (b.isPresent !== a.isPresent) return b.isPresent - a.isPresent;
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          });
           set({ currentSessionAttendees: users });
         }
       } else {
         const users = await userService.getCurrentSessionAttendees();
         if (users) {
-          users.sort((a, b) => b.isPresent - a.isPresent);
+          users.sort((a, b) => {
+            if (b.isPresent !== a.isPresent) return b.isPresent - a.isPresent;
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          });
           set({ currentSessionAttendees: users });
         }
       }
@@ -121,7 +127,10 @@ const studentStore = create((set, get) => ({
       const users = await userService.getTodaysSessionAttendees(effectiveCenterId);
 
       if (users) {
-        users.sort((a, b) => b.isPresent - a.isPresent);
+        users.sort((a, b) => {
+          if (b.isPresent !== a.isPresent) return b.isPresent - a.isPresent;
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
         set({ todaysSessionAttendees: users });
       }
 
