@@ -2,25 +2,54 @@ import Title from '@components/layouts/Title'
 import slotStore from '@stores/SlotStore'
 import userStore from '@stores/UserStore';
 import { groupByMonthName } from '@utils/helper'
-import { Skeleton } from 'antd';
-import { lazy, Suspense, useEffect, useMemo } from 'react'
+import { Button, Skeleton } from 'antd';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 const SlotList = lazy(() => import('@pages/Slots/Components/SlotList'));
+const AdditionalSessionRequestModal = lazy(() => import('@pages/Slots/Components/AdditionalSessionRequestModal'));
 
 function Slots() {
 
-  const { loading, slots, getSlots } = slotStore()
+  const { loading, slots, getSlots, getSlotStats, slotStats } = slotStore()
   const { user } = userStore()
+  const [isAdditionalModalOpen, setIsAdditionalModalOpen] = useState(false)
+  const [statsLoaded, setStatsLoaded] = useState(false)
 
   useEffect(() => {
+    if (!user?._id) return
     getSlots(0, { sort: { start_date: -1 }, query: { booked_student_id: user._id, isActive: true }, populate: "center_id session" })
+
+    const courseId = user?.details_id?.course_id?._id || user?.details_id?.course_id
+    if (!courseId) return
+
+    const loadStats = async () => {
+      await getSlotStats(user._id, courseId)
+      setStatsLoaded(true)
+    }
+
+    loadStats()
   }, [])
 
   const groupedSlots = useMemo(() => groupByMonthName(slots), [slots])
+  const unattendedSessions = Number(slotStats?.totalCounts?.non_attended || 0)
+  const canRequestAdditionalSession = user?.role === "student"
+    && statsLoaded
+    && user?.allow_additional_session_request !== false
+    && unattendedSessions === 0
+
+  const titleButton = canRequestAdditionalSession ? (
+    <Button type="primary" onClick={() => setIsAdditionalModalOpen(true)}>
+      Request Additional Session
+    </Button>
+  ) : null
 
   return (
-    <Title title={"Slots"}>
+    <Title title={"Slots"} button={titleButton}>
       <Suspense fallback={<Loader />}>
         <SlotList groupedSlots={groupedSlots} slots={slots} />
+        <AdditionalSessionRequestModal
+          isOpen={isAdditionalModalOpen}
+          onCancel={() => setIsAdditionalModalOpen(false)}
+        />
       </Suspense>
     </Title>
   )

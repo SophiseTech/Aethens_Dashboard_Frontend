@@ -3,6 +3,7 @@ import { Modal, Button, Form, Typography } from 'antd';
 import CustomForm from '@components/form/CustomForm';
 import CustomInput from '@components/form/CustomInput';
 import CustomDatePicker from '@components/form/CustomDatePicker';
+import CustomCheckbox from '@components/form/CustomCheckBox';
 import dayjs from 'dayjs';
 import ProfileImageUploader from '@components/ProfileImageUploader';
 import { useStore } from 'zustand';
@@ -24,7 +25,8 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
     phone: user?.phone,
     address: user?.address,
     school_uni_work: user?.school_uni_work,
-    profile_img: user?.profile_img || "https://app.schoolofathens.art/images/default.jpg"
+    profile_img: user?.profile_img || "https://app.schoolofathens.art/images/default.jpg",
+    allow_additional_session_request: user?.allow_additional_session_request !== false
   }
 
   React.useEffect(() => {
@@ -104,6 +106,13 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
             placeholder="Scool / University / Company Name"
           />
         }
+        {loggedinUser.role === ROLES.MANAGER && user?.role === ROLES.STUDENT && (
+          <CustomCheckbox
+            name="allow_additional_session_request"
+            label="Allow additional session request"
+            required={false}
+          />
+        )}
         <Button type="primary" htmlType="submit">
           Save Changes
         </Button>

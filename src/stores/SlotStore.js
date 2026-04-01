@@ -167,6 +167,26 @@ const slotStore = create((set, get) => ({
       set({ createLoading: false })
     }
   },
+  requestAdditionalSession: async (requested_slot) => {
+    try {
+      set({ createLoading: true })
+      if (!requested_slot?.date || !requested_slot?.session) throw new Error("Bad Data")
+
+      const { slots } = get()
+      const response = await slotService.requestAdditionalSession({ requested_slot })
+      const slot = response?.slot
+
+      if (slot) {
+        set({ slots: [slot, ...slots] })
+        handleSuccess("Additional session request auto-approved")
+        return slot
+      }
+    } catch (error) {
+      handleError(error)
+    } finally {
+      set({ createLoading: false })
+    }
+  },
 }))
 
 export default slotStore
