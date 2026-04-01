@@ -18,7 +18,10 @@ function CustomSyllabusForm({ student, course }) {
     const { syllabus, loading: syllabusLoading, fetchSyllabus } = useStore(studentSyllabusStore);
     const [selectedImage, setSelectedImage] = useState(null);
 
-    const courseId = student?.details_id?.course_id;
+    const courseId = student?.details_id?.course_id?._id
+        || student?.details_id?.course_id
+        || student?.details_id?.course?._id
+        || student?.details_id?.course;
 
     // Fetch the student's personal custom syllabus on mount
     useEffect(() => {
@@ -54,7 +57,6 @@ function CustomSyllabusForm({ student, course }) {
 
     // Images to display: personal syllabus only (SyllabusGallery images)
     const images = syllabus?.images || [];
-    console.log(images, syllabus);
     if (syllabusLoading) {
         return (
             <div className="flex justify-center py-10">
