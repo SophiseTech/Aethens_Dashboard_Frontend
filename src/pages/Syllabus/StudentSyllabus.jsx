@@ -94,6 +94,7 @@ function StudentSyllabus() {
           searchText=""
           setSearchText={() => {}}
           course={course}
+          showProgressColumns
         />
         <CourseDetail course={course} />
       </div>
