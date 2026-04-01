@@ -113,7 +113,13 @@ function SlotList({ groupedSlots, slots = [] }) {
         <p>No Slots allotted</p>
       )}
 
-      <SlotRescheduleModal handleOk={handleOk} isModalOpen={isModalOpen} handleCancel={handleCancel} studentsSlots={slots} />
+      <SlotRescheduleModal
+        handleOk={handleOk}
+        isModalOpen={isModalOpen}
+        handleCancel={handleCancel}
+        studentsSlots={slots}
+        holidays={holidays}
+      />
     </div>
   )
 }
