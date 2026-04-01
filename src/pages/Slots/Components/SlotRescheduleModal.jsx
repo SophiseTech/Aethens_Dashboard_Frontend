@@ -6,14 +6,14 @@ import { sessionSlotOptionRenderer } from '@components/form/SessionDateSelector'
 import SessionStore from '@stores/SessionStore';
 import slotStore from '@stores/SlotStore';
 import userStore from '@stores/UserStore';
-import { getNextAvailableWeekdayDate } from '@utils/helper';
+import { getHolidayInfo, getNextAvailableWeekdayDate } from '@utils/helper';
 // import { getNextWeekdayDate } from '@utils/helper';
 import { Form, Modal } from 'antd';
 import dayjs from 'dayjs';
 import { useEffect, useMemo } from 'react';
 import { useStore } from 'zustand';
 
-function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlots = [] }) {
+function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlots = [], holidays = [] }) {
   const [form] = Form.useForm();
   const { getAvailableSessions, availableSessions, loading: sessionLoading } = useStore(SessionStore)
   const { reschedulingSlot, loading: submitLoading } = useStore(slotStore)
@@ -72,11 +72,10 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
   }
 
   const disabledDate = (value) => {
-    const key = value.format("YYYY-MM-DD");
-
-    // ⛔ Disable past dates
     if (value.isBefore(today, "day")) return true;
-
+    const key = value.format("YYYY-MM-DD");
+    const holidayInfo = getHolidayInfo(key, holidays, value.year());
+    return Boolean(holidayInfo);
   };
 
   return (
@@ -90,6 +89,9 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
           className='w-full'
           inputProps={{ disabledDate: disabledDate }}
         />
+        <div className='text-xs text-gray-500 -mt-2 mb-2'>
+          Holiday dates cannot be selected for reschedule.
+        </div>
         <CustomSelect
           name={"session"}
           label={"Select New Slot"}

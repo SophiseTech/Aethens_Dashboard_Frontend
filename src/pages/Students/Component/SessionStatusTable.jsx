@@ -25,7 +25,10 @@ function SessionStatusTable({ student }) {
   useEffect(() => {
     if (!student?._id) return;
 
-    const courseId = student?.details_id?.course_id?._id || student?.details_id?.course_id;
+    const courseId = student?.details_id?.course_id?._id
+      || student?.details_id?.course_id
+      || student?.details_id?.course?._id
+      || student?.details_id?.course;
 
     const filters = {
       query: {
@@ -56,7 +59,7 @@ function SessionStatusTable({ student }) {
     if (courseId) {
       fetchSyllabus(student._id, courseId);
     }
-  }, [student?._id, student?.details_id?.course_id, statusFilter, searchText]);
+  }, [student?._id, student?.details_id?.course_id, student?.details_id?.course, statusFilter, searchText]);
 
   /**
    * Resolve an image by name.

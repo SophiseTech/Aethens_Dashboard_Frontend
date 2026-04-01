@@ -30,7 +30,10 @@ function AddSessionStatus() {
                     const studentData = location.state.student;
 
                     // Fetch full course data to get syllabusType and images
-                    const courseId = studentData?.details_id?.course_id?._id || studentData?.details_id?.course_id;
+                    const courseId = studentData?.details_id?.course_id?._id
+                        || studentData?.details_id?.course_id
+                        || studentData?.details_id?.course?._id
+                        || studentData?.details_id?.course;
                     if (courseId) {
                         await getCourse(courseId);
                     }

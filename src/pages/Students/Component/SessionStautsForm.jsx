@@ -25,15 +25,19 @@ function SessionStautsForm({ handleOk, student }) {
   // Track whether course has finished loading for this student
   const [courseLoading, setCourseLoading] = useState(true);
   const { user } = useStore(userStore)
+  const courseId = student?.details_id?.course_id?._id
+    || student?.details_id?.course_id
+    || student?.details_id?.course?._id
+    || student?.details_id?.course;
 
   useEffect(() => {
-    if (student?.details_id?.course_id) {
+    if (courseId) {
       setCourseLoading(true);
-      getCourse(student.details_id.course_id).finally(() => setCourseLoading(false));
+      getCourse(courseId).finally(() => setCourseLoading(false));
     } else {
       setCourseLoading(false);
     }
-  }, [student?._id])
+  }, [student?._id, courseId])
 
   // Show spinner while course data is being fetched
   if (courseLoading) {
@@ -55,7 +59,7 @@ function SessionStautsForm({ handleOk, student }) {
     // const faculty = faculties?.find(faculty => faculty.username === values.faculty_id)
     values.faculty_id = user._id
     values.student_id = student._id
-    values.course_id = student.details_id.course_id
+    values.course_id = courseId
     if (values.isTopicComplete) {
       values.completedOn = new Date()
     }

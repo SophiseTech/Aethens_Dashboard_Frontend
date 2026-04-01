@@ -9,7 +9,7 @@ import CustomSyllabusList from './CustomSyllabusList';
 
 const { Search } = Input;
 
-function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, searchText, setSearchText, course }) {
+function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, searchText, setSearchText, course, showProgressColumns = false }) {
   // Get user data
   const { user } = useStore(userStore);
 
@@ -106,8 +106,10 @@ function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, se
     },
   ];
 
-  // Add "Status" and "Sessions" columns only if user is a student
-  if (user.role === ROLES.STUDENT) {
+  const shouldShowProgress = showProgressColumns || user.role === ROLES.STUDENT;
+
+  // Add "Status" and "Sessions" columns where syllabus progress is expected
+  if (shouldShowProgress) {
     columns.push(
       {
         title: 'Sessions',
@@ -153,13 +155,14 @@ function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, se
       setStatusFilter={setStatusFilter}
       searchText={searchText}
       setSearchText={setSearchText}
+      showProgressColumns={showProgressColumns}
     />;
   }
 
   return (
     <div>
       {/* Filters - Only show for students */}
-      {user.role === ROLES.STUDENT && (
+      {shouldShowProgress && (
         <Space className="mb-4" wrap>
           <Select
             style={{ width: 160 }}
