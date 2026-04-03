@@ -15,11 +15,10 @@ const slotStore = create((set, get) => ({
   reschedulingSlot: {},
   slotRequests: [],
   requestLoading: true,
+  requestLastRefKey: 0,
   slotStats: { totalCounts: {}, monthlyStats: [] },
   createLoading: false,
   getSlots: async (
-    // start_date = new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-    // end_date = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
     limit = 10,
     filters,
   ) => {
@@ -81,16 +80,16 @@ const slotStore = create((set, get) => ({
   getSlotRequests: async (limit = 10, filters = {}) => {
     try {
       set({ requestLoading: true })
-      const { lastRefKey, slotRequests: prevSlotRequests } = get()
+      const { requestLastRefKey, slotRequests: prevSlotRequests } = get()
       const { requests, total } = await slotService.getSlotRequests(
         filters,
-        lastRefKey,
+        requestLastRefKey,
         limit
       )
       if (requests) {
         set({
           slotRequests: [...prevSlotRequests, ...requests],
-          lastRefKey: lastRefKey + requests.length,
+          requestLastRefKey: requestLastRefKey + requests.length,
           total: total
         })
       }
@@ -175,11 +174,17 @@ const slotStore = create((set, get) => ({
       const { slots } = get()
       const response = await slotService.requestAdditionalSession({ requested_slot })
       const slot = response?.slot
+      const request = response?.request
+      const autoApproved = Boolean(response?.auto_approved)
 
       if (slot) {
         set({ slots: [slot, ...slots] })
         handleSuccess("Additional session request auto-approved")
-        return slot
+        return { slot, request, auto_approved: autoApproved }
+      }
+      if (request) {
+        handleSuccess("Additional session request submitted for approval")
+        return { request, auto_approved: autoApproved }
       }
     } catch (error) {
       handleError(error)

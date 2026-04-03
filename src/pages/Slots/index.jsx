@@ -3,6 +3,7 @@ import slotStore from '@stores/SlotStore'
 import userStore from '@stores/UserStore';
 import { groupByMonthName } from '@utils/helper'
 import { Button, Skeleton } from 'antd';
+import holidayService from '@services/Holiday'
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 const SlotList = lazy(() => import('@pages/Slots/Components/SlotList'));
 const AdditionalSessionRequestModal = lazy(() => import('@pages/Slots/Components/AdditionalSessionRequestModal'));
@@ -29,6 +30,19 @@ function Slots() {
     loadStats()
   }, [])
 
+  const [holidays, setHolidays] = useState([])
+
+  // Fetch holidays
+  useEffect(() => {
+    if (!user?.center_id) return
+    holidayService.fetchHolidays({
+      skip: 0,
+      limit: 100,
+      centerId: user.center_id,
+      status: 'published'
+    }).then(res => res?.holidays && setHolidays(res.holidays)).catch(() => { })
+  }, [user?.center_id])
+
   const groupedSlots = useMemo(() => groupByMonthName(slots), [slots])
   const unattendedSessions = Number(slotStats?.totalCounts?.non_attended || 0)
   const canRequestAdditionalSession = user?.role === "student"
@@ -45,10 +59,11 @@ function Slots() {
   return (
     <Title title={"Slots"} button={titleButton}>
       <Suspense fallback={<Loader />}>
-        <SlotList groupedSlots={groupedSlots} slots={slots} />
+        <SlotList groupedSlots={groupedSlots} slots={slots} holidays={holidays} />
         <AdditionalSessionRequestModal
           isOpen={isAdditionalModalOpen}
           onCancel={() => setIsAdditionalModalOpen(false)}
+          holidays={holidays}
         />
       </Suspense>
     </Title>
