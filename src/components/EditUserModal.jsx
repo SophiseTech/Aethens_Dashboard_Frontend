@@ -3,6 +3,8 @@ import { Modal, Button, Form, Typography } from 'antd';
 import CustomForm from '@components/form/CustomForm';
 import CustomInput from '@components/form/CustomInput';
 import CustomDatePicker from '@components/form/CustomDatePicker';
+import CustomSelect from '@components/form/CustomSelect';
+import studentStore from '@stores/StudentStore';
 import dayjs from 'dayjs';
 import ProfileImageUploader from '@components/ProfileImageUploader';
 import { useStore } from 'zustand';
@@ -17,15 +19,24 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
   const dobValue = Form.useWatch('DOB', form);
   // Prefill form with user data when modal opens
   const { user: loggedinUser } = useStore(userStore)
+  const { reusableIdCards, getReusableCards } = studentStore()
 
   const initialValues = {
     username: user?.username,
     DOB: dayjs(user?.DOB),
     phone: user?.phone,
+    phone_alt: user?.phone_alt,
     address: user?.address,
     school_uni_work: user?.school_uni_work,
+    idCardNumber: user?.details_id?.idCardNumber ? [user.details_id.idCardNumber] : [],
     profile_img: user?.profile_img || "https://app.schoolofathens.art/images/default.jpg"
   }
+
+  React.useEffect(() => {
+    if (visible && isStudentDetail && user?.center_id) {
+      getReusableCards(user.center_id);
+    }
+  }, [visible, isStudentDetail, user?.center_id]);
 
   React.useEffect(() => {
     if (visible && user) {
@@ -40,6 +51,12 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
     const formattedDOJ = values.DOJ?.format('YYYY-MM-DD');
     values.DOB = formattedDate ? new Date(formattedDate) : null; // Convert date to Date object
     values.DOJ = formattedDOJ ? new Date(formattedDOJ) : null; // Convert date to Date object
+    
+    // Convert idCardNumber array to string
+    if (Array.isArray(values.idCardNumber)) {
+      values.idCardNumber = values.idCardNumber[0] || null;
+    }
+
     await onSave(values);
     form.resetFields();
   };
@@ -104,7 +121,20 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
             placeholder="Scool / University / Company Name"
           />
         }
-        <Button type="primary" htmlType="submit">
+        {isStudentDetail && (
+          <CustomSelect
+            name={"idCardNumber"}
+            options={reusableIdCards?.map(c => ({ label: `Reusable: ${c.code}`, value: c.code })) || []}
+            label={"Assign ID Card (Select from Pool or Type New)"}
+            placeholder="Select a returned card or type a new one"
+            showSearch
+            allowClear
+            required={false}
+            mode="tags"
+            maxCount={1}
+          />
+        )}
+        <Button type="primary" htmlType="submit" className='mt-4'>
           Save Changes
         </Button>
       </CustomForm>
