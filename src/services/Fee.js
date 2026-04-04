@@ -25,4 +25,11 @@ export const FeeService = {
   markInstallmentAsPaid: (feeAccountId, installmentId, payload = {}) => {
     return post(`/fees/${feeAccountId}/installment/${installmentId}/mark-paid`, payload);
   },
+  // New: Recreate installments for a student
+  recreateInstallments: (studentId, payload = {}) => {
+    return post(`/fees/student/${studentId}/recreate-installments`, payload);
+  },
+  addAdditionalFee: (feeAccountId, payload = {}) => {
+    return post(`/fees/account/${feeAccountId}/additional-fee`, payload);
+  },
 };
