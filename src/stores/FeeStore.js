@@ -64,6 +64,28 @@ const feeStore = create((set) => ({
       throw error;
     }
   },
+  recreateInstallments: async (studentId, payload = {}) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await FeeService.recreateInstallments(studentId, payload);
+      set({ loading: false });
+      return response.data;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
+  addAdditionalFee: async (feeAccountId, payload = {}) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await FeeService.addAdditionalFee(feeAccountId, payload);
+      set({ loading: false });
+      return response.data;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
 }));
 
 export default feeStore;
