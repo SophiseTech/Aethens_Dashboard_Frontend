@@ -23,12 +23,12 @@ function Slots() {
     if (!courseId) return
 
     const loadStats = async () => {
-      await getSlotStats(user._id, courseId)
-      setStatsLoaded(true)
+      const stats = await getSlotStats(user._id, courseId)
+      if (stats) setStatsLoaded(true)
     }
 
     loadStats()
-  }, [])
+  }, [user?._id])
 
   const [holidays, setHolidays] = useState([])
 

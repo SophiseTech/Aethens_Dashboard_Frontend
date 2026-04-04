@@ -30,6 +30,7 @@ function SlotRequests({ handleClose, drawerState }) {
         },
         {
           path: "requested_slot",
+          populate: { path: "session", options: { select: "start_time" } }
         }
       ]
     })
@@ -74,7 +75,6 @@ function SlotRequests({ handleClose, drawerState }) {
         rejectAction={rejectSlotRequest}
         fromField={"username"}
         loading={requestLoading}
-      // render={(item) => <Table columns={columns} dataSource={item?.items || []} pagination={false} className='mt-5' />}
       />
     </Drawer>
   )
