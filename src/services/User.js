@@ -92,9 +92,9 @@ class UserService {
     }
   }
 
-  async deactivateUsers(userId) {
+  async deactivateUsers(userId, cardReturned = false) {
     try {
-      await post(`/user/deactivateUser`, { userId })
+      await post(`/user/deactivateUser`, { userId, cardReturned })
     } catch (error) {
       handleError(error)
     }

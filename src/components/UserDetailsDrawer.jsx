@@ -328,6 +328,7 @@ const UserDetailsDrawer = ({
           visible={isEditModalVisible}
           onCancel={() => setIsEditModalVisible(false)}
           onSave={handleSave}
+          isStudentDetail={isStudentDetail}
         />
       )}
     </>

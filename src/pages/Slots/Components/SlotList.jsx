@@ -1,7 +1,6 @@
 import useModal from '@hooks/useModal'
 import SlotItem from '@pages/Slots/Components/SlotItem'
 import SlotRescheduleModal from '@pages/Slots/Components/SlotRescheduleModal'
-import holidayService from '@services/Holiday'
 import slotStore from '@stores/SlotStore'
 import userStore from '@stores/UserStore'
 import { generateHolidayDates, getHolidayInfo } from '@utils/helper'
@@ -11,13 +10,11 @@ import { useStore } from 'zustand'
 import { Select } from 'antd'
 import dayjs from 'dayjs'
 
-function SlotList({ groupedSlots, slots = [] }) {
+function SlotList({ groupedSlots, slots = [], holidays = [] }) {
   const { reschedulingSlot, reshceduleSlot } = useStore(slotStore)
   const { user } = useStore(userStore)
-  const [holidays, setHolidays] = useState([])
   const months = Object.keys(groupedSlots)
 
-  // Determine default selected month
   const currentMonth = dayjs().format('MMMM YYYY')
   const defaultMonth = months.includes(currentMonth) ? currentMonth : months[months.length - 1] || null
 
@@ -27,18 +24,6 @@ function SlotList({ groupedSlots, slots = [] }) {
     setSelectedMonth(defaultMonth)
   }, [groupedSlots])
 
-  // Fetch holidays
-  useEffect(() => {
-    if (!user?.center_id) return
-    holidayService.fetchHolidays({
-      skip: 0,
-      limit: 100,
-      centerId: user.center_id,
-      status: 'published'
-    }).then(res => res?.holidays && setHolidays(res.holidays)).catch(() => { })
-  }, [user?.center_id])
-
-  // Holiday lookup
   const currentYear = dayjs().year()
   const holidayDates = useMemo(() => generateHolidayDates(holidays, currentYear), [holidays, currentYear])
 
@@ -48,10 +33,8 @@ function SlotList({ groupedSlots, slots = [] }) {
     const datePart = dayjs(slot.start_date).format('YYYY-MM-DD');
     const timePart = dayjs(slot.session?.start_time).format('HH:mm:ss');
     const slotDateTime = dayjs(`${datePart} ${timePart}`);
-
     return slotDateTime.isAfter(now);
   });
-
 
   const getType = (status, index) => {
     if (status === "requested") return "requested"

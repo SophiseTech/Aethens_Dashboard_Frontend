@@ -24,6 +24,8 @@ const studentStore = create((set, get) => ({
   activeStudentSessions: {},
   projectOpenedStudents: [],
   activeStudent: null,
+  reusableIdCards: [],
+
   getStudentsByCenter: async (limit = 10, page = 1, status = null, courseId = null, fromBranch = null, toBranch = null) => {
     try {
       set({ loading: true });
@@ -69,6 +71,17 @@ const studentStore = create((set, get) => ({
         console.log("📥 Received students:", users.length, "Total:", total);
         set({ students: users, total });
       }
+    } catch (error) {
+      handleInternalError(error);
+    } finally {
+      set({ loading: false });
+    }
+  },
+  getReusableCards: async (centerId) => {
+    try {
+      set({ loading: true });
+      const response = await studentService.getReusableCards(centerId);
+      set({ reusableIdCards: response || [] });
     } catch (error) {
       handleInternalError(error);
     } finally {
@@ -222,11 +235,11 @@ const studentStore = create((set, get) => ({
       set({ loading: false });
     }
   },
-  deactivateStudent: async (id) => {
+  deactivateStudent: async (id, cardReturned = false) => {
     try {
       set({ loading: true });
       if (!id) throw new Error("Bad Data");
-      await userService.deactivateUsers(id);
+      await userService.deactivateUsers(id, cardReturned);
       const { students } = get();
       if (students) {
         const updatedStudents = students.map((item) =>

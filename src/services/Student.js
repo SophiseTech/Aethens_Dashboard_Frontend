@@ -22,7 +22,8 @@ class StudentService {
     numberOfInstallments,
     type,
     isFeeEnabled,
-    reg_fee
+    reg_fee,
+    idCardNumber
   }) {
     try {
       if (
@@ -55,7 +56,8 @@ class StudentService {
         type,
         paidAmount,
         total_course_fee,
-        reg_fee
+        reg_fee,
+        idCardNumber
       });
       if (!response || !response.data)
         throw new Error("An error occured. Please try again");
@@ -193,6 +195,16 @@ class StudentService {
   async getUserById(userId, filters) {
     try {
       const response = await post(`/user/getById/${userId}`, filters);
+      if (!response) throw new Error("An error occured. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async getReusableCards(centerId) {
+    try {
+      const response = await get(`/v2/id-card-pool/available?center_id=${centerId}`);
       if (!response) throw new Error("An error occured. Please try again");
       return response.data;
     } catch (error) {
