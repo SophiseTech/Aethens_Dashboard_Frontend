@@ -58,6 +58,17 @@ const attendanceStore = create((set, get) => ({
       set({ submitLoading: false })
     }
   },
+  processSwipe: async (facultyId, timestamp) => {
+    try {
+      set({ submitLoading: true })
+      const message = await attendanceService.processSwipe(facultyId, timestamp)
+      handleSuccess(message || "Swipe recorded successfully!")
+    } catch (error) {
+      handleInternalError(error)
+    } finally {
+      set({ submitLoading: false })
+    }
+  },
 }))
 
 export default attendanceStore
