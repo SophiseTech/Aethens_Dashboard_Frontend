@@ -226,8 +226,12 @@ const FacultyAssignmentSection = ({ user, visible }) => {
                         <Typography.Text>{stats?.dailyAssignmentCap ?? 0}</Typography.Text>
                     </Col>
                     <Col span={24}>
-                        <Typography.Text strong>Assigned Today: </Typography.Text>
+                        <Typography.Text strong>This Session: </Typography.Text>
                         <Tag color="blue">{stats?.assignedCount ?? 0} students</Tag>
+                    </Col>
+                    <Col span={24}>
+                        <Typography.Text strong>Assigned Today: </Typography.Text>
+                        <Tag color="geekblue">{stats?.dailyAssignedCount ?? 0} students</Tag>
                     </Col>
                 </Row>
             </Card>

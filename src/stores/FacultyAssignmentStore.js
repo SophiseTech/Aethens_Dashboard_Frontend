@@ -76,7 +76,12 @@ const facultyAssignmentStore = create((set, get) => ({
       const response = await facultyAssignmentService.updateFacultyCap(facultyId, dailyAssignmentCap, centerId);
       const facultyStats = get().facultyStats.map((item) =>
         item._id === facultyId
-          ? { ...item, dailyAssignmentCap: response?.dailyAssignmentCap ?? dailyAssignmentCap, assignedCount: response?.assignedCount ?? item.assignedCount }
+          ? {
+              ...item,
+              dailyAssignmentCap: response?.dailyAssignmentCap ?? dailyAssignmentCap,
+              assignedCount: response?.assignedCount ?? item.assignedCount,
+              dailyAssignedCount: response?.dailyAssignedCount ?? item.dailyAssignedCount,
+            }
           : item
       );
       set({ facultyStats });
