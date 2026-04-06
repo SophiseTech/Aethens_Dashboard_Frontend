@@ -5,7 +5,6 @@ import handleSuccess from "@utils/handleSuccess";
 import { create } from "zustand";
 
 const facultyAssignmentStore = create((set, get) => ({
-  unassignedStudents: [],
   currentStudents: [],
   currentAssignment: null,
   assignments: [],
@@ -24,17 +23,7 @@ const facultyAssignmentStore = create((set, get) => ({
       set({ loading: false });
     }
   },
-  getUnassignedStudents: async (centerId) => {
-    try {
-      set({ loading: true });
-      const unassignedStudents = await facultyAssignmentService.getUnassignedStudents(centerId);
-      set({ unassignedStudents: unassignedStudents || [] });
-    } catch (error) {
-      handleInternalError(error);
-    } finally {
-      set({ loading: false });
-    }
-  },
+
   getStudentAssignment: async (studentId, centerId, slotId = null) => {
     try {
       set({ loading: true });
@@ -60,11 +49,6 @@ const facultyAssignmentStore = create((set, get) => ({
         currentAssignment: response?.assignment || null,
         assignments: response?.assignments || [],
         facultyCandidates: response?.facultyCandidates || [],
-        unassignedStudents: get().unassignedStudents.filter((item) => {
-          const sameStudent = item?._studentId === studentId;
-          const sameSlot = item?.slotId === slotId || item?.slot?._id === slotId;
-          return !(sameStudent && sameSlot);
-        }),
       });
       handleSuccess("Faculty assignment updated");
       return response;
@@ -106,7 +90,6 @@ const facultyAssignmentStore = create((set, get) => ({
     }
   },
   resetAssignment: () => set({ currentAssignment: null, assignments: [], facultyCandidates: [] }),
-  clearUnassignedStudents: () => set({ unassignedStudents: [] }),
 }));
 
 export default facultyAssignmentStore;
