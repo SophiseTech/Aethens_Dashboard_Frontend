@@ -67,7 +67,7 @@ function ManagerSlots() {
   );
 
   const extraSlots = useMemo(
-    () => students.filter((s) => s.type === 'rescheduled' || s.type === 'additional').sort((a, b) => (a.name || '').localeCompare(b.name || '')),
+    () => students.filter((s) => s.isActive !== false).sort((a, b) => (a.name || '').localeCompare(b.name || '')),
     [students]
   );
 
@@ -87,6 +87,7 @@ function ManagerSlots() {
         status: student.status,
         course_name: student.course_name,
         type: student.type,
+        isActive: student.isActive !== false,
       }));
       setStudents(formatted);
       setCurrentPage(1);
@@ -174,7 +175,20 @@ function ManagerSlots() {
     ...col,
     render: col.key === 'index'
       ? (_, __, idx) => idx + 1 + (currentPage - 1) * 10
-      : col.render,
+      : col.key === 'name'
+        ? (value, record) => (
+            <Space size={4}>
+              <span style={record.isActive === false ? { color: '#cf1322', fontWeight: 500 } : {}}>
+                {value}
+              </span>
+              {record.isActive === false && (
+                <Tag color="red" style={{ fontSize: 11, lineHeight: '16px', padding: '0 4px' }}>
+                  Not Expected
+                </Tag>
+              )}
+            </Space>
+          )
+        : col.render,
   }));
 
   const extraColumns = filterByRole([
@@ -259,16 +273,21 @@ function ManagerSlots() {
                   onChange: setCurrentPage,
                   hideOnSinglePage: true,
                 }}
+                rowClassName={(record) => record.isActive === false ? 'slot-row-inactive' : ''}
                 loading={loadingStudents}
                 bordered
                 size="small"
                 locale={{ emptyText: 'No regular slots for this session.' }}
               />
+              <style>{`
+                .slot-row-inactive td { background-color: #fff1f0 !important; }
+                .slot-row-inactive:hover td { background-color: #ffccc7 !important; }
+              `}</style>
             </div>
 
             <div>
               <Title level={5} style={{ marginBottom: 8 }}>
-                Rescheduled &amp; Additional Slots
+                Today's Expected Students (All Types)
                 {hasData && (
                   <Tag color="default" style={{ marginLeft: 8, fontWeight: 'normal' }}>
                     {extraSlots.length}
@@ -287,7 +306,7 @@ function ManagerSlots() {
                 loading={loadingStudents}
                 bordered
                 size="small"
-                locale={{ emptyText: 'No rescheduled or additional slots for this session.' }}
+                locale={{ emptyText: 'No students expected for this session today.' }}
               />
             </div>
           </>
