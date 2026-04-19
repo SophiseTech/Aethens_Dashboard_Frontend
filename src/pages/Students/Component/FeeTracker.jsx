@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Modal, Table, Spin, Alert, Row, Col, Statistic, Tag, Button, InputNumber, Form, DatePicker, Select, Card, Checkbox, Space, Divider, Flex, Popconfirm, message } from 'antd';
-import { WalletOutlined, DollarOutlined, CheckCircleOutlined, FileDoneOutlined, CheckSquareOutlined, PrinterOutlined, DownloadOutlined, ReloadOutlined } from '@ant-design/icons';
+import { WalletOutlined, DollarOutlined, CheckCircleOutlined, FileDoneOutlined, CheckSquareOutlined, PrinterOutlined, DownloadOutlined, ReloadOutlined, SettingOutlined } from '@ant-design/icons';
 import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
 import InvoicePdf from '@pages/Bills/Components/Invoice';
 import { isAndroid } from 'react-device-detect';
@@ -11,6 +11,7 @@ import CustomInput from '@components/form/CustomInput';
 import { paymentMethods } from '@utils/constants';
 import permissions from '@utils/permissions';
 import userStore from '@stores/UserStore';
+import InstallmentManager from './InstallmentManager';
 
 const FeeTracker = ({ student, visible, onCancel }) => {
   const {
@@ -34,9 +35,11 @@ const FeeTracker = ({ student, visible, onCancel }) => {
   const [useWallet, setUseWallet] = useState(false);
   const [viewBill, setViewBill] = useState(null);
   const [additionalFeeModal, setAdditionalFeeModal] = useState(false);
+  const [installmentManagerOpen, setInstallmentManagerOpen] = useState(false);
   const [additionalFeeForm] = Form.useForm();
   const additionalAmount = Form.useWatch('amount', additionalFeeForm);
   const [useWalletForAdditional, setUseWalletForAdditional] = useState(false);
+  const additionalTaxRate = Form.useWatch('taxRate', additionalFeeForm) ?? 18;
   const paidAmount = Form.useWatch('paidAmount', form);
   const isPartialPayment = feeDetails?.feeAccount?.type === 'partial';
   const isInstallment = feeDetails?.feeAccount?.isInstallment;
@@ -153,6 +156,11 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         .map((bill, index) => {
           const billDate = new Date(bill.generated_on);
           if (
+            bill.installmentId === installment._id
+          ) {
+            return index;
+          } else if (
+            bill.installmentId == null &&
             billDate.getFullYear() === instDate.getFullYear() &&
             billDate.getMonth() === instDate.getMonth()
           ) {
@@ -244,8 +252,9 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         payment_date: values.payment_date ? toISTStartOfDayISO(values.payment_date) : undefined,
         useWallet: useWalletForAdditional,
         walletDeduction: additionalWalletDeduction,
-        excessPayment: 0, // No overpayment for additional fees for now
+        excessPayment: 0,
         walletId: student?.wallet?._id || null,
+        taxRate: values.taxRate ?? 18,
       };
       await addAdditionalFee(feeDetails.feeAccount._id, payload);
       message.success('Additional fee added and bill generated successfully');
@@ -596,39 +605,48 @@ const FeeTracker = ({ student, visible, onCancel }) => {
                 </div>
               </Col>
               <Col span={6}>
-                 <Flex vertical align="center" justify="center" style={{ height: '100%', gap: '8px' }}>
-                    {isInstallment && permissions.fee_tracker.edit.includes(user?.role) && (
-                      <Popconfirm
-                        title="Recreate Installments?"
-                        description="This will delete future unpaid installments and re-create them starting from today. Proceed?"
-                        onConfirm={handleRecreateInstallments}
-                        okText="Yes, Recreate"
-                        cancelText="No"
-                        okButtonProps={{ danger: true }}
-                      >
-                        <Button 
-                          type="primary" 
-                          danger 
-                          ghost 
-                          icon={<ReloadOutlined />} 
-                          loading={loading}
-                          size="small"
-                        >
-                          Recreate Installments
-                        </Button>
-                      </Popconfirm>
-                    )}
-                    {permissions.fee_tracker.edit.includes(user?.role) && (
+                <Flex vertical align="center" justify="center" style={{ height: '100%', gap: '8px' }}>
+                  {isInstallment && permissions.fee_tracker.edit.includes(user?.role) && (
+                    <Popconfirm
+                      title="Recreate Installments?"
+                      description="This will delete future unpaid installments and re-create them starting from today. Proceed?"
+                      onConfirm={handleRecreateInstallments}
+                      okText="Yes, Recreate"
+                      cancelText="No"
+                      okButtonProps={{ danger: true }}
+                    >
                       <Button
                         type="primary"
-                        icon={<DollarOutlined />}
-                        onClick={() => setAdditionalFeeModal(true)}
+                        danger
+                        ghost
+                        icon={<ReloadOutlined />}
+                        loading={loading}
                         size="small"
                       >
-                        Add Additional Fee
+                        Recreate Installments
                       </Button>
-                    )}
-                 </Flex>
+                    </Popconfirm>
+                  )}
+                  {isInstallment && permissions.fee_tracker.edit.includes(user?.role) && (
+                    <Button
+                      icon={<SettingOutlined />}
+                      size="small"
+                      onClick={() => setInstallmentManagerOpen(true)}
+                    >
+                      Manage Installments
+                    </Button>
+                  )}
+                  {permissions.fee_tracker.edit.includes(user?.role) && (
+                    <Button
+                      type="primary"
+                      icon={<DollarOutlined />}
+                      onClick={() => setAdditionalFeeModal(true)}
+                      size="small"
+                    >
+                      Add Additional Fee
+                    </Button>
+                  )}
+                </Flex>
               </Col>
             </Row>
 
@@ -698,13 +716,13 @@ const FeeTracker = ({ student, visible, onCancel }) => {
                     { title: 'Amount', dataIndex: 'amount', key: 'amount', render: (amt) => `₹${amt?.toFixed(2)}` },
                     { title: 'Method', dataIndex: 'payment_method', key: 'method' },
                     { title: 'Invoice', dataIndex: 'invoiceNo', key: 'inv' },
-                    { 
-                      title: 'Action', 
-                      key: 'action', 
+                    {
+                      title: 'Action',
+                      key: 'action',
                       render: (_, record) => (
-                        <Button 
-                          type="link" 
-                          icon={<PrinterOutlined />} 
+                        <Button
+                          type="link"
+                          icon={<PrinterOutlined />}
                           onClick={() => {
                             const bill = feeDetails.bills?.find(b => b._id === record.bill_id);
                             if (bill) setViewBill(bill);
@@ -713,7 +731,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
                         >
                           Print
                         </Button>
-                      ) 
+                      )
                     }
                   ]}
                   dataSource={feeDetails.feeAccount.additionalFees}
@@ -907,37 +925,63 @@ const FeeTracker = ({ student, visible, onCancel }) => {
           form={additionalFeeForm}
           layout="vertical"
         >
-          <CustomInput 
-            name="amount" 
-            label="Amount (₹)" 
+          <CustomInput
+            name="amount"
+            label="Amount (₹) — inclusive of tax"
             type="number"
             rules={[{ required: true, message: 'Please enter amount' }]}
           />
-          <CustomInput 
-            name="description" 
-            label="Description / Reason" 
+          <Form.Item label="GST Rate (%)" name="taxRate" initialValue={18}>
+            <InputNumber
+              min={0}
+              max={100}
+              style={{ width: '100%' }}
+              formatter={(v) => `${v}%`}
+              parser={(v) => v.replace('%', '')}
+            />
+          </Form.Item>
+          <CustomInput
+            name="description"
+            label="Description / Reason"
             rules={[{ required: true, message: 'Please enter description' }]}
           />
 
           {walletBalance > 0 && additionalAmount > 0 && (
             <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 mb-4" size="small">
-               <Checkbox
-                  checked={useWalletForAdditional}
-                  onChange={(e) => {
-                    setUseWalletForAdditional(e.target.checked);
-                    if (e.target.checked) additionalFeeForm.setFieldValue("payment_method", "wallet");
-                  }}
-                >
-                  Apply Wallet Balance (Available: ₹{walletBalance.toFixed(2)})
-                </Checkbox>
-                {useWalletForAdditional && (
+              <Checkbox
+                checked={useWalletForAdditional}
+                onChange={(e) => {
+                  setUseWalletForAdditional(e.target.checked);
+                  if (e.target.checked) additionalFeeForm.setFieldValue("payment_method", "wallet");
+                }}
+              >
+                Apply Wallet Balance (Available: ₹{walletBalance.toFixed(2)})
+              </Checkbox>
+              {useWalletForAdditional && (
+                additionalWalletDeduction >= (additionalAmount || 0) ? (
                   <Alert
-                    message={`₹${additionalWalletDeduction.toFixed(2)} will be deducted from wallet`}
+                    message={`₹${additionalWalletDeduction.toFixed(2)} will be deducted from wallet — fully covered`}
+                    description="No additional cash payment required."
                     type="success"
                     showIcon
                     style={{ marginTop: 8, fontSize: '12px' }}
                   />
-                )}
+                ) : (
+                  <Alert
+                    message={`Wallet balance (₹${walletBalance.toFixed(2)}) is less than the fee amount`}
+                    description={
+                      <span>
+                        💳 <strong>₹{additionalWalletDeduction.toFixed(2)}</strong> deducted from wallet (wallet zeroed out)
+                        <br />
+                        💵 <strong>₹{((additionalAmount || 0) - additionalWalletDeduction).toFixed(2)}</strong> to be collected as cash / other payment
+                      </span>
+                    }
+                    type="warning"
+                    showIcon
+                    style={{ marginTop: 8, fontSize: '12px' }}
+                  />
+                )
+              )}
             </Card>
           )}
 
@@ -950,6 +994,13 @@ const FeeTracker = ({ student, visible, onCancel }) => {
           </Form.Item>
         </Form>
       </Modal>
+
+      <InstallmentManager
+        feeAccountId={feeDetails?.feeAccount?._id}
+        visible={installmentManagerOpen}
+        onCancel={() => setInstallmentManagerOpen(false)}
+        onSaved={refreshFeeDetails}
+      />
     </>
   );
 };

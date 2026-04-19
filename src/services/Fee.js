@@ -1,4 +1,4 @@
-import { get, put, post } from "@utils/Requests";
+import { get, put, post, del } from "@utils/Requests";
 
 export const FeeService = {
   getFeeDetailsByStudent: (studentId) => {
@@ -31,5 +31,14 @@ export const FeeService = {
   },
   addAdditionalFee: (feeAccountId, payload = {}) => {
     return post(`/fees/account/${feeAccountId}/additional-fee`, payload);
+  },
+  updateInstallment: (feeAccountId, installmentId, payload = {}) => {
+    return put(`/fees/${feeAccountId}/installment/${installmentId}`, payload);
+  },
+  addInstallment: (feeAccountId, payload = {}) => {
+    return post(`/fees/${feeAccountId}/installment`, payload);
+  },
+  deleteInstallment: (feeAccountId, installmentId) => {
+    return del(`/fees/${feeAccountId}/installment/${installmentId}`);
   },
 };

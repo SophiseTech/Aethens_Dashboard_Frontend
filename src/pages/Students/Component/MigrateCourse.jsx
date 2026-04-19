@@ -162,8 +162,8 @@ function MigrateCourse({ student }) {
     }
 
     const hasPaid = pendingFees?.amountPaid > 0;
-    const walletLine = generateFeeAccount && hasPaid
-      ? `\n\n₦${pendingFees.amountPaid.toLocaleString()} will be credited to the student's wallet.`
+    const walletLine = generateFeeAccount && !isCourseCompleted
+      ? `\n\n₹${pendingFees.amountPaid.toLocaleString()} will be credited to the student's wallet.`
       : '';
     const copyLine = !generateFeeAccount
       ? '\n\nThe existing fee structure will be copied to the new course — old bills will be marked as closed.'
@@ -200,8 +200,8 @@ function MigrateCourse({ student }) {
     });
   };
 
-  const hasPendingBalance = pendingFees?.balance > 0;
-  const fullyPaid = pendingFees && pendingFees.amountPaid > 0 && pendingFees.balance === 0;
+  const hasPendingBalance = pendingFees?.balance > 10;
+  const fullyPaid = pendingFees && pendingFees.amountPaid > 0 && pendingFees.balance <= 10;
 
   return (
     <>
@@ -279,7 +279,7 @@ function MigrateCourse({ student }) {
 
           {/* Fee Account Checkbox */}
           <div>
-            <Checkbox
+            {/* <Checkbox
               checked={!generateFeeAccount}
               onChange={(e) => setGenerateFeeAccount(!e.target.checked)}
             >
@@ -295,24 +295,22 @@ function MigrateCourse({ student }) {
                   New fee account and refund of all paid bills to wallet.
                 </Text>
               )}
-            </div>
+            </div> */}
 
             {/* Course Completed Checkbox (Only if fully paid & creating new fee account) */}
-            {fullyPaid && generateFeeAccount && (
-              <div style={{ marginTop: 12 }}>
-                <Checkbox
-                  checked={isCourseCompleted}
-                  onChange={(e) => setIsCourseCompleted(e.target.checked)}
-                >
-                  <Text strong>Course Completed</Text>
-                </Checkbox>
-                <div style={{ paddingLeft: 24, marginTop: 4 }}>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    Only for upgradation, the previously paid fees (₹{pendingFees?.amountPaid?.toLocaleString()}) will <Text strong type="danger">NOT</Text> be refunded to the wallet.
-                  </Text>
-                </div>
+            <div style={{ marginTop: 12 }}>
+              <Checkbox
+                checked={isCourseCompleted}
+                onChange={(e) => setIsCourseCompleted(e.target.checked)}
+              >
+                <Text strong>Course Completed</Text>
+              </Checkbox>
+              <div style={{ paddingLeft: 24, marginTop: 4 }}>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  Only for upgradation, the previously paid fees (₹{pendingFees?.amountPaid?.toLocaleString()}) will <Text strong type="danger">NOT</Text> be refunded to the wallet.
+                </Text>
               </div>
-            )}
+            </div>
           </div>
 
 
@@ -402,7 +400,7 @@ function MigrateCourse({ student }) {
                         placeholder="Select start date"
                         value={startDate ? dayjs(startDate) : null}
                         onChange={(date) => setStartDate(date ? date.toDate() : null)}
-                        disabledDate={(current) => current && current < dayjs().startOf('day')}
+                      // disabledDate={(current) => current && current < dayjs().startOf('day')}
                       />
                     </div>
                   </>
