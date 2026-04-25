@@ -25,10 +25,6 @@ function SessionStautsForm({ handleOk, student }) {
   // Track whether course has finished loading for this student
   const [courseLoading, setCourseLoading] = useState(true);
   const { user } = useStore(userStore)
-  const courseId = student?.details_id?.course_id?._id
-    || student?.details_id?.course_id
-    || student?.details_id?.course?._id
-    || student?.details_id?.course;
 
   // Safely extract course ID — must be a non-empty string (not an empty object from demo slots)
   const rawCourseId = student?.details_id?.course_id?._id
