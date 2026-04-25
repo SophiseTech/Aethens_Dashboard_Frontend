@@ -21,6 +21,7 @@ import {
   SwapRightOutlined,
   EnvironmentOutlined,
   LoadingOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import { formatDate, calculateAge } from "@utils/helper"; // Your date formatting utility
 import CustomImageUploadWithCrop from "@components/form/CustomImageUploadWithCrop"; // Added import
@@ -42,6 +43,7 @@ const UserDetailsDrawer = ({
   isStudentDetail = false,
 }) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const { editUser } = useStore(studentStore);
   const { user: loggedinUser } = useStore(userStore);
   const [profileImageLoading, setProfileImageLoading] = useState(false);
@@ -84,17 +86,25 @@ const UserDetailsDrawer = ({
           }
         }}
         extra={
-          (!isStudentDetail || loggedinUser.role !== ROLES.FACULTY) && (
-            permissions.student.edit.includes(loggedinUser.role) && <Button
-              type="primary"
-              icon={<EditOutlined />}
-              onClick={handleEditClick}
-            >
-              Edit
-            </Button>
-          )
+          <Flex gap={8}>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => setRefreshKey((k) => k + 1)}
+            />
+            {(!isStudentDetail || loggedinUser.role !== ROLES.FACULTY) &&
+              permissions.student.edit.includes(loggedinUser.role) && (
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={handleEditClick}
+                >
+                  Edit
+                </Button>
+              )}
+          </Flex>
         }
       >
+        <div key={refreshKey}>
         <Card
           bordered={false}
           style={{ boxShadow: "none", background: "transparent" }}
@@ -321,6 +331,7 @@ const UserDetailsDrawer = ({
             </Card>
           </>
         )}
+        </div>
       </Drawer>
       {(!isStudentDetail || loggedinUser.role !== ROLES.FACULTY) && (
         <EditUserModal
@@ -328,6 +339,7 @@ const UserDetailsDrawer = ({
           visible={isEditModalVisible}
           onCancel={() => setIsEditModalVisible(false)}
           onSave={handleSave}
+          isStudentDetail={isStudentDetail}
         />
       )}
     </>

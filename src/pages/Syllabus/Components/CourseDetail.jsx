@@ -1,7 +1,11 @@
-import { Avatar } from 'antd'
+import { Tag } from 'antd'
 import React from 'react'
 
 function CourseDetail({ course }) {
+  const status = (course?.status || '').toLowerCase()
+  const statusColor = status === 'active' ? 'success' : status === 'inactive' ? 'default' : 'processing'
+  const statusLabel = course?.status ? `${course.status}` : 'N/A'
+
   return (
     <div className='bg-card p-3 rounded-xl flex items-start gap-10 flex-col | w-full lg:w-1/3'>
       <div className='w-full | max-lg:hidden '>
@@ -24,6 +28,9 @@ function CourseDetail({ course }) {
         </Avatar.Group> */}
 
         <p className='font-bold text-lg'>Total number of sessions: <span className='text-secondary'>{course.total_session}</span></p>
+        <p className='font-bold text-lg'>
+          Status: <Tag color={statusColor}>{statusLabel}</Tag>
+        </p>
       </div>
     </div>
   )

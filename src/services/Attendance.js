@@ -59,6 +59,16 @@ class AttendanceService {
     }
   }
 
+  async processSwipe(facultyId, timestamp) {
+    try {
+      const response = await post(`/attendance/swipe`, { facultyId, timestamp })
+      if (!response) throw new Error("An error occured. Please try again")
+      return response?.message
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
   async getGraphSummary(center_id, startDate, endDate) {
     try {
       const path = this.constructPath("/open/attendance-summary", "center_id");

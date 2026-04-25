@@ -90,18 +90,9 @@ const getMenuConfig = (role) => {
           path: "/manager/enquiry-slots",
         },
         { label: "Targets", key: "targets", path: "/manager/targets" },
-        { label: "Slots", key: "slots", path: "/manager/slots" },
-        {
-          label: "Announcements",
-          key: "announcements",
-          path: "/manager/announcements",
-        },
-        {
-          label: "Notifications",
-          key: "notifications",
-          path: "/manager/notifications",
-        },
-        { label: "Holidays", key: "holidays", path: "/manager/holidays" },
+        
+        
+        
       ],
     },
     {
@@ -126,6 +117,7 @@ const getMenuConfig = (role) => {
           key: "attendance-register",
           path: "/manager/attendance-register",
         },
+        { label: "Slots", key: "slots", path: "/manager/slots" },
       ],
     },
 
@@ -164,6 +156,23 @@ const getMenuConfig = (role) => {
       path: "/admin/centers",
     },
     {
+          label: "Announcements",
+          icon: <ClockCircleOutlined />,
+          key: "announcements",
+          path: "/manager/announcements",
+    },
+    {
+          label: "Notifications",
+          icon: <BellOutlined />,
+          key: "notifications",
+          path: "/manager/notifications",
+    },
+    { label: "Holidays", 
+      icon: <CalendarOutlined />,
+      key: "holidays", 
+      path: "/manager/holidays" 
+    },
+    {
       label: "Content",
       icon: <FileTextOutlined />,
       key: "content",
@@ -186,15 +195,15 @@ const getMenuConfig = (role) => {
           key: "latest-videos",
           path: "/admin/latest-videos",
         },
-      ],
-    },
-
-    {
+        {
       label: "Gallery",
-      icon: <PictureOutlined />,
       key: "gallery",
       path: "/gallery",
     },
+      ],
+    },
+
+    
   ];
 
   const managerItems = [
@@ -220,6 +229,7 @@ const getMenuConfig = (role) => {
           key: "attendance-register",
           path: "/manager/attendance-register",
         },
+        { label: "Slots", key: "slots", path: "/manager/slots" },
       ],
     },
     {
@@ -254,20 +264,27 @@ const getMenuConfig = (role) => {
           path: "/manager/enquiry-slots",
         },
         { label: "Targets", key: "targets", path: "/manager/targets" },
-        { label: "Slots", key: "slots", path: "/manager/slots" },
-        {
+        
+        
+      ],
+    },
+    {
           label: "Announcements",
+          icon: <ClockCircleOutlined />,
           key: "announcements",
           path: "/manager/announcements",
         },
         {
           label: "Notifications",
+          icon: <BellOutlined />,
           key: "notifications",
           path: "/manager/notifications",
         },
-        { label: "Holidays", key: "holidays", path: "/manager/holidays" },
-      ],
-    },
+        { label: "Holidays", 
+          icon: <CalendarOutlined />,
+          key: "holidays", 
+          path: "/manager/holidays" 
+        },
     {
       label: "Gallery",
       icon: <PictureOutlined />,

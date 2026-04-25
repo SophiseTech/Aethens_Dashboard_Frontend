@@ -33,9 +33,11 @@ function AddStudent() {
   const { getCourses, courses, total } = useStore(courseStore)
   const { getAvailableSessions, loading: sessionsLoading, availableSessions } = SessionStore()
   const { centers, getCenters } = useStore(centersStore);
+  const { reusableIdCards, getReusableCards } = studentStore()
   const isFeeEnabled = Form.useWatch("isFeeEnabled", form)
   const feeType = Form.useWatch("type", form)
   const selectedCourse = Form.useWatch("course_id", form)
+  const selectedCenter = Form.useWatch("center_id", form)
 
   const initialValues = {
     username: "",
@@ -64,6 +66,13 @@ function AddStudent() {
     }
     getCenters();
   }, [])
+
+  useEffect(() => {
+    const centerToFetch = user.role === 'manager' ? user.center_id : selectedCenter;
+    if (centerToFetch && isModalOpen) {
+      getReusableCards(centerToFetch);
+    }
+  }, [selectedCenter, user.center_id, isModalOpen]);
 
   useEffect(() => {
     if (selectedCourse) {
@@ -183,6 +192,17 @@ function AddStudent() {
             maxItems={10}
           />
           {user.role === ROLES.ADMIN && <CustomSelect name={"center_id"} options={centerOptions} label={"Select Center"} />}
+          <CustomSelect
+            name={"idCardNumber"}
+            options={reusableIdCards?.map(c => ({ label: `Reusable: ${c.code}`, value: c.code })) || []}
+            label={"Assign ID Card (Select from Pool or Type New)"}
+            placeholder="Select a returned card or type a new one"
+            showSearch
+            allowClear
+            required={false}
+            mode="tags"
+            maxCount={1}
+          />
           <CustomInput label={"Password"} name={"password"} placeholder={"Password"} type='password' />
 
           <Divider />

@@ -65,7 +65,7 @@ function SessionStatusTable({ student }) {
     if (courseId) {
       fetchSyllabus(student._id, courseId);
     }
-  }, [student?._id, student?.details_id?.course_id, statusFilter, searchText]);
+  }, [student?._id, student?.details_id?.course_id, student?.details_id?.course, statusFilter, searchText]);
 
   /**
    * Resolve an image by name.

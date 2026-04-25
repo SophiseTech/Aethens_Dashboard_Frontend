@@ -63,7 +63,6 @@ function CustomSyllabusForm({ student, course }) {
 
     // Images to display: personal syllabus only (SyllabusGallery images)
     const images = syllabus?.images || [];
-    console.log(images, syllabus);
     if (syllabusLoading) {
         return (
             <div className="flex justify-center py-10">

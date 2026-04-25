@@ -30,6 +30,7 @@ function SlotRequests({ handleClose, drawerState }) {
         },
         {
           path: "requested_slot",
+          populate: { path: "session", options: { select: "start_time" } }
         }
       ]
     })
@@ -38,11 +39,18 @@ function SlotRequests({ handleClose, drawerState }) {
   const formattedRequests = useMemo(() => slotRequests?.map(request => ({
     ...request,
     request_details: <div>
-      <p>
-        {request.raised_by_center?.username} has requested to reschedule their slot
-        from <span className='font-bold'>{formatDate(request?.current_slot?.start_date)}, {formatTime(request?.current_slot?.session?.start_time)}</span>&nbsp;
-        to <span className='font-bold'>{formatDate(request?.requested_slot?.date)}, {formatTime(request?.requested_slot?.date)}</span>
-      </p>
+      {request?.current_slot ? (
+        <p>
+          {request.raised_by_center?.username} has requested to reschedule their slot
+          from <span className='font-bold'>{formatDate(request?.current_slot?.start_date)}, {formatTime(request?.current_slot?.session?.start_time)}</span>&nbsp;
+          to <span className='font-bold'>{formatDate(request?.requested_slot?.date)}, {formatTime(request?.requested_slot?.session?.start_time)}</span>
+        </p>
+      ) : (
+        <p>
+          {request.raised_by_center?.username} has requested an additional session on{" "}
+          <span className='font-bold'>{formatDate(request?.requested_slot?.date)}, {formatTime(request?.requested_slot?.session?.start_time)}</span>
+        </p>
+      )}
       {request.status === 'pending' && request.available_slots !== undefined && (
         <p className='text-sm text-gray-500 mt-1'>
           Available slots in requested session: <span className='font-semibold'>{request.available_slots}</span>
@@ -53,7 +61,7 @@ function SlotRequests({ handleClose, drawerState }) {
 
   return (
     <Drawer
-      title="Slot Reschedule Requests"
+      title="Slot Requests"
       placement='right'
       closable
       onClose={handleClose}
@@ -67,7 +75,6 @@ function SlotRequests({ handleClose, drawerState }) {
         rejectAction={rejectSlotRequest}
         fromField={"username"}
         loading={requestLoading}
-      // render={(item) => <Table columns={columns} dataSource={item?.items || []} pagination={false} className='mt-5' />}
       />
     </Drawer>
   )

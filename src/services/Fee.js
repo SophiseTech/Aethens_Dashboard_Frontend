@@ -1,4 +1,4 @@
-import { get, put, post } from "@utils/Requests";
+import { get, put, post, del } from "@utils/Requests";
 
 export const FeeService = {
   getFeeDetailsByStudent: (studentId) => {
@@ -24,5 +24,21 @@ export const FeeService = {
   // New: mark an installment as paid without generating a bill
   markInstallmentAsPaid: (feeAccountId, installmentId, payload = {}) => {
     return post(`/fees/${feeAccountId}/installment/${installmentId}/mark-paid`, payload);
+  },
+  // New: Recreate installments for a student
+  recreateInstallments: (studentId, payload = {}) => {
+    return post(`/fees/student/${studentId}/recreate-installments`, payload);
+  },
+  addAdditionalFee: (feeAccountId, payload = {}) => {
+    return post(`/fees/account/${feeAccountId}/additional-fee`, payload);
+  },
+  updateInstallment: (feeAccountId, installmentId, payload = {}) => {
+    return put(`/fees/${feeAccountId}/installment/${installmentId}`, payload);
+  },
+  addInstallment: (feeAccountId, payload = {}) => {
+    return post(`/fees/${feeAccountId}/installment`, payload);
+  },
+  deleteInstallment: (feeAccountId, installmentId) => {
+    return del(`/fees/${feeAccountId}/installment/${installmentId}`);
   },
 };

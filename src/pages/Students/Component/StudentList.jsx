@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState, useRef } from "react";
-import { Badge, Button, Segmented, Select, Table, Tag } from "antd";
+import { Badge, Button, Modal, Segmented, Select, Table, Tag, Flex, Empty } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import studentStore from "@stores/StudentStore";
 import userStore from "@stores/UserStore";
 import { ROLES } from "@utils/constants";
 import UserDetailsDrawer from "@components/UserDetailsDrawer";
 import courseService from "@/services/Course";
-import Chip from "@components/Chips/Chip";
 import { useStore } from "zustand";
 import centersStore from "@stores/CentersStore";
 import facultyAssignmentStore from "@stores/FacultyAssignmentStore";
+import Chip from '@components/Chips/Chip';
 
 function StudentList() {
   const {
@@ -33,10 +33,13 @@ function StudentList() {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const { selectedCenter } = useStore(centersStore);
-  const { unassignedStudents, getUnassignedStudents } = useStore(facultyAssignmentStore);
-  const unassignedCenterId = (
-    user?.role === ROLES.ADMIN || user?.role === ROLES.OPERATIONS_MANAGER || user?.role === ROLES.ACADEMIC_MANAGER
-  ) ? selectedCenter : user?.center_id;
+  const {
+    facultyCandidates,
+    getStudentAssignment,
+    reassignStudent,
+    submitLoading: assignSubmitLoading,
+    loading: assignLoading,
+  } = useStore(facultyAssignmentStore);
 
   // Get initial view and page from query parameters
   const initialView = queryParams.get("view") || "Current Students";
@@ -49,7 +52,8 @@ function StudentList() {
   const [selectedView, setSelectedView] = useState(initialView);
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [allCourses, setAllCourses] = useState([]);
-  const { setActiveStudent } = studentStore()
+  const { setActiveStudent } = studentStore();
+  const [assignModalStudent, setAssignModalStudent] = useState(null);
   // Per-view total counts (separate so they don't overwrite each other)
   const [viewTotals, setViewTotals] = useState({});
 
@@ -153,8 +157,6 @@ function StudentList() {
         }
       } else if (selectedView === "Todays Students") {
         getTodaysSessionAttendees(user, selectedCenter);
-      } else if (selectedView === "Unassigned Students") {
-        getUnassignedStudents(unassignedCenterId);
       } else {
         getCurrentSessionAttendees();
       }
@@ -227,8 +229,6 @@ function StudentList() {
 
     if (selectedView === "Current Students") {
       data = currentSessionAttendees;
-    } else if (selectedView === "Unassigned Students") {
-      data = unassignedStudents;
     } else {
       data = searchQuery ? searchResults : students;
     }
@@ -264,12 +264,45 @@ function StudentList() {
     fromBranch,
     toBranch,
     user?.center_id,
-    user?.role,
     todaysSessionAttendees,
-    unassignedStudents,
   ]);
 
   console.log("search query: ", searchQuery, searchResults, currentPage);
+
+  const canAssignFaculty = [
+    ROLES.ADMIN,
+    ROLES.MANAGER,
+    ROLES.OPERATIONS_MANAGER,
+    ROLES.ACADEMIC_MANAGER,
+  ].includes(user?.role);
+
+  const handleOpenAssignModal = async (record, e) => {
+    e.stopPropagation();
+    setAssignModalStudent(record);
+    const centerId =
+      record?.center_id?._id ||
+      record?.center_id ||
+      (selectedCenter !== "all" ? selectedCenter : null) ||
+      user?.center_id ||
+      null;
+    await getStudentAssignment(record._id, centerId);
+  };
+
+  const handleAssign = async (facultyId) => {
+    if (!assignModalStudent) return;
+    const centerId =
+      assignModalStudent?.center_id?._id ||
+      assignModalStudent?.center_id ||
+      (selectedCenter !== "all" ? selectedCenter : null) ||
+      user?.center_id ||
+      null;
+    const slotId = assignModalStudent?.slotId || null;
+    const response = await reassignStudent(assignModalStudent._id, facultyId, slotId, centerId);
+    if (response) {
+      setAssignModalStudent(null);
+      await getCurrentSessionAttendees(selectedCenter);
+    }
+  };
 
   const columns = [
     {
@@ -278,6 +311,13 @@ function StudentList() {
       key: "username",
       render: (name, record) => {
         const isMigrated = record?.details_id?.migrated?.fromBranchId;
+        const isCurrentView = selectedView === "Current Students";
+        const ringStyle = isCurrentView && record.isPresent !== undefined
+          ? {
+            outline: `3px solid ${record.isPresent ? "#52c41a" : "#ff4d4f"}`,
+            outlineOffset: "2px",
+          }
+          : {};
         return (
           <div
             className="flex items-center gap-3"
@@ -286,6 +326,7 @@ function StudentList() {
           >
             <img
               className="rounded-full aspect-square w-8 2xl:w-10 border border-border"
+              style={ringStyle}
               src={record?.profile_img || '/images/default.jpg'}
               alt="Profile"
             />
@@ -345,31 +386,45 @@ function StudentList() {
   ];
 
   if (selectedView === "Current Students") {
-    columns.push(
-      {
-        title: "Status",
-        dataIndex: "isPresent",
-        render: (value) => <Chip type={value ? "success" : "danger"} label={value ? "Present" : "Absent"} glow={false} />
-      }
-    )
+    columns.push({
+      title: "Faculty",
+      key: "faculty",
+      render: (_, record) => {
+        const isAssigned = !!record.facultyName;
+        const source = record.assignmentSource;
+        const sourceColor = isAssigned ? (source === "AUTO" ? "blue" : "green") : "orange";
+        const sourceLabel = isAssigned ? (source === "AUTO" ? "Auto-Assigned" : "Manual") : "Unassigned";
+        const isUnassigned = !isAssigned;
+        return (
+          <Flex vertical gap={4} align="flex-start">
+            <span className="font-medium text-[13px] text-gray-700 leading-none">
+              {record.facultyName ?? "—"}
+            </span>
+            <Flex gap={8} align="center">
+              <Tag
+                color={sourceColor}
+                className="m-0 border-transparent rounded-full px-2"
+                style={{ fontSize: "10px", lineHeight: "16px" }}
+              >
+                {sourceLabel}
+              </Tag>
+              {canAssignFaculty && record.slotType !== "demo" && (
+                <Button
+                  type="link"
+                  size="small"
+                  className="p-0 h-auto text-[12px]"
+                  onClick={(e) => handleOpenAssignModal(record, e)}
+                >
+                  {isUnassigned ? "+ Assign" : "Reassign"}
+                </Button>
+              )}
+            </Flex>
+          </Flex>
+        );
+      },
+    });
   }
 
-  if (selectedView === "Unassigned Students") {
-    columns.push(
-      {
-        title: "Marked At",
-        dataIndex: "assignedAt",
-        key: "assignedAt",
-        render: (value) => value ? new Date(value).toLocaleString() : "-",
-      },
-      {
-        title: "Assignment",
-        dataIndex: "assignmentStatus",
-        key: "assignmentStatus",
-        render: () => <Chip type="warning" label="Unassigned" glow={false} />,
-      }
-    );
-  }
 
   const handleTableChange = (pagination, filters) => {
     // Handle course filter change
@@ -393,12 +448,10 @@ function StudentList() {
       setViewTotals((prev) => ({ ...prev, [selectedView]: count }));
     } else if (selectedView === 'Current Students') {
       setViewTotals((prev) => ({ ...prev, [selectedView]: currentSessionAttendees?.length ?? 0 }));
-    } else if (selectedView === 'Unassigned Students') {
-      setViewTotals((prev) => ({ ...prev, [selectedView]: unassignedStudents?.length ?? 0 }));
     } else if (selectedView === 'Todays Students') {
       setViewTotals((prev) => ({ ...prev, [selectedView]: todaysSessionAttendees?.length ?? 0 }));
     }
-  }, [total, searchTotal, searchQuery, selectedView, currentSessionAttendees?.length, todaysSessionAttendees?.length, unassignedStudents?.length]);
+  }, [total, searchTotal, searchQuery, selectedView, currentSessionAttendees?.length, todaysSessionAttendees?.length]);
 
   const segmentOptions = useMemo(() => {
     const countFor = (view) => viewTotals[view] ?? 0;
@@ -415,10 +468,8 @@ function StudentList() {
       </span>
     );
 
+
     const views = ['Current Students', 'Active Students', 'All Students'];
-    if (user?.role === ROLES.MANAGER || user?.role === ROLES.ADMIN || user?.role === ROLES.OPERATIONS_MANAGER || user?.role === ROLES.ACADEMIC_MANAGER) {
-      views.splice(1, 0, 'Unassigned Students');
-    }
     if (user?.role === ROLES.ADMIN || user?.role === ROLES.FACULTY || user?.role === ROLES.OPERATIONS_MANAGER || user.role === ROLES.ACADEMIC_MANAGER) {
       views.push('Todays Students');
     }
@@ -430,8 +481,7 @@ function StudentList() {
   return (
     <>
       {/* Migration Filters - positioned below search, above view selector */}
-      {selectedView !== "Unassigned Students" && (
-        <div className="flex gap-3 mb-4 items-center flex-wrap">
+      <div className="flex gap-3 mb-4 items-center flex-wrap">
         <Select
           placeholder="From Branch"
           value={tempFromBranch}
@@ -485,7 +535,6 @@ function StudentList() {
           Clear Filters
         </Button>
         </div>
-      )}
 
       {/* View Selector */}
       <Segmented
@@ -536,6 +585,65 @@ function StudentList() {
         showActions
         isStudentDetail
       />
+      <Modal
+        title={assignModalStudent ? `Assign Faculty — ${assignModalStudent.username}` : "Assign Faculty"}
+        open={!!assignModalStudent}
+        onCancel={() => setAssignModalStudent(null)}
+        footer={null}
+        width={680}
+        destroyOnClose
+      >
+        {assignLoading ? (
+          <div className="py-6 text-center text-gray-400">Loading faculty...</div>
+        ) : !facultyCandidates?.length ? (
+          <Empty description="No faculty available" />
+        ) : (
+          <Table
+            rowKey="_id"
+            size="small"
+            pagination={false}
+            loading={assignSubmitLoading}
+            dataSource={facultyCandidates}
+            columns={[
+              {
+                title: "Faculty",
+                dataIndex: "username",
+                render: (name, rec) => (
+                  <Flex align="center" gap={8}>
+                    <img className="rounded-full w-7 aspect-square border border-border" src={rec?.profile_img || "/images/default.jpg"} alt={name} />
+                    <span>{name}</span>
+                  </Flex>
+                ),
+              },
+              { title: "Assigned", dataIndex: "assignedCount" },
+              { title: "Cap", dataIndex: "dailyAssignmentCap" },
+              { title: "Available", dataIndex: "availableCapacity" },
+              {
+                title: "Status",
+                render: (_, rec) => {
+                  if (rec.isAssigned) return <Tag color="blue">Assigned</Tag>;
+                  if (rec.isEligible) return <Tag color="green">Available</Tag>;
+                  return <Tag color="red">Full</Tag>;
+                },
+              },
+              {
+                title: "Action",
+                render: (_, rec) => (
+                  <Button
+                    type="primary"
+                    size="small"
+                    loading={assignSubmitLoading}
+                    disabled={!rec.isEligible && !rec.isAssigned}
+                    onClick={() => handleAssign(rec._id)}
+                  >
+                    {rec.isAssigned ? "Reassign" : "Assign"}
+                  </Button>
+                ),
+              },
+            ]}
+          />
+        )}
+      </Modal>
     </>
   );
 }

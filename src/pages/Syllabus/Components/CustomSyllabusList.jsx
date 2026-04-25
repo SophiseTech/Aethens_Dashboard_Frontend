@@ -6,8 +6,9 @@ import { useStore } from 'zustand';
 
 const { Search } = Input;
 
-function CustomSyllabusList({ images, loading, statusFilter, setStatusFilter, searchText, setSearchText }) {
+function CustomSyllabusList({ images, loading, statusFilter, setStatusFilter, searchText, setSearchText, showProgressColumns = false }) {
     const { user } = useStore(userStore);
+    const shouldShowProgress = showProgressColumns || user.role === ROLES.STUDENT;
 
     // Define table columns
     const columns = [
@@ -56,36 +57,42 @@ function CustomSyllabusList({ images, loading, statusFilter, setStatusFilter, se
         },
     ];
 
-    columns.push(
-        {
-            title: 'Sessions',
-            dataIndex: 'sessionCount',
-            key: 'sessionCount',
-            render: (sessionCount) => {
-                return (
-                    <span className="text-sm">
-                        <span className="font-semibold">{sessionCount}</span>
-                    </span>
-                );
+    if (shouldShowProgress) {
+        columns.push(
+            {
+                title: 'Sessions',
+                dataIndex: 'sessionCount',
+                key: 'sessionCount',
+                render: (sessionCount, record) => {
+                    const totalSessions = record.sessionsRequired || null;
+                    return (
+                        <span className="text-sm">
+                            <span className="font-semibold">{sessionCount}</span>
+                            {totalSessions > 0 && (
+                                <span className="text-gray-500">/{totalSessions}</span>
+                            )}
+                        </span>
+                    );
+                },
             },
-        },
-        {
-            title: 'Status',
-            dataIndex: 'status',
-            key: 'status',
-            render: (_, record) => {
-                const { completed, sessionCount } = record;
+            {
+                title: 'Status',
+                dataIndex: 'status',
+                key: 'status',
+                render: (_, record) => {
+                    const { completed, sessionCount } = record;
 
-                if (completed) {
-                    return <Tag color="success">Completed</Tag>;
-                } else if (sessionCount >= 1) {
-                    return <Tag color="processing">Ongoing</Tag>;
-                } else {
-                    return <Tag color="default">Not Started</Tag>;
-                }
-            },
-        }
-    );
+                    if (completed) {
+                        return <Tag color="success">Completed</Tag>;
+                    } else if (sessionCount >= 1) {
+                        return <Tag color="processing">Ongoing</Tag>;
+                    } else {
+                        return <Tag color="default">Not Started</Tag>;
+                    }
+                },
+            }
+        );
+    }
 
 
     // Transform images into table data - NO MORE FILTERING
@@ -97,7 +104,7 @@ function CustomSyllabusList({ images, loading, statusFilter, setStatusFilter, se
     return (
         <div>
             {/* Filters - Only show for students */}
-            {user.role === ROLES.STUDENT && (
+            {shouldShowProgress && (
                 <Space className="mb-4" wrap>
                     <Select
                         style={{ width: 160 }}
