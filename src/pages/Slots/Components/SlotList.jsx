@@ -52,7 +52,8 @@ function SlotList({ groupedSlots, slots = [], holidays = [] }) {
   const handleRescheduleSlot = async (values) => {
     await reshceduleSlot({
       current_slot: reschedulingSlot,
-      requested_slot: values?.requested_slot
+      requested_slot: values?.requested_slot,
+      type: values?.type || "reschedule"
     })
   }
 

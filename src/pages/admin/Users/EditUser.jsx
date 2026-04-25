@@ -25,6 +25,7 @@ function EditUser() {
     const isEditing = id && id !== "new";
 
     const dobValue = Form.useWatch("DOB", form);
+    const roleValue = Form.useWatch("role", form);
 
     // Fetch centers on mount
     useEffect(() => {
@@ -53,6 +54,7 @@ function EditUser() {
                         DOJ: user.DOJ ? dayjs(user.DOJ) : null,
                         school_uni_work: user.school_uni_work,
                         profile_img: user.profile_img || "https://app.schoolofathens.art/images/default.jpg",
+                        idCardNumber: user.idCardNumber,
                     });
                 })
                 .catch(() => {
@@ -209,6 +211,19 @@ function EditUser() {
                             />
                         </Col>
                     </Row>
+
+                    {roleValue === 'faculty' && (
+                        <Row gutter={16}>
+                            <Col xs={24} md={12}>
+                                <CustomInput
+                                    name="idCardNumber"
+                                    label="ID Card Number"
+                                    placeholder="Enter ID Card Number"
+                                    required={true}
+                                />
+                            </Col>
+                        </Row>
+                    )}
 
                     <Divider orientation="left">Personal Details</Divider>
 

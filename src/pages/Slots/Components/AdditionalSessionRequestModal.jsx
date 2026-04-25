@@ -20,7 +20,7 @@ function AdditionalSessionRequestModal({ isOpen, onCancel, holidays = [] }) {
   const date = Form.useWatch("date", form);
 
   useEffect(() => {
-    getAvailableSessions(date, null, null);
+    getAvailableSessions(date, null, 'additional_student');
   }, [date]);
 
   const today = dayjs().startOf("day");

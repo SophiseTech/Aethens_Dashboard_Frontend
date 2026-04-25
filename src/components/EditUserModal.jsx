@@ -123,13 +123,6 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
             placeholder="Scool / University / Company Name"
           />
         }
-        {loggedinUser.role === ROLES.MANAGER && user?.role === ROLES.STUDENT && (
-          <CustomCheckbox
-            name="allow_additional_session_request"
-            label="Allow additional session request"
-            required={false}
-          />
-        )}
         {isStudentDetail && (
           <CustomSelect
             name={"idCardNumber"}

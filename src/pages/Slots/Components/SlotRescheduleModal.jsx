@@ -68,6 +68,7 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
       date: nextDate,
       session: session._id
     }
+    values.type = 'reschedule'
     await handleOk(values)
   }
 
@@ -108,7 +109,7 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
           optionFilterProp="label"
           optionRender={(options) => sessionSlotOptionRenderer(options, user, false)}
         />
-        <CustomSubmit className='bg-primary' label='Submit' loading={submitLoading} disabled={submitLoading}/>
+        <CustomSubmit className='bg-primary' label='Submit' loading={submitLoading} disabled={submitLoading} />
       </CustomForm>
     </Modal>
   )

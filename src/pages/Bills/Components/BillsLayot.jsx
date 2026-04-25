@@ -70,6 +70,16 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
 
   const customFilters = [
     { key: 'invoice_search', type: 'input', placeholder: 'Search Invoice (e.g., WFD1001)' },
+    { key: 'student_name', type: 'input', placeholder: 'Search Student Name' },
+    {
+      key: 'subject', type: 'select', placeholder: 'Select Subject', options: [
+        { value: '', label: 'Select Subject' },
+        { value: 'course', label: 'Course' },
+        { value: 'materials', label: 'Materials' },
+        { value: 'gallery', label: 'Gallery' },
+        { value: 'registration', label: 'Registration' }
+      ]
+    },
     {
       key: 'payment_method', type: 'select', placeholder: 'Select Payment Method', options: [
         { value: '', label: 'Select' },
