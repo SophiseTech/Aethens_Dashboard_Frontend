@@ -18,7 +18,16 @@ function CustomSyllabusForm({ student, course }) {
     const { syllabus, loading: syllabusLoading, fetchSyllabus } = useStore(studentSyllabusStore);
     const [selectedImage, setSelectedImage] = useState(null);
 
-    const courseId = student?.details_id?.course_id;
+
+    // Safely extract course ID — must be a non-empty string (not an empty object from demo slots)
+    const rawCourseId = student?.details_id?.course_id?._id
+        || student?.details_id?.course_id
+        || student?.details_id?.course?._id
+        || student?.details_id?.course;
+    const courseId = rawCourseId && typeof rawCourseId === 'string' && rawCourseId.length > 0
+        ? rawCourseId
+        : null;
+
 
     // Fetch the student's personal custom syllabus on mount
     useEffect(() => {

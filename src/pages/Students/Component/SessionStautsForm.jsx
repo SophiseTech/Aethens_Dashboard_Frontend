@@ -7,7 +7,7 @@ import courseStore from '@stores/CourseStore';
 import facultyRemarksStore from '@stores/FacultyRemarksStore';
 import facultyStore from '@stores/FacultyStore';
 import userStore from '@stores/UserStore';
-import { Flex, Form, Spin } from 'antd';
+import { Flex, Form, Spin, Empty } from 'antd';
 import React, { useEffect, useState } from 'react'
 import { useStore } from 'zustand';
 import CustomSyllabusForm from './CustomSyllabusForm';
@@ -26,6 +26,16 @@ function SessionStautsForm({ handleOk, student }) {
   const [courseLoading, setCourseLoading] = useState(true);
   const { user } = useStore(userStore)
 
+  // Safely extract course ID — must be a non-empty string (not an empty object from demo slots)
+  const rawCourseId = student?.details_id?.course_id?._id
+    || student?.details_id?.course_id
+    || student?.details_id?.course?._id
+    || student?.details_id?.course;
+  const courseId = rawCourseId && typeof rawCourseId === 'string' && rawCourseId.length > 0
+    ? rawCourseId
+    : null;
+
+
   useEffect(() => {
     if (student?.details_id?.course_id) {
       setCourseLoading(true);
@@ -33,7 +43,7 @@ function SessionStautsForm({ handleOk, student }) {
     } else {
       setCourseLoading(false);
     }
-  }, [student?._id])
+  }, [student?._id, courseId])
 
   // Show spinner while course data is being fetched
   if (courseLoading) {
