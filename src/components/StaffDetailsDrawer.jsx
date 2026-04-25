@@ -22,11 +22,8 @@ import {
     FileTextOutlined,
     ClockCircleOutlined,
     CalendarFilled,
-<<<<<<< Updated upstream
     ThunderboltOutlined,
-=======
     IdcardOutlined,
->>>>>>> Stashed changes
 } from "@ant-design/icons";
 import { formatDate } from "@utils/helper";
 import PropTypes from "prop-types";
