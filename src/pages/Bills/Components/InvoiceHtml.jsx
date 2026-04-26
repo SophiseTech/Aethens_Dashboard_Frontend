@@ -14,9 +14,9 @@ const InvoiceHtml = ({ bill }) => {
     const total = bill?.total || 0;
     const undiscountedTotal = bill?.undiscountedTotal || 0;
     const applyWallet = bill?.applyWallet || false;
-    const walletAmountDeducted = bill?.walletAmountDeducted || 0;
-    const finalTotal = bill?.finalTotal || 0;
-    const walletCreditAmount = bill?.walletCreditAmount || 0;
+    const walletAmountDeducted = bill?.walletAmountDeducted ?? 0;
+    const finalTotal = bill?.finalTotal ?? 0;
+    const walletCreditAmount = bill?.walletCreditAmount ?? 0;
 
     const year = new Date().getFullYear().toString().slice(-2);
 
@@ -120,7 +120,7 @@ const InvoiceHtml = ({ bill }) => {
                                 <span>Wallet Amount (-):</span><span>{walletAmountDeducted.toFixed(2)}</span>
                             </div>
                             <div style={{ ...summaryRowStyle, fontWeight: 'bold' }}>
-                                <span>Grand Total:</span><span>{finalTotal.toFixed(2)}</span>
+                                <span>Grand Total (Cash):</span><span>{finalTotal.toFixed(2)}</span>
                             </div>
                         </>
                     )}

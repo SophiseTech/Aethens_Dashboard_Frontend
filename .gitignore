@@ -25,3 +25,4 @@ dist-ssr
 .env*
 .github/copilot-instructions.md
 nul
+package-lock.json

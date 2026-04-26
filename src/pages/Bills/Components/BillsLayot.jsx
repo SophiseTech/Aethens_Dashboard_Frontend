@@ -1,18 +1,23 @@
 import Chip from '@components/Chips/Chip'
 import BillsList from '@pages/Bills/Components/BillsList'
+import ExportBillsModal from '@pages/Bills/Components/ExportBillsModal'
 import billStore from '@stores/BillStore'
 import materialStore from '@stores/MaterialsStore'
+import userStore from '@stores/UserStore'
 import { formatDate } from '@utils/helper'
-import { Empty } from 'antd'
+import permissions from '@utils/permissions'
+import { Empty, Tag } from 'antd'
 import dayjs from 'dayjs'
 import React, { useMemo } from 'react'
 import { Outlet, useParams, useSearchParams } from 'react-router-dom'
+import { useStore } from 'zustand'
 
 function BillsLayot({ bills, loading, total, onLoadMore }) {
 
   const { id } = useParams()
   const { editBill, deleteBill, setFilters, filters, fe } = billStore()
   const { editMaterialsByBillId } = materialStore()
+  const { user } = useStore(userStore)
 
   const fields = {
     title: ["generated_for", "username"],
@@ -70,6 +75,16 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
 
   const customFilters = [
     { key: 'invoice_search', type: 'input', placeholder: 'Search Invoice (e.g., WFD1001)' },
+    { key: 'student_name', type: 'input', placeholder: 'Search Student Name' },
+    {
+      key: 'subject', type: 'select', placeholder: 'Select Subject', options: [
+        { value: '', label: 'Select Subject' },
+        { value: 'course', label: 'Course' },
+        { value: 'materials', label: 'Materials' },
+        { value: 'gallery', label: 'Gallery' },
+        { value: 'registration', label: 'Registration' }
+      ]
+    },
     {
       key: 'payment_method', type: 'select', placeholder: 'Select Payment Method', options: [
         { value: '', label: 'Select' },
@@ -110,6 +125,16 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
   return (
     <div className='flex gap-5 h-full | flex-col lg:overflow-auto lg:flex-row'>
       <div className='| w-full lg:w-1/4'>
+        <div className='flex justify-between mb-3 items-center'>
+          <div>
+            <Tag color='orange'>{total} bills</Tag>
+          </div>
+          {permissions.bills?.export?.includes(user?.role) && (
+            <div>
+              <ExportBillsModal />
+            </div>
+          )}
+        </div>
         <BillsList
           bills={formattedBills}
           loading={loading}

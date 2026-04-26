@@ -1,6 +1,8 @@
 
 import sessionService from "@/services/Session"
+import centersStore from "@stores/CentersStore"
 import slotStore from "@stores/SlotStore"
+import userStore from "@stores/UserStore"
 import handleInternalError from "@utils/handleInternalError"
 import handleSuccess from "@utils/handleSuccess"
 import { notification } from "antd"
@@ -25,7 +27,15 @@ const SessionStore = create((set, get) => ({
   getAvailableSessions: async (date, center_id, sessionDisabledModule) => {
     try {
       set({ loading: true })
-      const { data } = await sessionService.getAvailableSessionByDate(date, center_id, sessionDisabledModule)
+      let effectiveCenterId = center_id
+      if (!effectiveCenterId) {
+        const { user } = userStore.getState()
+        const { selectedCenter } = centersStore.getState()
+        if ((user?.role === 'admin' || user?.role === 'operations_manager') && selectedCenter) {
+          effectiveCenterId = selectedCenter
+        }
+      }
+      const { data } = await sessionService.getAvailableSessionByDate(date, effectiveCenterId, sessionDisabledModule)
       set({ availableSessions: data })
     } catch (error) {
       handleInternalError(error)

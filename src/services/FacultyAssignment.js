@@ -12,16 +12,7 @@ class FacultyAssignmentService {
     }
   }
 
-  async getUnassignedStudents(centerId) {
-    try {
-      const query = centerId ? `?centerId=${centerId}` : "";
-      const response = await get(`/faculty-assignments/today/unassigned${query}`);
-      return response?.data ?? [];
-    } catch (error) {
-      handleError(error);
-      throw error;
-    }
-  }
+
 
   async getStudentAssignment(studentId, centerId, slotId = null) {
     try {

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Select, Button, Table, message, Space, Typography, Empty, Popconfirm, DatePicker } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
+import { Select, Button, Table, message, Space, Typography, Empty, Popconfirm, DatePicker, Tag } from 'antd';
 import dayjs from 'dayjs';
 import SessionStore from '@stores/SessionStore';
 import { ROLES, weekDays } from '@utils/constants';
@@ -12,6 +12,11 @@ import { sessionSlotOptionRenderer } from '@components/form/SessionDateSelector'
 
 const { Title } = Typography;
 
+const TYPE_TAG = {
+  rescheduled: { color: 'orange', label: 'Rescheduled' },
+  additional: { color: 'blue', label: 'Additional' },
+};
+
 function ManagerSlots() {
   const [sessionOptions, setSessionOptions] = useState([]);
   const [selectedSessionId, setSelectedSessionId] = useState(null);
@@ -19,9 +24,10 @@ function ManagerSlots() {
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [deallocatingIds, setDeallocatingIds] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1)
-  const [slotDate, setSlotDate] = useState(dayjs())
-  const { user } = userStore()
+  const [currentPage, setCurrentPage] = useState(1);
+  const [extraPage, setExtraPage] = useState(1);
+  const [slotDate, setSlotDate] = useState(dayjs());
+  const { user } = userStore();
   const { selectedCenter } = useStore(centersStore);
 
   const { getAllSessions } = SessionStore();
@@ -51,11 +57,19 @@ function ManagerSlots() {
   }, [getAllSessions, selectedCenter, slotDate]);
 
   useEffect(() => {
-    // Clear students when slot date changes
     setStudents([]);
     setSelectedSessionId(null);
-  }, [slotDate])
+  }, [slotDate]);
 
+  const regularSlots = useMemo(
+    () => students.filter((s) => s.type === 'regular').sort((a, b) => (a.name || '').localeCompare(b.name || '')),
+    [students]
+  );
+
+  const extraSlots = useMemo(
+    () => students.filter((s) => s.isActive !== false && ['attended', 'booked'].includes(s.status)).sort((a, b) => (a.name || '').localeCompare(b.name || '')),
+    [students]
+  );
 
   const loadStudents = async () => {
     if (!selectedSessionId) {
@@ -72,9 +86,12 @@ function ManagerSlots() {
         email: student.email,
         status: student.status,
         course_name: student.course_name,
-        type: student.type
+        type: student.type,
+        isActive: student.isActive !== false,
       }));
       setStudents(formatted);
+      setCurrentPage(1);
+      setExtraPage(1);
     } catch (error) {
       console.error('Failed to load students:', error);
       message.error('Failed to load student data');
@@ -97,16 +114,33 @@ function ManagerSlots() {
     }
   };
 
-  const columns = [
+  const deallocateAction = {
+    roles: [ROLES.MANAGER],
+    render: (record) => (
+      <Popconfirm
+        title="Are you sure you want to deallocate this student?"
+        onConfirm={() => handleDeallocate(record._id)}
+        okText="Yes"
+        cancelText="No"
+      >
+        <Button
+          type="primary"
+          danger
+          size="small"
+          loading={deallocatingIds.includes(record._id)}
+        >
+          Deallocate
+        </Button>
+      </Popconfirm>
+    ),
+  };
+
+  const baseColumns = [
     {
       title: '#',
       key: 'index',
-      render: (_, __, index) => {
-        const pageSize = 10;;
-
-        return index + 1 + (currentPage - 1) * pageSize;
-      },
-      roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]
+      width: 50,
+      roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     },
     {
       title: 'Student Name',
@@ -121,76 +155,68 @@ function ManagerSlots() {
       roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     },
     {
-      title: 'Type',
-      dataIndex: 'type',
-      key: 'type',
-      roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-      render: (value) => value ? String(value).charAt(0).toUpperCase() + String(value).slice(1) : ''
-    },
-    // {
-    //   title: 'Status',
-    //   dataIndex: 'status',
-    //   key: 'status',
-    //   render: (status) => (
-    //     <span style={{ color: status === 'active' ? 'green' : 'volcano' }}>{status}</span>
-    //   ),
-    //   roles: [ROLES.MANAGER]
-    // },
-    {
       title: 'Course',
-      dataIndex: "course_name",
+      dataIndex: 'course_name',
       key: 'course_name',
       roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN],
     },
     {
       title: 'Action',
       key: 'action',
-      render: (_, record) => (
-        actionButtonsByRole.map((action) => {
-          if (action.roles.includes(user.role)) {
-            return action.render(record);
-          }
-          return null;
-        })
-      ),
+      roles: [ROLES.MANAGER],
+      render: (_, record) => deallocateAction.roles.includes(user.role) ? deallocateAction.render(record) : null,
     },
   ];
 
-  const actionButtonsByRole = [
-    {
-      roles: [ROLES.MANAGER],
-      render: (record) => (
-        <Popconfirm
-          title="Are you sure you want to deallocate this student?"
-          onConfirm={() => handleDeallocate(record._id)}
-          okText="Yes"
-          cancelText="No"
-        >
-          <Button
-            type="primary"
-            danger
-            size="small"
-            loading={deallocatingIds.includes(record._id)}
-          >
-            Deallocate
-          </Button>
-        </Popconfirm>
-      ),
-    }
-  ]
+  const filterByRole = (cols) =>
+    cols.filter((c) => (c.roles || []).includes(user.role));
 
-  const columnsByRole = columns.filter((column) => {
-    const columnRoles = column.roles || [];
-    return columnRoles.includes(user.role);
-  });
+  const regularColumns = filterByRole(baseColumns).map((col, colIdx) => ({
+    ...col,
+    render: col.key === 'index'
+      ? (_, __, idx) => idx + 1 + (currentPage - 1) * 10
+      : col.key === 'name'
+        ? (value, record) => (
+          <Space size={4}>
+            <span style={record.isActive === false ? { color: '#cf1322', fontWeight: 500 } : {}}>
+              {value}
+            </span>
+            {['rescheduled', 'absent'].includes(record.status) && (
+              <Tag color="red" style={{ fontSize: 11, lineHeight: '16px', padding: '0 4px' }}>
+                Not Expected
+              </Tag>
+            )}
+          </Space>
+        )
+        : col.render,
+  }));
+
+  const extraColumns = filterByRole([
+    ...baseColumns.slice(0, -1),
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+      width: 120,
+      roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+      render: (value) => {
+        const cfg = TYPE_TAG[value];
+        return cfg ? <Tag color={cfg.color}>{cfg.label}</Tag> : value;
+      },
+    },
+    baseColumns[baseColumns.length - 1],
+  ]).map((col) => ({
+    ...col,
+    render: col.key === 'index'
+      ? (_, __, idx) => idx + 1 + (extraPage - 1) * 10
+      : col.render,
+  }));
+
+  const hasData = students.length > 0;
 
   return (
-    <TitleLayout title={"View Students by Session"}>
-      <Space direction="vertical" style={{ width: '100%' }}>
-        {/* <Row justify="space-between">
-          <Title level={3}>View Students by Session</Title>
-          <AdminCenterSelector />
-        </Row> */}
+    <TitleLayout title="View Students by Session">
+      <Space direction="vertical" style={{ width: '100%' }} size="large">
         <Space wrap>
           <Select
             showSearch
@@ -205,43 +231,85 @@ function ManagerSlots() {
             optionFilterProp="label"
             optionRender={(options) => sessionSlotOptionRenderer(options, user)}
           />
-          <DatePicker
-            onChange={setSlotDate}
-            value={slotDate}
-          />
+          <DatePicker onChange={setSlotDate} value={slotDate} />
           <Button
             type="primary"
             onClick={loadStudents}
             loading={loadingStudents}
             disabled={!selectedSessionId}
           >
-            {students.length > 0 ? 'Reload Students' : 'Load Students'}
+            {hasData ? 'Reload Students' : 'Load Students'}
           </Button>
         </Space>
 
         {selectedSessionId && (
-          <Title level={5} style={{ marginTop: 16 }}>
-            Showing students for session:{' '}
+          <Title level={5} style={{ margin: 0 }}>
+            Showing students for:{' '}
             {sessionOptions.find((opt) => opt.value === selectedSessionId)?.label || ''}
           </Title>
         )}
 
-        {students.length > 0 ? (
-          <Table
-            dataSource={students}
-            columns={columnsByRole}
-            pagination={{
-              current: currentPage,
-              pageSize: 10,
-              onChange: (page) => {
-                setCurrentPage(page); // Update your pagination state
-              },
-            }}
-            loading={loadingStudents}
-            bordered
-          />
-        ) : (
-          !loadingStudents && <Empty description="No students found for this session." />
+        {!hasData && !loadingStudents && (
+          <Empty description="No students found for this session." />
+        )}
+
+        {(hasData || loadingStudents) && (
+          <>
+            <div>
+              <Title level={5} style={{ marginBottom: 8 }}>
+                Regular Slots
+                {hasData && (
+                  <Tag color="default" style={{ marginLeft: 8, fontWeight: 'normal' }}>
+                    {regularSlots.length}
+                  </Tag>
+                )}
+              </Title>
+              <Table
+                dataSource={regularSlots}
+                columns={regularColumns}
+                pagination={{
+                  current: currentPage,
+                  pageSize: 10,
+                  onChange: setCurrentPage,
+                  hideOnSinglePage: true,
+                }}
+                rowClassName={(record) => record.isActive === false ? 'slot-row-inactive' : ''}
+                loading={loadingStudents}
+                bordered
+                size="small"
+                locale={{ emptyText: 'No regular slots for this session.' }}
+              />
+              <style>{`
+                .slot-row-inactive td { background-color: #fff1f0 !important; }
+                .slot-row-inactive:hover td { background-color: #ffccc7 !important; }
+              `}</style>
+            </div>
+
+            <div>
+              <Title level={5} style={{ marginBottom: 8 }}>
+                Today's Expected Students (All Types)
+                {hasData && (
+                  <Tag color="default" style={{ marginLeft: 8, fontWeight: 'normal' }}>
+                    {extraSlots.length}
+                  </Tag>
+                )}
+              </Title>
+              <Table
+                dataSource={extraSlots}
+                columns={extraColumns}
+                pagination={{
+                  current: extraPage,
+                  pageSize: 10,
+                  onChange: setExtraPage,
+                  hideOnSinglePage: true,
+                }}
+                loading={loadingStudents}
+                bordered
+                size="small"
+                locale={{ emptyText: 'No students expected for this session today.' }}
+              />
+            </div>
+          </>
         )}
       </Space>
     </TitleLayout>
@@ -249,3 +317,4 @@ function ManagerSlots() {
 }
 
 export default ManagerSlots;
+

@@ -25,6 +25,7 @@ const permissions = {
     delete: [ROLES.ADMIN],
     finalize: [ROLES.MANAGER, ROLES.ADMIN],
     edit_draft: [ROLES.MANAGER, ROLES.ADMIN],
+    export: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   fda: {
     mark_don: [ROLES.MANAGER, ROLES.ACADEMIC_MANAGER]

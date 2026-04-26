@@ -218,12 +218,12 @@ const studentStore = create((set, get) => ({
       if (student) {
         if (searchQuery) {
           const updatedSearchResults = searchResults?.map((item) =>
-            item._id === student._id ? { ...item, ...updateData } : item
+            item._id.toString() === student._id.toString() ? { ...item, ...updateData } : item
           );
           set({ searchResults: updatedSearchResults });
         } else {
           const updatedStudents = students?.map((item) =>
-            item._id === student._id ? { ...item, ...updateData } : item
+            item._id.toString() === student._id.toString() ? student : item
           );
           set({ students: updatedStudents });
         }

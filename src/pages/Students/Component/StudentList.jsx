@@ -9,6 +9,7 @@ import courseService from "@/services/Course";
 import { useStore } from "zustand";
 import centersStore from "@stores/CentersStore";
 import facultyAssignmentStore from "@stores/FacultyAssignmentStore";
+import Chip from '@components/Chips/Chip';
 
 function StudentList() {
   const {
@@ -33,17 +34,12 @@ function StudentList() {
   const queryParams = new URLSearchParams(location.search);
   const { selectedCenter } = useStore(centersStore);
   const {
-    unassignedStudents,
-    getUnassignedStudents,
     facultyCandidates,
     getStudentAssignment,
     reassignStudent,
     submitLoading: assignSubmitLoading,
     loading: assignLoading,
   } = useStore(facultyAssignmentStore);
-  const unassignedCenterId = (
-    user?.role === ROLES.ADMIN || user?.role === ROLES.OPERATIONS_MANAGER || user?.role === ROLES.ACADEMIC_MANAGER
-  ) ? selectedCenter : user?.center_id;
 
   // Get initial view and page from query parameters
   const initialView = queryParams.get("view") || "Current Students";
@@ -161,8 +157,6 @@ function StudentList() {
         }
       } else if (selectedView === "Todays Students") {
         getTodaysSessionAttendees(user, selectedCenter);
-      } else if (selectedView === "Unassigned Students") {
-        getUnassignedStudents(unassignedCenterId);
       } else {
         getCurrentSessionAttendees();
       }
@@ -235,8 +229,6 @@ function StudentList() {
 
     if (selectedView === "Current Students") {
       data = currentSessionAttendees;
-    } else if (selectedView === "Unassigned Students") {
-      data = unassignedStudents;
     } else {
       data = searchQuery ? searchResults : students;
     }
@@ -272,9 +264,7 @@ function StudentList() {
     fromBranch,
     toBranch,
     user?.center_id,
-    user?.role,
     todaysSessionAttendees,
-    unassignedStudents,
   ]);
 
   console.log("search query: ", searchQuery, searchResults, currentPage);
@@ -316,6 +306,10 @@ function StudentList() {
 
   const columns = [
     {
+      title: "Adm No",
+      dataIndex: ["details_id", "admissionNumber"],
+    },
+    {
       title: "Name",
       dataIndex: "username",
       key: "username",
@@ -351,8 +345,9 @@ function StudentList() {
       },
     },
     {
-      title: "Adm No",
-      dataIndex: ["details_id", "admissionNumber"],
+      title: "ID Card No",
+      dataIndex: ["details_id", "idCardNumber"],
+      render: (value) => value || <Tag color="warning">Unassigned</Tag>,
     },
     {
       title: "Course",
@@ -363,10 +358,10 @@ function StudentList() {
         ? (selectedCourses.length > 0 ? selectedCourses : null)
         : null,
     },
-    {
-      title: "Email",
-      dataIndex: "email",
-    },
+    // {
+    //   title: "Email",
+    //   dataIndex: "email",
+    // },
     {
       title: "Type",
       dataIndex: "slotType",
@@ -400,10 +395,11 @@ function StudentList() {
       title: "Faculty",
       key: "faculty",
       render: (_, record) => {
+        const isAssigned = !!record.facultyName;
         const source = record.assignmentSource;
-        const sourceColor = source === "AUTO" ? "blue" : source === "MANUAL" ? "green" : "orange";
-        const sourceLabel = source ?? "Unassigned";
-        const isUnassigned = !source || source === "UNASSIGNED";
+        const sourceColor = isAssigned ? (source === "AUTO" ? "blue" : "green") : "orange";
+        const sourceLabel = isAssigned ? (source === "AUTO" ? "Auto-Assigned" : "Manual") : "Unassigned";
+        const isUnassigned = !isAssigned;
         return (
           <Flex vertical gap={4} align="flex-start">
             <span className="font-medium text-[13px] text-gray-700 leading-none">
@@ -434,22 +430,6 @@ function StudentList() {
     });
   }
 
-  if (selectedView === "Unassigned Students") {
-    columns.push(
-      {
-        title: "Marked At",
-        dataIndex: "assignedAt",
-        key: "assignedAt",
-        render: (value) => value ? new Date(value).toLocaleString() : "-",
-      },
-      {
-        title: "Assignment",
-        dataIndex: "assignmentStatus",
-        key: "assignmentStatus",
-        render: () => <Chip type="warning" label="Unassigned" glow={false} />,
-      }
-    );
-  }
 
   const handleTableChange = (pagination, filters) => {
     // Handle course filter change
@@ -473,12 +453,10 @@ function StudentList() {
       setViewTotals((prev) => ({ ...prev, [selectedView]: count }));
     } else if (selectedView === 'Current Students') {
       setViewTotals((prev) => ({ ...prev, [selectedView]: currentSessionAttendees?.length ?? 0 }));
-    } else if (selectedView === 'Unassigned Students') {
-      setViewTotals((prev) => ({ ...prev, [selectedView]: unassignedStudents?.length ?? 0 }));
     } else if (selectedView === 'Todays Students') {
       setViewTotals((prev) => ({ ...prev, [selectedView]: todaysSessionAttendees?.length ?? 0 }));
     }
-  }, [total, searchTotal, searchQuery, selectedView, currentSessionAttendees?.length, todaysSessionAttendees?.length, unassignedStudents?.length]);
+  }, [total, searchTotal, searchQuery, selectedView, currentSessionAttendees?.length, todaysSessionAttendees?.length]);
 
   const segmentOptions = useMemo(() => {
     const countFor = (view) => viewTotals[view] ?? 0;
@@ -495,10 +473,8 @@ function StudentList() {
       </span>
     );
 
+
     const views = ['Current Students', 'Active Students', 'All Students'];
-    if (user?.role === ROLES.MANAGER || user?.role === ROLES.ADMIN || user?.role === ROLES.OPERATIONS_MANAGER || user?.role === ROLES.ACADEMIC_MANAGER) {
-      views.splice(1, 0, 'Unassigned Students');
-    }
     if (user?.role === ROLES.ADMIN || user?.role === ROLES.FACULTY || user?.role === ROLES.OPERATIONS_MANAGER || user.role === ROLES.ACADEMIC_MANAGER) {
       views.push('Todays Students');
     }
@@ -510,8 +486,7 @@ function StudentList() {
   return (
     <>
       {/* Migration Filters - positioned below search, above view selector */}
-      {selectedView !== "Unassigned Students" && (
-        <div className="flex gap-3 mb-4 items-center flex-wrap">
+      <div className="flex gap-3 mb-4 items-center flex-wrap">
         <Select
           placeholder="From Branch"
           value={tempFromBranch}
@@ -564,8 +539,7 @@ function StudentList() {
         >
           Clear Filters
         </Button>
-        </div>
-      )}
+      </div>
 
       {/* View Selector */}
       <Segmented

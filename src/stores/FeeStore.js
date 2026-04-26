@@ -86,6 +86,39 @@ const feeStore = create((set) => ({
       throw error;
     }
   },
+  updateInstallment: async (feeAccountId, installmentId, payload = {}) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await FeeService.updateInstallment(feeAccountId, installmentId, payload);
+      set({ loading: false });
+      return response.data;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
+  addInstallment: async (feeAccountId, payload = {}) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await FeeService.addInstallment(feeAccountId, payload);
+      set({ loading: false });
+      return response.data;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
+  deleteInstallment: async (feeAccountId, installmentId) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await FeeService.deleteInstallment(feeAccountId, installmentId);
+      set({ loading: false });
+      return response.data;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
 }));
 
 export default feeStore;

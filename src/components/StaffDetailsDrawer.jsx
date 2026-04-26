@@ -23,6 +23,7 @@ import {
     ClockCircleOutlined,
     CalendarFilled,
     ThunderboltOutlined,
+    IdcardOutlined,
 } from "@ant-design/icons";
 import { formatDate } from "@utils/helper";
 import PropTypes from "prop-types";
@@ -127,6 +128,15 @@ const StaffDetailsDrawer = ({
                 </Title>
                 <Row gutter={[16, 16]}>
                     <Col span={24}>
+                        <Text strong>
+                            <IdcardOutlined style={{ marginRight: "8px" }} />
+                            ID Card Number:
+                        </Text>
+                        <Text style={{ marginLeft: "8px" }}>
+                            {user?.details_id?.idCardNumber || "—"}
+                        </Text>
+                    </Col>
+                    <Col span={24}>
                         <Text strong>Role:</Text>
                         <Tag color="blue" style={{ marginLeft: "8px" }}>
                             {user?.role || "N/A"}
@@ -226,8 +236,12 @@ const FacultyAssignmentSection = ({ user, visible }) => {
                         <Typography.Text>{stats?.dailyAssignmentCap ?? 0}</Typography.Text>
                     </Col>
                     <Col span={24}>
-                        <Typography.Text strong>Assigned Today: </Typography.Text>
+                        <Typography.Text strong>This Session: </Typography.Text>
                         <Tag color="blue">{stats?.assignedCount ?? 0} students</Tag>
+                    </Col>
+                    <Col span={24}>
+                        <Typography.Text strong>Assigned Today: </Typography.Text>
+                        <Tag color="geekblue">{stats?.dailyAssignedCount ?? 0} students</Tag>
                     </Col>
                 </Row>
             </Card>
