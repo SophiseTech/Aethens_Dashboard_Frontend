@@ -73,6 +73,22 @@ class BillServices {
     }
   }
 
+  async exportBills({ dateRange, centerIds, selectedFields, status, subject }) {
+    try {
+      const response = await post(`/bills/export`, {
+        dateRange,
+        centerIds,
+        selectedFields,
+        status,
+        subject,
+      })
+      if (!response || !response.data) throw new Error("An error occurred. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
 }
 
 const billService = new BillServices()
