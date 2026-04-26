@@ -1,8 +1,7 @@
 import { ClockCircleFilled, CloseOutlined, EnvironmentFilled } from '@ant-design/icons'
-import SubMenu from '@components/SubMenu'
 import slotStore from '@stores/SlotStore'
 import { formatTime } from '@utils/helper'
-import { Avatar, Modal, Popover, Tag } from 'antd'
+import { Avatar, Button, Modal, Popover, Tag } from 'antd'
 import { cva } from 'class-variance-authority'
 import dayjs from 'dayjs'
 import React from 'react'
@@ -53,28 +52,38 @@ function SlotItem({ _id, session, center_id: { location }, type, slotType, start
 
   const isRequest = () => type === "requested" || type === "completed"
 
-  const getOptions = (type) => {
-    return [
-      {
-        label: 'Request reschedule',
-        icon: <ClockCircleFilled />,
-        key: '1',
-        onClick: () => {
-          setReschedulingSlot({
-            start_date: sessionDate,
-            session: session,
-            _id
-          })
-          showModal()
-        },
-        disabled: type === "completed" || type === "cancelled"
-      },
-      {
-        label: 'Mark Absent',
-        icon: <CloseOutlined />,
-        danger: true,
-        key: '2',
-        onClick: () => {
+  const isPast = dayjs(sessionDate).isBefore(dayjs())
+  const isAbsent = type === "absent" || type === "cancelled"
+
+  const renderAction = () => {
+    if (isPast || isAbsent) {
+      return (
+        <Button
+          className='rounded-full font-bold'
+          size='small'
+          icon={<ClockCircleFilled />}
+          onClick={() => {
+            setReschedulingSlot({
+              start_date: sessionDate,
+              session: session,
+              _id
+            })
+            showModal()
+          }}
+          disabled={type === "completed" || type === "cancelled"}
+        >
+          Reschedule
+        </Button>
+      )
+    }
+
+    return (
+      <Button
+        className='rounded-full font-bold'
+        size='small'
+        danger
+        icon={<CloseOutlined />}
+        onClick={() => {
           Modal.confirm({
             title: 'Confirm Mark Absent',
             content: 'Are you sure you want to mark this student as absent?',
@@ -84,10 +93,12 @@ function SlotItem({ _id, session, center_id: { location }, type, slotType, start
               markAbsent(_id, "cancelled");
             }
           });
-        },
-        disabled: type === "completed" || type === "cancelled" || type === "absent"
-      },
-    ];
+        }}
+        disabled={type === "completed" || type === "cancelled" || type === "absent"}
+      >
+        Mark Absent
+      </Button>
+    )
   }
 
   return (
@@ -129,7 +140,7 @@ function SlotItem({ _id, session, center_id: { location }, type, slotType, start
       </div>
 
       <div>
-        <SubMenu items={getOptions(type)} />
+        {renderAction()}
       </div>
 
       {isRequest() && <RequestMask />}

@@ -306,6 +306,10 @@ function StudentList() {
 
   const columns = [
     {
+      title: "Adm No",
+      dataIndex: ["details_id", "admissionNumber"],
+    },
+    {
       title: "Name",
       dataIndex: "username",
       key: "username",
@@ -341,8 +345,9 @@ function StudentList() {
       },
     },
     {
-      title: "Adm No",
-      dataIndex: ["details_id", "admissionNumber"],
+      title: "ID Card No",
+      dataIndex: ["details_id", "idCardNumber"],
+      render: (value) => value || <Tag color="warning">Unassigned</Tag>,
     },
     {
       title: "Course",
@@ -353,10 +358,10 @@ function StudentList() {
         ? (selectedCourses.length > 0 ? selectedCourses : null)
         : null,
     },
-    {
-      title: "Email",
-      dataIndex: "email",
-    },
+    // {
+    //   title: "Email",
+    //   dataIndex: "email",
+    // },
     {
       title: "Type",
       dataIndex: "slotType",
@@ -534,7 +539,7 @@ function StudentList() {
         >
           Clear Filters
         </Button>
-        </div>
+      </div>
 
       {/* View Selector */}
       <Segmented

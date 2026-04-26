@@ -14,7 +14,7 @@ const { Title } = Typography;
 
 const TYPE_TAG = {
   rescheduled: { color: 'orange', label: 'Rescheduled' },
-  additional:  { color: 'blue',   label: 'Additional'  },
+  additional: { color: 'blue', label: 'Additional' },
 };
 
 function ManagerSlots() {
@@ -67,7 +67,7 @@ function ManagerSlots() {
   );
 
   const extraSlots = useMemo(
-    () => students.filter((s) => s.isActive !== false).sort((a, b) => (a.name || '').localeCompare(b.name || '')),
+    () => students.filter((s) => s.isActive !== false && ['attended', 'booked'].includes(s.status)).sort((a, b) => (a.name || '').localeCompare(b.name || '')),
     [students]
   );
 
@@ -177,17 +177,17 @@ function ManagerSlots() {
       ? (_, __, idx) => idx + 1 + (currentPage - 1) * 10
       : col.key === 'name'
         ? (value, record) => (
-            <Space size={4}>
-              <span style={record.isActive === false ? { color: '#cf1322', fontWeight: 500 } : {}}>
-                {value}
-              </span>
-              {record.isActive === false && (
-                <Tag color="red" style={{ fontSize: 11, lineHeight: '16px', padding: '0 4px' }}>
-                  Not Expected
-                </Tag>
-              )}
-            </Space>
-          )
+          <Space size={4}>
+            <span style={record.isActive === false ? { color: '#cf1322', fontWeight: 500 } : {}}>
+              {value}
+            </span>
+            {['rescheduled', 'absent'].includes(record.status) && (
+              <Tag color="red" style={{ fontSize: 11, lineHeight: '16px', padding: '0 4px' }}>
+                Not Expected
+              </Tag>
+            )}
+          </Space>
+        )
         : col.render,
   }));
 

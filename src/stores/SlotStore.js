@@ -155,7 +155,7 @@ const slotStore = create((set, get) => ({
       const stats = await slotService.updateSlotStatus(slotId, status)
       if (stats) {
         const { slots } = get()
-        const updatedSlots = slots.map(slot => slot._id === slotId ? { ...slot, status: "cancelled" } : slot)
+        const updatedSlots = slots.map(slot => slot._id === slotId ? { ...slot, status: "absent" } : slot)
         set({ slots: updatedSlots })
         handleSuccess("Slot Marked Absent Successfully")
         return stats
