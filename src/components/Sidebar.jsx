@@ -90,9 +90,9 @@ const getMenuConfig = (role) => {
           path: "/manager/enquiry-slots",
         },
         { label: "Targets", key: "targets", path: "/manager/targets" },
-        
-        
-        
+
+
+
       ],
     },
     {
@@ -156,21 +156,22 @@ const getMenuConfig = (role) => {
       path: "/admin/centers",
     },
     {
-          label: "Announcements",
-          icon: <ClockCircleOutlined />,
-          key: "announcements",
-          path: "/manager/announcements",
+      label: "Announcements",
+      icon: <ClockCircleOutlined />,
+      key: "announcements",
+      path: "/manager/announcements",
     },
     {
-          label: "Notifications",
-          icon: <BellOutlined />,
-          key: "notifications",
-          path: "/manager/notifications",
+      label: "Notifications",
+      icon: <BellOutlined />,
+      key: "notifications",
+      path: "/manager/notifications",
     },
-    { label: "Holidays", 
+    {
+      label: "Holidays",
       icon: <CalendarOutlined />,
-      key: "holidays", 
-      path: "/manager/holidays" 
+      key: "holidays",
+      path: "/manager/holidays"
     },
     {
       label: "Content",
@@ -196,14 +197,14 @@ const getMenuConfig = (role) => {
           path: "/admin/latest-videos",
         },
         {
-      label: "Gallery",
-      key: "gallery",
-      path: "/gallery",
-    },
+          label: "Gallery",
+          key: "gallery",
+          path: "/gallery",
+        },
       ],
     },
 
-    
+
   ];
 
   const managerItems = [
@@ -264,27 +265,28 @@ const getMenuConfig = (role) => {
           path: "/manager/enquiry-slots",
         },
         { label: "Targets", key: "targets", path: "/manager/targets" },
-        
-        
+
+
       ],
     },
     {
-          label: "Announcements",
-          icon: <ClockCircleOutlined />,
-          key: "announcements",
-          path: "/manager/announcements",
-        },
-        {
-          label: "Notifications",
-          icon: <BellOutlined />,
-          key: "notifications",
-          path: "/manager/notifications",
-        },
-        { label: "Holidays", 
-          icon: <CalendarOutlined />,
-          key: "holidays", 
-          path: "/manager/holidays" 
-        },
+      label: "Announcements",
+      icon: <ClockCircleOutlined />,
+      key: "announcements",
+      path: "/manager/announcements",
+    },
+    {
+      label: "Notifications",
+      icon: <BellOutlined />,
+      key: "notifications",
+      path: "/manager/notifications",
+    },
+    {
+      label: "Holidays",
+      icon: <CalendarOutlined />,
+      key: "holidays",
+      path: "/manager/holidays"
+    },
     {
       label: "Gallery",
       icon: <PictureOutlined />,

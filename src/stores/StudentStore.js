@@ -165,6 +165,7 @@ const studentStore = create((set, get) => ({
       set({ students: [...students, response.data] });
     } catch (error) {
       handleInternalError(error);
+      throw error;
     } finally {
       set({ loading: false });
     }

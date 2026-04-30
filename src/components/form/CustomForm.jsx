@@ -16,7 +16,12 @@ function CustomForm({ form, children, action, initialValues = {}, className = ""
   const onFinish = async (values) => {
     // call the provided action and allow it to return a value
     // which can be used to decide whether to reset the form
-    const result = await action(values);
+    let result;
+    try {
+      result = await action(values);
+    } catch (error) {
+      return;
+    }
 
     let shouldReset = true;
     if (typeof resetOnFinish === 'function') {
