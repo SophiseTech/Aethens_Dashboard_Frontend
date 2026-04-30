@@ -12,7 +12,7 @@ import SessionStore from '@stores/SessionStore';
 import studentStore from '@stores/StudentStore';
 import userStore from '@stores/UserStore';
 import { feeOptions, ROLES } from '@utils/constants';
-import { Divider, Form, Modal } from 'antd';
+import { Divider, Form, message, Modal } from 'antd';
 import dayjs from 'dayjs';
 import { Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
@@ -126,8 +126,14 @@ function AddStudent() {
     }
 
     console.log(values);
-    await enroll(values)
+    try {
+      await enroll(values)
+      message.success("Student Enrolled Successfully")
+    } catch (error) {
+      return;
+    }
     handleOk()
+    form.resetFields()
   }
 
   const options = useMemo(() => courses?.map(course => ({ label: course.course_name, value: course._id })), [courses])
@@ -163,7 +169,7 @@ function AddStudent() {
         onCancel={handleCancel}
         width={'50%'}
       >
-        <CustomForm form={form} initialValues={initialValues} action={onSubmit}>
+        <CustomForm form={form} initialValues={initialValues} action={onSubmit} resetOnFinish={false}>
           <ProfileImageUploader
             name={"profile_img"}
             form={form}
