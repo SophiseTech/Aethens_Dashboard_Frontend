@@ -240,7 +240,7 @@ const UserDetailsDrawer = ({
                 <Row gutter={[16, 16]}>
                   {user?.role === ROLES.STUDENT && (
                     <>
-                      {[ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY, ROLES.ACADEMIC_MANAGER, ROLES.OPERATIONS_MANAGER].includes(loggedinUser.role) && (
+                      {[ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER, ROLES.OPERATIONS_MANAGER].includes(loggedinUser.role) && (
                         <Col span={24}>
                           <Text strong>
                             <IdcardOutlined style={{ marginRight: "8px" }} />

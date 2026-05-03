@@ -8,6 +8,7 @@ import dayjs from "dayjs";
 import AttendanceFilter from "@pages/Attendance/Components/AttendanceFilter";
 import AttendanceStats from "@pages/Attendance/Components/AttendanceStats";
 import AttendanceTrend from "@pages/Attendance/Components/AttendanceTrend";
+import AdditionalSessions from "@pages/Attendance/Components/AdditionalSessions";
 import { getMonthRange } from "@utils/helper";
 
 function FacultyAttendance() {
@@ -42,11 +43,14 @@ function FacultyAttendance() {
           setSelectedFilter={setSelectedFilter}
         />
         <Flex gap={20}>
-          <Flex vertical gap={20}>
+          <Flex vertical gap={20} flex={1}>
             <AttendanceStats stats={slotStats} slots={slots} loading={loading} selectedFilter={selectedFilter?.format("MMMM YYYY")} />
             <AttendanceTrend stats={slotStats} />
           </Flex>
-          <MonthlyReport slots={slots} loading={loading} month={selectedFilter?.format("MMMM YYYY")} />
+          <Flex wrap={"wrap"} gap={20} flex={1}>
+            <AdditionalSessions stats={slotStats} loading={loading} />
+            <MonthlyReport slots={slots} loading={loading} month={selectedFilter?.format("MMMM YYYY")} />
+          </Flex>
         </Flex>
       </div>
     </Title>

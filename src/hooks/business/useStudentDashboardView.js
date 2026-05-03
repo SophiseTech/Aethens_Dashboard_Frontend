@@ -10,6 +10,7 @@ function useStudentDashboardView() {
     getLatestSubmission({
       query: { studentId: user._id },
       populate: "phaseId projectId",
+      sort: { createdAt: -1 },
       options: {
         select: "status phaseId projectId"
       }

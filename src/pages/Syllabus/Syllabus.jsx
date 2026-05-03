@@ -19,13 +19,13 @@ function Syllabus() {
   const { getStudentSyllabus, syllabus, syllabusLoading } = useStore(studentStore);
 
   const isViewingOtherStudent = studentId && studentId !== user?._id;
-  const shouldFetchStudentSyllabus = user?.role === ROLES.STUDENT 
-    ? user._id 
+  const shouldFetchStudentSyllabus = user?.role === ROLES.STUDENT
+    ? user._id
     : studentId;
 
   useEffect(() => {
     if (!user || !user._id) return;
-    
+
     if (user.role === ROLES.STUDENT) {
       getStudentSyllabus(user._id, {
         status: statusFilter,
@@ -62,6 +62,7 @@ function Syllabus() {
           searchText={searchText}
           setSearchText={setSearchText}
           course={course}
+          showProgressColumns
         />
         <CourseDetail course={course} />
       </div>

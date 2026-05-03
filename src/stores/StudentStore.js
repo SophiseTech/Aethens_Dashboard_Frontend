@@ -215,6 +215,7 @@ const studentStore = create((set, get) => ({
       set({ loading: true });
       if (!id || !updateData) throw new Error("Bad Data");
       const { students, searchResults, searchQuery } = get();
+      const { user } = userStore.getState();
       const student = await userService.edit(id, updateData);
       if (student) {
         if (searchQuery) {
@@ -227,6 +228,9 @@ const studentStore = create((set, get) => ({
             item._id.toString() === student._id.toString() ? student : item
           );
           set({ students: updatedStudents });
+        }
+        if (user.role !== ROLES.STUDENT) {
+          set({ activeStudent: student })
         }
         handleSuccess("User details updated Succesfully");
       }

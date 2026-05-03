@@ -22,8 +22,8 @@ function Student() {
             <CourseStat finalProject={dashboardInfo.finalProject} />
             <div className='flex gap-5'>
               <div className='w-1/2 flex flex-col gap-5'>
-                <Updates />
                 <Announcement />
+                <Updates />
               </div>
               <Transaction />
             </div>
@@ -35,11 +35,11 @@ function Student() {
       <Suspense fallback={<Loader />}>
         <div className='flex gap-5 flex-col lg:hidden'>
           <div className='flex gap-5 flex-col md:flex-row'>
-            <CourseStat finalProject={dashboardInfo.finalProject}/>
+            <CourseStat finalProject={dashboardInfo.finalProject} />
+            <Announcement />
             <Attendance />
           </div>
           <Updates />
-          <Announcement />
           <Transaction />
         </div>
       </Suspense>

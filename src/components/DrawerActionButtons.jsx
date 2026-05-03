@@ -33,7 +33,7 @@ const ActionSection = ({ title, children }) => {
 function DrawerActionButtons({ userDetails }) {
   const { user } = useStore(userStore);
   const nav = useNavigate();
-  
+
   // Shared state and hooks
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const { handleCancel: handleProjectCancel, isModalOpen: isProjectModalOpen, handleOk: handleProjectOk, showModal: showProjectModal } = useModal();
@@ -87,7 +87,7 @@ function DrawerActionButtons({ userDetails }) {
       disabled: !isUserActive(userDetails),
       action: () => setIsSessionModalOpen(true)
     },
-    
+
     // --- Academics ---
     {
       key: 'syllabus_academic',
@@ -151,10 +151,7 @@ function DrawerActionButtons({ userDetails }) {
       color: 'gold',
       section: 'Academics',
       roles: [ROLES.FACULTY],
-      action: () => {
-        setSelectedProjectStudent(studentId);
-        showProjectModal();
-      }
+      action: () => navigateWithStudentContext(`/faculty/final-project/student/${studentId}/details`)
     },
     {
       key: 'view_activities_academic',
@@ -225,7 +222,7 @@ function DrawerActionButtons({ userDetails }) {
 
   // 2. Group these actions by 'section'
   const sections = ['Sessions & Attendance', 'Academics', 'Financials', 'Administration'];
-  
+
   if (allowedActions.length === 0) return null;
 
   return (
@@ -239,11 +236,11 @@ function DrawerActionButtons({ userDetails }) {
             {actionsInSection.map(action => {
               if (action.component) return <div key={action.key}>{action.component({ student: userDetails })}</div>;
               return (
-                <Button 
-                  key={action.key} 
-                  onClick={action.action} 
+                <Button
+                  key={action.key}
+                  onClick={action.action}
                   disabled={action.disabled}
-                  variant="filled" 
+                  variant="filled"
                   color={action.color}
                 >
                   {action.label}

@@ -21,7 +21,9 @@ function SlotList({ groupedSlots, slots = [], holidays = [] }) {
   const [selectedMonth, setSelectedMonth] = useState(defaultMonth)
 
   useEffect(() => {
-    setSelectedMonth(defaultMonth)
+    if (!selectedMonth || !months.includes(selectedMonth)) {
+      setSelectedMonth(defaultMonth)
+    }
   }, [groupedSlots])
 
   const currentYear = dayjs().year()

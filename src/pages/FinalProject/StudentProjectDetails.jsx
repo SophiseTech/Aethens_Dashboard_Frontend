@@ -1,3 +1,4 @@
+import useProjectsView from '@hooks/business/useProjectsView';
 import useCourse from '@hooks/useCourse';
 import { useFinalProject } from '@hooks/useFinalProject';
 import CourseHeader from '@pages/FinalProject/Components/CourseHeader';
@@ -10,6 +11,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 function StudentProjectDetails() {
   const { studentId, projectId } = useParams()
   const { phases, loading, fetchPhases, submissionInfo, currentProject } = useFinalProject();
+  const { viewContext } = useProjectsView()
   const course = currentProject?.course || {}
 
   const navigate = useNavigate();
@@ -19,7 +21,13 @@ function StudentProjectDetails() {
   }, []);
 
   const handleViewPhase = (phase) => {
-    navigate(`/manager/final-project/${projectId}/student/${studentId}/phase/${phase._id}`);
+    console.log(viewContext);
+
+    if (viewContext.isManagerView) {
+      navigate(`/manager/final-project/${projectId}/student/${studentId}/phase/${phase._id}`);
+    } else if (viewContext.isFacultyView) {
+      navigate(`/faculty/final-project/${projectId}/student/${studentId}/phase/${phase._id}`);
+    }
   };
 
   if (loading) {

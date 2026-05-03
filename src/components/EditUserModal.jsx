@@ -24,6 +24,7 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
 
   const initialValues = {
     username: user?.username,
+    email: user?.email,
     DOB: dayjs(user?.DOB),
     phone: user?.phone,
     phone_alt: user?.phone_alt,
@@ -82,6 +83,15 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
           label="Full Name"
           placeholder="Enter username"
         />
+        {loggedinUser.role === ROLES.ADMIN && (
+          <CustomInput
+            name="email"
+            label="Email Address"
+            placeholder="Enter email address"
+            required={false}
+            type="email"
+          />
+        )}
         <CustomDatePicker
           name={"DOB"}
           label={"Date Of Birth"}

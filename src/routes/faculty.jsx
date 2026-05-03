@@ -21,6 +21,9 @@ const MyLeaves = lazy(() => import("@pages/FacultyLeaves/MyLeaves"))
 const AddSessionStatus = lazy(() => import("@pages/Students/AddSessionStatus"))
 const SyllabusGallery = lazy(() => import("@pages/SyllabusGallery"))
 const StudentSyllabus = lazy(() => import("@pages/Syllabus/StudentSyllabus"))
+const FinalProjectStudentView = lazy(() => import("@pages/FinalProject/Components/FinalProjectStudentView"))
+const PhaseDetails = lazy(() => import("@pages/FinalProject/PhaseDetails"))
+const StudentProjectDetails = lazy(() => import("@pages/FinalProject/StudentProjectDetails"))
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
   return (<Suspense
@@ -130,6 +133,23 @@ export const facultyRoutes = [
             path: "/faculty/student-syllabus",
             element: <LazyLoader element={<StudentSyllabus />} />,
             title: "Student Syllabus",
+          },
+          {
+            path: "/faculty/final-project/student/:studentId/details",
+            element: <LazyLoader element={<FinalProjectStudentView />} />,
+            title: "Slots",
+          },
+          {
+            path: "/faculty/final-project/:projectId/student/:studentId/phases",
+            element: <LazyLoader element={<StudentProjectDetails />} />,
+            title: "Payslips"
+          },
+          {
+            path: "/faculty/final-project/:projectId/student/:studentId/phase/:phaseId",
+            element: (
+              <LazyLoader element={<PhaseDetails />} />
+            ),
+            title: "Slots",
           },
         ]
       }

@@ -133,12 +133,12 @@ function StudentList() {
       },
     },
     {
-      title: 'Adm No',
-      key: 'admissionNumber',
+      title: 'ID No',
+      key: 'idCardNumber',
       render: (_, record) =>
-        record?.student?.details_id?.admissionNumber ||
-        record?.details_id?.admissionNumber ||
-        '—',
+        record?.student?.details_id?.idCardNumber ||
+        record?.details_id?.idCardNumber ||
+        <Tag color="warning">Unassigned</Tag>,
     },
     {
       title: 'Course',

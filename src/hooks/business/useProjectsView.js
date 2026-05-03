@@ -13,12 +13,15 @@ function useProjectsView() {
   const viewContext = {
     userRole: user.role,
     isManagerView: user.role === ROLES.MANAGER || user.role === ROLES.ACADEMIC_MANAGER || user.role === ROLES.OPERATIONS_MANAGER || user.role === ROLES.ADMIN,
+    isFacultyView: user.role === ROLES.FACULTY,
     targetStudentId: studentId || user._id,
   }
 
   const handleViewProjectDetails = (project) => {
     if (viewContext.isManagerView) {
       nav(`/manager/final-project/${project._id}/student/${studentId}/phases`)
+    } else if (viewContext.isFacultyView) {
+      nav(`/faculty/final-project/${project._id}/student/${studentId}/phases`)
     } else {
       nav(`/student/final-project/${project._id}/phases`)
     }

@@ -49,6 +49,7 @@ function Slots() {
     && statsLoaded
     && user?.allow_additional_session_request !== false
     && unattendedSessions === 0
+    && user.status === 'active'
 
   const titleButton = canRequestAdditionalSession ? (
     <Button type="primary" onClick={() => setIsAdditionalModalOpen(true)}>
