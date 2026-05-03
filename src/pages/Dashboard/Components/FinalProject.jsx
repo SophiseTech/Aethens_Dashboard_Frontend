@@ -38,11 +38,13 @@ function FinalProject({ finalProjectInfo = {} }) {
       case "approved":
         return <Tag color='green'>Approved</Tag>
       case "under_review":
-        return <Tag color='red'>Pending</Tag>
+        return <Tag color='blue'>Pending</Tag>
       case "rejected":
         return <Tag color='red'>Rejected</Tag>
+      case "not_started":
+        return <Tag color='cyan'>To Start</Tag>
       default:
-        return <Tag color='blue'>Not Opened</Tag>
+        return null
     }
   }
 
@@ -54,6 +56,20 @@ function FinalProject({ finalProjectInfo = {} }) {
     return <Link to={`/student/final-project/${project._id}/phase/${phase?._id}`}>
       <Button variant='filled' color='green' size='small'>View More</Button>
     </Link>
+  }
+
+  if (!finalProjectInfo?.project || _.isEmpty(finalProjectInfo?.project)) {
+    return (
+      <div className='bg-black/30 text-white relative rounded-3xl p-4 flex justify-between items-center | gap-5 2xl:gap-10'>
+        <div className='space-y-5'>
+          <p className='font-bold | text-xs 2xl:text-lg'>Final Project</p>
+          <div className='space-y-2'>
+            <p className='font-bold'>No project assigned</p>
+            <p className="| text-xs 2xl:text-sm">Please contact your faculty for project assignment.</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -69,6 +85,7 @@ function FinalProject({ finalProjectInfo = {} }) {
             {finalProjectInfo?.latestSubmission?.status === "approved" && "✅ Your last submission was approved. Great job!"}
             {finalProjectInfo?.latestSubmission?.status === "under_review" && "⏳ Your last submission is under review. Please wait for feedback."}
             {finalProjectInfo?.latestSubmission?.status === "rejected" && "❌ Your last submission was rejected. Please review the feedback and resubmit."}
+            {finalProjectInfo?.latestSubmission?.status === "not_started" && "🚀 You haven't started this phase yet. Click 'View More' to begin!"}
           </p>
         </div>
 
