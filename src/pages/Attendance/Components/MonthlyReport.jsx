@@ -5,7 +5,7 @@ import { Spin } from 'antd'
 
 function MonthlyReport({ slots, loading, month }) {
   return (
-    <div className='p-2 border border-border rounded-3xl flex flex-col gap-5 h-fit | w-full lg:w-4/12'>
+    <div className='p-2 border border-border rounded-3xl flex flex-col gap-5 h-fit 2xl:w-1/2 lg:w-3/4'>
 
       <div className='flex justify-between items-center | p-2 2xl:p-4 pb-0'>
         <h1 className='font-bold | text-sm 2xl:text-xl'>Attendance</h1>

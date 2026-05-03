@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Table, Button, Flex, Modal, Form, Input, InputNumber, message } from "antd";
+import { Table, Button, Flex, Modal, Form, Input, InputNumber, Switch, Tag, message } from "antd";
 import Title from "@components/layouts/Title";
 import userStore from "@stores/UserStore";
 import permissions from "@utils/permissions";
@@ -48,6 +48,7 @@ function AdminCenters() {
       center_initial: record.center_initial,
       maxCount: record.maxCount,
       rescheduleAutoApprovalMaxCount: record.rescheduleAutoApprovalMaxCount,
+      autoReject: record.autoReject ?? false,
     });
     setModalOpen(true);
   };
@@ -98,6 +99,7 @@ function AdminCenters() {
     { title: "Initial", dataIndex: "center_initial", key: "center_initial" },
     { title: "Max Count", dataIndex: "maxCount", key: "maxCount", render: (val) => val ?? "—" },
     { title: "Auto Approve Limit", dataIndex: "rescheduleAutoApprovalMaxCount", key: "rescheduleAutoApprovalMaxCount", render: (val) => val ?? "—" },
+    { title: "Auto Reject", dataIndex: "autoReject", key: "autoReject", render: (val) => <Tag color={val ? "red" : "default"}>{val ? "Enabled" : "Disabled"}</Tag> },
     {
       title: "Actions",
       key: "actions",
@@ -168,6 +170,9 @@ function AdminCenters() {
             ]}
           >
             <InputNumber min={0} placeholder="e.g. 2" style={{ width: "100%" }} />
+          </Form.Item>
+          <Form.Item name="autoReject" label="Enable Auto Reject" valuePropName="checked">
+            <Switch />
           </Form.Item>
         </Form>
       </Modal>

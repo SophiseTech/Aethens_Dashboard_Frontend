@@ -32,7 +32,7 @@ function FinalProjectStudentView() {
           description={
             <div className="text-gray-500">
               <p className="mb-1">No projects found</p>
-              {viewContext.isManagerView ?
+              {(viewContext.isManagerView || viewContext.isFacultyView) ?
                 <Text type="secondary" className="text-sm">
                   No projects have been created for this student yet
                 </Text>
