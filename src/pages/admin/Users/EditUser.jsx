@@ -12,6 +12,7 @@ import usersV2Service from "@services/UsersV2";
 import centersService from "@services/Centers";
 import { calculateAge } from "@utils/helper";
 import dayjs from "dayjs";
+import { ROLES } from "@utils/constants";
 
 const { Text } = Typography;
 
@@ -105,12 +106,7 @@ function EditUser() {
         );
     }
 
-    const roleOptions = [
-        { value: "student", label: "Student" },
-        { value: "faculty", label: "Faculty" },
-        { value: "manager", label: "Manager" },
-        { value: "admin", label: "Admin" },
-    ];
+    const roleOptions = ROLES.map(role => ({ value: role, label: role }))
 
     const statusOptions = [
         { value: "active", label: "Active" },
