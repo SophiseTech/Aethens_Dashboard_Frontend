@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import dayjs from 'dayjs';
 import { Modal, Table, Spin, Alert, Row, Col, Statistic, Tag, Button, InputNumber, Form, DatePicker, Select, Card, Checkbox, Space, Divider, Flex, Popconfirm, message } from 'antd';
 import { WalletOutlined, DollarOutlined, CheckCircleOutlined, FileDoneOutlined, CheckSquareOutlined, PrinterOutlined, DownloadOutlined, ReloadOutlined, SettingOutlined } from '@ant-design/icons';
 import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
@@ -37,12 +38,15 @@ const FeeTracker = ({ student, visible, onCancel }) => {
   const [additionalFeeModal, setAdditionalFeeModal] = useState(false);
   const [installmentManagerOpen, setInstallmentManagerOpen] = useState(false);
   const [additionalFeeForm] = Form.useForm();
+  const [createAccountModalOpen, setCreateAccountModalOpen] = useState(false);
+  const [createAccountForm] = Form.useForm();
   const additionalAmount = Form.useWatch('amount', additionalFeeForm);
   const [useWalletForAdditional, setUseWalletForAdditional] = useState(false);
   const additionalTaxRate = Form.useWatch('taxRate', additionalFeeForm) ?? 18;
   const paidAmount = Form.useWatch('paidAmount', form);
   const isPartialPayment = feeDetails?.feeAccount?.type === 'partial';
   const isInstallment = feeDetails?.feeAccount?.isInstallment;
+  const hasFeeAccount = feeDetails?.feeAccount;
 
   // Build items array for partial payments
   const partialItems = useMemo(() => {
@@ -240,6 +244,23 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       refreshFeeDetails();
     } catch (err) {
       message.error(err?.message || 'Failed to recreate installments');
+    }
+  };
+  const handleCreateAccountSubmit = async () => {
+    try {
+      const values = await createAccountForm.validateFields();
+      const payload = {
+        startDate: values.startDate ? toISTStartOfDayISO(values.startDate) : undefined,
+        totalInstallments: values.totalInstallments,
+        registrationFee: values.registrationFee
+      };
+      await recreateInstallments(student._id, payload);
+      message.success('Fee account created and installments generated successfully');
+      setCreateAccountModalOpen(false);
+      createAccountForm.resetFields();
+      refreshFeeDetails();
+    } catch (err) {
+      message.error(err?.message || 'Failed to create fee account');
     }
   };
   const handleAdditionalFeeSubmit = async () => {
@@ -606,15 +627,8 @@ const FeeTracker = ({ student, visible, onCancel }) => {
               </Col>
               <Col span={6}>
                 <Flex vertical align="center" justify="center" style={{ height: '100%', gap: '8px' }}>
-                  {isInstallment && permissions.fee_tracker.edit.includes(user?.role) && (
-                    <Popconfirm
-                      title="Recreate Installments?"
-                      description="This will delete future unpaid installments and re-create them starting from today. Proceed?"
-                      onConfirm={handleRecreateInstallments}
-                      okText="Yes, Recreate"
-                      cancelText="No"
-                      okButtonProps={{ danger: true }}
-                    >
+                  {permissions.fee_tracker.edit.includes(user?.role) && (
+                    !hasFeeAccount ? (
                       <Button
                         type="primary"
                         danger
@@ -622,10 +636,33 @@ const FeeTracker = ({ student, visible, onCancel }) => {
                         icon={<ReloadOutlined />}
                         loading={loading}
                         size="small"
+                        onClick={() => setCreateAccountModalOpen(true)}
                       >
                         Recreate Installments
                       </Button>
-                    </Popconfirm>
+                    ) : (
+                      isInstallment && (
+                        <Popconfirm
+                          title="Recreate Installments?"
+                          description="This will delete future unpaid installments and re-create them starting from today. Proceed?"
+                          onConfirm={handleRecreateInstallments}
+                          okText="Yes, Recreate"
+                          cancelText="No"
+                          okButtonProps={{ danger: true }}
+                        >
+                          <Button
+                            type="primary"
+                            danger
+                            ghost
+                            icon={<ReloadOutlined />}
+                            loading={loading}
+                            size="small"
+                          >
+                            Recreate Installments
+                          </Button>
+                        </Popconfirm>
+                      )
+                    )
                   )}
                   {isInstallment && permissions.fee_tracker.edit.includes(user?.role) && (
                     <Button
@@ -1001,6 +1038,53 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         onCancel={() => setInstallmentManagerOpen(false)}
         onSaved={refreshFeeDetails}
       />
+
+      {/* Create Fee Account / Recreate Installments Modal */}
+      <Modal
+        title="Recreate Installments (Create Fee Account)"
+        visible={createAccountModalOpen}
+        onCancel={() => {
+          setCreateAccountModalOpen(false);
+          createAccountForm.resetFields();
+        }}
+        onOk={handleCreateAccountSubmit}
+        okText="Create & Recreate"
+        confirmLoading={loading}
+        width={500}
+      >
+        <Form
+          form={createAccountForm}
+          layout="vertical"
+          initialValues={{
+            startDate: dayjs(),
+            totalInstallments: (student?.course_id?.duration?.type === 'month' && student.course_id.duration.count) || 6,
+            registrationFee: true
+          }}
+        >
+          <Form.Item
+            label="Start Date"
+            name="startDate"
+            rules={[{ required: true, message: 'Please select start date' }]}
+          >
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item
+            label="Total Installments"
+            name="totalInstallments"
+            rules={[{ required: true, message: 'Please enter total installments' }]}
+          >
+            <InputNumber min={1} style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item
+            name="registrationFee"
+            valuePropName="checked"
+          >
+            <Checkbox>Add Registration Fee</Checkbox>
+          </Form.Item>
+        </Form>
+      </Modal>
     </>
   );
 };
