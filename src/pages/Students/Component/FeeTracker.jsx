@@ -47,6 +47,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
   const isPartialPayment = feeDetails?.feeAccount?.type === 'partial';
   const isInstallment = feeDetails?.feeAccount?.isInstallment;
   const hasFeeAccount = feeDetails?.feeAccount;
+  const [showAllInstallments, setShowAllInstallments] = useState(false);
 
   // Build items array for partial payments
   const partialItems = useMemo(() => {
@@ -65,6 +66,32 @@ const FeeTracker = ({ student, visible, onCancel }) => {
     }
     return items;
   }, [feeDetails, isPartialPayment]);
+
+  // Separate installments into current/past months and upcoming months
+  const installments = useMemo(() => {
+    return feeDetails?.feeAccount?.installments || [];
+  }, [feeDetails]);
+
+  const { currentAndPastInstallments, upcomingInstallments } = useMemo(() => {
+    const currentAndPast = [];
+    const upcoming = [];
+    const now = dayjs();
+
+    installments.forEach((inst) => {
+      // Compare month of installment to the current month/year
+      if (dayjs(inst.month).isAfter(now, 'month')) {
+        upcoming.push(inst);
+      } else {
+        currentAndPast.push(inst);
+      }
+    });
+
+    return { currentAndPastInstallments: currentAndPast, upcomingInstallments: upcoming };
+  }, [installments]);
+
+  const displayedInstallments = useMemo(() => {
+    return showAllInstallments ? installments : currentAndPastInstallments;
+  }, [showAllInstallments, installments, currentAndPastInstallments]);
 
   const walletBalance = useMemo(() => {
     return student?.wallet?.balance || 0;
@@ -92,7 +119,8 @@ const FeeTracker = ({ student, visible, onCancel }) => {
     if (student?._id) {
       getFeeDetailsByStudent(student._id);
     }
-  }, [student, getFeeDetailsByStudent]);
+    setShowAllInstallments(false);
+  }, [student, getFeeDetailsByStudent, visible]);
 
   const refreshFeeDetails = () => {
     if (student?._id) getFeeDetailsByStudent(student._id);
@@ -718,10 +746,23 @@ const FeeTracker = ({ student, visible, onCancel }) => {
                 />
                 <Table
                   columns={installmentColumns}
-                  dataSource={feeDetails.feeAccount?.installments || []}
+                  dataSource={displayedInstallments}
                   rowKey="_id"
                   size="small"
                 />
+                {upcomingInstallments.length > 0 && (
+                  <div className="flex justify-center mt-4">
+                    <Button 
+                      type="dashed" 
+                      onClick={() => setShowAllInstallments(!showAllInstallments)}
+                      style={{ borderColor: '#1890ff', color: '#1890ff' }}
+                    >
+                      {showAllInstallments 
+                        ? 'Show Less' 
+                        : `View All (${upcomingInstallments.length} upcoming remaining)`}
+                    </Button>
+                  </div>
+                )}
               </>
             ) : isPartialPayment ? (
               <>
