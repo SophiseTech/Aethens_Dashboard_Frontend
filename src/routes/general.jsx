@@ -251,7 +251,7 @@ export const generalRoutes = [
     ],
   },
   {
-    element: <Protected roles={[ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER]} />,
+    element: <Protected roles={[ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER]} />,
     children: [
       {
         element: <SidebarLayout />,
@@ -264,25 +264,7 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Staff",
-          },
-          {
-            path: "/admin/users/new",
-            element: (
-              <LazyLoader>
-                <AdminEditUser />
-              </LazyLoader>
-            ),
-            title: "Add User",
-          },
-          {
-            path: "/admin/users/:id",
-            element: (
-              <LazyLoader>
-                <AdminEditUser />
-              </LazyLoader>
-            ),
-            title: "Edit User",
-          },
+          }
         ],
       },
     ],
@@ -317,20 +299,11 @@ export const generalRoutes = [
     ],
   },
   {
-    element: <Protected roles={[ROLES.ADMIN, ROLES.ACADEMIC_MANAGER]} />,
+    element: <Protected roles={[ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]} />,
     children: [
       {
         element: <SidebarLayout />,
         children: [
-          {
-            path: "/admin/users",
-            element: (
-              <LazyLoader>
-                <AdminUsers />
-              </LazyLoader>
-            ),
-            title: "Users",
-          },
           {
             path: "/admin/users/new",
             element: (
@@ -349,6 +322,17 @@ export const generalRoutes = [
             ),
             title: "Edit User",
           },
+        ]
+      }
+    ]
+  },
+  {
+    element: <Protected roles={[ROLES.ADMIN]} />,
+    children: [
+      {
+        element: <SidebarLayout />,
+        children: [
+
           {
             path: "/admin/centers",
             element: (

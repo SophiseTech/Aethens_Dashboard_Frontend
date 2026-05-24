@@ -83,7 +83,7 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
           label="Full Name"
           placeholder="Enter username"
         />
-        {loggedinUser.role === ROLES.ADMIN && (
+        {(loggedinUser.role === ROLES.ADMIN || loggedinUser.role === ROLES.OPERATIONS_MANAGER) && (
           <CustomInput
             name="email"
             label="Email Address"

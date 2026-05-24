@@ -4,7 +4,7 @@ const permissions = {
   student: {
     add: [ROLES.MANAGER, ROLES.ADMIN],
     slot_requests: [ROLES.MANAGER],
-    edit: [ROLES.MANAGER, ROLES.ADMIN]
+    edit: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]
   },
   payslips: {
     mark_paid: [ROLES.MANAGER],

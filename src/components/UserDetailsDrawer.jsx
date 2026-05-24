@@ -103,7 +103,7 @@ const UserDetailsDrawer = ({
         placement="right"
         onClose={onClose}
         open={visible}
-        width={isStudentDetail && [ROLES.MANAGER, ROLES.ADMIN].includes(loggedinUser.role) ? 750 : 400}
+        width={isStudentDetail && [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER].includes(loggedinUser.role) ? 750 : 400}
         closable={true}
         styles={{
           header: {

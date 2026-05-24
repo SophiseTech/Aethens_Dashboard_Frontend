@@ -106,7 +106,7 @@ function EditUser() {
         );
     }
 
-    const roleOptions = ROLES.map(role => ({ value: role, label: role }))
+    const roleOptions = Object.keys(ROLES).map(role => ({ value: ROLES[role], label: role.replace('_', ' ') }))
 
     const statusOptions = [
         { value: "active", label: "Active" },
