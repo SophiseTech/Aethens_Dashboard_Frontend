@@ -150,6 +150,13 @@ const UserDetailsDrawer = ({
                         onPressEnter={() => handleLimitBlur('rescheduleLimit')}
                       />
                     </Flex>
+                    {(user?.remainingReschedules !== undefined || user?.details_id?.remainingReschedules !== undefined) && (
+                      <div style={{ textAlign: 'right', marginTop: '4px' }}>
+                        <Text type="secondary" style={{ fontSize: '12px' }}>
+                          Remaining: <Text strong style={{ color: '#52c41a' }}>{user.remainingReschedules ?? user.details_id.remainingReschedules}</Text>
+                        </Text>
+                      </div>
+                    )}
                   </Col>
                   <Col span={24}>
                     <Flex justify="space-between" align="center">
@@ -162,6 +169,13 @@ const UserDetailsDrawer = ({
                         onPressEnter={() => handleLimitBlur('additionalLimit')}
                       />
                     </Flex>
+                    {(user?.remainingAdditionalRequests !== undefined || user?.details_id?.remainingAdditionalRequests !== undefined) && (
+                      <div style={{ textAlign: 'right', marginTop: '4px' }}>
+                        <Text type="secondary" style={{ fontSize: '12px' }}>
+                          Remaining: <Text strong style={{ color: '#52c41a' }}>{user.remainingAdditionalRequests ?? user.details_id.remainingAdditionalRequests}</Text>
+                        </Text>
+                      </div>
+                    )}
                   </Col>
                   <Col span={24}>
                     <Flex justify="space-between" align="center">

@@ -57,9 +57,37 @@ function Slots() {
     </Button>
   ) : null
 
+  const rescheduleLimit = user?.details_id?.rescheduleLimit ?? 4;
+  const additionalLimit = user?.details_id?.additionalLimit ?? 2;
+  const remainingReschedules = user?.remainingReschedules ?? user?.details_id?.remainingReschedules ?? rescheduleLimit;
+  const remainingAdditional = user?.remainingAdditionalRequests ?? user?.details_id?.remainingAdditionalRequests ?? additionalLimit;
+
   return (
     <Title title={"Slots"} button={titleButton}>
       <Suspense fallback={<Loader />}>
+        {user?.role === 'student' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-sm flex justify-between items-center">
+              <div>
+                <p className="text-xs text-stone-500 font-medium uppercase tracking-wider">Reschedules Remaining (Monthly)</p>
+                <h3 className="text-2xl font-bold text-stone-800 mt-1">{remainingReschedules} <span className="text-sm font-normal text-stone-400">/ {rescheduleLimit}</span></h3>
+              </div>
+              <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 font-semibold text-lg">
+                🔄
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-sm flex justify-between items-center">
+              <div>
+                <p className="text-xs text-stone-500 font-medium uppercase tracking-wider">Additional Sessions Remaining (Weekly)</p>
+                <h3 className="text-2xl font-bold text-stone-800 mt-1">{remainingAdditional} <span className="text-sm font-normal text-stone-400">/ {additionalLimit}</span></h3>
+              </div>
+              <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center text-green-500 font-semibold text-lg">
+                ➕
+              </div>
+            </div>
+          </div>
+        )}
         <SlotList groupedSlots={groupedSlots} slots={slots} holidays={holidays} />
         <AdditionalSessionRequestModal
           isOpen={isAdditionalModalOpen}
