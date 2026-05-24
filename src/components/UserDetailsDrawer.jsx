@@ -188,6 +188,34 @@ const UserDetailsDrawer = ({
                   </Col>
                 </Row>
               </Card>
+              {user?.details_id?.gst?.gstEnabled && (
+                <Card bordered={false} style={{ boxShadow: "none", background: "transparent", marginTop: 8 }}>
+                  <Title level={5} style={{ marginBottom: "16px" }}>
+                    GST Details
+                    <Tag color="green" style={{ marginLeft: 8, fontSize: 10, verticalAlign: 'middle' }}>Enabled</Tag>
+                  </Title>
+                  <Row gutter={[16, 12]}>
+                    {user.details_id.gst.gstin && (
+                      <Col span={24}>
+                        <Text type="secondary" style={{ fontSize: 11 }}>GSTIN</Text>
+                        <div><Text strong copyable style={{ fontSize: 13 }}>{user.details_id.gst.gstin}</Text></div>
+                      </Col>
+                    )}
+                    {user.details_id.gst.legalName && (
+                      <Col span={24}>
+                        <Text type="secondary" style={{ fontSize: 11 }}>Legal / Company Name</Text>
+                        <div><Text style={{ fontSize: 13 }}>{user.details_id.gst.legalName}</Text></div>
+                      </Col>
+                    )}
+                    {user.details_id.gst.address && (
+                      <Col span={24}>
+                        <Text type="secondary" style={{ fontSize: 11 }}>GST Billing Address</Text>
+                        <div><Text style={{ fontSize: 13 }}>{user.details_id.gst.address}</Text></div>
+                      </Col>
+                    )}
+                  </Row>
+                </Card>
+              )}
             </Col>
           )}
           <Col span={isStudentDetail && [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY, ROLES.ACADEMIC_MANAGER, ROLES.OPERATIONS_MANAGER].includes(loggedinUser.role) ? 14 : 24}>

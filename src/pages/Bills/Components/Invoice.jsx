@@ -204,12 +204,25 @@ const InvoicePdf = ({ bill }) => {
 
               <View style={styles.section}>
                 <View style={styles.row}>
-                  <View style={styles.box}>
-                    <Text style={styles.sectionTitle}>Billed To</Text>
-                    <Text>{bill?.generated_for?.username}</Text>
-                    <Text>{bill?.generated_for?.address}</Text>
-                    <Text style={[styles.fontBold]}>Adm No: {bill?.generated_for?.details_id?.admissionNumber}</Text>
-                  </View>
+                  {bill?.generated_for?.details_id?.gst?.gstEnabled ? (
+                    <View style={styles.box}>
+                      <Text style={styles.sectionTitle}>GST Details</Text>
+                      <Text>{bill?.generated_for?.details_id?.gst?.gstin}</Text>
+                      <Text>{bill?.generated_for?.details_id?.gst?.legalName}</Text>
+                      <Text>{bill?.generated_for?.details_id?.gst?.address}</Text>
+                      <Text style={[styles.fontBold]}>Adm No: {bill?.generated_for?.details_id?.admissionNumber}</Text>
+                    </View>
+                  )
+                    :
+                    (
+                      <View style={styles.box}>
+                        <Text style={styles.sectionTitle}>Billed To</Text>
+                        <Text>{bill?.generated_for?.username}</Text>
+                        <Text>{bill?.generated_for?.address}</Text>
+                        <Text style={[styles.fontBold]}>Adm No: {bill?.generated_for?.details_id?.admissionNumber}</Text>
+                      </View>
+                    )
+                  }
                 </View>
               </View>
             </>

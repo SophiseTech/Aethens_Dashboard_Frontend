@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Form, Typography } from 'antd';
+import { Modal, Button, Form, Typography, Switch, Divider } from 'antd';
 import CustomForm from '@components/form/CustomForm';
 import CustomInput from '@components/form/CustomInput';
 import CustomDatePicker from '@components/form/CustomDatePicker';
@@ -18,6 +18,7 @@ const { Text } = Typography;
 const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = false }) => {
   const [form] = Form.useForm(); // Initialize form
   const dobValue = Form.useWatch('DOB', form);
+  const gstEnabled = Form.useWatch(['gst', 'gstEnabled'], form);
   // Prefill form with user data when modal opens
   const { user: loggedinUser } = useStore(userStore)
   const { reusableIdCards, getReusableCards } = studentStore()
@@ -33,6 +34,12 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
     profile_img: user?.profile_img || "https://app.schoolofathens.art/images/default.jpg",
     allow_additional_session_request: user?.allow_additional_session_request !== false,
     idCardNumber: user?.details_id?.idCardNumber ? [user.details_id.idCardNumber] : [],
+    gst: {
+      gstEnabled: user?.details_id?.gst?.gstEnabled ?? false,
+      gstin: user?.details_id?.gst?.gstin ?? '',
+      legalName: user?.details_id?.gst?.legalName ?? '',
+      address: user?.details_id?.gst?.address ?? '',
+    },
   }
 
   React.useEffect(() => {
@@ -145,6 +152,36 @@ const EditUserModal = ({ user, visible, onCancel, onSave, isStudentDetail = fals
             mode="tags"
             maxCount={1}
           />
+        )}
+        {isStudentDetail && (
+          <>
+            <Divider orientation="left" style={{ fontSize: 13, color: '#888', marginTop: 12, marginBottom: 8 }}>GST Details <Text type="secondary" style={{ fontSize: 11 }}>(Optional)</Text></Divider>
+            <Form.Item name={['gst', 'gstEnabled']} valuePropName="checked" label="Enable GST Billing">
+              <Switch checkedChildren="GST On" unCheckedChildren="GST Off" />
+            </Form.Item>
+            {gstEnabled && (
+              <>
+                <CustomInput
+                  name={['gst', 'gstin']}
+                  label="GSTIN"
+                  placeholder="e.g. 29ABCDE1234F1Z5"
+                  required={false}
+                />
+                <CustomInput
+                  name={['gst', 'legalName']}
+                  label="Legal / Company Name"
+                  placeholder="As registered on GST portal"
+                  required={false}
+                />
+                <CustomInput
+                  name={['gst', 'address']}
+                  label="GST Billing Address"
+                  placeholder="Registered GST address"
+                  required={false}
+                />
+              </>
+            )}
+          </>
         )}
         <Button type="primary" htmlType="submit" className='mt-4'>
           Save Changes

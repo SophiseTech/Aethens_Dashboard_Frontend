@@ -52,12 +52,22 @@ const InvoiceHtml = ({ bill }) => {
             </div>
 
             {/* Billed To */}
-            <div style={{ border: '1px solid #E5E7EB', borderRadius: 4, padding: 8, marginBottom: 14, display: 'inline-block', minWidth: 200 }}>
-                <div style={{ fontWeight: 'bold', marginBottom: 4 }}>Billed To</div>
-                <div>{bill?.generated_for?.username}</div>
-                <div>{bill?.generated_for?.address}</div>
-                <div style={{ fontWeight: 'bold' }}>Adm No: {bill?.generated_for?.details_id?.admissionNumber}</div>
-            </div>
+            {bill?.generated_for?.details_id?.gst?.gstEnabled ? (
+                <div style={{ border: '1px solid #E5E7EB', borderRadius: 4, padding: 8, marginBottom: 14, display: 'inline-block', minWidth: 200 }}>
+                    <div style={{ fontWeight: 'bold', marginBottom: 4 }}>GST Details</div>
+                    <div>{bill?.generated_for?.details_id?.gst?.gstin}</div>
+                    <div>{bill?.generated_for?.details_id?.gst?.legalName}</div>
+                    <div>{bill?.generated_for?.details_id?.gst?.address}</div>
+                    <div style={{ fontWeight: 'bold' }}>Adm No: {bill?.generated_for?.details_id?.admissionNumber}</div>
+                </div>
+            ) :
+                (<div style={{ border: '1px solid #E5E7EB', borderRadius: 4, padding: 8, marginBottom: 14, display: 'inline-block', minWidth: 200 }}>
+                    <div style={{ fontWeight: 'bold', marginBottom: 4 }}>Billed To</div>
+                    <div>{bill?.generated_for?.username}</div>
+                    <div>{bill?.generated_for?.address}</div>
+                    <div style={{ fontWeight: 'bold' }}>Adm No: {bill?.generated_for?.details_id?.admissionNumber}</div>
+                </div>)
+            }
 
             {/* Items table */}
             <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #D1D5DB', borderRadius: 4, marginBottom: 16, fontSize: 12 }}>
