@@ -240,17 +240,7 @@ const getMenuConfig = (role) => {
       children: [
         { label: "Bills", key: "bills", path: "/manager/bills" },
         { label: "Inventory", key: "inventory", path: "/manager/inventory" },
-        { label: "Audits", key: "audits", path: "/manager/audits" },
-        {
-          label: "Expenses",
-          key: "expenses",
-          path: "/manager/expenses",
-        },
-        {
-          label: "Ledgers",
-          key: "ledgers",
-          path: "/manager/ledgers",
-        },
+        { label: "Audits", key: "audits", path: "/manager/audits" }
       ],
     },
     {

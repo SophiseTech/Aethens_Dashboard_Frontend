@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Segmented, Table, message } from "antd";
+import { Segmented, Table, Tooltip, message } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import enquiryStore from "@stores/EnquiryStore";
 import EnquiryDetailsDrawer from "@pages/Enquiries/Component/EnquiryDetailsDrawer";
@@ -10,6 +10,7 @@ import EnquiryDashboard from "@pages/Enquiries/Component/EnquiryDashboard";
 import userStore from "@stores/UserStore";
 import centersStore from "@stores/CentersStore";
 import enquiryService from "@services/Enquiry";
+import dayjs from "dayjs";
 
 function EnquiryList() {
   const {
@@ -148,15 +149,42 @@ function EnquiryList() {
       },
     },
     {
+      title: "Updated At",
+      dataIndex: "updatedAt",
+      render: (value) => formatDate(value)
+    },
+    {
       title: "Status",
       dataIndex: "stage",
       render: (_, row) => {
         return row?.stage === "Demo"
-          ? row?.demoSlot?.status || "Not Scheduled"
-          : row?.stage;
+          ? <>
+            <Tooltip title={`${row?.followUpRemarks || row?.remarks || "No Remarks"}`}>
+              <p>{row?.demoSlot?.status || "Not Scheduled"}</p>
+              <p>{getFollowUpStatus(row)}</p>
+            </Tooltip>
+          </>
+          : <>
+            <Tooltip title={`${row?.followUpRemarks || row?.remarks || "No Remarks"}`}>
+              <p className="">{row?.stage}</p>
+              <p className="">{getFollowUpStatus(row)}</p>
+            </Tooltip>
+          </>;
       },
     }
   ];
+
+  const getFollowUpStatus = (enquiry) => {
+    if (!enquiry) return
+    if (["Enrolled", "Closed"].includes(enquiry.stage)) return ""
+    if (!enquiry.followUpDate) {
+      return ""
+    }
+    if (enquiry.followUpDate && dayjs(enquiry.followUpDate).isAfter(dayjs())) {
+      return <span className="text-green-500">| Followed-Up</span>
+    }
+    return <span className="text-red-500">| Follow-Up Overdue</span>
+  }
 
   return (
     <>
