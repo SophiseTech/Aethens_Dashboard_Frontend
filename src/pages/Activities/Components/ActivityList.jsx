@@ -4,8 +4,8 @@ import React from 'react'
 
 function ActivityList({ activities }) {
 
-  const isDocument = (activity) => activity.type === 'attachment' || (!activity.title && activity.resource?.fileType !== 'image')
-  const isImage = (activity) => activity.type === 'image' || activity.resource?.fileType === 'image'
+  const isDocument = (activity) => activity.type === 'attachment' || (!activity.title && !['image', 'video', 'jpeg', 'png', 'jpg'].includes(activity.resource?.fileType))
+  const isImage = (activity) => activity.type === 'image' || ['image', 'jpeg', 'png', 'jpg'].includes(activity.resource?.fileType)
 
   if (!activities || activities.length === 0) return <p>No activities!</p>
   return (
