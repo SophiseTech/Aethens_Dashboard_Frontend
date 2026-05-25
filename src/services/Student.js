@@ -23,7 +23,8 @@ class StudentService {
     type,
     isFeeEnabled,
     reg_fee,
-    idCardNumber
+    idCardNumber,
+    discountAmount
   }) {
     try {
       if (
@@ -57,7 +58,8 @@ class StudentService {
         paidAmount,
         total_course_fee,
         reg_fee,
-        idCardNumber
+        idCardNumber,
+        discountAmount
       });
       if (!response || !response.data)
         throw new Error("An error occured. Please try again");

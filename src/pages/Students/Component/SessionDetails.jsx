@@ -9,6 +9,7 @@ import userStore from '@stores/UserStore';
 import facultyAssignmentStore from '@stores/FacultyAssignmentStore';
 import centersStore from '@stores/CentersStore';
 import { useStore } from 'zustand';
+import slotStore from '@stores/SlotStore';
 
 const { Title } = Typography;
 
@@ -38,6 +39,7 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
   const canManualOverrideCap = ["manager", "admin", "academic_manager", "operations_manager"].includes(user?.role);
 
   const { getActiveSessions } = studentStore();
+  const { markAbsent } = slotStore()
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -210,6 +212,19 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
     }
   };
 
+  const handleMarkAbsent = (record) => {
+    Modal.confirm({
+      title: 'Confirm Mark Absent',
+      content: 'Are you sure you want to mark this slot as absent?',
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk: () => {
+        markAbsent(record._id, "cancelled");
+        setSlots((prevSlots) => prevSlots.map((slot) => (slot._id === record._id ? { ...slot, status: "absent" } : slot)));
+      }
+    });
+  }
+
   useEffect(() => {
     if (!isModalOpen) return;
     if (!selectedSlotId) return;
@@ -349,6 +364,9 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
             >
               <Button type="link">Mark Unattended</Button>
             </Popconfirm>
+          )}
+          {(record.status?.toLowerCase() !== 'cancelled' && record.status?.toLowerCase() !== 'absent') && (
+            <Button type="link" danger onClick={() => handleMarkAbsent(record)}>Mark Absent</Button>
           )}
         </Space>
       )

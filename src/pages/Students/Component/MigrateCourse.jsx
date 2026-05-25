@@ -23,6 +23,7 @@ import { FeeService } from '@/services/Fee';
 import { isUserActive, calculateAge, formatDate } from '@utils/helper';
 import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
+import { SINGLE_FEE_DISCOUNT } from '@utils/constants';
 
 const { Title, Text } = Typography;
 
@@ -58,6 +59,7 @@ function MigrateCourse({ student }) {
   const [numberOfInstallments, setNumberOfInstallments] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [isCourseCompleted, setIsCourseCompleted] = useState(false);
+  const [discountAmount, setDiscountAmount] = useState(SINGLE_FEE_DISCOUNT);
 
   useEffect(() => {
     if (!isModalOpen) return;
@@ -140,6 +142,12 @@ function MigrateCourse({ student }) {
         ...base,
         numberOfInstallments,
         start_date: startDate ? startDate.toISOString() : new Date().toISOString(),
+      };
+    }
+    if (paymentType === 'single') {
+      return {
+        ...base,
+        discountAmount,
       };
     }
     return base;
@@ -360,6 +368,24 @@ function MigrateCourse({ student }) {
                     parser={(v) => v.replace(/₹\s?|(,*)/g, '')}
                   />
                 </div>
+
+                {/* Single payment - discount field */}
+                {paymentType === 'single' && (
+                  <div>
+                    <Text strong style={{ display: 'block', marginBottom: 6 }}>Discount Amount</Text>
+                    <InputNumber
+                      style={{ width: '100%' }}
+                      placeholder="Discount amount"
+                      value={discountAmount}
+                      onChange={(val) => setDiscountAmount(val)}
+                      min={0}
+                      max={courseFee ?? selectedCourseData?.rate ?? undefined}
+                      prefix="₹"
+                      formatter={(v) => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                      parser={(v) => v.replace(/₹\s?|(,*)/g, '')}
+                    />
+                  </div>
+                )}
 
                 {/* Partial — upfront paid amount */}
                 {paymentType === 'partial' && (

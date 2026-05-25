@@ -154,6 +154,12 @@ function AddStudent() {
             <CustomInput name={"numberOfInstallments"} label={"Number of installments"} />
           </>
         )
+      case "single":
+        return (
+          <>
+            <CustomInput name={"discountAmount"} label={"Discount Amount"} />
+          </>
+        )
       default:
         break;
     }

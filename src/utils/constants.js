@@ -241,6 +241,8 @@ export const TASK_STATUS = [
   { label: "Completed", value: "Completed" },
 ];
 
+export const SINGLE_FEE_DISCOUNT = 1000
+
 export const ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES = [
   "/manager/tasks",
   "/manager/holidays",
