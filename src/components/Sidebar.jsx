@@ -507,31 +507,7 @@ const getMenuConfig = (role) => {
 
   const studentItems = [
     {
-      label: "Materials",
-      icon: <BookOutlined />,
-      key: "materials",
-      path: "/materials",
-    },
-    {
-      label: "Attendance",
-      icon: <FundProjectionScreenOutlined />,
-      key: "attendance",
-      path: "/attendance",
-    },
-    {
-      label: "Course History",
-      icon: <ClockCircleOutlined />,
-      key: "course-history",
-      path: "/courseHistory",
-    },
-    {
-      label: "Activities",
-      icon: <AimOutlined />,
-      key: "activities",
-      path: "/activities",
-    },
-    {
-      label: "Slots",
+      label: "Sessions",
       icon: <CalendarOutlined />,
       key: "slots",
       path: "/slots",
@@ -543,10 +519,34 @@ const getMenuConfig = (role) => {
       path: "/bills",
     },
     {
+      label: "Attendance",
+      icon: <FundProjectionScreenOutlined />,
+      key: "attendance",
+      path: "/attendance",
+    },
+    {
+      label: "Activities",
+      icon: <AimOutlined />,
+      key: "activities",
+      path: "/activities",
+    },
+    {
       label: "Announcements",
       icon: <ClockCircleOutlined />,
       key: "announcements",
       path: "/student/announcements",
+    },
+    {
+      label: "Materials",
+      icon: <BookOutlined />,
+      key: "materials",
+      path: "/materials",
+    },
+    {
+      label: "Course History",
+      icon: <ClockCircleOutlined />,
+      key: "course-history",
+      path: "/courseHistory",
     },
     {
       label: "Final Project",

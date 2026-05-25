@@ -140,6 +140,38 @@ function FinancialSummary() {
                         </div>
                     </Card>
                 </Col>
+
+                {/* Projected (Selected Range) */}
+                <Col xs={12} sm={8} lg={6}>
+                    <Card size="small" className="border border-border text-center bg-card">
+                        <Statistic
+                            title={<span className="text-xs text-gray-500">Projected (Selected)</span>}
+                            value={summary?.projectedIncome?.selectedRange || 0}
+                            precision={0}
+                            prefix="₹"
+                            valueStyle={{ color: SECONDARY, fontSize: 18 }}
+                            formatter={(v) => Number(v).toLocaleString('en-IN')}
+                        />
+                    </Card>
+                </Col>
+
+                {/* Projected (Upcoming Month) */}
+                <Col xs={12} sm={8} lg={6}>
+                    <Card size="small" className="border border-border text-center bg-card">
+                        <Statistic
+                            title={
+                                <span className="text-xs text-gray-500">
+                                    Projected ({summary?.projectedIncome?.upcomingMonthName || 'Upcoming Month'})
+                                </span>
+                            }
+                            value={summary?.projectedIncome?.upcomingMonth || 0}
+                            precision={0}
+                            prefix="₹"
+                            valueStyle={{ color: SECONDARY, fontSize: 18 }}
+                            formatter={(v) => Number(v).toLocaleString('en-IN')}
+                        />
+                    </Card>
+                </Col>
             </Row>
 
             <Divider style={{ margin: '16px 0' }} />
