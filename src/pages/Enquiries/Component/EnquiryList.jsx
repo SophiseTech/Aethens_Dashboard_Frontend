@@ -37,14 +37,15 @@ function EnquiryList() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   // const [selectedView, setSelectedView] = useState("All");
+  const [activeFilters, setActiveFilters] = useState({});
 
   const fetchEnquiries = useCallback(() => {
     if (searchQuery) {
       search(10, { searchQuery }, currentPage);
     } else {
-      getEnquiries(10, currentPage, { stage: selectedView, centerId: selectedCenter });
+      getEnquiries(10, currentPage, { ...activeFilters, stage: selectedView, centerId: selectedCenter });
     }
-  }, [searchQuery, getEnquiries, search, currentPage, selectedView, selectedCenter]);
+  }, [searchQuery, getEnquiries, search, currentPage, selectedView, selectedCenter, activeFilters]);
 
   useEffect(() => {
     fetchEnquiries();
@@ -79,17 +80,8 @@ function EnquiryList() {
     nav(`?page=${page}&view=${view}`, { replace: true });
   };
 
-  const handlePageChange = (page, pageSize) => {
+  const handlePageChange = (page) => {
     updateURL(page, selectedView);
-    loadMore(page, pageSize);
-  };
-
-  const loadMore = (page, pageSize) => {
-    if (searchQuery) {
-      search(pageSize, { searchQuery }, page);
-    } else {
-      getEnquiries(pageSize, page, { stage: selectedView, centerId: selectedCenter });
-    }
   };
 
   const handleRowClick = (record) => {
@@ -192,7 +184,10 @@ function EnquiryList() {
         options={["Dashboard", "All", "New", "Demo", "Enrolled", "Closed"]}
         className="w-fit"
         value={selectedView}
-        onChange={(view) => { updateURL(1, view) }}
+        onChange={(view) => {
+          setActiveFilters({});
+          updateURL(1, view);
+        }}
       />
 
       {selectedView === 'Dashboard' ?
@@ -202,13 +197,12 @@ function EnquiryList() {
           <ViewWiseFilters
             selectedView={selectedView}
             onApply={(filters) => {
-              // reset to page 1 and call search with filters
-              updateURL(1, selectedView)
-              getEnquiries(10, 1, { ...filters, centerId: selectedCenter })
+              setActiveFilters(filters);
+              updateURL(1, selectedView);
             }}
             onClear={() => {
-              updateURL(1, selectedView)
-              getEnquiries(10, 1, { stage: selectedView, centerId: selectedCenter })
+              setActiveFilters({});
+              updateURL(1, selectedView);
             }}
           />
 
