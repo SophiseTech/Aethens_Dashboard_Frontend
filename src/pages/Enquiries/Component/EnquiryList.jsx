@@ -11,6 +11,7 @@ import userStore from "@stores/UserStore";
 import centersStore from "@stores/CentersStore";
 import enquiryService from "@services/Enquiry";
 import dayjs from "dayjs";
+import { capitalize } from "lodash";
 
 function EnquiryList() {
   const {
@@ -127,6 +128,11 @@ function EnquiryList() {
       title: "Course Interested",
       dataIndex: "selectedCourses",
       render: (courses) => courses?.map(c => c.course_name).join(", ")
+    },
+    {
+      title: "Age Category",
+      dataIndex: "ageCategory",
+      render: (value) => capitalize(value.replaceAll('_', " "))
     },
     {
       title: selectedView === "Demo" ? "Demo Date" : "Created At",

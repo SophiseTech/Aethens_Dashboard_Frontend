@@ -148,12 +148,12 @@ function ManagerSlots() {
       key: 'name',
       roles: [ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     },
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-      roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-    },
+    // {
+    //   title: 'Email',
+    //   dataIndex: 'email',
+    //   key: 'email',
+    //   roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    // },
     {
       title: 'Course',
       dataIndex: 'course_name',
