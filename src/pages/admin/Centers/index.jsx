@@ -89,6 +89,24 @@ function AdminCenters() {
     });
   };
 
+  const handleResetLimit = (record) => {
+    Modal.confirm({
+      title: "Reset limit?",
+      content: `Reset "${record.center_name}" limit?`,
+      okText: "Reset",
+      okType: "danger",
+      onOk: async () => {
+        try {
+          await centersService.resetLimitForCenter(record._id);
+          message.success("Limit reset");
+          load();
+        } catch (e) {
+          message.error(e?.message || "Reset failed");
+        }
+      },
+    });
+  };
+
   if (!canView) {
     return <div className="p-4 text-center">You don&apos;t have permission to view centers.</div>;
   }
@@ -107,6 +125,7 @@ function AdminCenters() {
         <Flex gap={8}>
           <Button size="small" onClick={() => openEdit(rec)}>Edit</Button>
           <Button size="small" danger onClick={() => handleDelete(rec)}>Delete</Button>
+          <Button size="small" danger onClick={() => handleResetLimit(rec)}>Reset Limit</Button>
         </Flex>
       ),
     },

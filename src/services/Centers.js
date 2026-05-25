@@ -43,6 +43,17 @@ class CentersService {
       throw error
     }
   }
+
+  async resetLimitForCenter(id) {
+    try {
+      const response = await put(`/centers/resetLimitForCenter/${id}`)
+      if (!response || !response.data) throw new Error("An error occurred. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+      throw error
+    }
+  }
 }
 
 const centersService = new CentersService()
