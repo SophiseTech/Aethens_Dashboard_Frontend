@@ -51,6 +51,7 @@ function StudentList() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedView, setSelectedView] = useState(initialView);
   const [selectedCourses, setSelectedCourses] = useState([]);
+  const [statusFilter, setStatusFilter] = useState(null);
   const [allCourses, setAllCourses] = useState([]);
   const { setActiveStudent } = studentStore();
   const [assignModalStudent, setAssignModalStudent] = useState(null);
@@ -74,7 +75,7 @@ function StudentList() {
   useEffect(() => {
     fetchStudents();
     console.log(students);
-  }, [selectedView, currentPage, searchQuery, selectedCourses, fromBranch, toBranch, selectedCenter]);
+  }, [selectedView, currentPage, searchQuery, selectedCourses, statusFilter, fromBranch, toBranch, selectedCenter]);
 
   useEffect(() => {
     if (selectedCenter === tempFromBranch || selectedCenter === tempToBranch) {
@@ -136,14 +137,18 @@ function StudentList() {
         : (fromBranch ? user?.center_id : null);
 
       if (selectedView === "All Students") {
+        const query = { role: ROLES.STUDENT, center_id: selectedCenter };
+        if (statusFilter) {
+          query.status = statusFilter;
+        }
         if (searchQuery) {
           search(
             10,
-            { searchQuery, query: { role: ROLES.STUDENT, center_id: selectedCenter }, page: currentPage },
+            { searchQuery, query, page: currentPage },
             currentPage
           );
         } else {
-          getStudentsByCenter(10, currentPage, null, selectedCourses, fromBranch, toBranchParam);
+          getStudentsByCenter(10, currentPage, statusFilter, selectedCourses, fromBranch, toBranchParam);
         }
       } else if (selectedView === "Active Students") {
         if (searchQuery) {
@@ -178,6 +183,7 @@ function StudentList() {
   const handleSegmentChange = (view) => {
     setSelectedView(view);
     setSelectedCourses([]); // Clear course filter when view changes
+    setStatusFilter(null); // Clear status filter when view changes
     setFromBranch(null); // Clear applied migration filters
     setToBranch(null); // Clear applied migration filters (for admin)
     setTempFromBranch(null); // Clear temporary migration filters
@@ -386,6 +392,29 @@ function StudentList() {
           </p>
         );
       },
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      filters: selectedView === "All Students" ? [
+        { text: "Active", value: "active" },
+        { text: "Inactive", value: "inactive" },
+        { text: "System Deactivated", value: "system-deactivated" }
+      ] : undefined,
+      filteredValue: selectedView === "All Students" ? (statusFilter ? [statusFilter] : null) : null,
+      filterMultiple: false,
+      render: (status) => {
+        let color = "blue";
+        if (status === "active") color = "green";
+        else if (status === "inactive") color = "red";
+        else if (status === "system-deactivated") color = "volcano";
+        return (
+          <Tag color={color} style={{ textTransform: "capitalize" }}>
+            {status || "active"}
+          </Tag>
+        );
+      },
     }
 
   ];
@@ -434,12 +463,14 @@ function StudentList() {
   const handleTableChange = (pagination, filters) => {
     // Handle course filter change
     const newCourseFilters = filters.course_name && filters.course_name.length > 0 ? filters.course_name : [];
+    const newStatusFilter = filters.status && filters.status.length > 0 ? filters.status[0] : null;
 
-    // Check if the filter has changed by comparing arrays
-    const hasChanged = JSON.stringify(newCourseFilters.sort()) !== JSON.stringify(selectedCourses.sort());
+    const courseChanged = JSON.stringify(newCourseFilters.sort()) !== JSON.stringify(selectedCourses.sort());
+    const statusChanged = newStatusFilter !== statusFilter;
 
-    if (hasChanged) {
-      setSelectedCourses(newCourseFilters);
+    if (courseChanged || statusChanged) {
+      if (courseChanged) setSelectedCourses(newCourseFilters);
+      if (statusChanged) setStatusFilter(newStatusFilter);
       setCurrentPage(1); // Reset to page 1 when filter changes
       updateURL(selectedView, 1);
       // No need to call fetch here - the useEffect will handle it
