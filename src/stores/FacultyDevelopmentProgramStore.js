@@ -38,6 +38,28 @@ const facultyDevProgramStore = create((set, get) => ({
     }
   },
 
+  getProgramsPaginated: async (limit = 10, page = 1, filters = {}) => {
+    try {
+      set({ loading: true });
+      const lastRefKey = (page - 1) * limit;
+      const { programs, total } = await facultyDevelopmentProgramService.getPrograms(
+        filters,
+        lastRefKey,
+        limit
+      );
+      if (programs) {
+        set({
+          programs: programs, // Replace instead of append
+          total: total,
+        });
+      }
+    } catch (error) {
+      handleInternalError(error);
+    } finally {
+      set({ loading: false });
+    }
+  },
+
   editProgram: async (id, updateData) => {
     try {
       set({ createLoading: true });

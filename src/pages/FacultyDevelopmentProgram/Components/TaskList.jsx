@@ -7,7 +7,7 @@ import { Button, Flex, Table, Image } from "antd"
 import { useStore } from "zustand"
 import { ROLES } from "@utils/constants"
 
-function TaskList({ tasks, loading }) {
+function TaskList({ tasks, loading, pagination }) {
 
   const { editProgram } = useStore(facultyDevProgramStore)
   const { user } = useStore(userStore)
@@ -76,7 +76,7 @@ function TaskList({ tasks, loading }) {
   ].filter(col => !col.hidden) // Ensure hidden columns are actually removed from the Table
 
   return (
-    <Table dataSource={tasks} columns={columns} loading={loading}
+    <Table dataSource={tasks} columns={columns} loading={loading} pagination={pagination}
     // scroll={{
     //   x: "max-content",
     // }}
