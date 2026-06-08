@@ -2,6 +2,7 @@ import centersService from '@/services/Centers'
 import courseService from '@/services/Course'
 import inventoryService from '@/services/Inventory'
 import Title from '@components/layouts/Title'
+import useSearchableStudents from '@hooks/useSearchableStudents'
 import BillsLayot from '@pages/Bills/Components/BillsLayot'
 import GenerateBillButton from '@pages/Bills/Components/GenerateBillButton'
 import billStore from '@stores/BillStore'
@@ -14,8 +15,8 @@ import { ROLES } from '@utils/constants'
 import { toISTStartOfDayISO } from '@utils/helper'
 import permissions from '@utils/permissions'
 import dayjs from 'dayjs'
-import _ from 'lodash'
-import { useEffect, useMemo, useState } from 'react'
+import _, { debounce } from 'lodash'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useStore } from 'zustand'
 
@@ -24,7 +25,8 @@ function Bills() {
 
   const { getBills, bills, loading, createBill, total, getInvoiceNo, invoiceNo, center_initial, filters: stateFilters } = billStore()
   const { getItems } = inventoryStore()
-  const { getStudentsByCenter, total: studentTotal, students } = studentStore()
+  // const { getStudentsByCenter, total: studentTotal, students } = studentStore()
+  const { searchStudents, students } = useSearchableStudents()
   const [searchParams, setSearchParams] = useSearchParams();
   const student_id = searchParams.get("student_id")
   const { user } = useStore(userStore)
@@ -77,9 +79,17 @@ function Bills() {
     })
   }
 
-  useEffect(() => {
-    getStudentsByCenter(0);
-  }, [selectedCenter])
+  const handleDebouncedCustomerSearch = useCallback(
+    debounce((searchQuery) => {
+      try {
+        console.log(searchQuery);
+        searchStudents(0, 15, { searchQuery });
+      } catch (error) {
+        console.error(error);
+      }
+    }, 500),
+    []
+  );
 
   const loadInitData = async ({ itemType, centerId }) => {
     console.log(itemType, centerId);
@@ -126,10 +136,12 @@ function Bills() {
         setLineItems(mappedItems)
       }
     }
-    if (studentTotal === 0 || students.length < studentTotal || user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER) {
-      getStudentsByCenter(0)
-    }
+    // if (studentTotal === 0 || students.length < studentTotal || user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER) {
+    //   getStudentsByCenter(0)
+    // }
   }
+  console.log(students);
+
 
   const customerOptions = useMemo(() => students?.map(item => ({ label: item.username, value: item._id, data: item?.wallet })), [students])
 
@@ -140,9 +152,9 @@ function Bills() {
 
   const handleSearch = async (value, itemType) => {
     let effectiveCenterId;
-    if(user.role === 'manager'){
-      effectiveCenterId =  user?.center_id
-    }else{
+    if (user.role === 'manager') {
+      effectiveCenterId = user?.center_id
+    } else {
       effectiveCenterId = selectedCenter
     }
     if (!effectiveCenterId) return;
@@ -202,6 +214,7 @@ function Bills() {
         invoiceNo={invoiceNo}
         center_initial={center_initial}
         onSearch={handleSearch}
+        onCustomerSearch={handleDebouncedCustomerSearch}
       />
     }>
       <BillsLayot

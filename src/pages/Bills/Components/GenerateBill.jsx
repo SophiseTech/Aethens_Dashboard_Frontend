@@ -28,6 +28,7 @@ function GenerateBill({
   isModalOpen,
   handleOk,
   onSearch,
+  onCustomerSearch
 }) {
   const [selectedItem, setSelectedItem] = useState({});
   const [totals, setTotals] = useState({});
@@ -283,6 +284,7 @@ function GenerateBill({
               options={customersOptions}
               label={"Select Customer"}
               placeholder="Customer"
+              onSearch={onCustomerSearch}
             />
             <CustomSelect
               name={"subject"}
