@@ -109,15 +109,40 @@ function SessionDateRow({
   loading = false,
   minItems = 1,
   totalItems = 1,
+  listName = 'sessionSchedule',
 }) {
+  const form = Form.useFormInstance();
   const hasCalledRef = useRef(new Set()); // Track dates we've already triggered
 
-  const dateValue = Form.useWatch(['sessionSchedule', fieldMeta.name, 'date']);
-  const sessionValue = Form.useWatch(['sessionSchedule', fieldMeta.name, 'session_id']);
+  const dateValue = Form.useWatch([listName, fieldMeta.name, 'date']);
+  const sessionValue = Form.useWatch([listName, fieldMeta.name, 'session_id']);
+  const prevDateRef = useRef(dateValue);
+
+  console.log('SessionDateRow render:', {
+    index,
+    dateValue: dateValue?.format("YYYY-MM-DD"),
+    sessionValue,
+    formValue: form.getFieldValue([listName, fieldMeta.name, 'session_id'])
+  });
 
   // Call getAvailableSessions when date changes to trigger store update
+  // Reset session value when date changes or is cleared
   useEffect(() => {
-    if (!dateValue) return;
+    const prevDate = prevDateRef.current;
+    console.log('SessionDateRow useEffect:', {
+      index,
+      prevDate: prevDate?.format("YYYY-MM-DD"),
+      dateValue: dateValue?.format("YYYY-MM-DD")
+    });
+
+    if (!dateValue) {
+      if (prevDate) {
+        console.log('Clearing session_id because dateValue is null');
+        form.setFieldValue([listName, fieldMeta.name, 'session_id'], undefined);
+      }
+      prevDateRef.current = dateValue;
+      return;
+    }
 
     const dateStr = dateValue.format("YYYY-MM-DD");
 
@@ -126,12 +151,20 @@ function SessionDateRow({
       hasCalledRef.current.add(dateStr);
       getAvailableSessions(dateValue, null, 'booking');
     }
-  }, [dateValue, getAvailableSessions]);
+
+    // Reset session select if date changed and was not previously null/undefined
+    if (prevDate && !dateValue.isSame(prevDate, 'day')) {
+      console.log('Resetting session_id because date changed');
+      form.setFieldValue([listName, fieldMeta.name, 'session_id'], undefined);
+    }
+
+    prevDateRef.current = dateValue;
+  }, [dateValue, getAvailableSessions, form, listName, fieldMeta.name]);
 
   // Format available sessions for Select component
   const formattedSessions = formatSessions(availableSessions);
   const selectedSessionData = formattedSessions.find(s => s.value === sessionValue);
-  const { user } = userStore()
+  const { user } = userStore();
 
   return (
     <Card
@@ -175,6 +208,7 @@ function SessionDateRow({
             style={{ marginBottom: 0 }}
           >
             <Select
+              value={sessionValue}
               placeholder="Select a session"
               options={formattedSessions}
               aria-autocomplete='false'
@@ -287,6 +321,7 @@ function SessionDateSelector({
                     loading={loading}
                     minItems={minItems}
                     totalItems={listFields.length}
+                    listName={name}
                   />
                 ))
               )}
