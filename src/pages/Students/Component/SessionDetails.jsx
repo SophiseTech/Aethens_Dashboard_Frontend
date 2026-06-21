@@ -10,6 +10,10 @@ import facultyAssignmentStore from '@stores/FacultyAssignmentStore';
 import centersStore from '@stores/CentersStore';
 import { useStore } from 'zustand';
 import slotStore from '@stores/SlotStore';
+import SlotRescheduleModal from '@pages/Slots/Components/SlotRescheduleModal';
+import useModal from '@hooks/useModal';
+import holidayService from '@services/Holiday'
+import logger from '@utils/logger';
 
 const { Title } = Typography;
 
@@ -21,6 +25,10 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
   const [syncing, setSyncing] = useState(false);
   const [deallocating, setDeallocating] = useState(false);
   const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
+  const { handleCancel: handleRescheduleCancel, isModalOpen: isRescheduleModalOpen, showModal } = useModal()
+  const [holidays, setHolidays] = useState([])
+  const [currentSlotToReschedule, setCurrentSlotToReschedule] = useState(null)
+
 
   const { user } = useStore(userStore);
   const { selectedCenter } = useStore(centersStore);
@@ -39,14 +47,14 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
   const canManualOverrideCap = ["manager", "admin", "academic_manager", "operations_manager"].includes(user?.role);
 
   const { getActiveSessions } = studentStore();
-  const { markAbsent } = slotStore()
+  const { markAbsent, reshceduleSlotByManager } = slotStore()
 
   useEffect(() => {
     const fetchSessions = async () => {
       if (isModalOpen) {
         try {
           setLoadingSessions(true);
-          await getActiveSessions(student._id);
+          // await getActiveSessions(student._id);
           if (permissions.student.edit.includes(user?.role) || user?.role === "academic_manager" || user?.role === "operations_manager") {
             const response = await getStudentAssignment(student._id, assignmentCenterId);
             const firstSlotId = response?.assignment?.slotId || response?.assignment?.slot?._id || null;
@@ -65,6 +73,17 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
       fetchSlots();
     }
   }, [isModalOpen, student._id, assignmentCenterId, user?.role]);
+
+  // Fetch holidays
+  useEffect(() => {
+    if (!student?.center_id) return logger.error("Student center not found", "error")
+    holidayService.fetchHolidays({
+      skip: 0,
+      limit: 100,
+      centerId: student?.center_id,
+      status: 'published'
+    }).then(res => res?.holidays && setHolidays(res.holidays)).catch(() => { })
+  }, [student])
 
   const handleCancel = () => {
     setIsModalOpen(false);
@@ -225,6 +244,25 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
     });
   }
 
+  const handleRescheduleSlot = async (request) => {
+    try {
+      await reshceduleSlotByManager({
+        requested_slot: {
+          date: request.date,
+          session: request.session
+        },
+        current_slot: currentSlotToReschedule,
+        type: 'rescheduled',
+        raised_by_center: student
+      })
+      handleRescheduleCancel()
+      fetchSlots()
+    } catch (error) {
+      logger.error('Error marking slot as attended:', error);
+      message.error('Failed to mark slot as attended');
+    }
+  };
+
   useEffect(() => {
     if (!isModalOpen) return;
     if (!selectedSlotId) return;
@@ -238,7 +276,7 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
       key: 'username',
       render: (value, record) => (
         <Flex align="center" gap={8}>
-          <img className="rounded-full aspect-square w-8 border border-border" src={record?.profile_img || '/images/default.jpg'} alt={value} />
+          <img className="w-8 rounded-full border aspect-square border-border" src={record?.profile_img || '/images/default.jpg'} alt={value} />
           <div>
             <div>{value}</div>
             <div style={{ fontSize: 12, color: '#888' }}>{record?.email}</div>
@@ -336,7 +374,7 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
       key: 'actions',
       render: (record) => (
         permissions.sessions.edit.includes(user?.role) &&
-        <Space>
+        <Flex gap={5} wrap>
           <Popconfirm
             title="Are you sure you want to delete this slot?"
             onConfirm={() => handleDeleteSlot(record)}
@@ -368,7 +406,21 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
           {(record.status?.toLowerCase() !== 'cancelled' && record.status?.toLowerCase() !== 'absent') && (
             <Button type="link" danger onClick={() => handleMarkAbsent(record)}>Mark Absent</Button>
           )}
-        </Space>
+
+          {!['attended', 'requested',].includes(record.status?.toLowerCase()) && (
+            <Popconfirm
+              title="Are you sure you want to reschedule this slot?"
+              onConfirm={() => {
+                setCurrentSlotToReschedule(record)
+                showModal(true)
+              }}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button type="link" danger>Reschedule</Button>
+            </Popconfirm>
+          )}
+        </Flex>
       )
     }
 
@@ -552,6 +604,14 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
             loading={assignmentLoading}
           />
         </Modal>
+
+        <SlotRescheduleModal
+          handleOk={handleRescheduleSlot}
+          isModalOpen={isRescheduleModalOpen}
+          handleCancel={handleRescheduleCancel}
+          studentsSlots={[]} //Not applicable
+          holidays={holidays}
+        />
       </Space>
     </Modal>
   );

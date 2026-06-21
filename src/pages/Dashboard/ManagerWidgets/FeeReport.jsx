@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Card, List, Tag, Typography, Empty, Spin, Tooltip } from 'antd';
+import { Card, List, Tag, Typography, Empty, Spin, Tooltip, message } from 'antd';
 import { DollarOutlined, RightOutlined, WarningOutlined } from '@ant-design/icons';
 import { FeeService } from '@services/Fee';
+import studentService from '@services/Student';
+import walletService from '@services/WalletService';
+import FeeTracker from '@pages/Students/Component/FeeTracker';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
+import logger from '@utils/logger';
 
 const { Text } = Typography;
 
 function FeeReport({ dateRange }) {
     const [unpaidList, setUnpaidList] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedStudent, setSelectedStudent] = useState(null);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalLoading, setModalLoading] = useState(false);
     const navigate = useNavigate();
 
     const fetchUnpaidReport = async () => {
@@ -39,9 +46,34 @@ function FeeReport({ dateRange }) {
         fetchUnpaidReport();
     }, [dateRange]);
 
-    const handleItemClick = (item) => {
-        if (item.studentId) {
-            navigate(`/manager/wallets/s/${item.studentId}`);
+    const handleItemClick = async (item) => {
+        if (!item.studentId) return;
+        console.log(item);
+
+        let hideLoading = null;
+        try {
+            hideLoading = message.loading('Loading student fee tracker...', 0);
+            setModalLoading(true);
+            const studentData = await studentService.getUserById(item.studentId);
+            if (studentData) {
+                try {
+                    const walletData = await walletService.getWalletByStudentId(studentData._id);
+                    studentData.wallet = walletData;
+                } catch (walletError) {
+                    console.error("Error fetching student wallet details:", walletError);
+                }
+                setSelectedStudent(studentData);
+                setModalVisible(true);
+            } else {
+                message.error('Student details not found');
+            }
+            logger.debug("Student Data after fetching for fee report: ", studentData)
+        } catch (error) {
+            console.error("Error fetching student details:", error);
+            message.error('Failed to load student fee tracker');
+        } finally {
+            if (hideLoading) hideLoading();
+            setModalLoading(false);
         }
     };
 
@@ -65,9 +97,9 @@ function FeeReport({ dateRange }) {
 
     return (
         <Card
-            className='border border-border w-full'
+            className='w-full border border-border'
             title={
-                <div className="flex items-center gap-2">
+                <div className="flex gap-2 items-center">
                     <DollarOutlined />
                     <span>Fee Report - Unpaid</span>
                     {unpaidList.length > 0 && (
@@ -92,7 +124,7 @@ function FeeReport({ dateRange }) {
                         renderItem={(item) => (
                             <List.Item
                                 key={`${item._id}-${item.dueMonth || 'balance'}`}
-                                className="hover:bg-gray-50 transition-colors rounded-lg px-2 cursor-pointer"
+                                className="px-2 rounded-lg transition-colors cursor-pointer hover:bg-gray-50"
                                 onClick={() => handleItemClick(item)}
                                 actions={[
                                     <Tooltip key="view" title="View Wallet">
@@ -102,18 +134,18 @@ function FeeReport({ dateRange }) {
                             >
                                 <List.Item.Meta
                                     avatar={
-                                        <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                                        <div className="flex justify-center items-center w-10 h-10 bg-red-100 rounded-full">
                                             <WarningOutlined className="text-red-500" />
                                         </div>
                                     }
                                     title={
-                                        <div className="flex items-center gap-2 flex-wrap">
+                                        <div className="flex flex-wrap gap-2 items-center">
                                             <Text strong>{item.studentName}</Text>
                                             {getTypeTag(item.type)}
                                         </div>
                                     }
                                     description={
-                                        <div className="flex items-center justify-between">
+                                        <div className="flex justify-between items-center">
                                             <Text type="secondary" className="text-xs">
                                                 {item.dueMonth
                                                     ? `Due: ${dayjs(item.dueMonth).format('MMM YYYY')}`
@@ -130,6 +162,16 @@ function FeeReport({ dateRange }) {
                         )}
                     />
                 </div>
+            )}
+            {modalVisible && selectedStudent && (
+                <FeeTracker
+                    student={selectedStudent}
+                    visible={modalVisible}
+                    onCancel={() => {
+                        setModalVisible(false);
+                        setSelectedStudent(null);
+                    }}
+                />
             )}
         </Card>
     );

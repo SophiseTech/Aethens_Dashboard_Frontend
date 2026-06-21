@@ -63,7 +63,7 @@ const slotStore = create((set, get) => ({
   },
   reshceduleSlot: async (data) => {
     try {
-      set({ loading: true })
+      set({ createLoading: true })
       const { slots } = get()
       const slotRequest = await slotService.rescheduleSlot(data)
       if (slotRequest) {
@@ -73,7 +73,17 @@ const slotStore = create((set, get) => ({
     } catch (error) {
       handleInternalError(error)
     } finally {
-      set({ loading: false })
+      set({ createLoading: false })
+    }
+  },
+  reshceduleSlotByManager: async (data) => {
+    try {
+      set({ createLoading: true })
+      await slotService.rescheduleSlotByManager(data)
+    } catch (error) {
+      throw error
+    } finally {
+      set({ createLoading: false })
     }
   },
   setReschedulingSlot: (slot) => set({ reschedulingSlot: slot }),

@@ -32,40 +32,49 @@ function AdditionalSessions({ stats, loading }) {
   ]
 
   return (
-    <Card bordered={false} className='border border-border w-fit'>
-      <Flex vertical gap={16}>
-        <Flex align='center' justify='space-between'>
+    <Card
+      bordered={false}
+      className='border border-border w-fit max-h-[380px]'
+      styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}
+    >
+      <Flex vertical gap={16} className='h-full' style={{ minHeight: 0 }}>
+        <Flex align='center' justify='space-between' className='flex-shrink-0'>
           <Flex align='center' gap={8}>
-            <div className='bg-primary p-2 rounded-lg flex flex-shrink-0'>
+            <div className='flex flex-shrink-0 p-2 rounded-lg bg-primary'>
               <ThunderboltOutlined className='text-xl text-white' />
             </div>
-            <p className='text-gray-500 font-bold'>Additional Sessions</p>
+            <p className='font-bold text-gray-500'>Additional Sessions</p>
           </Flex>
           <Flex gap={16}>
             <Flex align='center' gap={4}>
               <CheckCircleOutlined className='text-green-600' />
-              <span className='font-bold text-lg'>{additionalCount?.attended || 0}</span>
-              <span className='text-gray-400 text-xs'>Attended</span>
+              <span className='text-lg font-bold'>{additionalCount?.attended || 0}</span>
+              <span className='text-xs text-gray-400'>Attended</span>
             </Flex>
             <Flex align='center' gap={4}>
               <CloseCircleOutlined className='text-red-500' />
-              <span className='font-bold text-lg'>{additionalCount?.non_attended || 0}</span>
-              <span className='text-gray-400 text-xs'>Unattended</span>
+              <span className='text-lg font-bold'>{additionalCount?.non_attended || 0}</span>
+              <span className='text-xs text-gray-400'>Unattended</span>
             </Flex>
           </Flex>
         </Flex>
 
         {additionalSlots?.length > 0 ? (
-          <Table
-            columns={columns}
-            dataSource={additionalSlots}
-            rowKey="_id"
-            pagination={false}
-            size="small"
-            loading={loading}
-          />
+          <div className='overflow-hidden flex-1'>
+            <Table
+              columns={columns}
+              dataSource={additionalSlots}
+              rowKey="_id"
+              pagination={false}
+              size="small"
+              loading={loading}
+              scroll={{ y: 220 }}
+            />
+          </div>
         ) : (
-          <Empty description="No additional sessions" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+          <div className='flex flex-grow justify-center items-center'>
+            <Empty description="No additional sessions" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+          </div>
         )}
       </Flex>
     </Card>

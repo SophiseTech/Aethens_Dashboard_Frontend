@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Table, Button, Flex, Modal, Form, Input, InputNumber, Switch, Tag, message } from "antd";
+import { Table, Button, Flex, Modal, Form, Input, InputNumber, Switch, Tag, message, Row, Col, Tooltip } from "antd";
 import Title from "@components/layouts/Title";
 import userStore from "@stores/UserStore";
 import permissions from "@utils/permissions";
@@ -37,21 +37,46 @@ function AdminCenters() {
   const openCreate = () => {
     setEditingRecord(null);
     form.resetFields();
+    form.setFieldsValue({
+      rescheduleAutoApprovalMaxCount: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 }
+    });
     setModalOpen(true);
   };
 
   const openEdit = (record) => {
     setEditingRecord(record);
+    
+    // Normalize rescheduleAutoApprovalMaxCount
+    let autoApproval = {};
+    if (record.rescheduleAutoApprovalMaxCount && typeof record.rescheduleAutoApprovalMaxCount === 'object') {
+      autoApproval = { ...record.rescheduleAutoApprovalMaxCount };
+    } else if (typeof record.rescheduleAutoApprovalMaxCount === 'number') {
+      const oldVal = record.rescheduleAutoApprovalMaxCount;
+      autoApproval = { 0: oldVal, 1: oldVal, 2: oldVal, 3: oldVal, 4: oldVal, 5: oldVal, 6: oldVal };
+    } else {
+      autoApproval = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+    }
+
     form.setFieldsValue({
       center_name: record.center_name,
       location: record.location,
       center_initial: record.center_initial,
       maxCount: record.maxCount,
-      rescheduleAutoApprovalMaxCount: record.rescheduleAutoApprovalMaxCount,
+      rescheduleAutoApprovalMaxCount: autoApproval,
       autoReject: record.autoReject ?? false,
     });
     setModalOpen(true);
   };
+
+  const validateLimit = ({ getFieldValue }) => ({
+    validator(_, value) {
+      const max = getFieldValue('maxCount');
+      if (value === undefined || value === null || typeof max !== 'number' || value <= max) {
+        return Promise.resolve();
+      }
+      return Promise.reject(new Error('Cannot exceed Max Count'));
+    },
+  });
 
   const handleSubmit = async () => {
     try {
@@ -116,7 +141,51 @@ function AdminCenters() {
     { title: "Location", dataIndex: "location", key: "location" },
     { title: "Initial", dataIndex: "center_initial", key: "center_initial" },
     { title: "Max Count", dataIndex: "maxCount", key: "maxCount", render: (val) => val ?? "—" },
-    { title: "Auto Approve Limit", dataIndex: "rescheduleAutoApprovalMaxCount", key: "rescheduleAutoApprovalMaxCount", render: (val) => val ?? "—" },
+    {
+      title: "Auto Approve Limit",
+      dataIndex: "rescheduleAutoApprovalMaxCount",
+      key: "rescheduleAutoApprovalMaxCount",
+      render: (val) => {
+        if (!val || typeof val !== "object") {
+          return typeof val === "number" ? val : "—";
+        }
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const values = Object.values(val);
+        const uniqueValues = [...new Set(values)];
+        if (uniqueValues.length === 1) {
+          return `${uniqueValues[0]} (All days)`;
+        }
+
+        const tooltipContent = (
+          <div className="p-1">
+            {days.map((day, idx) => {
+              const count = val[idx] ?? 0;
+              return (
+                <div key={day} style={{ display: "flex", justifyContent: "space-between", gap: "16px" }}>
+                  <span className="font-semibold">{day}:</span>
+                  <span>{count}</span>
+                </div>
+              );
+            })}
+          </div>
+        );
+
+        const summary = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+          .map(d => {
+            const idx = d === "Sun" ? 0 : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(d);
+            return `${d.slice(0, 1)}:${val[idx] ?? 0}`;
+          })
+          .join(" ");
+
+        return (
+          <Tooltip title={tooltipContent} placement="topLeft">
+            <span className="cursor-pointer border-b border-dashed border-gray-400">
+              {summary}
+            </span>
+          </Tooltip>
+        );
+      }
+    },
     { title: "Auto Reject", dataIndex: "autoReject", key: "autoReject", render: (val) => <Tag color={val ? "red" : "default"}>{val ? "Enabled" : "Disabled"}</Tag> },
     {
       title: "Actions",
@@ -171,24 +240,33 @@ function AdminCenters() {
           <Form.Item name="maxCount" label="Max Count" rules={[{ type: "number", min: 0, message: "Must be a positive number" }]}>
             <InputNumber min={0} placeholder="e.g. 30" style={{ width: "100%" }} />
           </Form.Item>
-          <Form.Item
-            name="rescheduleAutoApprovalMaxCount"
-            label="Auto Approve Limit"
-            dependencies={['maxCount']}
-            rules={[
-              { type: "number", min: 0, message: "Must be a positive number" },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  const max = getFieldValue('maxCount');
-                  if (!value || typeof max !== 'number' || value <= max) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(new Error('Auto Approve Limit cannot exceed Max Count'));
-                },
-              })
-            ]}
-          >
-            <InputNumber min={0} placeholder="e.g. 2" style={{ width: "100%" }} />
+          <Form.Item label="Auto Approve Limit (per Weekday)" style={{ marginBottom: 8 }}>
+            <Row gutter={[8, 8]}>
+              {[
+                { label: "Monday", key: "1" },
+                { label: "Tuesday", key: "2" },
+                { label: "Wednesday", key: "3" },
+                { label: "Thursday", key: "4" },
+                { label: "Friday", key: "5" },
+                { label: "Saturday", key: "6" },
+                { label: "Sunday", key: "0" }
+              ].map(day => (
+                <Col span={8} key={day.key}>
+                  <Form.Item
+                    name={["rescheduleAutoApprovalMaxCount", day.key]}
+                    label={day.label}
+                    dependencies={['maxCount']}
+                    rules={[
+                      { required: true, type: "number", min: 0, message: "Required" },
+                      validateLimit
+                    ]}
+                    style={{ marginBottom: 12 }}
+                  >
+                    <InputNumber min={0} style={{ width: "100%" }} />
+                  </Form.Item>
+                </Col>
+              ))}
+            </Row>
           </Form.Item>
           <Form.Item name="autoReject" label="Enable Auto Reject" valuePropName="checked">
             <Switch />

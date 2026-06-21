@@ -16,15 +16,17 @@ import { useStore } from 'zustand';
 function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlots = [], holidays = [] }) {
   const [form] = Form.useForm();
   const { getAvailableSessions, availableSessions, loading: sessionLoading } = useStore(SessionStore)
-  const { reschedulingSlot, loading: submitLoading } = useStore(slotStore)
+  const { reschedulingSlot, createLoading: submitLoading } = useStore(slotStore)
   const date = Form.useWatch("date", form)
   const { user } = useStore(userStore)
 
   const today = dayjs().startOf("day");
 
   useEffect(() => {
-    getAvailableSessions(date, null, 'reschedule')
-  }, [date])
+    if (isModalOpen) {
+      getAvailableSessions(date, null, 'reschedule')
+    }
+  }, [date, isModalOpen])
 
   const initialValues = {
     session: {},
@@ -90,7 +92,7 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
           className='w-full'
           inputProps={{ disabledDate: disabledDate }}
         />
-        <div className='text-xs text-gray-500 -mt-2 mb-2'>
+        <div className='-mt-2 mb-2 text-xs text-gray-500'>
           Holiday dates cannot be selected for reschedule.
         </div>
         <CustomSelect

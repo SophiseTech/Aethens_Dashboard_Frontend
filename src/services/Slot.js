@@ -32,6 +32,16 @@ class SlotService {
     }
   }
 
+  async rescheduleSlotByManager(data) {
+    try {
+      const response = await post(`/slots/rescheduleSlotByManager`, data)
+      if (!response || !response.data) throw new Error("An error occured. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
   async requestAdditionalSession(data) {
     try {
       const response = await post(`/slots/requestAdditionalSession`, data)
