@@ -3,30 +3,39 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api'; // Base URL for
 
 // Utility function for making API requests
 const request = async (endpoint, method, data = {}, headers = {}) => {
-  try {
-    const token = localStorage.getItem('jwt_token') || "";
-    const authHeaders = endpoint !== "auth/login" && token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method,
-      // credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeaders,
-        ...headers,
-      },
-      body: method !== 'GET' ? JSON.stringify(data) : undefined,
-    });
+  const token = localStorage.getItem("jwt_token") || "";
+  const authHeaders =
+    endpoint !== "auth/login" && token
+      ? { Authorization: `Bearer ${token}` }
+      : {};
 
-    const responseData = await response.json();
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders,
+      ...headers,
+    },
+    body: method !== "GET" ? JSON.stringify(data) : undefined,
+  });
 
-    if (!response.ok) {
-      throw new Error(`${responseData?.message || response.statusText}`);
-    }
+  const contentType = response.headers.get("content-type");
 
-    return responseData;
-  } catch (error) {
-    throw error;
+  let responseData;
+
+  if (contentType?.includes("application/json")) {
+    responseData = await response.json();
+  } else if (contentType?.includes("text")) {
+    responseData = await response.text();
+  } else {
+    responseData = await response.blob();
   }
+
+  if (!response.ok) {
+    throw new Error(responseData?.message || response.statusText);
+  }
+
+  return responseData;
 };
 
 // Export API methods

@@ -97,6 +97,21 @@ class AttendanceService {
     }
   }
 
+  async downloadAttendanceRegister({ centerId, courseId, month }) {
+    try {
+      const response = await post('/attendance/downloadRegister', {
+        centerId,
+        courseId,
+        month
+      }, { responseType: 'blob' })
+      if (!response) throw new Error("An error occured. Please try again")
+
+      return response
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
 }
 
 const attendanceService = new AttendanceService()

@@ -7,6 +7,7 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import { GLOBAL_USER_ROLES } from "./constants";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -369,4 +370,8 @@ export const getHolidayInfo = (dateStr, holidays, displayYear) => {
 export function capitalize(str) {
   if (!str) return ""
   return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+export function isGlobalUser(user) {
+  return GLOBAL_USER_ROLES.includes(user.role)
 }

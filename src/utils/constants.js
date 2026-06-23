@@ -281,3 +281,9 @@ export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
   "/manager/expenses",
   "/manager/ledgers"
 ]
+
+export const GLOBAL_USER_ROLES = [
+  ROLES.ADMIN,
+  ROLES.OPERATIONS_MANAGER,
+  ROLES.ACADEMIC_MANAGER
+]

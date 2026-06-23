@@ -5,6 +5,9 @@ import { ROLES } from "@utils/constants";
 import handleInternalError from "@utils/handleInternalError";
 import centersStore from "@stores/CentersStore";
 import attendanceService from "@services/Attendance";
+import { isGlobalUser } from "@utils/helper";
+import handleError from "@utils/handleError";
+import dayjs from "dayjs";
 
 const attendanceRegisterStore = create((set, get) => ({
   students: [],
@@ -38,7 +41,7 @@ const attendanceRegisterStore = create((set, get) => ({
       set({ loading: true, error: null });
       const { user } = userStore.getState();
       let center_id;
-      if(user.role === ROLES.ADMIN || user.role === ROLES.ACADEMIC_MANAGER || user.role === ROLES.OPERATIONS_MANAGER) {
+      if (user.role === ROLES.ADMIN || user.role === ROLES.ACADEMIC_MANAGER || user.role === ROLES.OPERATIONS_MANAGER) {
         center_id = centersStore.getState().selectedCenter;
       }
       const { selectedMonth, selectedCourse, pagination } = get();
@@ -63,6 +66,49 @@ const attendanceRegisterStore = create((set, get) => ({
     } catch (error) {
       handleInternalError(error);
       set({ loading: false, error: error.message });
+    }
+  },
+
+  exportAttendanceRegister: async () => {
+    try {
+      set({ loading: true, error: null });
+      const { user } = userStore.getState();
+      let center_id;
+      if (isGlobalUser(user)) {
+        center_id = centersStore.getState().selectedCenter;
+      }
+      const { selectedMonth, selectedCourse } = get();
+
+
+      // Use dummy data
+      const blob = await attendanceService.downloadAttendanceRegister({
+        centerId: center_id,
+        courseId: selectedCourse,
+        month: selectedMonth
+      })
+
+      const url = window.URL.createObjectURL(blob);
+
+      const monthYear = dayjs(selectedMonth).format('MMMM-YYYY');
+      const filename = selectedCourse
+        ? `attendance-register-${monthYear}-course.xlsx`
+        : `attendance-register-${monthYear}-all.xlsx`;
+
+      // Create temporary link and trigger download
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      // // Clean up URL object
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      handleError(error);
+      set({ loading: false, error: error.message });
+    } finally {
+      set({ loading: false });
     }
   },
 

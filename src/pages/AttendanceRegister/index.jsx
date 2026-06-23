@@ -21,7 +21,8 @@ function AttendanceRegister() {
     setSelectedMonth,
     setSelectedCourse,
     setPage,
-    fetchStudentsAttendance
+    fetchStudentsAttendance,
+    exportAttendanceRegister
   } = useAttendanceRegister();
 
   // Auto-fetch on mount
@@ -67,23 +68,17 @@ function AttendanceRegister() {
   }, [students, attendanceData, pagination]);
 
   const handleDownloadReport = () => {
-    if (students.length === 0) {
-      message.warning('No data to download');
-      return;
-    }
+    exportAttendanceRegister()
+    // try {
 
-    try {
-      const monthYear = dayjs(selectedMonth).format('MMMM-YYYY');
-      const filename = selectedCourse
-        ? `attendance-register-${monthYear}-course.csv`
-        : `attendance-register-${monthYear}-all.csv`;
 
-      exportToCSV(tableDataForExport, filename);
-      message.success('Report downloaded successfully!');
-    } catch (error) {
-      message.error('Failed to download report');
-      console.error(error);
-    }
+    //   // exportToCSV(tableDataForExport, filename);
+
+    //   message.success('Report downloaded successfully!');
+    // } catch (error) {
+    //   message.error('Failed to download report');
+    //   console.error(error);
+    // }
   };
 
   return (

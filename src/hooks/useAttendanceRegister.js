@@ -15,7 +15,8 @@ function useAttendanceRegister() {
     setSelectedCourse,
     setPage,
     fetchStudentsAttendance,
-    reset
+    reset,
+    exportAttendanceRegister
   } = useStore(attendanceRegisterStore);
   const { selectedCenter } = centersStore()
 
@@ -42,7 +43,8 @@ function useAttendanceRegister() {
     setSelectedCourse,
     setPage,
     fetchStudentsAttendance,
-    reset
+    reset,
+    exportAttendanceRegister
   };
 }
 
