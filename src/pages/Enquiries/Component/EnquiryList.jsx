@@ -111,7 +111,7 @@ function EnquiryList() {
       render: (value, record) => (
         <div className="flex gap-2 items-center">
           <p
-            className="cursor-pointer text-blue-600 hover:underline"
+            className="text-blue-600 cursor-pointer hover:underline"
             onClick={() => handleRowClick(record)}
           >
             {value}
@@ -132,7 +132,7 @@ function EnquiryList() {
     {
       title: "Age Category",
       dataIndex: "ageCategory",
-      render: (value) => capitalize(value.replaceAll('_', " "))
+      render: (value) => capitalize(value?.replaceAll('_', " "))
     },
     {
       title: selectedView === "Demo" ? "Demo Date" : "Created At",
