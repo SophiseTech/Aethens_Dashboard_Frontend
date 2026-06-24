@@ -230,12 +230,12 @@ const UserDetailsDrawer = ({
                       <div className='relative w-fit group'>
                         <CustomImageUploadWithCrop
                           name="profile_img"
-                          customUploadButton={<EditOutlined className='group-hover:text-white transition-all text-xl' />}
+                          customUploadButton={<EditOutlined className='text-xl transition-all group-hover:text-white' />}
                           showUploadList={false}
                           listType='text'
                           cropImage
                           squareCrop
-                          className="absolute inset-0 z-10 flex items-center justify-center hover:bg-black/50 transition-colors rounded-full hover:text-white cursor-pointer opacity-0 group-hover:opacity-100"
+                          className="flex absolute inset-0 z-10 justify-center items-center rounded-full opacity-0 transition-colors cursor-pointer hover:bg-black/50 hover:text-white group-hover:opacity-100"
                           path={`uploads/profile_img/${user?._id}`}
                           form={{ setFieldValue: (name, value) => handleProfileImageUpload(value) }}
                           loading={profileImageLoading}
@@ -399,20 +399,28 @@ const UserDetailsDrawer = ({
                       </Text>
                     </Col>
                     {user && (
-                      <Col span={24}>
-                        <Text strong>Attendance:</Text>
-                        <Text style={{ marginLeft: 8 }}>
-                          {user?.attended || 0}/{user?.details_id?.course?.total_session} (
-                          {user?.attended || user?.details_id?.course?.total_session
-                            ? Math.round(
-                              ((user?.attended) /
-                                (user?.details_id?.course?.total_session)) *
-                              100
-                            )
-                            : 0}
-                          %)
-                        </Text>
-                      </Col>
+                      <>
+                        <Col span={24}>
+                          <Text strong>Attendance:</Text>
+                          <Text style={{ marginLeft: 8 }}>
+                            {user?.regularAttendedCount || 0}/{user?.details_id?.course?.total_session} (
+                            {user?.regularAttendedCount || user?.details_id?.course?.total_session
+                              ? Math.round(
+                                ((user?.regularAttendedCount) /
+                                  (user?.details_id?.course?.total_session)) *
+                                100
+                              )
+                              : 0}
+                            %)
+                          </Text>
+                        </Col>
+                        <Col span={24}>
+                          <Text strong>Additional Sessions:</Text>
+                          <Text style={{ marginLeft: 8 }}>
+                            {user?.additionalAttendedCount || 0}
+                          </Text>
+                        </Col>
+                      </>
                     )}
                   </Row>
                 </Card>

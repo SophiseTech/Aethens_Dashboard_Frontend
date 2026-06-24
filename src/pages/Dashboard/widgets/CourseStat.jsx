@@ -12,13 +12,13 @@ import { buildStyles, CircularProgressbarWithChildren } from 'react-circular-pro
 import 'react-circular-progressbar/dist/styles.css';
 import { useStore } from 'zustand';
 
-function CourseStat({finalProject = {}}) {
+function CourseStat({ finalProject = {} }) {
 
   const { getCourse, course } = courseStore()
   const { user } = userStore()
   const { slots, getCompletedCount, completedCount } = slotStore()
   const project = finalProject?.project
-
+  const { regularCount } = completedCount || {}
   const mostUpcoming = useMemo(() => slots
     .filter(item => dayjs(item.start_date) >= dayjs())
     .reduce((closest, current) => {
@@ -51,12 +51,12 @@ function CourseStat({finalProject = {}}) {
     <div className='bg-card rounded-3xl w-full space-y-5 | p-2 2xl:p-5'>
       <div className='bg-cardGradient rounded-3xl p-5 flex gap-5 justify-between items-center | max-xl:flex-col'>
 
-        <Progress value={(completedCount / course?.total_session) * 100} curr={completedCount} total={course?.total_session} />
+        <Progress value={(regularCount / course?.total_session) * 100} curr={regularCount} total={course?.total_session} />
 
-        <div className='flex gap-5 flex-col'>
+        <div className='flex flex-col gap-5'>
 
           <div className='flex gap-5'>
-            <div className='text-white flex gap-5'>
+            <div className='flex gap-5 text-white'>
               {data.map((item, index) => (<StatItem
                 key={index}
                 label={item.label}
@@ -66,7 +66,7 @@ function CourseStat({finalProject = {}}) {
             </div>
           </div>
 
-          <FinalProject finalProjectInfo={finalProject}  />
+          <FinalProject finalProjectInfo={finalProject} />
 
         </div>
 

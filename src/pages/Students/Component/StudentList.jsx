@@ -330,19 +330,19 @@ function StudentList() {
           : {};
         return (
           <div
-            className="flex items-center gap-3"
+            className="flex gap-3 items-center"
             onClick={() => handleNameClick(record)}
             style={{ cursor: "pointer" }}
           >
             <img
-              className="rounded-full aspect-square w-8 2xl:w-10 border border-border"
+              className="w-8 rounded-full border aspect-square 2xl:w-10 border-border"
               style={ringStyle}
               src={record?.profile_img || '/images/default.jpg'}
               alt="Profile"
             />
             <p className="max-2xl:text-xs">{name}</p>
             {isMigrated && (
-              <Tag color="blue" className="text-xs ml-1">
+              <Tag color="blue" className="ml-1 text-xs">
                 Transferred
               </Tag>
             )}
@@ -384,12 +384,18 @@ function StudentList() {
       dataIndex: "sessions_attended",
       render: (attendedCount, record) => {
         const totalSessions = record?.details_id?.course?.total_session || 0;
-        const attended = record?.attended || 0;
+        const attended = record?.regularAttendedCount || 0;
+        const additionalAttended = record?.additionalAttendedCount || 0;
 
         return (
-          <p>
-            {attended}/{totalSessions}
-          </p>
+          <div className="flex gap-2 items-center">
+            <p>
+              {attended}/{totalSessions}
+            </p>
+            <p>
+              A: {additionalAttended}
+            </p>
+          </div>
         );
       },
     },
@@ -437,7 +443,7 @@ function StudentList() {
             <Flex gap={8} align="center">
               <Tag
                 color={sourceColor}
-                className="m-0 border-transparent rounded-full px-2"
+                className="px-2 m-0 rounded-full border-transparent"
                 style={{ fontSize: "10px", lineHeight: "16px" }}
               >
                 {sourceLabel}
@@ -493,7 +499,7 @@ function StudentList() {
     const countFor = (view) => viewTotals[view] ?? 0;
 
     const makeLabel = (view) => (
-      <span className="flex items-center gap-1">
+      <span className="flex gap-1 items-center">
         {view}
         <Badge
           count={countFor(view)}
@@ -517,7 +523,7 @@ function StudentList() {
   return (
     <>
       {/* Migration Filters - positioned below search, above view selector */}
-      <div className="flex gap-3 mb-4 items-center flex-wrap">
+      <div className="flex flex-wrap gap-3 items-center mb-4">
         <Select
           placeholder="From Branch"
           value={tempFromBranch}
@@ -575,13 +581,13 @@ function StudentList() {
       {/* View Selector */}
       <Segmented
         options={segmentOptions}
-        className="w-fit mb-3"
+        className="mb-3 w-fit"
         value={selectedView}
         onChange={handleSegmentChange}
       />
 
       {/* Total count line */}
-      <div className="text-xs text-gray-400 mb-2">
+      <div className="mb-2 text-xs text-gray-400">
         Showing{' '}
         <span className="font-semibold text-gray-600">
           {selectedView === 'All Students' || selectedView === 'Active Students'
@@ -646,7 +652,7 @@ function StudentList() {
                 dataIndex: "username",
                 render: (name, rec) => (
                   <Flex align="center" gap={8}>
-                    <img className="rounded-full w-7 aspect-square border border-border" src={rec?.profile_img || "/images/default.jpg"} alt={name} />
+                    <img className="w-7 rounded-full border aspect-square border-border" src={rec?.profile_img || "/images/default.jpg"} alt={name} />
                     <span>{name}</span>
                   </Flex>
                 ),

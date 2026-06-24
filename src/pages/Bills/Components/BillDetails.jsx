@@ -20,11 +20,14 @@ import courseService from '@/services/Course';
 import studentStore from '@stores/StudentStore';
 import { ROLES } from '@utils/constants';
 import centersStore from '@stores/CentersStore';
+import logger from '@utils/logger';
+import { debounce } from 'lodash';
+import walletService from '@services/WalletService';
 
 const GenerateBill = lazy(() => import('@pages/Bills/Components/GenerateBill'));
 const ModalLoader = () => (
-  <div className='fixed inset-0 bg-black/40 z-50 flex items-center justify-center'>
-    <div className='bg-white px-4 py-2 rounded-md shadow-md text-sm'>Loading…</div>
+  <div className='flex fixed inset-0 z-50 justify-center items-center bg-black/40'>
+    <div className='px-4 py-2 text-sm bg-white rounded-md shadow-md'>Loading…</div>
   </div>
 );
 
@@ -67,97 +70,45 @@ function BillDetails() {
     }
   };
 
-  const loadInitData = async ({ itemType, centerId }) => {
-    const effectiveCenterId = centerId || (user.role === ROLES.MANAGER ? user?.center_id : selectedCenter);
+  const handleSearch = useMemo(
+    () =>
+      debounce(async (value, itemType) => {
+        const effectiveCenterId =
+          user.role === ROLES.MANAGER ? user?.center_id : selectedCenter;
 
-    if (itemType === "materials" && effectiveCenterId) {
-      const response = await inventoryService.getCenterInventoryItems(effectiveCenterId, 0, 200, { type: "materials" });
-      if (response?.items) {
-        const mappedItems = response.items.map(record => ({
-          ...record.item_id,
-          rate: record.rate,
-          discount: record.discount,
-          taxes: record.tax,
-          quantity: record.quantity,
-          type: record.type,
-        }));
-        setLineItems(mappedItems);
-      }
-    }
-    if (itemType === "course") {
-      const { courses } = await courseService.getCourses({}, 0, 0);
-      setLineItems([...courses?.map(course => ({ name: course.course_name, _id: course._id, type: "course", rate: course.rate, discount: 0, taxes: 18 }))]);
-    }
-    if (itemType === "gallery" && effectiveCenterId) {
-      const response = await inventoryService.getCenterInventoryItems(effectiveCenterId, 0, 200, { type: "gallery" });
-      if (response?.items) {
-        const mappedItems = response.items.map(record => ({
-          ...record.item_id,
-          rate: record.rate,
-          discount: record.discount,
-          taxes: record.tax,
-          quantity: record.quantity,
-          type: record.type,
-        }));
-        setLineItems(mappedItems);
-      }
-    }
+        if (!effectiveCenterId) return;
 
-    if (students.length === 0 || students.length < studentTotal) {
-      await getStudentsByCenter(0);
-    }
-  };
+        const response = await inventoryService.getCenterInventoryItems(
+          effectiveCenterId,
+          0,
+          10,
+          {
+            searchQuery: value,
+            type: itemType,
+          }
+        );
 
-  const handleSearch = async (value, itemType) => {
-    const effectiveCenterId = user.role === ROLES.MANAGER ? user?.center_id : selectedCenter;
-    if (!effectiveCenterId) return;
+        if (response?.items) {
+          const mappedItems = response.items.map((record) => ({
+            ...record.item_id,
+            rate: record.rate,
+            discount: record.discount,
+            taxes: record.tax,
+            quantity: record.quantity,
+            type: record.type,
+          }));
 
-    if (itemType === "materials") {
-      const response = await inventoryService.getCenterInventoryItems(
-        effectiveCenterId,
-        0,
-        value === "" ? 200 : 0,
-        { searchQuery: value, type: "materials" }
-      );
-      if (response?.items) {
-        const mappedItems = response.items.map(record => ({
-          ...record.item_id,
-          rate: record.rate,
-          discount: record.discount,
-          taxes: record.tax,
-          quantity: record.quantity,
-          type: record.type,
-        }));
-        setLineItems(mappedItems);
-      }
-      return;
-    }
-    if (itemType === "gallery") {
-      const response = await inventoryService.getCenterInventoryItems(
-        effectiveCenterId,
-        0,
-        value === "" ? 200 : 0,
-        { searchQuery: value, type: "gallery" }
-      );
-      if (response?.items) {
-        const mappedItems = response.items.map(record => ({
-          ...record.item_id,
-          rate: record.rate,
-          discount: record.discount,
-          taxes: record.tax,
-          quantity: record.quantity,
-          type: record.type,
-        }));
-        setLineItems(mappedItems);
-      }
-    }
-  };
+          setLineItems(mappedItems);
+        }
+      }, 300),
+    [user.role, user?.center_id, selectedCenter]
+  );
 
   useEffect(() => {
-    if (isEditModalOpen && bill?.subject) {
-      loadInitData({ itemType: bill.subject, centerId: bill.center_id || bill.centerId });
-    }
-  }, [isEditModalOpen, bill]);
+    return () => {
+      handleSearch.cancel();
+    };
+  }, [handleSearch]);
 
   useEffect(() => {
     if (!bill?.items?.length) return;
@@ -173,34 +124,48 @@ function BillDetails() {
       return merged;
     });
   }, [bill]);
+  logger.debug("Students: ", students)
 
-  const customersOptions = useMemo(() => {
+  const customersOptions = useMemo(async () => {
     const base = students?.map(item => ({ label: item.username, value: item._id, data: item?.wallet })) || [];
     const currentId = bill?.generated_for?._id || bill?.generated_for;
     const hasCurrent = base.some(option => option.value === currentId);
     if (currentId && !hasCurrent) {
-      return [{ label: bill?.generated_for?.username || "Current Customer", value: currentId, data: bill?.generated_for?.wallet }, ...base];
+      const wallet = await walletService.getWalletByStudentId(bill.generated_for._id || bill.generated_for)
+      return [{ label: bill?.generated_for?.username || "Current Customer", value: currentId, data: wallet }, ...base];
     }
     return base;
   }, [students, bill]);
 
   const handleEditDraftSave = async (values) => {
     if (!id) return;
+    logger.debug(values)
     await editBill(id, {
       ...values,
       generated_on: toISTStartOfDayISO(values.generated_on),
-      status: 'draft',
-      saveAsDraft: true,
+      // status: 'draft',
+      saveAsDraft: values.status === 'draft',
       invoiceNo: bill?.invoiceNo,
       center_initial: bill?.center_initial
     });
   };
 
   return (
-    <div className='rounded-xl lg:flex-1 lg:h-full lg:overflow-auto bg-card flex flex-col'>
+    <div className='flex flex-col rounded-xl lg:flex-1 lg:h-full lg:overflow-auto bg-card'>
       <div className='border-b border-border flex justify-between | p-5 2xl:p-10'>
         <h1 className='font-bold | max-2xl:text-xl 2xl:text-2xl'>Preview</h1>
         <div className='flex gap-2'>
+          {(bill?.status === 'unpaid') && permissions.bills?.edit_unpaid?.includes(user.role) && (
+            <Button
+              className='rounded-full'
+              color='default'
+              icon={<EditOutlined />}
+              variant='outlined'
+              onClick={() => setIsEditModalOpen(true)}
+            >
+              Edit Bill
+            </Button>
+          )}
           {bill?.status === 'draft' && permissions.bills?.edit_draft?.includes(user.role) && (
             <Button
               className='rounded-full'
@@ -289,7 +254,6 @@ function BillDetails() {
             isModalOpen={isEditModalOpen}
             handleCancel={() => setIsEditModalOpen(false)}
             handleOk={() => setIsEditModalOpen(false)}
-            loadInitData={loadInitData}
             items={lineItems}
             customersOptions={customersOptions}
             customers={students}
