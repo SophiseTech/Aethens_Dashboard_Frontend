@@ -63,7 +63,7 @@ const billStore = create((set, get) => ({
       const bill = await billService.editBill(id, updateData)
       if (bill && bills) {
         const updatedBills = bills.map(item => (
-          item._id === bill._id ? { ...item, ...updateData } : item
+          item._id === bill._id ? bill : item
         ))
         set({ bills: updatedBills })
         handleSuccess("Bill Updated Succesfully")
