@@ -22,6 +22,8 @@ function EnquiryList() {
     searchQuery,
     searchTotal,
     search,
+    refresh,
+    setRefresh
   } = enquiryStore();
   const { user } = userStore();
   const { selectedCenter } = centersStore();
@@ -52,7 +54,15 @@ function EnquiryList() {
     fetchEnquiries();
     // fetchEnquiries depends on searchQuery/currentPage/selectedView
     // include fetchEnquiries to satisfy exhaustive-deps
-  }, [selectedView, currentPage, searchQuery, fetchEnquiries, selectedCenter]);
+  }, [selectedView, currentPage, searchQuery, fetchEnquiries, selectedCenter, refresh]);
+
+  useEffect(() => {
+    if (refresh) {
+      fetchEnquiries()
+      setRefresh(false)
+    }
+  }, [refresh])
+
 
   // Handle enquiryId from URL to auto-open drawer
   useEffect(() => {

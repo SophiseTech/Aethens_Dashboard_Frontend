@@ -25,7 +25,7 @@ export default function CloseEnquiryModal({ visible, onCancel, enquiry }) {
       values.reason === "other" ? values.other_reason : values.reason;
 
     await enquiryService.transitionEnquiry(enquiry._id, 'Closed', finalReason);
-    await getEnquiries(10, 1);
+    // await getEnquiries(10, 1);
     onCancel();
     return { reset: true };
   };
@@ -38,7 +38,7 @@ export default function CloseEnquiryModal({ visible, onCancel, enquiry }) {
       footer={null}
     >
       <CustomForm action={handleSubmit} initialValues={{ reason: '' }} form={form}>
-        
+
         <CustomSelect
           label="Closing Remark"
           name="reason"

@@ -33,6 +33,7 @@ import EnquiryDemoBookModal from "@pages/Enquiries/Component/EnquiryDemoBookModa
 import EnquiryDemoRescheduleModal from "@pages/Enquiries/Component/EnquiryDemoRescheduleModal";
 import permissions from "@utils/permissions";
 import userStore from "@stores/UserStore";
+import ReopenEnquiryModal from "./ReopenEnquiryModal";
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
@@ -41,6 +42,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isBookSlotModalVisible, setIsBookSlotModalVisible] = useState(false);
   const [isCloseModalVisible, setIsCloseModalVisible] = useState(false);
+  const [isReopenModalVisible, setIsReopenModalVisible] = useState(false);
   const [isFollowUpVisible, setFollowUpVisible] = useState(false);
   const [isReschduleSlot, setReschduleSlot] = useState(false);
   const [isEnrolled, setEnrolled] = useState(false);
@@ -57,6 +59,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
   const [form] = Form.useForm();
 
   const isClosed = (enquiry?.stage === 'Closed' || enquiry?.state === 'Closed');
+  const isReopened = enquiry?.stageHistory?.find(hist => hist.from === 'Closed' && hist.to === 'New')
 
   const handleEditClick = () => setIsEditModalVisible(true);
   const handleCloseClick = () => setIsCloseModalVisible(true);
@@ -190,6 +193,9 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
               </Title>
               <Text>Enquiry No: {enquiry?.enquiryNumber}</Text><br />
               <Text>{age_categories.find(item => item.value == enquiry?.ageCategory)?.label}</Text>
+            </Col>
+            <Col>
+              {isReopened && <Tag color="green">Re Opened</Tag>}
             </Col>
           </Row>
         </Card>
@@ -425,6 +431,11 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
           Enroll Student
         </Button> : null
         }
+        {(parentPage === 'enquiryList' && enquiry?.stage === 'Closed' && permissions.enquiries.edit.includes(user.role)) &&
+          <Button type="primary" onClick={() => setIsReopenModalVisible(true)}>
+            Re-Open Enquiry
+          </Button>
+        }
       </Drawer>
 
       {/* Edit Modal */}
@@ -518,6 +529,17 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
         }}
         enquiry={enquiry}
       />
+
+      <ReopenEnquiryModal
+        visible={isReopenModalVisible}
+        onCancel={() => {
+          setIsReopenModalVisible(false);
+          onClose();
+        }}
+        enquiry={enquiry}
+      />
+
+
     </>
   );
 };

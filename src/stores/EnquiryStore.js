@@ -12,6 +12,7 @@ const enquiryStore = create((set, get) => ({
   searchTotal: 0,
   searchQuery: "",
   demoSlots: {},
+  refresh: false,
 
   // Fetch enquiries list with pagination
   getEnquiries: async (limit = 10, page = 1, filters = {}) => {
@@ -235,6 +236,10 @@ const enquiryStore = create((set, get) => ({
       set({ loading: false });
     }
   },
+
+  setRefresh: (value) => {
+    set({ refresh: value })
+  }
 }));
 
 export default enquiryStore;

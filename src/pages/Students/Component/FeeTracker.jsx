@@ -346,6 +346,15 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       },
     },
     {
+      title: 'Payment Date',
+      key: 'paymentDate',
+      render: (_, record) => {
+        const bill = getBillForInstallment(record);
+        if (bill?.status === 'unpaid') return '-';
+        return bill ? formatDate(bill.payment_date) : '—';
+      },
+    },
+    {
       title: 'Bill Status',
       key: 'billStatus',
       render: (_, record) => {
@@ -573,6 +582,12 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       render: (date) => formatDate(date),
     },
     {
+      title: 'Paid On',
+      dataIndex: 'payment_date',
+      key: 'payment_date',
+      render: (date, record) => record?.status === 'unpaid' ? '—' : formatDate(date),
+    },
+    {
       title: 'Total',
       dataIndex: 'total',
       key: 'total',
@@ -718,19 +733,19 @@ const FeeTracker = ({ student, visible, onCancel }) => {
             <div className='bg-[#fff1f0] flex gap-2 p-3 justify-evenly mb-[20px] rounded-lg text-sm'>
               <div className='flex flex-col gap-1 items-center'>
                 <p className='text-stone-500'>Course Fee</p>
-                <p className='font-bold text-base'>{feeDetails.summary?.total_course_fee?.toFixed(2)}</p>
+                <p className='text-base font-bold'>{feeDetails.summary?.total_course_fee?.toFixed(2)}</p>
               </div>
               <div className='flex flex-col gap-1 items-center'>
                 <p className='text-stone-500'>Registration Fee</p>
-                <p className='font-bold text-base'>{feeDetails.summary?.courseRegFee?.toFixed(2)}</p>
+                <p className='text-base font-bold'>{feeDetails.summary?.courseRegFee?.toFixed(2)}</p>
               </div>
               <div className='flex flex-col gap-1 items-center'>
                 <p className='text-stone-500'>Additional Fees</p>
-                <p className='font-bold text-base'>{(feeDetails.feeAccount?.totalAdditionalAmount || 0).toFixed(2)}</p>
+                <p className='text-base font-bold'>{(feeDetails.feeAccount?.totalAdditionalAmount || 0).toFixed(2)}</p>
               </div>
               <div className='flex flex-col gap-1 items-center'>
                 <p className='text-stone-500'>Total Tax</p>
-                <p className='font-bold text-base'>{feeDetails.summary?.totalTax?.toFixed(2)}</p>
+                <p className='text-base font-bold'>{feeDetails.summary?.totalTax?.toFixed(2)}</p>
               </div>
             </div>
 
@@ -752,13 +767,13 @@ const FeeTracker = ({ student, visible, onCancel }) => {
                 />
                 {upcomingInstallments.length > 0 && (
                   <div className="flex justify-center mt-4">
-                    <Button 
-                      type="dashed" 
+                    <Button
+                      type="dashed"
                       onClick={() => setShowAllInstallments(!showAllInstallments)}
                       style={{ borderColor: '#1890ff', color: '#1890ff' }}
                     >
-                      {showAllInstallments 
-                        ? 'Show Less' 
+                      {showAllInstallments
+                        ? 'Show Less'
                         : `View All (${upcomingInstallments.length} upcoming remaining)`}
                     </Button>
                   </div>
@@ -838,7 +853,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         {viewBill && (
           <div style={{ height: isAndroid ? 'auto' : '80vh' }}>
             {isAndroid ? (
-              <div className="flex flex-col items-center justify-center py-10 gap-4">
+              <div className="flex flex-col gap-4 justify-center items-center py-10">
                 <Alert
                   message="Preview Not Available"
                   description="PDF preview is not supported on Android browsers. Please download the invoice to view it."
@@ -900,7 +915,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
           />
 
           {(paidAmount > 0) && (
-            <div className="space-y-3 mb-4">
+            <div className="mb-4 space-y-3">
               <Alert
                 message={
                   paidAmount < (selectedBill?.total || 0) && feeDetails?.feeAccount?.type !== 'partial' ? "Insufficient Payment" :
@@ -923,11 +938,11 @@ const FeeTracker = ({ student, visible, onCancel }) => {
           )}
 
           {walletBalance > 0 && paidAmount > 0 && paidAmount <= (selectedBill?.total || 0) && (
-            <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 mb-4" style={{ borderLeft: "4px solid #1890ff" }}>
+            <Card className="mb-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200" style={{ borderLeft: "4px solid #1890ff" }}>
               <Space direction="vertical" className="w-full" size="middle">
-                <div className="flex items-center justify-between">
+                <div className="flex justify-between items-center">
                   <Flex vertical>
-                    <p className="text-sm text-gray-600 mb-1">Available Wallet Balance</p>
+                    <p className="mb-1 text-sm text-gray-600">Available Wallet Balance</p>
                     <div className='flex gap-2 items-center'>
                       <WalletOutlined className="text-2xl text-blue-600" />
                       <p className="text-2xl font-bold text-blue-600">₹{walletBalance.toFixed(2)}</p>
@@ -952,7 +967,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
                   }}
                   className="text-base"
                 >
-                  <span className="font-medium text-sm">Use wallet balance to reduce bill amount</span>
+                  <span className="text-sm font-medium">Use wallet balance to reduce bill amount</span>
                 </Checkbox>
 
                 {useWallet && walletBalance > 0 && (
@@ -967,7 +982,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
                 )}
 
                 {walletBalance < (selectedBill?.total || 0) && walletBalance > 0 && (
-                  <p className="text-xs text-gray-500 italic">
+                  <p className="text-xs italic text-gray-500">
                     💡 Wallet balance is less than bill total. Remaining amount: ₹{((selectedBill?.total || 0) - walletBalance).toFixed(2)}
                   </p>
                 )}
@@ -1025,7 +1040,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
           />
 
           {walletBalance > 0 && additionalAmount > 0 && (
-            <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 mb-4" size="small">
+            <Card className="mb-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200" size="small">
               <Checkbox
                 checked={useWalletForAdditional}
                 onChange={(e) => {
