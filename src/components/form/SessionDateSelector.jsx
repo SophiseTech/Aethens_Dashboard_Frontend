@@ -6,6 +6,7 @@ import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { ROLES } from '@utils/constants';
 import userStore from '@stores/UserStore';
+import { getSlotColor } from '@utils/helper';
 
 const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -25,18 +26,16 @@ export const sessionSlotOptionRenderer = (option, user, showSlotCount = true) =>
   const { data: session } = option.data;
   if (!session) return null;
 
-  const { remainingSlots: regularRemainingSLots = 0, additional = 0, effectiveRemainingSlots: totalRemainingSlots = 0, rescheduled = 0 } = session;
+  const { remainingSlots: regularRemainingSLots = 0, additional = 0, effectiveRemainingSlots: totalRemainingSlots = 0, rescheduled = 0, freeSlotPercent } = session;
   const weekday = weekDays[session.weekDay];
   const time = dayjs(session.start_time).format('h:mm A');
   const remainingSlots = user.role === ROLES.STUDENT ? totalRemainingSlots : regularRemainingSLots
 
   // Determine color based on remaining slots
-  let slotColor = 'green';
-  if (remainingSlots <= 5) slotColor = 'orange';
-  if (remainingSlots <= 2) slotColor = 'red';
+  let slotColor = getSlotColor(freeSlotPercent)
 
   return (
-    <Flex direction="vertical" justify="space-between" align="center" size={2} style={{ width: '100%' }}>
+    <Flex direction="vertical" justify="space-between" align="center" size={2} style={{ width: '100%', background: slotColor }} className='px-2 py-1 rounded-lg'>
       <div style={{ textAlign: 'center' }}>
         <p style={{ fontSize: '1.05em', fontWeight: 'bold', margin: 0 }}>{weekday}</p>
         <p style={{ fontWeight: "bold", margin: 0 }}>{time}</p>
@@ -44,7 +43,7 @@ export const sessionSlotOptionRenderer = (option, user, showSlotCount = true) =>
       {showSlotCount && (
         <div style={{ display: 'flex', gap: 8 }}>
           <Tag
-            color={slotColor}
+            color={'default'}
             style={{
               fontWeight: 600,
               borderRadius: 4,
@@ -223,7 +222,7 @@ function SessionDateRow({
               }}
               notFoundContent={
                 loading ? (
-                  <div className="flex items-center gap-2 p-2">
+                  <div className="flex gap-2 items-center p-2">
                     <Spin size="small" />
                     <span>Loading sessions...</span>
                   </div>
@@ -252,7 +251,7 @@ function SessionDateRow({
         {/* Display selected session details */}
         {dateValue && sessionValue && selectedSessionData && (
           <Col xs={24}>
-            <div className="text-xs text-gray-600 bg-white p-2 rounded border border-gray-200">
+            <div className="p-2 text-xs text-gray-600 bg-white rounded border border-gray-200">
               ✓ {dayjs(dateValue).format("ddd, MMM DD, YYYY")} - {selectedSessionData.label}
             </div>
           </Col>

@@ -375,3 +375,12 @@ export function capitalize(str) {
 export function isGlobalUser(user) {
   return GLOBAL_USER_ROLES.includes(user.role)
 }
+
+export function getSlotColor(freeSlotPercent) {
+
+  if (freeSlotPercent >= 50) return '#d9f7be'
+
+  if (freeSlotPercent >= 25 && freeSlotPercent < 50) return '#fff1b8'
+
+  return '#ffccc7'
+}
