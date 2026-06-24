@@ -22,7 +22,6 @@ import { ROLES } from '@utils/constants';
 import centersStore from '@stores/CentersStore';
 import logger from '@utils/logger';
 import { debounce } from 'lodash';
-import walletService from '@services/WalletService';
 
 const GenerateBill = lazy(() => import('@pages/Bills/Components/GenerateBill'));
 const ModalLoader = () => (
@@ -126,13 +125,12 @@ function BillDetails() {
   }, [bill]);
   logger.debug("Students: ", students)
 
-  const customersOptions = useMemo(async () => {
+  const customersOptions = useMemo(() => {
     const base = students?.map(item => ({ label: item.username, value: item._id, data: item?.wallet })) || [];
     const currentId = bill?.generated_for?._id || bill?.generated_for;
     const hasCurrent = base.some(option => option.value === currentId);
     if (currentId && !hasCurrent) {
-      const wallet = await walletService.getWalletByStudentId(bill.generated_for._id || bill.generated_for)
-      return [{ label: bill?.generated_for?.username || "Current Customer", value: currentId, data: wallet }, ...base];
+      return [{ label: bill?.generated_for?.username || "Current Customer", value: currentId, data: bill?.generated_for?.wallet }, ...base];
     }
     return base;
   }, [students, bill]);
