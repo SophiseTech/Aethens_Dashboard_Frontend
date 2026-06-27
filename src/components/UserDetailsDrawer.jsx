@@ -103,7 +103,7 @@ const UserDetailsDrawer = ({
         placement="right"
         onClose={onClose}
         open={visible}
-        width={isStudentDetail && [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER].includes(loggedinUser.role) ? 750 : 400}
+        width={isStudentDetail && [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER].includes(loggedinUser.role) ? 750 : 500}
         closable={true}
         styles={{
           header: {
@@ -134,7 +134,7 @@ const UserDetailsDrawer = ({
         }
       >
         <Row gutter={24}>
-          {isStudentDetail && [ROLES.MANAGER, ROLES.ACADEMIC_MANAGER, ROLES.OPERATIONS_MANAGER, ROLES.ADMIN].includes(loggedinUser.role) && (
+          {isStudentDetail && [ROLES.MANAGER, ROLES.OPERATIONS_MANAGER, ROLES.ADMIN].includes(loggedinUser.role) && (
             <Col span={10}>
               <Card bordered={false} style={{ boxShadow: "none", background: "transparent" }}>
                 <Title level={5} style={{ marginBottom: "16px" }}>Limits</Title>
@@ -218,7 +218,7 @@ const UserDetailsDrawer = ({
               )}
             </Col>
           )}
-          <Col span={isStudentDetail && [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY, ROLES.ACADEMIC_MANAGER, ROLES.OPERATIONS_MANAGER].includes(loggedinUser.role) ? 14 : 24}>
+          <Col span={isStudentDetail && [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY, ROLES.OPERATIONS_MANAGER].includes(loggedinUser.role) ? 14 : 24}>
             <div key={refreshKey}>
               <Card
                 bordered={false}

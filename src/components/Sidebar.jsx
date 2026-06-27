@@ -296,7 +296,7 @@ const getMenuConfig = (role) => {
       label: "Courses",
       icon: <BookOutlined />,
       key: "courses",
-      path: "/admin/courses",
+      path: "/academic-manager/courses",
     },
     {
       label: "Syllabus Gallery",
@@ -583,12 +583,12 @@ const SidebarLogo = () => (
 );
 
 const UserProfile = ({ user, onProfileClick, onLogout }) => (
-  <div className="p-3 my-5 ml-2 bg-card rounded-full flex gap-2 justify-between items-center shadow-sm hover:shadow-md transition-shadow duration-200">
-    <div className="flex gap-2 cursor-pointer flex-1" onClick={onProfileClick}>
+  <div className="flex gap-2 justify-between items-center p-3 my-5 ml-2 rounded-full shadow-sm transition-shadow duration-200 bg-card hover:shadow-md">
+    <div className="flex flex-1 gap-2 cursor-pointer" onClick={onProfileClick}>
       <Avatar src={user?.profile_img} className="flex-shrink-0">
         {user?.username?.charAt(0)?.toUpperCase()}
       </Avatar>
-      <div className="min-w-0 flex-1">
+      <div className="flex-1 min-w-0">
         <h1 className="text-sm font-bold truncate">{user?.username}</h1>
         <p className="text-xs text-gray-500 truncate">{user?.email}</p>
       </div>
@@ -610,7 +610,7 @@ const UserProfile = ({ user, onProfileClick, onLogout }) => (
 const MobileMenuButton = () => (
   <label
     htmlFor="my-drawer"
-    className="drawer-button lg:hidden fixed right-5 top-5 bg-primary text-white flex items-center p-2 rounded-lg z-10 shadow-lg hover:shadow-xl transition-shadow duration-200"
+    className="flex fixed top-5 right-5 z-10 items-center p-2 text-white rounded-lg shadow-lg transition-shadow duration-200 drawer-button lg:hidden bg-primary hover:shadow-xl"
   >
     <MenuUnfoldOutlined />
   </label>
@@ -780,7 +780,7 @@ function Sidebar({ children }) {
   };
 
   return (
-    <div className="drawer h-full lg:drawer-open">
+    <div className="h-full drawer lg:drawer-open">
       <input
         ref={drawerRef}
         id="my-drawer"
@@ -793,15 +793,15 @@ function Sidebar({ children }) {
         {children}
       </div>
 
-      <div className="drawer-side z-20 no-scrollbar">
+      <div className="z-20 drawer-side no-scrollbar">
         <label htmlFor="my-drawer" className="drawer-overlay" />
 
-        <aside className="h-full flex flex-col bg-white max-sm:w-80 w-64 shadow-lg px-1">
+        <aside className="flex flex-col px-1 w-64 h-full bg-white shadow-lg max-sm:w-80">
           <div className="flex-shrink-0 border-b border-gray-100">
             <SidebarLogo />
           </div>
 
-          <nav className="flex-1 overflow-y-auto no-scrollbar py-2">
+          <nav className="overflow-y-auto flex-1 py-2 no-scrollbar">
             <Menu
               mode="inline"
               selectedKeys={selectedKeys}

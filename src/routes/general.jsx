@@ -47,7 +47,7 @@ const LazyLoader = ({ children }) => {
   const location = useLocation()
   return (<Suspense
     fallback={
-      <div className="w-full h-screen flex items-center justify-center">
+      <div className="flex justify-center items-center w-full h-screen">
         <Spin size="large" />
       </div>
     }
@@ -520,6 +520,15 @@ export const generalRoutes = [
             path: "/academic-manager/student-syllabus",
             element: <LazyLoader><StudentSyllabus /></LazyLoader>,
             title: "Student Syllabus",
+          },
+          {
+            path: "/academic-manager/courses",
+            element: (
+              <LazyLoader>
+                <AdminCourses />
+              </LazyLoader>
+            ),
+            title: "Courses",
           },
         ],
       },
