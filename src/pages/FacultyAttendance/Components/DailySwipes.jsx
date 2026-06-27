@@ -5,7 +5,7 @@ import duration from "dayjs/plugin/duration";
 
 dayjs.extend(duration);
 
-function DailySwipes({ date, swipes = [], summary = {} }) {
+function DailySwipes({ date, swipes = [], summary = {}, extra }) {
     const formatTime = (timestamp) => {
         return dayjs(timestamp).format("hh:mm A");
     };
@@ -64,6 +64,7 @@ function DailySwipes({ date, swipes = [], summary = {} }) {
                     </Tag>
                 </div>
             }
+            extra={extra}
             className="shadow-sm"
         >
             {/* Summary Stats */}

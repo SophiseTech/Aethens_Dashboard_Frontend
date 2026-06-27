@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
-import { Row, Col, Card, Statistic, Spin, message, Select } from "antd";
+import { Row, Col, Card, Statistic, Spin, message, Select, Modal, Button, TimePicker } from "antd";
 import {
     CheckCircleOutlined,
     ClockCircleOutlined,
     CloseCircleOutlined,
-    CalendarOutlined
+    CalendarOutlined,
+    DeleteOutlined,
+    PlusOutlined,
+    EditOutlined
 } from "@ant-design/icons";
 import { useStore } from "zustand";
 import dayjs from "dayjs";
@@ -37,6 +40,11 @@ function AdminFacultyAttendance() {
     const [dailyData, setDailyData] = useState(null);
     const [monthlyData, setMonthlyData] = useState(null);
     const [holidays, setHolidays] = useState([]);
+
+    // Adjustment states
+    const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
+    const [adjustSessions, setAdjustSessions] = useState([]);
+    const [adjustConfirmLoading, setAdjustConfirmLoading] = useState(false);
 
     // Fetch holidays on mount and when center changes
     useEffect(() => {
@@ -214,6 +222,114 @@ function AdminFacultyAttendance() {
         setSelectedMonth(newMonth);
     };
 
+    const handleOpenAdjustModal = () => {
+        const initialSessions = [];
+        const sessionMap = {};
+        
+        (dailyData?.swipes || []).forEach(swipe => {
+            const sessionId = swipe._id.replace('_in', '').replace('_out', '');
+            if (!sessionMap[sessionId]) {
+                sessionMap[sessionId] = {
+                    _id: sessionId,
+                    punchInTime: null,
+                    punchOutTime: null,
+                    isNew: false,
+                    isDeleted: false
+                };
+                initialSessions.push(sessionMap[sessionId]);
+            }
+            if (swipe.type === 'IN') {
+                sessionMap[sessionId].punchInTime = swipe.swipeTime;
+            } else if (swipe.type === 'OUT') {
+                sessionMap[sessionId].punchOutTime = swipe.swipeTime;
+            }
+        });
+        
+        setAdjustSessions(initialSessions);
+        setIsAdjustModalOpen(true);
+    };
+
+    const handleSessionTimeChange = (index, field, timeObj) => {
+        const updated = [...adjustSessions];
+        if (timeObj) {
+            const combined = selectedDate
+                .hour(timeObj.hour())
+                .minute(timeObj.minute())
+                .second(0)
+                .millisecond(0);
+            updated[index][field] = combined.toISOString();
+        } else {
+            updated[index][field] = null;
+        }
+        setAdjustSessions(updated);
+    };
+
+    const handleDeleteSession = (index) => {
+        const updated = [...adjustSessions];
+        if (updated[index].isNew) {
+            updated.splice(index, 1);
+        } else {
+            updated[index].isDeleted = true;
+        }
+        setAdjustSessions(updated);
+    };
+
+    const handleAddSession = () => {
+        setAdjustSessions([
+            ...adjustSessions,
+            {
+                punchInTime: null,
+                punchOutTime: null,
+                isNew: true,
+                isDeleted: false
+            }
+        ]);
+    };
+
+    const handleSaveAdjustments = async () => {
+        const activeSessions = adjustSessions.filter(s => !s.isDeleted);
+        
+        const hasMissingIn = activeSessions.some(s => !s.punchInTime);
+        if (hasMissingIn) {
+            message.error("Each session must have a Punch In time.");
+            return;
+        }
+
+        let hasInvalidSequence = false;
+        activeSessions.forEach(s => {
+            if (s.punchInTime && s.punchOutTime) {
+                if (dayjs(s.punchOutTime).isBefore(dayjs(s.punchInTime))) {
+                    hasInvalidSequence = true;
+                }
+            }
+        });
+        if (hasInvalidSequence) {
+            message.error("Punch Out time must be after Punch In time.");
+            return;
+        }
+
+        try {
+            setAdjustConfirmLoading(true);
+            const dateStr = selectedDate.format("YYYY-MM-DD");
+            
+            const result = await attendanceService.adjustFacultyAttendance(
+                selectedFaculty,
+                dateStr,
+                adjustSessions
+            );
+            
+            message.success("Attendance adjusted successfully");
+            setDailyData(result);
+            setIsAdjustModalOpen(false);
+            fetchMonthlyData();
+        } catch (error) {
+            message.error("Failed to adjust attendance");
+            console.error(error);
+        } finally {
+            setAdjustConfirmLoading(false);
+        }
+    };
+
     const stats = monthlyData?.stats || {
         totalDays: 0,
         fullDays: 0,
@@ -323,6 +439,18 @@ function AdminFacultyAttendance() {
                                         date={dailyData?.date || selectedDate.format("YYYY-MM-DD")}
                                         swipes={dailyData?.swipes || []}
                                         summary={dailyData?.summary || {}}
+                                        extra={
+                                            selectedFaculty && (
+                                                <Button
+                                                    type="primary"
+                                                    size="small"
+                                                    icon={<EditOutlined />}
+                                                    onClick={handleOpenAdjustModal}
+                                                >
+                                                    Adjust Swipes
+                                                </Button>
+                                            )
+                                        }
                                     />
                                 </Col>
                             </Row>
@@ -336,6 +464,96 @@ function AdminFacultyAttendance() {
                             </div>
                         </Card>
                     )}
+
+                    {/* Adjust Swipes Modal */}
+                    <Modal
+                        title={
+                            <div className="border-b pb-3">
+                                <span className="text-lg font-semibold">Adjust Swipe Records</span>
+                                <div className="text-xs text-gray-500 mt-1 font-normal">
+                                    Faculty: <strong className="text-gray-700">{selectedFacultyInfo?.username}</strong> ({selectedFacultyInfo?.email})
+                                    <span className="mx-2">|</span>
+                                    Date: <strong className="text-gray-700">{selectedDate.format("DD MMM YYYY")}</strong>
+                                </div>
+                            </div>
+                        }
+                        open={isAdjustModalOpen}
+                        onOk={handleSaveAdjustments}
+                        onCancel={() => setIsAdjustModalOpen(false)}
+                        confirmLoading={adjustConfirmLoading}
+                        width={500}
+                        okText="Save Adjustments"
+                        cancelText="Cancel"
+                        destroyOnClose
+                    >
+                        <div className="py-4 space-y-4">
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800 space-y-1">
+                                <p className="font-semibold">Guideline:</p>
+                                <ul className="list-disc pl-4 space-y-1">
+                                    <li>Times are recorded relative to the selected date.</li>
+                                    <li>Total daily duration must be <strong>at least 5 hours (300 minutes)</strong> to automatically mark the summary as <strong>Full Day</strong>.</li>
+                                    <li>Otherwise, any non-zero duration will be marked as <strong>Half Day</strong>.</li>
+                                </ul>
+                            </div>
+
+                            <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+                                {adjustSessions.filter(s => !s.isDeleted).map((session, index) => (
+                                    <div 
+                                        key={session._id || `new-${index}`} 
+                                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
+                                    >
+                                        <div className="flex-1 space-y-1">
+                                            <label className="text-[10px] text-gray-400 font-medium uppercase tracking-wider block">Punch In</label>
+                                            <TimePicker
+                                                use12Hours
+                                                format="h:mm A"
+                                                className="w-full"
+                                                placeholder="Select In Time"
+                                                value={session.punchInTime ? dayjs(session.punchInTime) : null}
+                                                onChange={(time) => handleSessionTimeChange(index, 'punchInTime', time)}
+                                            />
+                                        </div>
+                                        <div className="flex-1 space-y-1">
+                                            <label className="text-[10px] text-gray-400 font-medium uppercase tracking-wider block">Punch Out</label>
+                                            <TimePicker
+                                                use12Hours
+                                                format="h:mm A"
+                                                className="w-full"
+                                                placeholder="Select Out Time"
+                                                value={session.punchOutTime ? dayjs(session.punchOutTime) : null}
+                                                onChange={(time) => handleSessionTimeChange(index, 'punchOutTime', time)}
+                                            />
+                                        </div>
+                                        <div className="pt-5">
+                                            <Button
+                                                type="text"
+                                                danger
+                                                icon={<DeleteOutlined />}
+                                                onClick={() => handleDeleteSession(index)}
+                                                className="flex items-center justify-center hover:bg-red-50 rounded-full"
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {adjustSessions.filter(s => !s.isDeleted).length === 0 && (
+                                    <div className="text-center py-6 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-lg">
+                                        No swipe sessions defined for this day.
+                                    </div>
+                                )}
+                            </div>
+
+                            <Button
+                                type="dashed"
+                                onClick={handleAddSession}
+                                block
+                                icon={<PlusOutlined />}
+                                className="flex items-center justify-center"
+                            >
+                                Add Swipe Session
+                            </Button>
+                        </div>
+                    </Modal>
                 </div>
             </Spin>
         </Title>

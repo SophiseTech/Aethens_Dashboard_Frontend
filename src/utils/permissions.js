@@ -178,6 +178,9 @@ const permissions = {
     add: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     edit: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     delete: [ROLES.ADMIN],
+  },
+  finalProjectPhase: {
+    approve: [ROLES.ADMIN, ROLES.ACADEMIC_MANAGER]
   }
 }
 

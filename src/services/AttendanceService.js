@@ -1,5 +1,5 @@
 import handleError from "@utils/handleError";
-import { get } from "@utils/Requests";
+import { get, post } from "@utils/Requests";
 import { toISTDateString } from "@utils/helper";
 
 class AttendanceService {
@@ -74,6 +74,27 @@ class AttendanceService {
             const now = new Date();
             const date = toISTDateString(now);
             return await this.getDailySwipes(date, facultyId);
+        } catch (error) {
+            handleError(error);
+        }
+    }
+
+    /**
+     * Adjust faculty daily swipe records (admin/manager use)
+     * @param {string} facultyId - Faculty ID
+     * @param {string} date - Date in format YYYY-MM-DD
+     * @param {Array} sessions - Array of session objects
+     * @returns {Promise} Updated daily swipes data
+     */
+    async adjustFacultyAttendance(facultyId, date, sessions) {
+        try {
+            if (!facultyId) throw new Error("Faculty ID is required");
+            if (!date) throw new Error("Date is required");
+            if (!sessions) throw new Error("Sessions are required");
+
+            const response = await post('/attendance/adjust', { facultyId, date, sessions });
+            if (!response || !response.data) throw new Error("An error occurred. Please try again");
+            return response.data;
         } catch (error) {
             handleError(error);
         }
