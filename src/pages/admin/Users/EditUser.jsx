@@ -12,7 +12,7 @@ import usersV2Service from "@services/UsersV2";
 import centersService from "@services/Centers";
 import { calculateAge } from "@utils/helper";
 import dayjs from "dayjs";
-import { ROLES } from "@utils/constants";
+import { GLOBAL_USER_ROLES, ROLES } from "@utils/constants";
 
 const { Text } = Typography;
 
@@ -99,7 +99,7 @@ function EditUser() {
     if (loading) {
         return (
             <Title title={isEditing ? "Edit User" : "Add User"}>
-                <div className="flex items-center justify-center h-64">
+                <div className="flex justify-center items-center h-64">
                     <Spin size="large" />
                 </div>
             </Title>
@@ -198,14 +198,16 @@ function EditUser() {
                                 options={statusOptions}
                             />
                         </Col>
-                        <Col xs={24} md={12}>
-                            <CustomSelect
-                                name="center_id"
-                                label="Center"
-                                placeholder="Select center"
-                                options={centerOptions}
-                            />
-                        </Col>
+                        {!GLOBAL_USER_ROLES.includes(roleValue) && (
+                            <Col xs={24} md={12}>
+                                <CustomSelect
+                                    name="center_id"
+                                    label="Center"
+                                    placeholder="Select center"
+                                    options={centerOptions}
+                                />
+                            </Col>
+                        )}
                     </Row>
 
                     {roleValue === 'faculty' && (
@@ -233,7 +235,7 @@ function EditUser() {
                                 required={false}
                             />
                             {dobValue && (
-                                <div className="px-2 py-1 mb-4 bg-stone-100 rounded">
+                                <div className="px-2 py-1 mb-4 rounded bg-stone-100">
                                     <Text type="secondary">
                                         Calculated Age: <strong>{calculateAge(dobValue.toDate())} years</strong>
                                     </Text>

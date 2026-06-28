@@ -6,7 +6,7 @@ import permissions from '@utils/permissions';
 import { Button, Card, Space, Tag, Typography } from 'antd';
 const { Title, Paragraph, Text } = Typography;
 
-function PhaseCard({ phase, onViewPhase, onSkipPhase, disabled = false }) {
+function PhaseCard({ phase, onViewPhase, onSkipPhase, disabled = false, createLoading = false }) {
   const config = statusConfig[phase.latestSubmission?.status] || statusConfig['not_started'];
   const { user } = userStore()
 
@@ -60,7 +60,7 @@ function PhaseCard({ phase, onViewPhase, onSkipPhase, disabled = false }) {
             {phase.status === 'not-started' ? 'Submit Phase' : 'View Phase'}
           </Button>
           {permissions.finalProjectPhase.approve.includes(user?.role) && !['approved', 'under_review'].includes(phase.latestSubmission?.status) &&
-            <Button icon={<CheckOutlined />} onClick={() => { onSkipPhase(phase) }}>Skip Phase</Button>
+            <Button icon={<CheckOutlined />} onClick={() => { onSkipPhase(phase) }} loading={createLoading}>Skip Phase</Button>
           }
         </div>
       </div>

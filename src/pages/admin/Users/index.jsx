@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Table, Button, Flex, Modal, Input, Select, message, Tag } from "antd";
+import { Table, Button, Flex, Modal, Input, Select, message, Tag, Tabs } from "antd";
 import { useNavigate } from "react-router-dom";
 import Title from "@components/layouts/Title";
 import StaffDetailsDrawer from "@components/StaffDetailsDrawer";
@@ -17,7 +17,7 @@ function AdminUsers() {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10 });
-  const [filters, setFilters] = useState({ search: "", role: "", status: "", center_id: "" });
+  const [filters, setFilters] = useState({ search: "", role: "", status: "active", center_id: "" });
   const [selectedStaff, setSelectedStaff] = useState({});
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
 
@@ -69,6 +69,11 @@ function AdminUsers() {
     setPagination((p) => ({ ...p, page, limit: pageSize || p.limit }));
   };
 
+  const handleTabChange = (key) => {
+    setFilters((f) => ({ ...f, status: key }));
+    setPagination((p) => ({ ...p, page: 1 }));
+  };
+
   const handleDelete = (record) => {
     Modal.confirm({
       title: "Delete user?",
@@ -77,7 +82,7 @@ function AdminUsers() {
       okType: "danger",
       onOk: async () => {
         try {
-          await usersV2Service.delete(record._id);
+          await usersV2Service.update(record._id, { status: "inactive" });
           message.success("User deactivated");
           fetchUsers();
         } catch (e) {
@@ -101,9 +106,9 @@ function AdminUsers() {
       key: "username",
       ellipsis: true,
       render: (name, record) => (
-        <div className="flex items-center gap-3">
+        <div className="flex gap-3 items-center">
           <img
-            className="rounded-full aspect-square w-8 2xl:w-10 border border-border"
+            className="w-8 rounded-full border aspect-square 2xl:w-10 border-border"
             src={record?.profile_img || '/images/default.jpg'}
             alt="Profile"
           />
@@ -129,7 +134,7 @@ function AdminUsers() {
       key: "center",
       render: (_, r) => r.center_id?.center_name ?? r.center_id ?? "-",
     },
-    ...(canEdit || canDelete
+    ...((canEdit || canDelete)
       ? [
         {
           title: "Actions",
@@ -137,7 +142,7 @@ function AdminUsers() {
           render: (_, record) => (
             <Flex gap={8}>
               {canEdit && <Button size="small" onClick={() => navigate(`/admin/users/${record._id}`)}>Edit</Button>}
-              {canDelete && <Button size="small" danger onClick={() => handleDelete(record)}>Delete</Button>}
+              {canDelete && filters.status === "active" && <Button size="small" danger onClick={() => handleDelete(record)}>Delete</Button>}
             </Flex>
           ),
         },
@@ -156,7 +161,22 @@ function AdminUsers() {
         ) : null
       }
     >
-      <Flex className="mb-4 gap-3 flex-wrap">
+      <Tabs
+        activeKey={filters.status}
+        onChange={handleTabChange}
+        className="mb-4"
+        items={[
+          {
+            key: "active",
+            label: "Active Users",
+          },
+          {
+            key: "inactive",
+            label: "Inactive Users",
+          },
+        ]}
+      />
+      <Flex className="flex-wrap gap-3 mb-4">
         <Input.Search
           placeholder="Search by name"
           allowClear
@@ -175,17 +195,6 @@ function AdminUsers() {
             { value: ROLES.FACULTY, label: "Faculty" },
             { value: ROLES.MANAGER, label: "Manager" },
             { value: ROLES.OPERATIONS_MANAGER, label: "Operations Manager" },
-          ]}
-        />
-        <Select
-          placeholder="Status"
-          allowClear
-          value={filters.status || undefined}
-          onChange={(v) => setFilters((f) => ({ ...f, status: v || "" }))}
-          style={{ width: 120 }}
-          options={[
-            { value: "active", label: "Active" },
-            { value: "inactive", label: "Inactive" },
           ]}
         />
         <Select

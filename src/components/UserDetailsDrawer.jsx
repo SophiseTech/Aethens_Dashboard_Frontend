@@ -218,7 +218,7 @@ const UserDetailsDrawer = ({
               )}
             </Col>
           )}
-          <Col span={isStudentDetail && [ROLES.MANAGER, ROLES.ADMIN, ROLES.FACULTY, ROLES.OPERATIONS_MANAGER].includes(loggedinUser.role) ? 14 : 24}>
+          <Col span={isStudentDetail && [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER].includes(loggedinUser.role) ? 14 : 24}>
             <div key={refreshKey}>
               <Card
                 bordered={false}

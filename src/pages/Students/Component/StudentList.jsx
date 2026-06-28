@@ -10,6 +10,7 @@ import { useStore } from "zustand";
 import centersStore from "@stores/CentersStore";
 import facultyAssignmentStore from "@stores/FacultyAssignmentStore";
 import Chip from '@components/Chips/Chip';
+import RegularityTag from "./RegularityTag";
 
 function StudentList() {
   const {
@@ -421,7 +422,15 @@ function StudentList() {
           </Tag>
         );
       },
-    }
+    },
+    {
+      title: 'Regularity',
+      key: 'regularity',
+      dataIndex: "studentRegularity",
+      render: (regularity) => {
+        return <RegularityTag regularity={regularity} />
+      }
+    },
 
   ];
 

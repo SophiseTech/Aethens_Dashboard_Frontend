@@ -24,9 +24,24 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
 
   useEffect(() => {
     if (isModalOpen) {
+      const defaultDate = reschedulingSlot?.start_date && dayjs(reschedulingSlot.start_date).isAfter(dayjs())
+        ? dayjs(reschedulingSlot.start_date)
+        : dayjs();
+      const currentFormDate = form.getFieldValue("date");
+      if (!currentFormDate || !currentFormDate.isSame(defaultDate, "day")) {
+        form.setFieldsValue({
+          session: undefined,
+          date: defaultDate
+        });
+      }
+    }
+  }, [isModalOpen, reschedulingSlot, form]);
+
+  useEffect(() => {
+    if (isModalOpen && date) {
       getAvailableSessions(date, null, 'reschedule')
     }
-  }, [date, isModalOpen])
+  }, [date, isModalOpen, getAvailableSessions])
 
   const initialValues = {
     session: {},
@@ -76,6 +91,10 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
 
   const disabledDate = (value) => {
     if (value.isBefore(today, "day")) return true;
+    if (reschedulingSlot?.start_date) {
+      const startOfSlotMonth = dayjs(reschedulingSlot.start_date).startOf("month");
+      if (value.isBefore(startOfSlotMonth, "day")) return true;
+    }
     const key = value.format("YYYY-MM-DD");
     const holidayInfo = getHolidayInfo(key, holidays, value.year());
     return Boolean(holidayInfo);

@@ -8,6 +8,7 @@ import { useStore } from 'zustand';
 import Chip from '@components/Chips/Chip';
 import userStore from '@stores/UserStore';
 import facultyAssignmentStore from '@stores/FacultyAssignmentStore';
+import RegularityTag from './RegularityTag';
 
 function StudentList() {
   const {
@@ -120,9 +121,9 @@ function StudentList() {
           }
           : {};
         return (
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleNameClick(record)}>
+          <div className="flex gap-3 items-center cursor-pointer" onClick={() => handleNameClick(record)}>
             <img
-              className="rounded-full aspect-square w-8 2xl:w-10 border border-border"
+              className="w-8 rounded-full border aspect-square 2xl:w-10 border-border"
               style={ringStyle}
               src={img}
               alt="Profile"
@@ -148,22 +149,30 @@ function StudentList() {
         record?.details_id?.course?.course_name ||
         '—',
     },
+    {
+      title: 'Attendance',
+      key: 'attendance',
+      render: (_, record) => {
+        const totalSessions =
+          record?.student?.details_id?.course?.total_session ??
+          record?.details_id?.course?.total_session ??
+          0;
+        const attended = record?.regularAttendedCount ?? 0;
+        return <p className="text-sm">{attended}/{totalSessions}</p>;
+      },
+    },
+    {
+      title: 'Regularity',
+      key: 'regularity',
+      dataIndex: "studentRegularity",
+      render: (regularity) => {
+        return <RegularityTag regularity={regularity} />
+      }
+    },
   ];
 
   if (isCurrentView) {
     columns.push(
-      {
-        title: 'Attendance',
-        key: 'attendance',
-        render: (_, record) => {
-          const totalSessions =
-            record?.student?.details_id?.course?.total_session ??
-            record?.details_id?.course?.total_session ??
-            0;
-          const attended = record?.attended ?? 0;
-          return <p className="text-sm">{attended}/{totalSessions}</p>;
-        },
-      },
       {
         title: "Faculty",
         key: "faculty",
@@ -181,7 +190,7 @@ function StudentList() {
               <Flex gap={8} align="center">
                 <Tag
                   color={sourceColor}
-                  className="m-0 border-transparent rounded-full px-2"
+                  className="px-2 m-0 rounded-full border-transparent"
                   style={{ fontSize: "10px", lineHeight: "16px" }}
                 >
                   {sourceLabel}

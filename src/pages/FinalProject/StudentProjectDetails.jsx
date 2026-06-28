@@ -10,7 +10,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 function StudentProjectDetails() {
   const { studentId, projectId } = useParams()
-  const { phases, loading, fetchPhases, submissionInfo, currentProject, skipProject } = useFinalProject();
+  const { phases, loading, fetchPhases, submissionInfo, currentProject, skipProject, createLoading } = useFinalProject();
   const { viewContext } = useProjectsView()
   const course = currentProject?.course || {}
 
@@ -35,7 +35,6 @@ function StudentProjectDetails() {
   }
 
   const onSkipPhase = (phase) => {
-    console.log(phase, currentProject);
     skipProject({ phaseId: phase._id, studentId: studentId, projectId: projectId })
   }
 
@@ -48,7 +47,7 @@ function StudentProjectDetails() {
         : <CourseHeader course={course} />
       }
       <ProgressBar submissionInfo={submissionInfo} />
-      <PhaseList phases={phases} onViewPhase={handleViewPhase} submissionInfo={submissionInfo} onSkipPhase={onSkipPhase} />
+      <PhaseList phases={phases} onViewPhase={handleViewPhase} submissionInfo={submissionInfo} onSkipPhase={onSkipPhase} createLoading={createLoading} />
     </div>
   );
 }
