@@ -34,7 +34,8 @@ export const useFinalProject = () => {
     getProjectById,
     listProjects,
     getLatestSubmission,
-    projectFetchLoading
+    projectFetchLoading,
+    skipProject
   } = useFinalProjectStore();
   const { selectedCenter } =
     centersStore();
@@ -278,7 +279,7 @@ export const useFinalProject = () => {
 
   const fetchProjects = useCallback((page = 1, pageSize = 10, view = 'pending') => {
     listProjects({
-      query: { 
+      query: {
         status: view,
         centerId: selectedCenter ? selectedCenter : "all"
       },
@@ -353,6 +354,7 @@ export const useFinalProject = () => {
     getLatestSubmission,
     setView,
     selectedView,
-    projectFetchLoading
+    projectFetchLoading,
+    skipProject
   };
 };

@@ -10,7 +10,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 function StudentProjectDetails() {
   const { studentId, projectId } = useParams()
-  const { phases, loading, fetchPhases, submissionInfo, currentProject } = useFinalProject();
+  const { phases, loading, fetchPhases, submissionInfo, currentProject, skipProject } = useFinalProject();
   const { viewContext } = useProjectsView()
   const course = currentProject?.course || {}
 
@@ -31,11 +31,16 @@ function StudentProjectDetails() {
   };
 
   if (loading) {
-    return <div className='w-full h-full flex items-center justify-center'><Spin size="large" /></div>
+    return <div className='flex justify-center items-center w-full h-full'><Spin size="large" /></div>
+  }
+
+  const onSkipPhase = (phase) => {
+    console.log(phase, currentProject);
+    skipProject({ phaseId: phase._id, studentId: studentId, projectId: projectId })
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 min-h-screen">
+    <div className="p-6 mx-auto max-w-6xl min-h-screen">
       {loading ?
         (
           <Skeleton active title={false} className="mb-6" />
@@ -43,7 +48,7 @@ function StudentProjectDetails() {
         : <CourseHeader course={course} />
       }
       <ProgressBar submissionInfo={submissionInfo} />
-      <PhaseList phases={phases} onViewPhase={handleViewPhase} submissionInfo={submissionInfo} />
+      <PhaseList phases={phases} onViewPhase={handleViewPhase} submissionInfo={submissionInfo} onSkipPhase={onSkipPhase} />
     </div>
   );
 }

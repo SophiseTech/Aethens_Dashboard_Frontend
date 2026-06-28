@@ -200,6 +200,26 @@ export const useFinalProjectStore = create((set, get) => ({
     }
   },
 
+  skipProject: async ({ phaseId, studentId, projectId }) => {
+    try {
+      set({ createLoading: true });
+      if (!phaseId || !studentId || !projectId) throw new Error("Bad Data");
+      const phases = get().phases;
+      const currentPhase = phases.find(p => p._id === phaseId);
+
+      const submission = await finalProjectService.skipPhase({ phaseId, studentId, projectId });
+
+      if (submission) {
+        const updatedPhase = { ...currentPhase, status: 'approved', latestSubmission: submission };
+        set({ phases: phases.map(p => p._id === phaseId ? updatedPhase : p) });
+        handleSuccess("Project Phase Skipped Successfully");
+      }
+    } catch (error) {
+      handleInternalError(error);
+    } finally {
+      set({ createLoading: false });
+    }
+  },
 
   // Clear current project
   clearCurrentProject: () => {

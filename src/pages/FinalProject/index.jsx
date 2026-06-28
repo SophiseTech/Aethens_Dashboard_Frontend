@@ -1,8 +1,14 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
 import userStore from "@stores/UserStore";
 import { useStore } from "zustand";
 import { CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, InfoCircleOutlined } from "@ant-design/icons";
+const StudentView = React.lazy(() =>
+  import("@pages/FinalProject/Components/FinalProjectStudentView")
+);
 
+const ManagerView = React.lazy(() =>
+  import("@pages/FinalProject/Components/FinalProjectManagerView")
+);
 // Status Configuration
 export const statusConfig = {
   'not_started': { color: 'default', icon: <InfoCircleOutlined />, text: 'Not Started' },
@@ -24,16 +30,15 @@ export const projectStatusConfig = {
 export default function FinalProjectPage() {
   const { user } = useStore(userStore);
 
-  let LazyComponent = null;
-  if (user.role === "student") {
-    LazyComponent = React.lazy(() => import("@pages/FinalProject/Components/FinalProjectStudentView"));
-  } else if (user.role === "manager" || user.role === 'admin' || user.role === 'academic_manager') {
-    LazyComponent = React.lazy(() => import("@pages/FinalProject/Components/FinalProjectManagerView"));
-  }
-
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      {LazyComponent ? <LazyComponent /> : <p>Unauthorized</p>}
+      {user.role === "student" ? (
+        <StudentView />
+      ) : ["manager", "admin", "academic_manager"].includes(user.role) ? (
+        <ManagerView />
+      ) : (
+        <p>Unauthorized</p>
+      )}
     </Suspense>
   );
 }

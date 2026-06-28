@@ -6,20 +6,23 @@ import CustomSelect from '@components/form/CustomSelect';
 import CustomSubmit from '@components/form/CustomSubmit';
 import useCourse from '@hooks/useCourse';
 import { useFinalProject } from '@hooks/useFinalProject';
+import useSearchableStudents from '@hooks/useSearchableStudents';
 import useStudents from '@hooks/useStudents';
 import useUser from '@hooks/useUser';
-import { Avatar, Card, Col, Form, message, Row, Space } from 'antd';
-import React, { useEffect } from 'react'
+import { Avatar, Card, Col, Empty, Form, message, Row, Space, Spin } from 'antd';
+import { debounce } from 'lodash';
+import React, { useCallback, useEffect, useMemo } from 'react'
 
 function CreateProject() {
   const [form] = Form.useForm();
-  const { getStudentsByCenter, studentOptions, loading: studentListLoading, } = useStudents()
+  // const { getStudentsByCenter, loading: studentListLoading, } = useStudents()
   const { courseOptions, getCourses, loading: courseLoading } = useCourse()
   const { createProject, createLoading } = useFinalProject()
   const { user } = useUser()
+  const { searchStudents, students, loading: studentListLoading } = useSearchableStudents()
 
   useEffect(() => {
-    getStudentsByCenter(0)
+    searchStudents(0, 15, { searchQuery: '' });
     getCourses(0)
   }, [])
 
@@ -37,6 +40,20 @@ function CreateProject() {
     }
   };
 
+  const handleDebouncedStudentSearch = useCallback(
+    debounce((searchQuery) => {
+      try {
+        console.log(searchQuery);
+        searchStudents(0, 15, { searchQuery });
+      } catch (error) {
+        console.error(error);
+      }
+    }, 300),
+    []
+  );
+
+  const studentOptions = useMemo(() => students?.map(item => ({ label: item.username, value: item._id })), [students])
+
   return (
     <Card
       title={
@@ -50,7 +67,12 @@ function CreateProject() {
       <CustomForm form={form} action={handleSubmit}>
         <Row gutter={[16, 0]}>
           <Col xs={24} md={12}>
-            <CustomSelect name={'studentId'} label={'Select Student'} options={studentOptions || []}
+            <CustomSelect name={'studentId'} label={'Select Student'} options={studentListLoading ? [] : (studentOptions || [])}
+              onSearch={handleDebouncedStudentSearch}
+              loading={studentListLoading}
+              notFoundContent={
+                studentListLoading ? <Spin size="small" /> : <Empty />
+              }
               optionRender={(option) => (
                 <Space>
                   <Avatar size="small" icon={<UserOutlined />} />

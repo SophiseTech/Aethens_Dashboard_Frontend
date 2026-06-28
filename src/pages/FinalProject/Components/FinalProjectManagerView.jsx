@@ -36,7 +36,6 @@ function FinalProjectManagerView() {
 
   useEffect(() => {
     let query = { status: selectedView };
-
     if ((user.role === ROLES.ADMIN || user.role === ROLES.ACADEMIC_MANAGER) && selectedCenter) {
       query.centerId = selectedCenter;
     }
@@ -125,9 +124,17 @@ function FinalProjectManagerView() {
     },
   ];
 
-  if (loading) {
-    return <div className='w-full h-full flex items-center justify-center'><Spin size="large" /></div>
-  }
+  useEffect(() => {
+    console.log("Parent mounted");
+
+    return () => {
+      console.log("Parent unmounted");
+    };
+  }, []);
+
+  // if (loading) {
+  //   return <div className='flex justify-center items-center w-full h-full'><Spin size="large" /></div>
+  // }
 
   return (
     <TitleLayout title="Pending Submissions" >
@@ -146,6 +153,7 @@ function FinalProjectManagerView() {
             rowKey="id"
             pagination={true}
             className="mb-4"
+            loading={loading}
           />
         </Card>
 

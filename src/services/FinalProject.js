@@ -172,6 +172,16 @@ class FinalProjectService {
     }
   }
 
+  async skipPhase(data) {
+    try {
+      const response = await post(`/v2/finalProject/skipPhase`, data);
+      if (!response) throw new Error("An error occurred while skipping phase");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
 }
 
 const finalProjectService = new FinalProjectService();

@@ -1,21 +1,24 @@
-import { EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { CheckOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
 import { statusConfig } from '@pages/FinalProject';
+import userStore from '@stores/UserStore';
 import { formatDate } from '@utils/helper';
+import permissions from '@utils/permissions';
 import { Button, Card, Space, Tag, Typography } from 'antd';
 const { Title, Paragraph, Text } = Typography;
 
-function PhaseCard({ phase, onViewPhase, disabled = false }) {
+function PhaseCard({ phase, onViewPhase, onSkipPhase, disabled = false }) {
   const config = statusConfig[phase.latestSubmission?.status] || statusConfig['not_started'];
+  const { user } = userStore()
 
   return (
     <Card
-      className="mb-4 hover:shadow-md transition-shadow duration-200 border border-gray-200"
+      className="mb-4 border border-gray-200 transition-shadow duration-200 hover:shadow-md"
       bodyStyle={{ padding: '20px' }}
     >
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+      <div className="flex flex-col justify-between items-start sm:flex-row sm:items-center">
         <div className="flex-1">
           <div className="flex items-center mb-2">
-            <div className="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-semibold mr-3">
+            <div className="flex justify-center items-center mr-3 w-8 h-8 text-sm font-semibold text-blue-600 bg-blue-100 rounded-full">
               {phase.phaseNumber}
             </div>
             <Title level={4} className="!mb-0">
@@ -23,7 +26,7 @@ function PhaseCard({ phase, onViewPhase, disabled = false }) {
             </Title>
           </div>
 
-          <Paragraph className="text-gray-600 mb-3" ellipsis={{ rows: 2 }}>
+          <Paragraph className="mb-3 text-gray-600" ellipsis={{ rows: 2 }}>
             {phase.description}
           </Paragraph>
 
@@ -46,7 +49,7 @@ function PhaseCard({ phase, onViewPhase, disabled = false }) {
           </Space>
         </div>
 
-        <div className="mt-4 sm:mt-0 sm:ml-4 w-full sm:w-auto">
+        <div className="flex gap-2 mt-4 w-full sm:mt-0 sm:ml-4 sm:w-auto">
           <Button
             type="primary"
             icon={phase.status === 'not-started' ? <EditOutlined /> : <EyeOutlined />}
@@ -56,6 +59,9 @@ function PhaseCard({ phase, onViewPhase, disabled = false }) {
           >
             {phase.status === 'not-started' ? 'Submit Phase' : 'View Phase'}
           </Button>
+          {permissions.finalProjectPhase.approve.includes(user?.role) && !['approved', 'under_review'].includes(phase.latestSubmission?.status) &&
+            <Button icon={<CheckOutlined />} onClick={() => { onSkipPhase(phase) }}>Skip Phase</Button>
+          }
         </div>
       </div>
     </Card>
