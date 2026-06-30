@@ -75,10 +75,10 @@ function DiplomaPreRegistration() {
                 </p>
               </div>
 
-              <CustomForm form={form} action={onSubmit} resetOnFinish={false} className="flex flex-col lg:h-[80%] gap-5">
+              <CustomForm form={form} action={onSubmit} resetOnFinish={false} className="flex overflow-auto flex-col gap-5 h-full">
 
                 {/* Personal details */}
-                <div className="flex flex-col lg:flex-row gap-5 lg:h-[90%]">
+                <div className="flex flex-col gap-5 lg:flex-row">
                   <div className="w-full lg:w-1/2">
                     <CustomInput name="name" label="Full Name" placeholder="John Doe" />
                     <CustomInput name="phoneNumber" label="Phone Number" placeholder="+91 98765 43210" />
@@ -104,7 +104,7 @@ function DiplomaPreRegistration() {
                     <p className="mb-3 text-xs text-gray-400">
                       Upload PDF or image files. Maximum 1 file per document.
                     </p>
-                    <div className="lg:overflow-auto px-4 max-h-full lg:max-h-[90%] rounded-lg border border-border">
+                    <div className="px-4 rounded-lg border border-border">
                       {DIPLOMA_DOCUMENTS.map((doc) => (
                         <DocumentRow key={doc.key} doc={doc} />
                       ))}
@@ -127,7 +127,7 @@ function DiplomaPreRegistration() {
                   >
                     <Checkbox>
                       I agree to the{" "}
-                      <a href="/terms-conditions" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                      <a href="/terms-conditions" target="_blank" rel="noopener noreferrer" className="underline text-primary">
                         terms and conditions
                       </a>
                     </Checkbox>

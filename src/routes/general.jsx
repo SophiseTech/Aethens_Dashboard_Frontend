@@ -9,6 +9,7 @@ import AddSessionStatus from "@pages/Students/AddSessionStatus";
 
 const Login = lazy(() => import("@pages/Login"));
 const DiplomaPreRegistration = lazy(() => import("@pages/DiplomaPreRegistration"));
+const TermsAndConditions = lazy(() => import("@pages/TermsAndConditions"));
 const Dashboard = lazy(() => import("@pages/Dashboard"));
 const Gallery = lazy(() => import("@pages/Gallery"));
 const Materials = lazy(() => import("@pages/Materials"));
@@ -76,6 +77,15 @@ export const generalRoutes = [
       </LazyLoader>
     ),
     title: "Diploma Pre-Registration | School Of Athens",
+  },
+  {
+    path: "terms-conditions",
+    element: (
+      <LazyLoader>
+        <TermsAndConditions />
+      </LazyLoader>
+    ),
+    title: "Terms and Conditions | School Of Athens",
   },
   {
     element: <Protected roles={[ROLES.STUDENT, ROLES.MANAGER, ROLES.FACULTY, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER]} />,
