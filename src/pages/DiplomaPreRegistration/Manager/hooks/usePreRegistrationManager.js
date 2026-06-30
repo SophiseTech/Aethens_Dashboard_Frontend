@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useStore } from "zustand";
 import diplomaPreRegStore from "@stores/DiplomaPreRegStore";
+import diplomaPreRegService from "@/services/DiplomaPreReg";
 import handleSuccess from "@utils/handleSuccess";
 
 function usePreRegistrationManager() {
@@ -18,6 +19,7 @@ function usePreRegistrationManager() {
 
   const [approveModal, setApproveModal] = useState({ open: false, application: null });
   const [rejectModal, setRejectModal] = useState({ open: false, application: null });
+  const [drawer, setDrawer] = useState({ open: false, application: null, loading: false });
 
   useEffect(() => {
     fetchApplications(1);
@@ -46,6 +48,13 @@ function usePreRegistrationManager() {
     fetchApplications(page);
   };
 
+  const openDrawer = async (record) => {
+    setDrawer({ open: true, application: null, loading: true });
+    const data = await diplomaPreRegService.getApplicationById(record._id);
+    setDrawer({ open: true, application: data || null, loading: false });
+  };
+  const closeDrawer = () => setDrawer({ open: false, application: null, loading: false });
+
   const openApproveModal = (application) => setApproveModal({ open: true, application });
   const closeApproveModal = () => setApproveModal({ open: false, application: null });
 
@@ -69,12 +78,15 @@ function usePreRegistrationManager() {
     appLoading,
     pagination,
     filters,
+    drawer,
     approveModal,
     rejectModal,
     handleTabChange,
     handleFilterApply,
     handleFilterReset,
     handlePageChange,
+    openDrawer,
+    closeDrawer,
     openApproveModal,
     closeApproveModal,
     openRejectModal,

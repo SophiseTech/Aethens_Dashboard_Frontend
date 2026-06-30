@@ -1,12 +1,15 @@
-import { Segmented } from "antd";
+import { Button, message, Segmented } from "antd";
 import { useEffect, useState } from "react";
 import Filters from "@components/Filters";
 import diplomaBatchService from "@/services/DiplomaBatch";
 import ApplicationsTable from "./components/ApplicationsTable";
 import ApproveModal from "./components/ApproveModal";
 import RejectModal from "./components/RejectModal";
+import ApplicationDrawer from "./components/ApplicationDrawer";
 import usePreRegistrationManager from "./hooks/usePreRegistrationManager";
 import Title from "@components/layouts/Title";
+import { DIPLOMA_APPLY_URL } from "@utils/constants";
+import { CopyOutlined } from "@ant-design/icons";
 
 const TAB_OPTIONS = [
   { label: "Pending", value: "pending" },
@@ -20,12 +23,15 @@ function DiplomaPreRegistrationManager() {
     appLoading,
     pagination,
     filters,
+    drawer,
     approveModal,
     rejectModal,
     handleTabChange,
     handleFilterApply,
     handleFilterReset,
     handlePageChange,
+    openDrawer,
+    closeDrawer,
     openApproveModal,
     closeApproveModal,
     openRejectModal,
@@ -49,7 +55,12 @@ function DiplomaPreRegistrationManager() {
   ];
 
   return (
-    <Title title={"Diploma Pre-Registrations"}>
+    <Title title={"Diploma Pre-Registrations"}
+      button={<Button onClick={() => {
+        navigator.clipboard.writeText(DIPLOMA_APPLY_URL)
+        message.success("Linke Copied!")
+      }} icon={<CopyOutlined />}>Copy Apply Link</Button>}
+    >
       <div className="flex flex-col gap-4">
         <Segmented
           options={TAB_OPTIONS}
@@ -72,6 +83,7 @@ function DiplomaPreRegistrationManager() {
           onPageChange={handlePageChange}
           onApprove={openApproveModal}
           onReject={openRejectModal}
+          onRowClick={openDrawer}
         />
 
         <ApproveModal
@@ -86,6 +98,13 @@ function DiplomaPreRegistrationManager() {
           application={rejectModal.application}
           onConfirm={handleReject}
           onCancel={closeRejectModal}
+        />
+
+        <ApplicationDrawer
+          open={drawer.open}
+          application={drawer.application}
+          loading={drawer.loading}
+          onClose={closeDrawer}
         />
       </div>
     </Title>

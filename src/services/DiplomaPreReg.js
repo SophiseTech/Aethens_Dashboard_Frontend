@@ -30,6 +30,16 @@ class DiplomaPreRegService {
     }
   }
 
+  async getApplicationById(id) {
+    try {
+      const response = await get(`/v2/diploma-prereg/${id}`);
+      if (!response?.data) throw new Error("An error occurred. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
   async approveApplication(id, { batchId, intakeId }) {
     try {
       const response = await post(`/v2/diploma-prereg/${id}/approve`, { batchId, intakeId });

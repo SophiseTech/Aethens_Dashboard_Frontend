@@ -22,6 +22,7 @@ function ApplicationsTable({
   onPageChange,
   onApprove,
   onReject,
+  onRowClick,
 }) {
   const columns = [
     {
@@ -95,6 +96,13 @@ function ApplicationsTable({
         showSizeChanger: false,
         onChange: onPageChange,
       }}
+      onRow={(record) => ({
+        onClick: (e) => {
+          if (e.target.closest("button")) return;
+          onRowClick(record);
+        },
+        className: "cursor-pointer",
+      })}
       scroll={{ x: 800 }}
     />
   );
@@ -112,6 +120,7 @@ ApplicationsTable.propTypes = {
   onPageChange: PropTypes.func.isRequired,
   onApprove: PropTypes.func.isRequired,
   onReject: PropTypes.func.isRequired,
+  onRowClick: PropTypes.func.isRequired,
 };
 
 export default ApplicationsTable;

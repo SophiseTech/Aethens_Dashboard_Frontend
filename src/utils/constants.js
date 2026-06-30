@@ -287,3 +287,5 @@ export const GLOBAL_USER_ROLES = [
   ROLES.OPERATIONS_MANAGER,
   ROLES.ACADEMIC_MANAGER
 ]
+
+export const DIPLOMA_APPLY_URL = "https://app.schoolofathens.art/diploma/apply"

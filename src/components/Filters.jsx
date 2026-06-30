@@ -5,8 +5,8 @@ import dayjs from 'dayjs';
 import { toISTEndOfDayISO, toISTStartOfDayISO } from '@utils/helper';
 
 const { RangePicker } = DatePicker;
-
-const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defaultValues = {} }) => {
+const EMPTY_OBJECT = {};
+const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defaultValues = EMPTY_OBJECT }) => {
   const [filterValues, setFilterValues] = useState({});
 
   // Convert formatted defaultValues back to dayjs objects
@@ -32,6 +32,10 @@ const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defau
       return dayjs.isDayjs(value) ? dayjs(value) : value;
     });
     setFilterValues(convertedDefaults);
+  }, [defaultValues]);
+
+  useEffect(() => {
+    console.log('defaultValues changed');
   }, [defaultValues]);
 
   const handleChange = (key) => (value) => {
@@ -120,7 +124,7 @@ const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defau
   if (filters.length === 0) return null;
 
   return (
-    <div className='mb-3 bg-card p-3 rounded-xl border-border border'>
+    <div className='p-3 mb-3 rounded-xl border bg-card border-border'>
       {filters.map((filter) => (
         <div key={filter.key}>{renderFilter(filter)}</div>
       ))}

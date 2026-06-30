@@ -118,6 +118,7 @@ const getMenuConfig = (role) => {
           path: "/manager/attendance-register",
         },
         { label: "Slots", key: "slots", path: "/manager/slots" },
+        { label: "Pre Registration", key: "diploma-registrations", path: "/manager/diploma-registrations" },
       ],
     },
 
@@ -231,6 +232,8 @@ const getMenuConfig = (role) => {
           path: "/manager/attendance-register",
         },
         { label: "Slots", key: "slots", path: "/manager/slots" },
+        { label: "Pre Registration", key: "diploma-registrations", path: "/manager/diploma-registrations" },
+
       ],
     },
     {
