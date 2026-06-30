@@ -8,6 +8,7 @@ import FinalProjectPage from "@pages/FinalProject";
 import AddSessionStatus from "@pages/Students/AddSessionStatus";
 
 const Login = lazy(() => import("@pages/Login"));
+const DiplomaPreRegistration = lazy(() => import("@pages/DiplomaPreRegistration"));
 const Dashboard = lazy(() => import("@pages/Dashboard"));
 const Gallery = lazy(() => import("@pages/Gallery"));
 const Materials = lazy(() => import("@pages/Materials"));
@@ -66,6 +67,15 @@ export const generalRoutes = [
       </LazyLoader>
     ),
     title: "Login | School Of Aethens",
+  },
+  {
+    path: "diploma/apply",
+    element: (
+      <LazyLoader>
+        <DiplomaPreRegistration />
+      </LazyLoader>
+    ),
+    title: "Diploma Pre-Registration | School Of Athens",
   },
   {
     element: <Protected roles={[ROLES.STUDENT, ROLES.MANAGER, ROLES.FACULTY, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER]} />,

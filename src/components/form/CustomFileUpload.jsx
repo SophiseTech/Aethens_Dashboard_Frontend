@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import s3Service from '@/services/S3Service';
 import handleInternalError from '@utils/handleInternalError';
 
-function CustomFileUpload({ form, name, label, path, className = "", maxCount = 1, beforeUpload, multiple = false, required = true, children, type, ...props }) {
+function CustomFileUpload({ form, name, label, path, className = "", maxCount = 1, beforeUpload, multiple = false, required = true, children, type, accept = "image/*;capture=camera", ...props }) {
 
   const [loading, setLoading] = useState(false)
 
@@ -77,7 +77,7 @@ function CustomFileUpload({ form, name, label, path, className = "", maxCount = 
         showUploadList={{ showRemoveIcon: true }}
         customRequest={customRequest}
         multiple={multiple}
-        accept="image/*;capture=camera"
+        accept={accept}
       >
         {children || <Button icon={<UploadOutlined />}>Upload {label}</Button>}
       </Upload>

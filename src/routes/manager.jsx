@@ -37,6 +37,7 @@ const AttendanceRegister = lazy(() => import("@pages/AttendanceRegister"))
 const SyllabusGallery = lazy(() => import("@pages/SyllabusGallery"))
 const Expenses = lazy(() => import("@pages/Expenses"))
 const Ledgers = lazy(() => import("@pages/Ledgers"))
+const DiplomaPreRegistrationManager = lazy(() => import("@pages/DiplomaPreRegistration/Manager"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -230,6 +231,11 @@ export const managerRoutes = [
             path: "/manager/ledgers",
             element: <LazyLoader element={<Ledgers />} />,
             title: "Ledgers",
+          },
+          {
+            path: "/manager/diploma-registrations",
+            element: <LazyLoader element={<DiplomaPreRegistrationManager />} />,
+            title: "Diploma Registrations",
           },
         ]
       }
