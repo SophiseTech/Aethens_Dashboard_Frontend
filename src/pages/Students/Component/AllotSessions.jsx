@@ -42,7 +42,7 @@ function AllotSessions({ student }) {
     if (values.type === "regular" && studentActiveSession?.length > 0) return handleError("Student already has an active session")
     values.booked_student_id = student._id
     values.course_id = student.details_id?.course_id?._id || student?.details_id?.course_id
-    
+
     // Transform sessionSchedule array to sessions format
     if (values.sessionSchedule && Array.isArray(values.sessionSchedule)) {
       values.sessions = values.sessionSchedule.map(item => ({
@@ -51,7 +51,7 @@ function AllotSessions({ student }) {
       }));
       delete values.sessionSchedule; // Remove intermediate field
     }
-    
+
     console.log(values);
     if (sessionType === "regular") {
       await bookSession(values)
@@ -92,7 +92,7 @@ function AllotSessions({ student }) {
             availableSessions={availableSessions}
             loading={loading}
             minItems={1}
-            maxItems={sessionType === "regular" ? 2 : 1}
+            maxItems={sessionType === "regular" ? 7 : 1}
           />
           <CustomInput type='number' name={"customSessionCount"} label={"Number of sessions to allot"} placeholder={10} className='w-full' required={false} />
           <CustomSubmit className='bg-primary' label='Submit' loading={loading} />
