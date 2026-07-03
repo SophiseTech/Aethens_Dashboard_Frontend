@@ -8,8 +8,8 @@ import React, { useState } from 'react'
 
 function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = () => { }, disableAddItem, disableDelete }) {
 
-  const [editingKey, setEditingKey] = useState('');
-  const isEditing = (record) => record.key === editingKey;
+  const [editingIndex, setEditingIndex] = useState(-1);
+  const isEditing = (index) => index === editingIndex;
   const rows = Form.useWatch(name, form)
 
   const edit = (record, index) => {
@@ -19,19 +19,19 @@ function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = (
       address: '',
       ...record,
     });
-    setEditingKey(record.key);
+    setEditingIndex(index);
   };
 
   const cancel = async () => {
-    setEditingKey('');
+    setEditingIndex(-1);
   };
 
-  const save = async (key, index) => {
+  const save = async (index) => {
     try {
       await form.validateFields([[name, index]], { validateOnly: false, recursive: true });
       const newData = rows[index];
       form.setFieldValue([name, index], newData)
-      setEditingKey('');
+      setEditingIndex(-1);
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo);
     }
@@ -39,23 +39,21 @@ function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = (
 
   const addRow = () => {
     if (disableAddItem) return
-    const rows = form.getFieldValue(name)
+    const currentRows = form.getFieldValue(name)
     let newRow = {}
     columns?.map(column => {
       newRow[column.dataIndex] = column.defaultValue || ""
     })
-    const key = `${rows.length}`
-    newRow.key = key
-    form.setFieldValue(name, [...rows, newRow])
-    setEditingKey(key);
+    form.setFieldValue(name, [...currentRows, newRow])
+    setEditingIndex(currentRows.length);
   }
 
-  const remove = async (record, index) => {
+  const remove = async (index) => {
     if (disableDelete) return
-    const removedRows = rows.filter(row => row.key !== record.key)
-
+    const currentRows = form.getFieldValue(name)
+    const removedRows = currentRows.filter((_, i) => i !== index)
     await form.setFieldValue(name, removedRows)
-    if (editingKey === record.key) setEditingKey('')
+    if (editingIndex === index) setEditingIndex(-1)
   }
 
   const columnsWithActions = [
@@ -65,13 +63,13 @@ function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = (
       dataIndex: 'operation',
       width: '10%',
       render: (_, record, index) => {
-        const editable = isEditing(record);
+        const editable = isEditing(index);
         return editable ? (
           <Flex gap={5} align='center' wrap='wrap'>
             <Button
               variant='filled'
               color='green'
-              onClick={() => save(record.key, index)}
+              onClick={() => save(index)}
               style={{
                 marginInlineEnd: 8,
               }}
@@ -80,19 +78,19 @@ function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = (
               Save
             </Button>
             {!disableDelete &&
-              <Popconfirm title="Sure to delete?" onConfirm={() => remove(record, index)}>
+              <Popconfirm title="Sure to delete?" onConfirm={() => remove(index)}>
                 <Button variant='filled' color='red'>Delete</Button>
               </Popconfirm>
             }
           </Flex>
         ) : (
           <div className='flex gap-2'>
-            <Button disabled={editingKey !== ''} onClick={() => edit(record, index)} variant='filled' color='blue'>
+            <Button disabled={editingIndex !== -1} onClick={() => edit(record, index)} variant='filled' color='blue'>
               Edit
             </Button>
 
             {!disableDelete &&
-              <Button disabled={editingKey !== ''} onClick={() => remove(record, index)} variant='filled' color='red'>
+              <Button disabled={editingIndex !== -1} onClick={() => remove(index)} variant='filled' color='red'>
                 Delete
               </Button>
             }
@@ -119,7 +117,7 @@ function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = (
         onSelect,
         onSearch: col.onSearch,
         selectAfter: col.selectAfter,
-        editing: isEditing(record),
+        editing: isEditing(index),
         itemType: col.itemType,
       }),
     };
@@ -158,7 +156,7 @@ function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = (
         />
       </Form.Item>
       {!disableAddItem &&
-        <Button onClick={addRow} disabled={editingKey !== ''} className='self-start' variant='solid' color='green' icon={<PlusOutlined />}>
+        <Button onClick={addRow} disabled={editingIndex !== -1} className='self-start' variant='solid' color='green' icon={<PlusOutlined />}>
           Add Item
         </Button>
       }

@@ -147,7 +147,7 @@ function BillDetails() {
       center_initial: bill?.center_initial
     });
   };
-
+  console.log(bill);
   return (
     <div className='flex flex-col rounded-xl lg:flex-1 lg:h-full lg:overflow-auto bg-card'>
       <div className='border-b border-border flex justify-between | p-5 2xl:p-10'>
