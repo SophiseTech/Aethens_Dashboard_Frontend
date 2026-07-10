@@ -44,11 +44,11 @@ function Attendance() {
           setSelectedFilter={setSelectedFilter}
         />
         <Flex gap={20} className="max-lg:flex-col-reverse">
-          <Flex vertical gap={20} className="w-1/2">
+          <Flex vertical gap={20} className="w-full lg:w-1/2">
             <AttendanceStats stats={slotStats} slots={slots} loading={loading} selectedFilter={selectedFilter.format("MMMM YYYY")} />
             <AttendanceTrend stats={slotStats} />
           </Flex>
-          <Flex className="w-1/2">
+          <Flex className="w-full lg:w-1/2">
             <MonthlyReport slots={slots} loading={loading} month={selectedFilter.format("MMMM YYYY")} />
           </Flex>
         </Flex>
