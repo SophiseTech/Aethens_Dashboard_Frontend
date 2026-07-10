@@ -144,7 +144,7 @@ function EnquiryList() {
       title: "Age Category",
       dataIndex: "ageCategory",
       render: (value) => {
-        age_categories.find(item => item.value === value)?.label || value
+        return age_categories.find(item => item.value === value)?.label || value
       }
     },
     {
