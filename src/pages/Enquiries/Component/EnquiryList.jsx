@@ -12,6 +12,7 @@ import centersStore from "@stores/CentersStore";
 import enquiryService from "@services/Enquiry";
 import dayjs from "dayjs";
 import { capitalize } from "lodash";
+import { age_categories } from "@utils/constants";
 
 function EnquiryList() {
   const {
@@ -142,7 +143,9 @@ function EnquiryList() {
     {
       title: "Age Category",
       dataIndex: "ageCategory",
-      render: (value) => capitalize(value?.replaceAll('_', " "))
+      render: (value) => {
+        age_categories.find(item => item.value === value)?.label || value
+      }
     },
     {
       title: selectedView === "Demo" ? "Demo Date" : "Created At",
