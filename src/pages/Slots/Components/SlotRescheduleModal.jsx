@@ -7,6 +7,7 @@ import SessionStore from '@stores/SessionStore';
 import slotStore from '@stores/SlotStore';
 import userStore from '@stores/UserStore';
 import { getHolidayInfo, getNextAvailableWeekdayDate } from '@utils/helper';
+import permissions from '@utils/permissions';
 // import { getNextWeekdayDate } from '@utils/helper';
 import { Form, Modal } from 'antd';
 import dayjs from 'dayjs';
@@ -19,6 +20,7 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
   const { reschedulingSlot, createLoading: submitLoading } = useStore(slotStore)
   const date = Form.useWatch("date", form)
   const { user } = useStore(userStore)
+  const canManageReschedule = permissions.sessions.edit.includes(user?.role)
 
   const today = dayjs().startOf("day");
 
@@ -39,9 +41,9 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
 
   useEffect(() => {
     if (isModalOpen && date) {
-      getAvailableSessions(date, null, 'reschedule')
+      getAvailableSessions(date, null, 'reschedule', !canManageReschedule)
     }
-  }, [date, isModalOpen, getAvailableSessions])
+  }, [date, isModalOpen, getAvailableSessions, canManageReschedule])
 
   const initialValues = {
     session: {},
@@ -69,10 +71,10 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
         label: `${weekDays[session.weekDay]} - ${sessionStart.format("h:mm A")}`,
         value: session._id,
         data: session,
-        disabled: isPast // ⛔ disable only if today & time passed
+        disabled: canManageReschedule ? false : isPast // ⛔ students can't pick a past time today; managers can
       };
     });
-  }, [availableSessions, date]);
+  }, [availableSessions, date, canManageReschedule]);
 
 
   const handleSubmit = async (values) => {
@@ -128,7 +130,7 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
           //   // setStudents([]);
           // }}
           optionFilterProp="label"
-          optionRender={(options) => sessionSlotOptionRenderer(options, user, false)}
+          optionRender={(options) => sessionSlotOptionRenderer(options, user, canManageReschedule)}
         />
         <CustomSubmit className='bg-primary' label='Submit' loading={submitLoading} disabled={submitLoading} />
       </CustomForm>
