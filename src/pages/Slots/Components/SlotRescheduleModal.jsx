@@ -6,7 +6,7 @@ import { sessionSlotOptionRenderer } from '@components/form/SessionDateSelector'
 import SessionStore from '@stores/SessionStore';
 import slotStore from '@stores/SlotStore';
 import userStore from '@stores/UserStore';
-import { getHolidayInfo, getNextAvailableWeekdayDate } from '@utils/helper';
+import { getHolidayInfo, getNextAvailableWeekdayDate, IST_TIMEZONE } from '@utils/helper';
 import permissions from '@utils/permissions';
 // import { getNextWeekdayDate } from '@utils/helper';
 import { Form, Modal } from 'antd';
@@ -80,9 +80,16 @@ function SlotRescheduleModal({ isModalOpen, handleOk, handleCancel, studentsSlot
   const handleSubmit = async (values) => {
     const session = availableSessions.find(session => session._id === values.session)
     // const nextDate = getNextAvailableWeekdayDate(session.weekDay, studentsSlots, reschedulingSlot, session)
-    const nextDate = values.date.toDate();
-    nextDate.setHours(dayjs(session.start_time).hour())
-    nextDate.setMinutes(dayjs(session.start_time).minute())
+    // Build the target instant explicitly in IST so the selected calendar day survives
+    // regardless of the manager's browser timezone (previously used local Date.setHours,
+    // which silently assumed the browser was already running in IST).
+    const sessionTime = dayjs(session.start_time).tz(IST_TIMEZONE);
+    const nextDate = dayjs.tz(values.date.format('YYYY-MM-DD'), IST_TIMEZONE)
+      .hour(sessionTime.hour())
+      .minute(sessionTime.minute())
+      .second(0)
+      .millisecond(0)
+      .toDate();
     values.requested_slot = {
       date: nextDate,
       session: session._id
