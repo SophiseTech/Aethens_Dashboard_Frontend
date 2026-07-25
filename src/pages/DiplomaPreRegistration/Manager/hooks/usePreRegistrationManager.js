@@ -15,10 +15,12 @@ function usePreRegistrationManager() {
     resetFilters,
     approveApplication,
     rejectApplication,
+    enrollApplication,
   } = useStore(diplomaPreRegStore);
 
   const [approveModal, setApproveModal] = useState({ open: false, application: null });
   const [rejectModal, setRejectModal] = useState({ open: false, application: null });
+  const [enrollModal, setEnrollModal] = useState({ open: false, application: null });
   const [drawer, setDrawer] = useState({ open: false, application: null, loading: false });
 
   useEffect(() => {
@@ -61,6 +63,9 @@ function usePreRegistrationManager() {
   const openRejectModal = (application) => setRejectModal({ open: true, application });
   const closeRejectModal = () => setRejectModal({ open: false, application: null });
 
+  const openEnrollModal = (application) => setEnrollModal({ open: true, application });
+  const closeEnrollModal = () => setEnrollModal({ open: false, application: null });
+
   const handleApprove = async (data) => {
     await approveApplication(approveModal.application._id, data);
     handleSuccess("Application approved successfully");
@@ -73,6 +78,12 @@ function usePreRegistrationManager() {
     closeRejectModal();
   };
 
+  const handleEnroll = async (studentPayload) => {
+    await enrollApplication(enrollModal.application._id, studentPayload);
+    handleSuccess("Application enrolled successfully");
+    closeEnrollModal();
+  };
+
   return {
     applications,
     appLoading,
@@ -81,6 +92,7 @@ function usePreRegistrationManager() {
     drawer,
     approveModal,
     rejectModal,
+    enrollModal,
     handleTabChange,
     handleFilterApply,
     handleFilterReset,
@@ -91,8 +103,11 @@ function usePreRegistrationManager() {
     closeApproveModal,
     openRejectModal,
     closeRejectModal,
+    openEnrollModal,
+    closeEnrollModal,
     handleApprove,
     handleReject,
+    handleEnroll,
   };
 }
 

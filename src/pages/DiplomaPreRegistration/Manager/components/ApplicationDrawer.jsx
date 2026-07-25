@@ -10,6 +10,7 @@ const STATUS_COLORS = {
   confirmed: "green",
   rejected: "red",
   reviewed: "blue",
+  enrolled: "blue",
 };
 
 const STATUS_LABELS = {
@@ -17,6 +18,7 @@ const STATUS_LABELS = {
   confirmed: "Approved",
   rejected: "Rejected",
   reviewed: "Reviewed",
+  enrolled: "Enrolled",
 };
 
 const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];

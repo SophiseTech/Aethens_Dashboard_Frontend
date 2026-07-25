@@ -35,6 +35,9 @@ const EditArtWork = lazy(() => import("@pages/admin/ArtWorks/EditArtWork"));
 const EditStudentOfTheWeek = lazy(() => import("@pages/admin/StudentOfTheWeek/EditStudentOfTheWeek"));
 const AdminCourses = lazy(() => import("@pages/AdminCourses"));
 const AdminDiplomaCourses = lazy(() => import("@pages/AdminDiplomaCourses"));
+const AdminDiplomaBatches = lazy(() => import("@pages/AdminDiplomaBatches"));
+const AdminDiplomaIntakes = lazy(() => import("@pages/AdminDiplomaIntakes"));
+const AdminDiplomaTimetable = lazy(() => import("@pages/AdminDiplomaTimetable"));
 const AdminUsers = lazy(() => import("@pages/admin/Users"));
 const AdminEditUser = lazy(() => import("@pages/admin/Users/EditUser"));
 const AdminCenters = lazy(() => import("@pages/admin/Centers"));
@@ -526,6 +529,33 @@ export const generalRoutes = [
             ),
             title: "Diploma Courses",
           },
+          {
+            path: "/admin/diploma-batches",
+            element: (
+              <LazyLoader>
+                <AdminDiplomaBatches />
+              </LazyLoader>
+            ),
+            title: "Diploma Batches",
+          },
+          {
+            path: "/admin/diploma-intakes",
+            element: (
+              <LazyLoader>
+                <AdminDiplomaIntakes />
+              </LazyLoader>
+            ),
+            title: "Diploma Intakes",
+          },
+          {
+            path: "/admin/diploma-timetable",
+            element: (
+              <LazyLoader>
+                <AdminDiplomaTimetable />
+              </LazyLoader>
+            ),
+            title: "Diploma Timetable",
+          },
         ],
       },
     ],
@@ -568,6 +598,33 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Diploma Courses",
+          },
+          {
+            path: "/academic-manager/diploma-batches",
+            element: (
+              <LazyLoader>
+                <AdminDiplomaBatches />
+              </LazyLoader>
+            ),
+            title: "Diploma Batches",
+          },
+          {
+            path: "/academic-manager/diploma-intakes",
+            element: (
+              <LazyLoader>
+                <AdminDiplomaIntakes />
+              </LazyLoader>
+            ),
+            title: "Diploma Intakes",
+          },
+          {
+            path: "/academic-manager/diploma-timetable",
+            element: (
+              <LazyLoader>
+                <AdminDiplomaTimetable />
+              </LazyLoader>
+            ),
+            title: "Diploma Timetable",
           },
         ],
       },

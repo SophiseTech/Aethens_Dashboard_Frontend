@@ -5,6 +5,7 @@ import diplomaBatchService from "@/services/DiplomaBatch";
 import ApplicationsTable from "./components/ApplicationsTable";
 import ApproveModal from "./components/ApproveModal";
 import RejectModal from "./components/RejectModal";
+import EnrollModal from "./components/EnrollModal";
 import ApplicationDrawer from "./components/ApplicationDrawer";
 import usePreRegistrationManager from "./hooks/usePreRegistrationManager";
 import Title from "@components/layouts/Title";
@@ -14,6 +15,7 @@ import { CopyOutlined } from "@ant-design/icons";
 const TAB_OPTIONS = [
   { label: "Pending", value: "pending" },
   { label: "Approved", value: "completed" },
+  { label: "Enrolled", value: "enrolled" },
   { label: "Rejected", value: "rejected" },
 ];
 
@@ -26,6 +28,7 @@ function DiplomaPreRegistrationManager() {
     drawer,
     approveModal,
     rejectModal,
+    enrollModal,
     handleTabChange,
     handleFilterApply,
     handleFilterReset,
@@ -36,8 +39,11 @@ function DiplomaPreRegistrationManager() {
     closeApproveModal,
     openRejectModal,
     closeRejectModal,
+    openEnrollModal,
+    closeEnrollModal,
     handleApprove,
     handleReject,
+    handleEnroll,
   } = usePreRegistrationManager();
 
   const [batchOptions, setBatchOptions] = useState([]);
@@ -83,6 +89,7 @@ function DiplomaPreRegistrationManager() {
           onPageChange={handlePageChange}
           onApprove={openApproveModal}
           onReject={openRejectModal}
+          onEnroll={openEnrollModal}
           onRowClick={openDrawer}
         />
 
@@ -98,6 +105,13 @@ function DiplomaPreRegistrationManager() {
           application={rejectModal.application}
           onConfirm={handleReject}
           onCancel={closeRejectModal}
+        />
+
+        <EnrollModal
+          open={enrollModal.open}
+          application={enrollModal.application}
+          onConfirm={handleEnroll}
+          onCancel={closeEnrollModal}
         />
 
         <ApplicationDrawer
