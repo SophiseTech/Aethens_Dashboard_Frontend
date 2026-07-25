@@ -34,6 +34,7 @@ const EditShopItem = lazy(() => import("@pages/admin/ShopItems/EditShopItem"));
 const EditArtWork = lazy(() => import("@pages/admin/ArtWorks/EditArtWork"));
 const EditStudentOfTheWeek = lazy(() => import("@pages/admin/StudentOfTheWeek/EditStudentOfTheWeek"));
 const AdminCourses = lazy(() => import("@pages/AdminCourses"));
+const AdminDiplomaCourses = lazy(() => import("@pages/AdminDiplomaCourses"));
 const AdminUsers = lazy(() => import("@pages/admin/Users"));
 const AdminEditUser = lazy(() => import("@pages/admin/Users/EditUser"));
 const AdminCenters = lazy(() => import("@pages/admin/Centers"));
@@ -516,6 +517,15 @@ export const generalRoutes = [
             ),
             title: "Courses",
           },
+          {
+            path: "/admin/diploma-courses",
+            element: (
+              <LazyLoader>
+                <AdminDiplomaCourses />
+              </LazyLoader>
+            ),
+            title: "Diploma Courses",
+          },
         ],
       },
     ],
@@ -549,6 +559,15 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Courses",
+          },
+          {
+            path: "/academic-manager/diploma-courses",
+            element: (
+              <LazyLoader>
+                <AdminDiplomaCourses />
+              </LazyLoader>
+            ),
+            title: "Diploma Courses",
           },
         ],
       },

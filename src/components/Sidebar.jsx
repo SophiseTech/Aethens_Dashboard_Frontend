@@ -101,6 +101,7 @@ const getMenuConfig = (role) => {
       key: "academics",
       children: [
         { label: "Courses", key: "courses", path: "/admin/courses" },
+        { label: "Diploma Courses", key: "diploma-courses", path: "/admin/diploma-courses" },
         {
           label: "Syllabus Gallery",
           key: "syllabus-gallery",
@@ -300,6 +301,12 @@ const getMenuConfig = (role) => {
       icon: <BookOutlined />,
       key: "courses",
       path: "/academic-manager/courses",
+    },
+    {
+      label: "Diploma Courses",
+      icon: <BookOutlined />,
+      key: "diploma-courses",
+      path: "/academic-manager/diploma-courses",
     },
     {
       label: "Syllabus Gallery",
