@@ -8,6 +8,7 @@ import { useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 
 const Students = lazy(() => import("@pages/Students"))
+const DiplomaStudents = lazy(() => import("@pages/DiplomaStudents"))
 const Enquiries = lazy(() => import("@pages/Enquiries"))
 const Targets = lazy(() => import("@pages/Targets"))
 const Wallets = lazy(() => import("@pages/Wallets/index.jsx"))
@@ -65,6 +66,11 @@ export const managerRoutes = [
             path: "/manager/students",
             element: <LazyLoader element={<Students />} />,
             title: "Students"
+          },
+          {
+            path: "/manager/diploma-students",
+            element: <LazyLoader element={<DiplomaStudents />} />,
+            title: "Diploma Students"
           },
           {
             path: "/manager/enquiries",

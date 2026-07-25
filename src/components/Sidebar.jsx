@@ -129,6 +129,7 @@ const getMenuConfig = (role) => {
         { label: "Batches", key: "diploma-batches", path: "/admin/diploma-batches" },
         { label: "Intakes", key: "diploma-intakes", path: "/admin/diploma-intakes" },
         { label: "Timetable", key: "diploma-timetable", path: "/admin/diploma-timetable" },
+        { label: "Students", key: "diploma-students", path: "/manager/diploma-students" },
         { label: "Pre-Registrations", key: "diploma-registrations", path: "/manager/diploma-registrations" },
       ],
     },
@@ -250,6 +251,7 @@ const getMenuConfig = (role) => {
       icon: <BookOutlined />,
       key: "diploma",
       children: [
+        { label: "Students", key: "diploma-students", path: "/manager/diploma-students" },
         { label: "Pre-Registrations", key: "diploma-registrations", path: "/manager/diploma-registrations" },
       ],
     },
@@ -327,6 +329,7 @@ const getMenuConfig = (role) => {
         { label: "Batches", key: "diploma-batches", path: "/academic-manager/diploma-batches" },
         { label: "Intakes", key: "diploma-intakes", path: "/academic-manager/diploma-intakes" },
         { label: "Timetable", key: "diploma-timetable", path: "/academic-manager/diploma-timetable" },
+        { label: "Students", key: "diploma-students", path: "/manager/diploma-students" },
         { label: "Pre-Registrations", key: "diploma-registrations", path: "/manager/diploma-registrations" },
       ],
     },

@@ -1,6 +1,5 @@
 import Title from '@components/layouts/Title'
 import AddStudent from '@pages/Students/Component/AddStudent'
-import AddDiplomaStudent from '@pages/Students/Component/AddDiplomaStudent'
 import SlotRequests from '@pages/Students/Component/SlotRequests';
 import StudentSearch from '@pages/Students/Component/StudentSearch';
 import userStore from '@stores/UserStore';
@@ -23,7 +22,6 @@ function Students() {
           <Button variant='filled' color='orange' onClick={() => { setDrawerState(true) }}>Requests</Button>
         }
         {permissions.student.add.includes(user.role) && <AddStudent />}
-        {permissions.student.add.includes(user.role) && <AddDiplomaStudent />}
       </Flex>}
     >
       <StudentSearch />
