@@ -11,7 +11,8 @@ import ProfileImageUploader from "@components/ProfileImageUploader";
 import centersStore from "@stores/CentersStore";
 import studentStore from "@stores/StudentStore";
 import userStore from "@stores/UserStore";
-import { ROLES } from "@utils/constants";
+import { feeOptions, ROLES } from "@utils/constants";
+import dayjs from "dayjs";
 
 const { Text } = Typography;
 
@@ -21,6 +22,16 @@ function EnrollModal({ open, application, onConfirm, onCancel }) {
   const { centers, getCenters } = useStore(centersStore);
   const { reusableIdCards, getReusableCards } = studentStore();
   const selectedCenter = Form.useWatch("center_id", form);
+  const feeType = Form.useWatch("type", form);
+
+  const initialValues = {
+    total_course_fee: 0,
+    type: "single",
+    paidAmount: 0,
+    numberOfInstallments: 6,
+    reg_fee: 3500,
+    start_date: null,
+  };
 
   useEffect(() => {
     if (open) getCenters(0);
@@ -39,6 +50,12 @@ function EnrollModal({ open, application, onConfirm, onCancel }) {
     if (user.role === ROLES.MANAGER) {
       values.center_id = user.center_id;
     }
+    if (values.type === "single") {
+      values.paidAmount = values.total_course_fee;
+    }
+    if (values.type === "monthly" && values.start_date) {
+      values.start_date = dayjs(values.start_date).toDate();
+    }
     await onConfirm(values);
     form.resetFields();
     return { reset: true };
@@ -50,6 +67,24 @@ function EnrollModal({ open, application, onConfirm, onCancel }) {
   };
 
   const centerOptions = centers?.map((c) => ({ label: c.center_name, value: c._id }));
+
+  const getFieldsByFeeType = (type) => {
+    switch (type) {
+      case "monthly":
+        return (
+          <>
+            <CustomDatePicker name={"start_date"} label={"Installment Start Date"} className="w-full" />
+            <CustomInput name={"numberOfInstallments"} label={"Number of installments"} />
+          </>
+        );
+      case "single":
+        return (
+          <CustomInput name={"discountAmount"} label={"Discount Amount"} />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <Modal
@@ -68,7 +103,7 @@ function EnrollModal({ open, application, onConfirm, onCancel }) {
 
       <Divider />
 
-      <CustomForm form={form} action={handleSubmit} resetOnFinish={false}>
+      <CustomForm form={form} initialValues={initialValues} action={handleSubmit} resetOnFinish={false}>
         <ProfileImageUploader
           name={"profile_img"}
           form={form}
@@ -93,6 +128,13 @@ function EnrollModal({ open, application, onConfirm, onCancel }) {
           maxCount={1}
         />
         <CustomInput label={"Password"} name={"password"} placeholder={"Password"} type="password" />
+
+        <Divider />
+
+        <CustomInput name={"total_course_fee"} label={"Total Course Fee"} />
+        <CustomSelect name={"type"} options={feeOptions} label={"Payment Method"} />
+        {getFieldsByFeeType(feeType)}
+        <CustomInput name={"reg_fee"} label={"Total Registration Fee (Exc. Tax)"} type="number" placeholder={"3500"} />
 
         <CustomSubmit label="Enroll Student" className="mt-4" />
       </CustomForm>

@@ -8,8 +8,9 @@ import ProfileImageUploader from '@components/ProfileImageUploader';
 import centersStore from '@stores/CentersStore';
 import studentStore from '@stores/StudentStore';
 import userStore from '@stores/UserStore';
-import { ROLES } from '@utils/constants';
+import { feeOptions, ROLES } from '@utils/constants';
 import { Divider, Form, message, Modal, Tooltip, Typography } from 'antd';
+import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from 'zustand';
 import { calculateAge } from '@utils/helper';
@@ -31,8 +32,9 @@ function AddDiplomaStudent() {
   const selectedCenter = Form.useWatch("center_id", form)
   const selectedCourseId = Form.useWatch("diplomaCourse_id", form)
   const selectedIntakeId = Form.useWatch("diplomaIntake_id", form)
+  const feeType = Form.useWatch("type", form)
 
-  const { courseOptions, loading: loadingCourses } = useDiplomaCourses({ enabled: isModalOpen });
+  const { courses, courseOptions, loading: loadingCourses } = useDiplomaCourses({ enabled: isModalOpen });
   const { intakeOptions, loading: loadingIntakes } = useDiplomaIntakes(selectedCourseId);
   const { batchOptions, loading: loadingBatches } = useDiplomaIntakeBatches(selectedIntakeId);
 
@@ -46,6 +48,12 @@ function AddDiplomaStudent() {
     phone_alt: "",
     school_uni_work: "",
     profile_img: "https://app.schoolofathens.art/images/default.jpg",
+    total_course_fee: 0,
+    type: "monthly",
+    paidAmount: 0,
+    numberOfInstallments: 3,
+    reg_fee: 10000,
+    start_date: null,
   }
 
   useEffect(() => {
@@ -69,9 +77,13 @@ function AddDiplomaStudent() {
     setIsModalOpen(false);
   };
 
-  const handleCourseChange = () => {
+  const handleCourseChange = (courseId) => {
     form.setFieldValue("diplomaIntake_id", undefined);
     form.setFieldValue("diplomaBatch_id", undefined);
+    const selectedCourse = courses.find((c) => c._id === courseId);
+    if (selectedCourse?.fee != null) {
+      form.setFieldValue("total_course_fee", selectedCourse.fee);
+    }
   };
 
   const handleIntakeChange = () => {
@@ -83,6 +95,12 @@ function AddDiplomaStudent() {
     values.courseType = "diploma"
     if (user.role === ROLES.MANAGER) {
       values.center_id = user.center_id
+    }
+    if (values.type === "single") {
+      values.paidAmount = values.total_course_fee
+    }
+    if (values.type === "monthly" && values.start_date) {
+      values.start_date = dayjs(values.start_date).toDate();
     }
 
     try {
@@ -96,6 +114,26 @@ function AddDiplomaStudent() {
   }
 
   const centerOptions = useMemo(() => centers?.map(center => ({ label: center.center_name, value: center._id })), [centers])
+
+  const getFieldsByFeeType = (feeType) => {
+    switch (feeType) {
+      case "monthly":
+        return (
+          <>
+            <CustomDatePicker name={"start_date"} label={"Installment Start Date"} className='w-full' />
+            <CustomInput name={"numberOfInstallments"} label={"Number of installments"} />
+          </>
+        )
+      case "single":
+        return (
+          <>
+            <CustomInput name={"discountAmount"} label={"Discount Amount"} />
+          </>
+        )
+      default:
+        break;
+    }
+  }
 
   return (
     <>
@@ -118,7 +156,7 @@ function AddDiplomaStudent() {
           <CustomInput label={"Full Name"} name={"username"} placeholder={"John Doe"} />
           <CustomDatePicker name={"DOB"} label={"Date of Birth"} placeholder='13-02-2025' className='w-full' />
           {dobValue && (
-            <div className='-mt-4 mb-4 p-2 bg-stone-100 rounded-lg'>
+            <div className='p-2 -mt-4 mb-4 rounded-lg bg-stone-100'>
               <Text type="secondary">Calculated Age: <strong>{calculateAge(dobValue.toDate())} years</strong></Text>
             </div>
           )}
@@ -168,6 +206,13 @@ function AddDiplomaStudent() {
             maxCount={1}
           />
           <CustomInput label={"Password"} name={"password"} placeholder={"Password"} type='password' />
+
+          <Divider />
+
+          <CustomInput name={"total_course_fee"} label={"Total Course Fee"} />
+          <CustomSelect name={"type"} options={feeOptions} label={"Payment Method"} />
+          {getFieldsByFeeType(feeType)}
+          <CustomInput name={"reg_fee"} label={"Total Registration Fee (Exc. Tax)"} type='number' placeholder={'3500'} />
 
           <CustomSubmit className='bg-primary' label='Enroll' loading={loading} />
         </CustomForm>

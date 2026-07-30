@@ -22,6 +22,7 @@ function EditDiplomaCourseModal({ course, visible, onCancel, onSave }) {
             form.setFieldsValue({
                 name: course.name,
                 center_id: course.center_id?._id || course.center_id,
+                fee: course.fee,
                 numberOfTerms: course.numberOfTerms,
                 duration_count: course.duration?.count,
                 duration_type: course.duration?.type || 'year',
@@ -37,6 +38,7 @@ function EditDiplomaCourseModal({ course, visible, onCancel, onSave }) {
             const courseData = {
                 name: values.name,
                 center_id: values.center_id,
+                fee: values.fee,
                 numberOfTerms: values.numberOfTerms,
                 duration: {
                     count: values.duration_count,
@@ -91,6 +93,14 @@ function EditDiplomaCourseModal({ course, visible, onCancel, onSave }) {
                             <Option key={center._id} value={center._id}>{center.center_name}</Option>
                         ))}
                     </Select>
+                </Form.Item>
+
+                <Form.Item
+                    name="fee"
+                    label="Course Fee"
+                    rules={[{ required: true, message: 'Please enter the course fee' }]}
+                >
+                    <InputNumber min={0} placeholder="Enter total course fee" style={{ width: '100%' }} />
                 </Form.Item>
 
                 <Form.Item
