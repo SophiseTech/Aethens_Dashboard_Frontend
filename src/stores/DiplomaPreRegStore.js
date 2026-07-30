@@ -79,6 +79,12 @@ const diplomaPreRegStore = create((set, get) => ({
     await diplomaPreRegService.rejectApplication(id, data);
     await get().fetchApplications(get().pagination.page);
   },
+
+  enrollApplication: async (id, studentPayload) => {
+    const result = await diplomaPreRegService.enrollApplication(id, studentPayload);
+    await get().fetchApplications(get().pagination.page);
+    return result;
+  },
 }));
 
 export default diplomaPreRegStore;

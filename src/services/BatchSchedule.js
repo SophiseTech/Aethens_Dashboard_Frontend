@@ -1,10 +1,10 @@
 import handleError from "@utils/handleError";
 import { get, post, put } from "@utils/Requests";
 
-class DiplomaBatchService {
-  async getActiveBatches() {
+class BatchScheduleService {
+  async listByBatch(batchId) {
     try {
-      const response = await get("/v2/diploma-batch/active");
+      const response = await get(`/v2/batch-schedule/batch/${batchId}`);
       if (!response?.data) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {
@@ -12,13 +12,9 @@ class DiplomaBatchService {
     }
   }
 
-  async listBatches({ status, page, limit } = {}) {
+  async create(data) {
     try {
-      const params = new URLSearchParams();
-      if (status) params.set("status", status);
-      if (page) params.set("page", page);
-      if (limit) params.set("limit", limit);
-      const response = await get(`/v2/diploma-batch?${params.toString()}`);
+      const response = await post("/v2/batch-schedule", data);
       if (!response?.data) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {
@@ -26,9 +22,9 @@ class DiplomaBatchService {
     }
   }
 
-  async createBatch(batchData) {
+  async update(id, data) {
     try {
-      const response = await post("/v2/diploma-batch", batchData);
+      const response = await put(`/v2/batch-schedule/${id}`, data);
       if (!response?.data) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {
@@ -36,9 +32,19 @@ class DiplomaBatchService {
     }
   }
 
-  async updateBatch(batchId, batchData) {
+  async listBatchesForIntake(intakeId) {
     try {
-      const response = await put(`/v2/diploma-batch/${batchId}`, batchData);
+      const response = await get(`/v2/batch-schedule/intake/${intakeId}/batches`);
+      if (!response?.data) throw new Error("An error occurred. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async generateSlots(id, { fromDate, toDate }) {
+    try {
+      const response = await post(`/v2/batch-schedule/${id}/generate-slots`, { fromDate, toDate });
       if (!response?.data) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {
@@ -47,5 +53,4 @@ class DiplomaBatchService {
   }
 }
 
-const diplomaBatchService = new DiplomaBatchService();
-export default diplomaBatchService;
+export default new BatchScheduleService();

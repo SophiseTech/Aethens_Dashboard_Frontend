@@ -118,7 +118,19 @@ const getMenuConfig = (role) => {
           path: "/manager/attendance-register",
         },
         { label: "Slots", key: "slots", path: "/manager/slots" },
-        { label: "Pre Registration", key: "diploma-registrations", path: "/manager/diploma-registrations" },
+      ],
+    },
+    {
+      label: "Diploma",
+      icon: <BookOutlined />,
+      key: "diploma",
+      children: [
+        { label: "Courses", key: "diploma-courses", path: "/admin/diploma-courses" },
+        { label: "Batches", key: "diploma-batches", path: "/admin/diploma-batches" },
+        { label: "Intakes", key: "diploma-intakes", path: "/admin/diploma-intakes" },
+        { label: "Timetable", key: "diploma-timetable", path: "/admin/diploma-timetable" },
+        { label: "Students", key: "diploma-students", path: "/manager/diploma-students" },
+        { label: "Pre-Registrations", key: "diploma-registrations", path: "/manager/diploma-registrations" },
       ],
     },
 
@@ -232,8 +244,15 @@ const getMenuConfig = (role) => {
           path: "/manager/attendance-register",
         },
         { label: "Slots", key: "slots", path: "/manager/slots" },
-        { label: "Pre Registration", key: "diploma-registrations", path: "/manager/diploma-registrations" },
-
+      ],
+    },
+    {
+      label: "Diploma",
+      icon: <BookOutlined />,
+      key: "diploma",
+      children: [
+        { label: "Students", key: "diploma-students", path: "/manager/diploma-students" },
+        { label: "Pre-Registrations", key: "diploma-registrations", path: "/manager/diploma-registrations" },
       ],
     },
     {
@@ -300,6 +319,19 @@ const getMenuConfig = (role) => {
       icon: <BookOutlined />,
       key: "courses",
       path: "/academic-manager/courses",
+    },
+    {
+      label: "Diploma",
+      icon: <BookOutlined />,
+      key: "diploma",
+      children: [
+        { label: "Courses", key: "diploma-courses", path: "/academic-manager/diploma-courses" },
+        { label: "Batches", key: "diploma-batches", path: "/academic-manager/diploma-batches" },
+        { label: "Intakes", key: "diploma-intakes", path: "/academic-manager/diploma-intakes" },
+        { label: "Timetable", key: "diploma-timetable", path: "/academic-manager/diploma-timetable" },
+        { label: "Students", key: "diploma-students", path: "/manager/diploma-students" },
+        { label: "Pre-Registrations", key: "diploma-registrations", path: "/manager/diploma-registrations" },
+      ],
     },
     {
       label: "Syllabus Gallery",

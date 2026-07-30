@@ -6,12 +6,14 @@ const STATUS_COLORS = {
   pending: "orange",
   confirmed: "green",
   rejected: "red",
+  enrolled: "blue",
 };
 
 const STATUS_LABELS = {
   pending: "Pending",
   confirmed: "Approved",
   rejected: "Rejected",
+  enrolled: "Enrolled",
 };
 
 function ApplicationsTable({
@@ -22,6 +24,7 @@ function ApplicationsTable({
   onPageChange,
   onApprove,
   onReject,
+  onEnroll,
   onRowClick,
 }) {
   const columns = [
@@ -81,6 +84,21 @@ function ApplicationsTable({
           },
         ]
       : []),
+    ...(activeStatus === "completed"
+      ? [
+          {
+            title: "Actions",
+            key: "actions",
+            render: (_, record) => (
+              <Space size="small">
+                <Button type="primary" size="small" onClick={() => onEnroll(record)}>
+                  Enroll
+                </Button>
+              </Space>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -120,6 +138,7 @@ ApplicationsTable.propTypes = {
   onPageChange: PropTypes.func.isRequired,
   onApprove: PropTypes.func.isRequired,
   onReject: PropTypes.func.isRequired,
+  onEnroll: PropTypes.func.isRequired,
   onRowClick: PropTypes.func.isRequired,
 };
 

@@ -13,7 +13,9 @@ function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, se
   // Get user data
   const { user } = useStore(userStore);
 
-  // Handle general syllabus type (existing logic)
+  // Diploma syllabus has an extra Subject level wrapping the same modules shape;
+  // short-term syllabus is just modules directly.
+  const isDiplomaSyllabus = Array.isArray(syllabusData?.subjects);
   const modules = Array.isArray(syllabusData?.modules) ? syllabusData.modules
     : Array.isArray(syllabusData) ? syllabusData
       : [];
@@ -29,56 +31,72 @@ function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, se
     let dataIndex = 0;
     const formattedData = [];
 
-    (Array.isArray(modules) ? modules : []).forEach((module) => {
-      let moduleAdded = false;
+    const pushModules = (moduleList, subjectName) => {
+      (Array.isArray(moduleList) ? moduleList : []).forEach((module) => {
+        let moduleAdded = false;
 
-      module.units?.forEach((unit) => {
-        let unitAdded = false;
+        module.units?.forEach((unit) => {
+          let unitAdded = false;
 
-        unit.topics?.forEach((topic) => {
-          formattedData.push({
-            key: dataIndex++,
-            module: module.name,
-            unit: unit.name,
-            topic: topic?.name || topic,
-            completed: topic?.completed || false,
-            sessionCount: topic?.sessionCount || 0,
-            sessionsRequired: topic?.sessionsRequired || 0,
+          unit.topics?.forEach((topic) => {
+            formattedData.push({
+              key: dataIndex++,
+              subject: subjectName,
+              module: module.name,
+              unit: unit.name,
+              topic: topic?.name || topic,
+              completed: topic?.completed || false,
+              sessionCount: topic?.sessionCount || 0,
+              sessionsRequired: topic?.sessionsRequired || 0,
+            });
+            unitAdded = true;
+            moduleAdded = true;
           });
-          unitAdded = true;
-          moduleAdded = true;
+
+          if (!unitAdded) {
+            formattedData.push({
+              key: dataIndex++,
+              subject: subjectName,
+              module: module.name,
+              unit: unit.name,
+              topic: "-",
+              completed: unit?.completed || false,
+              sessionCount: 0,
+            });
+            moduleAdded = true;
+          }
         });
 
-        if (!unitAdded) {
+        if (!moduleAdded) {
           formattedData.push({
             key: dataIndex++,
+            subject: subjectName,
             module: module.name,
-            unit: unit.name,
+            unit: "-",
             topic: "-",
-            completed: unit?.completed || false,
+            completed: module?.completed || false,
             sessionCount: 0,
           });
-          moduleAdded = true;
         }
       });
+    };
 
-      if (!moduleAdded) {
-        formattedData.push({
-          key: dataIndex++,
-          module: module.name,
-          unit: "-",
-          topic: "-",
-          completed: module?.completed || false,
-          sessionCount: 0,
-        });
-      }
-    });
+    if (isDiplomaSyllabus) {
+      syllabusData.subjects.forEach((subject) => pushModules(subject.modules, subject.name));
+    } else {
+      pushModules(modules, null);
+    }
 
     return formattedData;
-  }, [modules, syllabusData?.syllabusType]);
+  }, [modules, syllabusData, isDiplomaSyllabus]);
 
   // Define table columns
   const columns = [
+    ...(isDiplomaSyllabus ? [{
+      title: 'Subject',
+      dataIndex: 'subject',
+      key: 'subject',
+    }] : []),
     {
       title: 'Module',
       dataIndex: 'module',

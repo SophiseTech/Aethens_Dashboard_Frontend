@@ -50,6 +50,16 @@ class DiplomaPreRegService {
     }
   }
 
+  async enrollApplication(id, studentPayload) {
+    try {
+      const response = await post(`/v2/diploma-prereg/${id}/enroll`, studentPayload);
+      if (!response?.data) throw new Error("An error occurred. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
   async rejectApplication(id, { reason }) {
     try {
       const response = await post(`/v2/diploma-prereg/${id}/reject`, { reason });

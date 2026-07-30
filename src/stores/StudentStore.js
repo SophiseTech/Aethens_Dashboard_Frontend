@@ -1,4 +1,6 @@
 import courseService from "@/services/Course";
+import diplomaCourseService from "@/services/DiplomaCourse";
+import enrollmentService from "@/services/Enrollment";
 import studentService from "@/services/Student";
 import userService from "@/services/User";
 import userStore from "@stores/UserStore";
@@ -173,7 +175,12 @@ const studentStore = create((set, get) => ({
   getStudentSyllabus: async (userId, filters = {}) => {
     try {
       set({ loading: true });
-      const response = await courseService.getStudentSyllabus(userId, filters);
+      // BookedSessions (enrollment) determines whether this student is in a
+      // short-term or diploma course — Student profile has no course-type field.
+      const enrollment = await enrollmentService.getMyEnrollment(userId);
+      const response = enrollment?.courseType === "diploma"
+        ? await diplomaCourseService.getStudentSyllabus(userId, filters)
+        : await courseService.getStudentSyllabus(userId, filters);
       set({ syllabus: response });
     } catch (error) {
       handleInternalError(error);

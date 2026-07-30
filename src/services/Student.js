@@ -24,19 +24,22 @@ class StudentService {
     isFeeEnabled,
     reg_fee,
     idCardNumber,
-    discountAmount
+    discountAmount,
+    courseType,
+    diplomaCourse_id,
+    diplomaBatch_id,
+    diplomaIntake_id
   }) {
     try {
-      if (
-        !username ||
-        !email ||
-        !password ||
-        !role ||
-        !address ||
-        !center_id ||
-        !course_id
-      )
+      const isDiploma = courseType === "diploma";
+      if (!username || !email || !password || !role || !address || !center_id)
         throw new Error("Bad Data");
+      if (isDiploma) {
+        if (!diplomaCourse_id || !diplomaBatch_id || !diplomaIntake_id)
+          throw new Error("Bad Data");
+      } else if (!course_id) {
+        throw new Error("Bad Data");
+      }
       const response = await post("/enrollment/create-student", {
         username,
         email,
@@ -59,7 +62,11 @@ class StudentService {
         total_course_fee,
         reg_fee,
         idCardNumber,
-        discountAmount
+        discountAmount,
+        courseType,
+        diplomaCourse_id,
+        diplomaBatch_id,
+        diplomaIntake_id
       });
       if (!response || !response.data)
         throw new Error("An error occured. Please try again");
