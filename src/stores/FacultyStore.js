@@ -13,8 +13,7 @@ const facultyStore = create((set, get) => ({
   total: 0,
   getFacultiesByCenter: async (limit = 10) => {
     try {
-      set({ loading: true })
-      const { lastRefKey, faculties } = get()
+      set({ loading: true, faculties: [], lastRefKey: 0 })
       const { user } = userStore.getState()
       const { selectedCenter } = centersStore.getState()
       let centerId;
@@ -24,9 +23,9 @@ const facultyStore = create((set, get) => ({
       } else {
         centerId = user.center_id;
       }
-      const { users, total } = await userService.getByRoleByCenter(ROLES.FACULTY, centerId, lastRefKey, limit)
+      const { users, total } = await userService.getByRoleByCenter(ROLES.FACULTY, centerId, 0, limit)
       if (users) {
-        set({ faculties: [...faculties, ...users], lastRefKey: lastRefKey + users.length, total: total })
+        set({ faculties: users, lastRefKey: users.length, total: total })
       }
     } catch (error) {
       handleInternalError(error)

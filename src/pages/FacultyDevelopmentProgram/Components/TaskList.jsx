@@ -1,20 +1,26 @@
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons"
 import Chip from "@components/Chips/Chip"
 import facultyDevProgramStore from "@stores/FacultyDevelopmentProgramStore"
 import userStore from "@stores/UserStore"
 import { formatDate } from "@utils/helper"
 import permissions from "@utils/permissions"
-import { Button, Flex, Table, Image } from "antd"
+import { Button, Flex, Table, Image, Popconfirm } from "antd"
 import { useStore } from "zustand"
 import { ROLES } from "@utils/constants"
 
-function TaskList({ tasks, loading, pagination }) {
+function TaskList({ tasks, loading, pagination, onEdit = () => { } }) {
 
-  const { editProgram } = useStore(facultyDevProgramStore)
+  const { editProgram, deleteProgram } = useStore(facultyDevProgramStore)
   const { user } = useStore(userStore)
 
   const handleMarkDone = async (id) => {
     if (!permissions.fdp.mark_don.includes(user.role)) return
     await editProgram(id, { status: "completed" })
+  }
+
+  const handleDelete = async (id) => {
+    if (!permissions.fdp.delete.includes(user.role)) return
+    await deleteProgram(id)
   }
 
   const columns = [
@@ -66,9 +72,17 @@ function TaskList({ tasks, loading, pagination }) {
       dataIndex: "action",
       hidden: user.role === ROLES.FACULTY,
       render: (_, record) => (
-        <Flex>
+        <Flex gap={8}>
           {permissions.fdp.mark_don.includes(user.role) &&
             <Button variant="filled" color="green" disabled={record.status === "completed"} onClick={() => handleMarkDone(record._id)}>Mark Done</Button>
+          }
+          {permissions.fdp.edit.includes(user.role) &&
+            <Button icon={<EditOutlined />} size="small" onClick={() => onEdit(record)}>Edit</Button>
+          }
+          {permissions.fdp.delete.includes(user.role) &&
+            <Popconfirm title="Delete Task" description="Are you sure you want to delete this task?" onConfirm={() => handleDelete(record._id)}>
+              <Button icon={<DeleteOutlined />} color="red" variant="filled" size="small">Delete</Button>
+            </Popconfirm>
           }
         </Flex>
       )
