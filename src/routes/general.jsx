@@ -12,6 +12,7 @@ const DiplomaPreRegistration = lazy(() => import("@pages/DiplomaPreRegistration"
 const TermsAndConditions = lazy(() => import("@pages/TermsAndConditions"));
 const Dashboard = lazy(() => import("@pages/Dashboard"));
 const Gallery = lazy(() => import("@pages/Gallery"));
+const ActivityGallery = lazy(() => import("@pages/ActivityGallery"));
 const Materials = lazy(() => import("@pages/Materials"));
 const Activities = lazy(() => import("@pages/Activities"));
 const Slots = lazy(() => import("@pages/Slots"));
@@ -142,6 +143,25 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Gallery",
+          }
+        ],
+      },
+    ],
+  },
+  {
+    element: <Protected roles={[ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER]} />,
+    children: [
+      {
+        element: <SidebarLayout />,
+        children: [
+          {
+            path: "/activity-gallery",
+            element: (
+              <LazyLoader>
+                <ActivityGallery />
+              </LazyLoader>
+            ),
+            title: "Activity Gallery",
           }
         ],
       },

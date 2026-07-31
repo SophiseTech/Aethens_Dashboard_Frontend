@@ -214,6 +214,11 @@ const getMenuConfig = (role) => {
           key: "gallery",
           path: "/gallery",
         },
+        {
+          label: "Activity Gallery",
+          key: "activity-gallery",
+          path: "/activity-gallery",
+        },
       ],
     },
 
@@ -305,6 +310,12 @@ const getMenuConfig = (role) => {
       key: "gallery",
       path: "/gallery",
     },
+    {
+      label: "Activity Gallery",
+      icon: <PictureOutlined />,
+      key: "activity-gallery",
+      path: "/activity-gallery",
+    },
   ];
 
   const academicManagerItems = [
@@ -338,6 +349,12 @@ const getMenuConfig = (role) => {
       icon: <PictureOutlined />,
       key: "syllabus-gallery",
       path: "/admin/syllabus-gallery",
+    },
+    {
+      label: "Activity Gallery",
+      icon: <PictureOutlined />,
+      key: "activity-gallery",
+      path: "/activity-gallery",
     },
     {
       label: "Student Syllabus",
@@ -444,6 +461,12 @@ const getMenuConfig = (role) => {
       icon: <PictureOutlined />,
       key: "gallery",
       path: "/gallery",
+    },
+    {
+      label: "Activity Gallery",
+      icon: <PictureOutlined />,
+      key: "activity-gallery",
+      path: "/activity-gallery",
     },
   ];
 

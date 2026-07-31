@@ -1,3 +1,4 @@
+import CustomCheckBox from '@components/form/CustomCheckBox';
 import CustomFileUpload from '@components/form/CustomFileUpload';
 import CustomForm from '@components/form/CustomForm'
 import CustomInput from '@components/form/CustomInput';
@@ -24,6 +25,7 @@ function AddActivityForm({ handleOk, student, activityType }) {
     title: "",
     remarks: "",
     upload: [],
+    completed: false,
   }
 
   const onSubmit = (values) => {
@@ -77,6 +79,7 @@ function AddActivityForm({ handleOk, student, activityType }) {
               return true;
             }}
           />
+          <CustomCheckBox name="completed" label="Mark as Completed" />
         </>
       }
       <CustomSubmit className='bg-primary' label='Save' loading={createLoading} disabled={loading} />
