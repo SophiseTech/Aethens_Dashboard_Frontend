@@ -1,5 +1,6 @@
 import centersStore from "@stores/CentersStore"
 import userStore from "@stores/UserStore"
+import { GLOBAL_USER_ROLES } from "@utils/constants"
 import handleError from "@utils/handleError"
 import { get, post } from "@utils/Requests"
 
@@ -48,7 +49,7 @@ class SessionService {
       const { selectedCenter } = centersStore.getState();
 
       let constructedPath;
-      if ((user.role === 'admin' || user.role === 'operations_manager') && selectedCenter) {
+      if ((GLOBAL_USER_ROLES.includes(user.role)) && selectedCenter) {
         constructedPath = `/sessions/getAll?centerId=${selectedCenter}&slotDate=${date || ""}`;
       } else {
         constructedPath = `/sessions/getAll?slotDate=${date || ""}`;
