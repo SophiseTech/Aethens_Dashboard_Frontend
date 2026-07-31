@@ -2,9 +2,23 @@ import handleError from "@utils/handleError";
 import { get, post, put } from "@utils/Requests";
 
 class BatchScheduleService {
-  async listByBatch(batchId) {
+  async listByBatch(batchId, { term, includeInactive } = {}) {
     try {
-      const response = await get(`/v2/batch-schedule/batch/${batchId}`);
+      const params = new URLSearchParams();
+      if (term !== undefined && term !== null && term !== "") params.set("term", term);
+      if (includeInactive) params.set("includeInactive", "true");
+      const queryString = params.toString();
+      const response = await get(`/v2/batch-schedule/batch/${batchId}${queryString ? `?${queryString}` : ""}`);
+      if (!response?.data) throw new Error("An error occurred. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async deactivateTerm({ diplomaBatch_id, term }) {
+    try {
+      const response = await post("/v2/batch-schedule/deactivate-term", { diplomaBatch_id, term });
       if (!response?.data) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {

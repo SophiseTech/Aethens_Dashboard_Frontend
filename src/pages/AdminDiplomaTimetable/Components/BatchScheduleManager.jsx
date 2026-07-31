@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Select, Table, Space, Tag, Empty } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
+import { Select, Table, Space, Tag, Empty, Switch, Button, Popconfirm, message } from 'antd';
+import { RightCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import batchScheduleStore from '@stores/BatchScheduleStore';
 import useDiplomaBatches from '@hooks/useDiplomaBatches';
@@ -12,17 +13,50 @@ function BatchScheduleManager() {
     const [selectedBatchId, setSelectedBatchId] = useState(null);
     const [editVisible, setEditVisible] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
+    const [selectedTerm, setSelectedTerm] = useState(null);
+    const [includeInactive, setIncludeInactive] = useState(false);
+    const [advancing, setAdvancing] = useState(false);
 
     const { batchOptions, loading: loadingBatches } = useDiplomaBatches({ enabled: true });
-    const { batchSchedules, loading, getByBatch } = batchScheduleStore();
+    const { batchSchedules, loading, getByBatch, deactivateTerm } = batchScheduleStore();
 
     useEffect(() => {
-        if (selectedBatchId) getByBatch(selectedBatchId);
-    }, [selectedBatchId, getByBatch]);
+        if (selectedBatchId) getByBatch(selectedBatchId, { includeInactive });
+    }, [selectedBatchId, includeInactive, getByBatch]);
+
+    useEffect(() => {
+        setSelectedTerm(null);
+    }, [selectedBatchId]);
+
+    const termOptions = useMemo(() => (
+        [...new Set(batchSchedules.map((r) => r.term))]
+            .filter((t) => t !== undefined && t !== null)
+            .sort((a, b) => a - b)
+            .map((t) => ({ label: `Term ${t}`, value: t }))
+    ), [batchSchedules]);
+
+    const filteredSchedules = useMemo(() => (
+        selectedTerm ? batchSchedules.filter((r) => r.term === selectedTerm) : batchSchedules
+    ), [batchSchedules, selectedTerm]);
+
+    const canAdvanceTerm = selectedTerm && filteredSchedules.some((r) => r.isActive);
 
     const handleRowClick = (record) => {
         setSelectedRow(record);
         setEditVisible(true);
+    };
+
+    const handleAdvanceTerm = async () => {
+        try {
+            setAdvancing(true);
+            await deactivateTerm({ diplomaBatch_id: selectedBatchId, term: selectedTerm });
+            message.success(`Term ${selectedTerm} deactivated`);
+            setSelectedTerm(selectedTerm + 1);
+        } catch (error) {
+            // handled by store
+        } finally {
+            setAdvancing(false);
+        }
     };
 
     const columns = [
@@ -41,12 +75,24 @@ function BatchScheduleManager() {
             render: (_, record) => record.diplomaIntake_id?.name || 'N/A',
         },
         {
+            title: 'Term',
+            dataIndex: 'term',
+            key: 'term',
+            render: (term) => term ? `Term ${term}` : 'N/A',
+        },
+        {
             title: 'Subject',
             key: 'subject',
             render: (_, record) =>
-                (record.diplomaIntake_id?.courseId?.terms || [])
-                    .flatMap((t) => t.subjects || [])
-                    .find((s) => s._id === record.subject_id)?.name || 'N/A',
+                record.diplomaIntake_id?.courseId?.terms
+                    ?.find((t) => t.termNumber === record.term)
+                    ?.subjects?.find((s) => s._id === record.subject_id)?.name || 'N/A',
+        },
+        {
+            title: 'Active',
+            dataIndex: 'isActive',
+            key: 'isActive',
+            render: (isActive) => <Tag color={isActive ? 'green' : 'default'}>{isActive ? 'Active' : 'Inactive'}</Tag>,
         },
         {
             title: 'Week Day',
@@ -90,15 +136,38 @@ function BatchScheduleManager() {
                 <>
                     <Space wrap>
                         <AddScheduleRowModal batchId={selectedBatchId} />
-                        <GenerateSlotsModal schedules={batchSchedules} />
+                        <GenerateSlotsModal schedules={filteredSchedules} />
+                        <Select
+                            placeholder="All Terms"
+                            allowClear
+                            style={{ width: 140 }}
+                            options={termOptions}
+                            value={selectedTerm}
+                            onChange={setSelectedTerm}
+                        />
+                        <Space size="small">
+                            <Switch checked={includeInactive} onChange={setIncludeInactive} />
+                            <span>Show Inactive/Past Terms</span>
+                        </Space>
+                        {canAdvanceTerm && (
+                            <Popconfirm
+                                title="Advance to next term"
+                                description={`This deactivates all active Term ${selectedTerm} rows for this batch.`}
+                                onConfirm={handleAdvanceTerm}
+                            >
+                                <Button icon={<RightCircleOutlined />} loading={advancing}>
+                                    Advance to Next Term
+                                </Button>
+                            </Popconfirm>
+                        )}
                     </Space>
 
-                    {batchSchedules.length === 0 && !loading ? (
+                    {filteredSchedules.length === 0 && !loading ? (
                         <Empty description="No timetable rows yet for this batch." />
                     ) : (
                         <Table
                             columns={columns}
-                            dataSource={batchSchedules}
+                            dataSource={filteredSchedules}
                             loading={loading}
                             rowKey="_id"
                             pagination={false}

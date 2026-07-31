@@ -65,9 +65,9 @@ function EditScheduleRowModal({ schedule, batchId, visible, onCancel, onSave }) 
     };
 
     const courseName = schedule?.diplomaIntake_id?.courseId?.name;
-    const subjectName = (schedule?.diplomaIntake_id?.courseId?.terms || [])
-        .flatMap((t) => t.subjects || [])
-        .find((s) => s._id === schedule?.subject_id)?.name;
+    const subjectName = schedule?.diplomaIntake_id?.courseId?.terms
+        ?.find((t) => t.termNumber === schedule?.term)
+        ?.subjects?.find((s) => s._id === schedule?.subject_id)?.name;
 
     return (
         <Modal
@@ -82,6 +82,7 @@ function EditScheduleRowModal({ schedule, batchId, visible, onCancel, onSave }) 
             <div className="mb-4">
                 <Text type="secondary">Course: <Text strong>{courseName || 'N/A'}</Text></Text><br />
                 <Text type="secondary">Intake: <Text strong>{schedule?.diplomaIntake_id?.name || 'N/A'}</Text></Text><br />
+                <Text type="secondary">Term: <Text strong>{schedule?.term ? `Term ${schedule.term}` : 'N/A'}</Text></Text><br />
                 <Text type="secondary">Subject: <Text strong>{subjectName || 'N/A'}</Text></Text>
             </div>
 

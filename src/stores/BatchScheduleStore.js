@@ -6,14 +6,31 @@ const batchScheduleStore = create((set, get) => ({
   batchSchedules: [],
   loading: true,
   createLoading: false,
+  activeFilters: {},
 
-  getByBatch: async (batchId) => {
+  getByBatch: async (batchId, filters = {}) => {
     try {
-      set({ loading: true })
-      const batchSchedules = await batchScheduleService.listByBatch(batchId)
+      set({ loading: true, activeFilters: filters })
+      const batchSchedules = await batchScheduleService.listByBatch(batchId, filters)
       set({ batchSchedules: batchSchedules || [] })
     } catch (error) {
       handleInternalError(error)
+    } finally {
+      set({ loading: false })
+    }
+  },
+
+  deactivateTerm: async (payload) => {
+    try {
+      set({ loading: true })
+      const response = await batchScheduleService.deactivateTerm(payload)
+      if (payload.diplomaBatch_id) {
+        await get().getByBatch(payload.diplomaBatch_id, get().activeFilters)
+      }
+      return response
+    } catch (error) {
+      handleInternalError(error)
+      throw error
     } finally {
       set({ loading: false })
     }
@@ -24,7 +41,7 @@ const batchScheduleStore = create((set, get) => ({
       set({ createLoading: true })
       const response = await batchScheduleService.create(data)
       if (response && data.diplomaBatch_id) {
-        await get().getByBatch(data.diplomaBatch_id)
+        await get().getByBatch(data.diplomaBatch_id, get().activeFilters)
       }
       return response
     } catch (error) {
@@ -40,7 +57,7 @@ const batchScheduleStore = create((set, get) => ({
       set({ loading: true })
       const response = await batchScheduleService.update(id, data)
       if (response && batchId) {
-        await get().getByBatch(batchId)
+        await get().getByBatch(batchId, get().activeFilters)
       }
       return response
     } catch (error) {
