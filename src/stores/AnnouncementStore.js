@@ -2,6 +2,7 @@ import { create } from "zustand"
 
 import {
   listAnnouncements,
+  listLatestAnnouncements,
   createAnnouncement,
   updateAnnouncement,
   deleteAnnouncement,
@@ -10,6 +11,8 @@ import {
 const useAnnouncementStore = create((set, get) => ({
   announcements: [],
   loading: false,
+  activeAnnouncements: [],
+  activeLoading: false,
   error: null,
   selected: null,
   modalOpen: false,
@@ -23,6 +26,16 @@ const useAnnouncementStore = create((set, get) => ({
       set({ announcements: data, loading: false });
     } catch (error) {
       set({ error, loading: false });
+    }
+  },
+
+  fetchActive: async () => {
+    set({ activeLoading: true });
+    try {
+      const data = await listLatestAnnouncements();
+      set({ activeAnnouncements: data, activeLoading: false });
+    } catch (error) {
+      set({ error, activeAnnouncements: [], activeLoading: false });
     }
   },
 
