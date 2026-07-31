@@ -26,7 +26,7 @@ export const sessionSlotOptionRenderer = (option, user, showSlotCount = true) =>
   const { data: session } = option.data;
   if (!session) return null;
 
-  const { remainingSlots: regularRemainingSLots = 0, additional = 0, effectiveRemainingSlots: totalRemainingSlots = 0, rescheduled = 0, freeSlotPercent } = session;
+  const { remainingSlots: regularRemainingSLots = 0, additional = 0, effectiveRemainingSlots: totalRemainingSlots = 0, rescheduled = 0, freeSlotPercent, demo } = session;
   const weekday = weekDays[session.weekDay];
   const time = dayjs(session.start_time).format('h:mm A');
   const remainingSlots = user.role === ROLES.STUDENT ? totalRemainingSlots : regularRemainingSLots
@@ -52,6 +52,18 @@ export const sessionSlotOptionRenderer = (option, user, showSlotCount = true) =>
           >
             {remainingSlots} slot{remainingSlots !== 1 ? 's' : ''} left
           </Tag>
+          {(demo > 0 && [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER].includes(user.role)) && (
+            <Tag
+              color='warning'
+              style={{
+                fontWeight: 600,
+                borderRadius: 4,
+                marginRight: 0
+              }}
+            >
+              D - {demo}
+            </Tag>
+          )}
           {(additional > 0 && [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER].includes(user.role)) && (
             <Tag
               color='gold'

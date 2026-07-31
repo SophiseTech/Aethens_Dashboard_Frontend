@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import enquiryStore from "@stores/EnquiryStore";
 import EnquiryDetailsDrawer from "@pages/Enquiries/Component/EnquiryDetailsDrawer";
 import ViewWiseFilters from './ViewWiseFilters'
-import { formatDate } from "@utils/helper";
+import { formatDate, formatDateTime } from "@utils/helper";
 import Chip from "@components/Chips/Chip";
 import EnquiryDashboard from "@pages/Enquiries/Component/EnquiryDashboard";
 import userStore from "@stores/UserStore";
@@ -156,13 +156,13 @@ function EnquiryList() {
             ? row?.demoSlot?.scheduledAt
             : row?.createdAt;
 
-        return formatDate(finalDate);
+        return formatDateTime(finalDate);
       },
     },
     {
       title: "Updated At",
       dataIndex: "updatedAt",
-      render: (value) => formatDate(value)
+      render: (value) => formatDateTime(value)
     },
     {
       title: "Status",
