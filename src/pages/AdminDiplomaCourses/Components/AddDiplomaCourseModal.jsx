@@ -5,7 +5,7 @@ import { useStore } from 'zustand';
 import diplomaCourseStore from '@stores/DiplomaCourseStore';
 import centerStore from '@stores/CentersStore';
 import useFormDraft from '@hooks/useFormDraft';
-import SubjectsFormSection from './SubjectsFormSection';
+import TermsFormSection from './TermsFormSection';
 
 const { Option } = Select;
 const DRAFT_STORAGE_KEY = 'draft:addDiplomaCourse';
@@ -41,12 +41,11 @@ function AddDiplomaCourseModal() {
                 name: values.name,
                 center_id: values.center_id,
                 fee: values.fee,
-                numberOfTerms: values.numberOfTerms,
                 duration: {
                     count: values.duration_count,
                     type: values.duration_type,
                 },
-                subjects: values.subjects || [],
+                terms: values.terms || [],
             };
 
             await createCourse(courseData);
@@ -110,14 +109,6 @@ function AddDiplomaCourseModal() {
                         <InputNumber min={0} placeholder="Enter total course fee" style={{ width: '100%' }} />
                     </Form.Item>
 
-                    <Form.Item
-                        name="numberOfTerms"
-                        label="Number of Terms"
-                        rules={[{ required: true, message: 'Please enter the number of terms' }]}
-                    >
-                        <InputNumber min={1} placeholder="Enter number of terms" style={{ width: '100%' }} />
-                    </Form.Item>
-
                     <div className="flex gap-4">
                         <Form.Item
                             name="duration_count"
@@ -141,8 +132,8 @@ function AddDiplomaCourseModal() {
                         </Form.Item>
                     </div>
 
-                    <Form.Item name="subjects" label="Subjects">
-                        <SubjectsFormSection />
+                    <Form.Item name="terms" label="Terms">
+                        <TermsFormSection />
                     </Form.Item>
                 </Form>
             </Modal>

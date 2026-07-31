@@ -65,9 +65,9 @@ function EditScheduleRowModal({ schedule, batchId, visible, onCancel, onSave }) 
     };
 
     const courseName = schedule?.diplomaIntake_id?.courseId?.name;
-    const subjectName = schedule?.diplomaIntake_id?.courseId?.subjects?.find(
-        (s) => s._id === schedule?.subject_id
-    )?.name;
+    const subjectName = (schedule?.diplomaIntake_id?.courseId?.terms || [])
+        .flatMap((t) => t.subjects || [])
+        .find((s) => s._id === schedule?.subject_id)?.name;
 
     return (
         <Modal

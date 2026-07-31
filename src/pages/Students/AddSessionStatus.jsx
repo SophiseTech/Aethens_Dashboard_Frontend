@@ -1,8 +1,10 @@
 import SessionStatusTable from '@pages/Students/Component/SessionStatusTable';
 import SessionStautsForm from '@pages/Students/Component/SessionStautsForm';
+import DiplomaSessionStatusForm from '@pages/Students/Component/DiplomaSessionStatusForm';
 import Title from '@components/layouts/Title';
 import facultyRemarksStore from '@stores/FacultyRemarksStore';
 import courseStore from '@stores/CourseStore';
+import enrollmentService from '@services/Enrollment';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Button, Card, Spin, Tag } from 'antd';
 import React, { useEffect, useState } from 'react';
@@ -17,8 +19,11 @@ function AddSessionStatus() {
     const location = useLocation();
     const [student, setStudent] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [enrollment, setEnrollment] = useState(null);
     const { getFacultyRemarks } = useStore(facultyRemarksStore);
     const { getCourse } = useStore(courseStore);
+
+    const isDiploma = enrollment?.courseType === "diploma";
 
     useEffect(() => {
         const fetchStudent = async () => {
@@ -29,25 +34,42 @@ function AddSessionStatus() {
                 if (location.state?.student) {
                     const studentData = location.state.student;
 
-                    // Fetch full course data to get syllabusType and images
-                    const courseId = studentData?.details_id?.course_id?._id
-                        || studentData?.details_id?.course_id
-                        || studentData?.details_id?.course?._id
-                        || studentData?.details_id?.course;
-                    if (courseId) {
-                        await getCourse(courseId);
+                    // BookedSessions (enrollment) determines whether this student is in a
+                    // short-term or diploma course — Student profile has no course-type field.
+                    const studentEnrollment = await enrollmentService.getMyEnrollment(studentData._id);
+                    setEnrollment(studentEnrollment);
+
+                    if (studentEnrollment?.courseType === "diploma") {
+                        setStudent(studentData);
+
+                        getFacultyRemarks({
+                            query: {
+                                student_id: studentData._id,
+                                diplomaCourse_id: studentEnrollment.diplomaCourse_id
+                            },
+                            populate: "faculty_id"
+                        });
+                    } else {
+                        // Fetch full course data to get syllabusType and images
+                        const courseId = studentData?.details_id?.course_id?._id
+                            || studentData?.details_id?.course_id
+                            || studentData?.details_id?.course?._id
+                            || studentData?.details_id?.course;
+                        if (courseId) {
+                            await getCourse(courseId);
+                        }
+
+                        setStudent(studentData);
+
+                        // Fetch faculty remarks for this student
+                        getFacultyRemarks({
+                            query: {
+                                student_id: studentData._id,
+                                course_id: courseId
+                            },
+                            populate: "faculty_id"
+                        });
                     }
-
-                    setStudent(studentData);
-
-                    // Fetch faculty remarks for this student
-                    getFacultyRemarks({
-                        query: {
-                            student_id: studentData._id,
-                            course_id: courseId
-                        },
-                        populate: "faculty_id"
-                    });
                 } else {
                     // Fallback: redirect back to students list if no student data
                     navigate('/');
@@ -121,12 +143,15 @@ function AddSessionStatus() {
 
             {/* Session Form */}
             <Card title="Add New Session" className="mb-4">
-                <SessionStautsForm student={student} />
+                {isDiploma
+                    ? <DiplomaSessionStatusForm student={student} diplomaCourseId={enrollment?.diplomaCourse_id} />
+                    : <SessionStautsForm student={student} />
+                }
             </Card>
 
             {/* Session History Table */}
             <Card title="Session History">
-                <SessionStatusTable student={student} />
+                <SessionStatusTable student={student} isDiploma={isDiploma} diplomaCourseId={enrollment?.diplomaCourse_id} />
             </Card>
         </Title>
     );

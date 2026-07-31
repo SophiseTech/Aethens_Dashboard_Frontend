@@ -46,13 +46,13 @@ function DiplomaCourseList() {
         },
         {
             title: 'Terms',
-            dataIndex: 'numberOfTerms',
-            key: 'numberOfTerms',
+            key: 'terms',
+            render: (_, record) => record.terms?.length || 0,
         },
         {
             title: 'Subjects',
             key: 'subjects',
-            render: (_, record) => record.subjects?.length || 0,
+            render: (_, record) => record.terms?.reduce((sum, t) => sum + (t.subjects?.length || 0), 0) || 0,
         },
     ];
 

@@ -44,7 +44,9 @@ function BatchScheduleManager() {
             title: 'Subject',
             key: 'subject',
             render: (_, record) =>
-                record.diplomaIntake_id?.courseId?.subjects?.find((s) => s._id === record.subject_id)?.name || 'N/A',
+                (record.diplomaIntake_id?.courseId?.terms || [])
+                    .flatMap((t) => t.subjects || [])
+                    .find((s) => s._id === record.subject_id)?.name || 'N/A',
         },
         {
             title: 'Week Day',

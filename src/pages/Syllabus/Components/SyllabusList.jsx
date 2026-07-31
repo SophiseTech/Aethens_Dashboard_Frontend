@@ -31,7 +31,7 @@ function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, se
     let dataIndex = 0;
     const formattedData = [];
 
-    const pushModules = (moduleList, subjectName) => {
+    const pushModules = (moduleList, subjectName, term) => {
       (Array.isArray(moduleList) ? moduleList : []).forEach((module) => {
         let moduleAdded = false;
 
@@ -41,6 +41,7 @@ function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, se
           unit.topics?.forEach((topic) => {
             formattedData.push({
               key: dataIndex++,
+              term,
               subject: subjectName,
               module: module.name,
               unit: unit.name,
@@ -56,6 +57,7 @@ function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, se
           if (!unitAdded) {
             formattedData.push({
               key: dataIndex++,
+              term,
               subject: subjectName,
               module: module.name,
               unit: unit.name,
@@ -70,6 +72,7 @@ function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, se
         if (!moduleAdded) {
           formattedData.push({
             key: dataIndex++,
+            term,
             subject: subjectName,
             module: module.name,
             unit: "-",
@@ -82,9 +85,9 @@ function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, se
     };
 
     if (isDiplomaSyllabus) {
-      syllabusData.subjects.forEach((subject) => pushModules(subject.modules, subject.name));
+      syllabusData.subjects.forEach((subject) => pushModules(subject.modules, subject.name, subject.term));
     } else {
-      pushModules(modules, null);
+      pushModules(modules, null, null);
     }
 
     return formattedData;
@@ -93,6 +96,11 @@ function SyllabusList({ syllabusData, loading, statusFilter, setStatusFilter, se
   // Define table columns
   const columns = [
     ...(isDiplomaSyllabus ? [{
+      title: 'Term',
+      dataIndex: 'term',
+      key: 'term',
+      render: (term) => term ? `Term ${term}` : '-',
+    }, {
       title: 'Subject',
       dataIndex: 'subject',
       key: 'subject',

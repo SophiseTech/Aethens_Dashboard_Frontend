@@ -15,7 +15,9 @@ function useDiplomaCourseSubjects(courseId) {
       .getById(courseId)
       .then((course) =>
         setSubjectOptions(
-          (course?.subjects || []).map((s) => ({ value: s._id, label: s.name }))
+          (course?.terms || []).flatMap((term) =>
+            (term.subjects || []).map((s) => ({ value: s._id, label: `T${term.termNumber} · ${s.name}` }))
+          )
         )
       )
       .finally(() => setLoading(false));

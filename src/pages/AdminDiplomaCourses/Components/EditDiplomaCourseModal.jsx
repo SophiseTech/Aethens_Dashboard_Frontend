@@ -3,7 +3,7 @@ import { Modal, Form, Input, InputNumber, Select, message } from 'antd';
 import { useStore } from 'zustand';
 import diplomaCourseStore from '@stores/DiplomaCourseStore';
 import centerStore from '@stores/CentersStore';
-import SubjectsFormSection from './SubjectsFormSection';
+import TermsFormSection from './TermsFormSection';
 
 const { Option } = Select;
 
@@ -23,10 +23,9 @@ function EditDiplomaCourseModal({ course, visible, onCancel, onSave }) {
                 name: course.name,
                 center_id: course.center_id?._id || course.center_id,
                 fee: course.fee,
-                numberOfTerms: course.numberOfTerms,
                 duration_count: course.duration?.count,
                 duration_type: course.duration?.type || 'year',
-                subjects: course.subjects || [],
+                terms: course.terms || [],
             });
         }
     }, [visible, course, form]);
@@ -39,12 +38,11 @@ function EditDiplomaCourseModal({ course, visible, onCancel, onSave }) {
                 name: values.name,
                 center_id: values.center_id,
                 fee: values.fee,
-                numberOfTerms: values.numberOfTerms,
                 duration: {
                     count: values.duration_count,
                     type: values.duration_type,
                 },
-                subjects: values.subjects || [],
+                terms: values.terms || [],
             };
 
             await updateCourse(course._id, courseData);
@@ -103,14 +101,6 @@ function EditDiplomaCourseModal({ course, visible, onCancel, onSave }) {
                     <InputNumber min={0} placeholder="Enter total course fee" style={{ width: '100%' }} />
                 </Form.Item>
 
-                <Form.Item
-                    name="numberOfTerms"
-                    label="Number of Terms"
-                    rules={[{ required: true, message: 'Please enter the number of terms' }]}
-                >
-                    <InputNumber min={1} placeholder="Enter number of terms" style={{ width: '100%' }} />
-                </Form.Item>
-
                 <div className="flex gap-4">
                     <Form.Item
                         name="duration_count"
@@ -134,8 +124,8 @@ function EditDiplomaCourseModal({ course, visible, onCancel, onSave }) {
                     </Form.Item>
                 </div>
 
-                <Form.Item name="subjects" label="Subjects">
-                    <SubjectsFormSection />
+                <Form.Item name="terms" label="Terms">
+                    <TermsFormSection />
                 </Form.Item>
             </Form>
         </Modal>

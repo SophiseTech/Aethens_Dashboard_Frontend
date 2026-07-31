@@ -11,7 +11,7 @@ import { useStore } from 'zustand'
 
 const { Search } = Input;
 
-function SessionStatusTable({ student }) {
+function SessionStatusTable({ student, isDiploma = false, diplomaCourseId }) {
 
   const { getFacultyRemarks, facultyRemarks, loading, deleteFacultyRemark } = useStore(facultyRemarksStore)
   const { course } = useStore(courseStore);
@@ -20,10 +20,30 @@ function SessionStatusTable({ student }) {
   const [searchText, setSearchText] = useState('');
   const { user } = userStore()
 
-  const syllabusType = course?.syllabusType || 'general';
+  const syllabusType = isDiploma ? 'diploma' : (course?.syllabusType || 'general');
 
   useEffect(() => {
     if (!student?._id) return;
+
+    if (isDiploma) {
+      const filters = {
+        query: {
+          student_id: student._id,
+          diplomaCourse_id: diplomaCourseId
+        },
+        populate: "faculty_id"
+      };
+
+      if (statusFilter && statusFilter !== 'all') {
+        filters.status = statusFilter;
+      }
+      if (searchText) {
+        filters.search = searchText;
+      }
+
+      getFacultyRemarks(filters);
+      return;
+    }
 
     const courseId = student?.details_id?.course_id?._id
       || student?.details_id?.course_id
@@ -41,12 +61,6 @@ function SessionStatusTable({ student }) {
     if (statusFilter && statusFilter !== 'all') {
       filters.status = statusFilter;
     }
-    // getFacultyRemarks({ query: { student_id: student._id, course_id: student?.details_id?.course_id?._id || student?.details_id?.course_id }, populate: "faculty_id" })
-    // if (!facultyRemarks || facultyRemarks.length === 0) {
-    // }
-    // }, [student])
-
-
 
     if (searchText) {
       filters.search = searchText;
@@ -59,7 +73,7 @@ function SessionStatusTable({ student }) {
     if (courseId) {
       fetchSyllabus(student._id, courseId);
     }
-  }, [student?._id, student?.details_id?.course_id, student?.details_id?.course, statusFilter, searchText]);
+  }, [student?._id, student?.details_id?.course_id, student?.details_id?.course, isDiploma, diplomaCourseId, statusFilter, searchText]);
 
   /**
    * Resolve an image by name.
@@ -126,6 +140,23 @@ function SessionStatusTable({ student }) {
         }
       });
     } else {
+      // For diploma syllabus, show Term/Subject columns before Module/Unit/Topic
+      if (isDiploma) {
+        cols.push(
+          {
+            title: "Term",
+            dataIndex: "term",
+            key: "term",
+            render: (term) => term ? `Term ${term}` : "-"
+          },
+          {
+            title: "Subject",
+            dataIndex: "subject",
+            key: "subject"
+          }
+        );
+      }
+
       // For general syllabus, show Module/Unit/Topic columns
       cols.push(
         {
