@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "art.schoolofathens.app.twa",
+            "sha256_cert_fingerprints": [
+                "6A:5A:EB:69:CA:15:3E:DF:A7:EC:FA:4D:FF:52:7C:2E:28:76:98:26:16:C8:30:36:73:4C:2C:28:81:88:3C:61"
+            ]
+        }
+    }
+]

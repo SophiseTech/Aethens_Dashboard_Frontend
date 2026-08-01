@@ -26,3 +26,14 @@ dist-ssr
 .github/copilot-instructions.md
 nul
 package-lock.json
+gradle/*
+android*
+app-release*
+gradle*
+_gradlew.bat
+manifest-checksum.txt
+settings.gradle
+store_icon.png
+twa-manifest.json
+*.gradle
+app
