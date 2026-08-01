@@ -35,6 +35,7 @@ export default defineConfig({
 
         scope: "/",
 
+
         orientation: "portrait",
 
         icons: [
