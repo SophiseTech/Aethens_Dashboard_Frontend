@@ -36,6 +36,21 @@ import { getStudentDrawerContext } from "@utils/studentDrawerContext";
 import { isStudentDrawerContextRoute } from "@/config/studentDrawerContextRoutes";
 
 const getMenuConfig = (role) => {
+  const staffSelfServiceItems = [
+    {
+      label: "My Attendance",
+      icon: <CheckSquareOutlined />,
+      key: "my-attendance",
+      path: "/faculty/my-attendance",
+    },
+    {
+      label: "My Leaves",
+      icon: <CalendarOutlined />,
+      key: "my-leaves",
+      path: "/faculty/my-leaves",
+    },
+  ];
+
   const commonItems = [
     {
       label: "Dashboard",
@@ -135,17 +150,18 @@ const getMenuConfig = (role) => {
     },
 
     {
-      label: "Faculty",
+      label: "Staff",
       icon: <SolutionOutlined />,
       key: "faculty",
       children: [
         {
-          label: "FDP",
-          key: "fdp",
-          path: "/manager/faculty-development-program",
+          label: "All Staffs",
+          // icon: <UserOutlined />,
+          key: "staff",
+          path: "/admin/users",
         },
         {
-          label: "Faculty Attendance",
+          label: "Attendance",
           key: "faculty-attendance",
           path: "/admin/faculty-attendance",
         },
@@ -154,14 +170,14 @@ const getMenuConfig = (role) => {
           key: "manage-leaves",
           path: "/admin/manage-leaves",
         },
+        {
+          label: "FDP",
+          key: "fdp",
+          path: "/manager/faculty-development-program",
+        },
       ],
     },
-    {
-      label: "Staff",
-      icon: <UserOutlined />,
-      key: "staff",
-      path: "/admin/users",
-    },
+
     {
       label: "Centers",
       icon: <BankOutlined />,
@@ -316,6 +332,7 @@ const getMenuConfig = (role) => {
       key: "activity-gallery",
       path: "/activity-gallery",
     },
+    ...staffSelfServiceItems,
   ];
 
   const mediaManagerItems = [
@@ -327,6 +344,7 @@ const getMenuConfig = (role) => {
     { label: "Latest Videos", icon: <PictureOutlined />, key: "latest-videos", path: "/admin/latest-videos" },
     { label: "Gallery", icon: <PictureOutlined />, key: "gallery", path: "/gallery" },
     { label: "Activity Gallery", icon: <PictureOutlined />, key: "activity-gallery", path: "/activity-gallery" },
+    ...staffSelfServiceItems,
   ];
 
   const academicManagerItems = [
@@ -409,6 +427,7 @@ const getMenuConfig = (role) => {
       key: "holidays",
       path: "/manager/holidays",
     },
+    ...staffSelfServiceItems,
   ];
 
   const facultyItems = [
@@ -442,18 +461,7 @@ const getMenuConfig = (role) => {
       key: "fdp",
       path: "/faculty/faculty-development-program",
     },
-    {
-      label: "My Attendance",
-      icon: <CheckSquareOutlined />,
-      key: "my-attendance",
-      path: "/faculty/my-attendance",
-    },
-    {
-      label: "My Leaves",
-      icon: <CalendarOutlined />,
-      key: "my-leaves",
-      path: "/faculty/my-leaves",
-    },
+    ...staffSelfServiceItems,
 
     {
       label: "Payslips",
@@ -519,6 +527,18 @@ const getMenuConfig = (role) => {
       path: "/admin/users",
     },
     {
+      label: "Faculty Attendance",
+      icon: <CheckSquareOutlined />,
+      key: "faculty-attendance",
+      path: "/admin/faculty-attendance",
+    },
+    {
+      label: "Manage Leaves",
+      icon: <CalendarOutlined />,
+      key: "manage-leaves",
+      path: "/admin/manage-leaves",
+    },
+    {
       label: "Announcements",
       icon: <ClockCircleOutlined />,
       key: "announcements",
@@ -572,6 +592,7 @@ const getMenuConfig = (role) => {
       key: "ledgers",
       path: "/manager/ledgers",
     },
+    ...staffSelfServiceItems,
   ];
 
   const studentItems = [

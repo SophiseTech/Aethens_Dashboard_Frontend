@@ -13,8 +13,9 @@ import { useStore } from "zustand";
 import dayjs from "dayjs";
 import Title from "@components/layouts/Title";
 import leaveService from "@services/LeaveService";
-import userService from "@services/User";
+import usersV2Service from "@services/UsersV2";
 import centerStore from "@stores/CentersStore";
+import { STAFF_ROLES } from "@utils/constants";
 import { useSearchParams } from "react-router-dom";
 
 const { confirm } = Modal;
@@ -52,9 +53,9 @@ function AdminLeaves() {
                 return;
             }
 
-            const response = await userService.getByRoleByCenter('faculty', selectedCenter, 0, 1000);
-            console.log("Faculty response:", response);
-            setFaculties(response?.users || []);
+            const result = await usersV2Service.getAll({ role: STAFF_ROLES.join(","), center_id: selectedCenter, limit: 1000 });
+            console.log("Faculty response:", result);
+            setFaculties(result?.data || []);
             // Reset faculty filter when center changes
             setFacultyFilter("ALL");
         } catch (error) {

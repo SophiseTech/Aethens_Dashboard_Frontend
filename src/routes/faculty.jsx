@@ -1,6 +1,6 @@
 import Protected from "@components/layouts/Protected";
 import SidebarLayout from "@components/layouts/Sidebar";
-import { ROLES } from "@utils/constants";
+import { ROLES, SELF_ATTENDANCE_ROLES } from "@utils/constants";
 import { Spin } from "antd";
 import { lazy, Suspense } from "react";
 import { useLocation } from "react-router-dom";
@@ -110,16 +110,6 @@ export const facultyRoutes = [
             title: "Materials"
           },
           {
-            path: "/faculty/my-attendance",
-            element: <LazyLoader element={<MyAttendance />} />,
-            title: "My Attendance"
-          },
-          {
-            path: "/faculty/my-leaves",
-            element: <LazyLoader element={<MyLeaves />} />,
-            title: "My Leaves"
-          },
-          {
             path: "/faculty/session-status/:studentId",
             element: <LazyLoader element={<AddSessionStatus />} />,
             title: "Add Session Status"
@@ -150,6 +140,26 @@ export const facultyRoutes = [
               <LazyLoader element={<PhaseDetails />} />
             ),
             title: "Slots",
+          },
+        ]
+      }
+    ]
+  },
+  {
+    element: <Protected roles={SELF_ATTENDANCE_ROLES} />,
+    children: [
+      {
+        element: <SidebarLayout />,
+        children: [
+          {
+            path: "/faculty/my-attendance",
+            element: <LazyLoader element={<MyAttendance />} />,
+            title: "My Attendance"
+          },
+          {
+            path: "/faculty/my-leaves",
+            element: <LazyLoader element={<MyLeaves />} />,
+            title: "My Leaves"
           },
         ]
       }

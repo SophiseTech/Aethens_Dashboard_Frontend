@@ -314,7 +314,7 @@ export const generalRoutes = [
     ],
   },
   {
-    element: <Protected roles={[ROLES.ADMIN]} />,
+    element: <Protected roles={[ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]} />,
 
     children: [
       {

@@ -15,11 +15,12 @@ import Title from "@components/layouts/Title";
 import DailySwipes from "@pages/FacultyAttendance/Components/DailySwipes";
 import AttendanceCalendar from "@pages/FacultyAttendance/Components/AttendanceCalendar";
 import attendanceService from "@services/AttendanceService";
-import userService from "@services/User";
+import usersV2Service from "@services/UsersV2";
 import leaveService from "@services/LeaveService";
 import holidayService from "@services/Holiday";
 import centerStore from "@stores/CentersStore";
 import userStore from "@stores/UserStore";
+import { STAFF_ROLES } from "@utils/constants";
 import { useSearchParams } from "react-router-dom";
 
 function AdminFacultyAttendance() {
@@ -95,9 +96,9 @@ function AdminFacultyAttendance() {
     const fetchFaculties = async () => {
         try {
             setLoading(true);
-            // Use getByRoleByCenter with 'faculty' role and selected centerId
-            const response = await userService.getByRoleByCenter('faculty', selectedCenter, 0, 1000);
-            const facultyUsers = response?.users || [];
+            // Fetch every non-student staff member for the selected center
+            const result = await usersV2Service.getAll({ role: STAFF_ROLES.join(","), center_id: selectedCenter || "all", limit: 1000 });
+            const facultyUsers = result?.data || [];
             setFaculties(facultyUsers);
 
             // Only reset if there's no pre-selected faculty from the URL query param

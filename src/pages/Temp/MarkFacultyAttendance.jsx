@@ -12,14 +12,14 @@ function MarkFacultyAttendance() {
   };
 
   return (
-    <Card title="Mark Faculty Attendance" className="max-w-md mx-auto mt-10 shadow-lg">
+    <Card title="Mark Staff Attendance" className="max-w-md mx-auto mt-10 shadow-lg">
       <Form layout="vertical" onFinish={onFinish}>
         <Form.Item
           label="Email"
           name="email"
           rules={[{ required: true, message: 'Please enter an email' }]}
         >
-          <Input placeholder="Enter email" />
+          <Input placeholder="Enter your staff email" />
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" loading={submitLoading} block>

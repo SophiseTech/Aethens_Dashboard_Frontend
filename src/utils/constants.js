@@ -8,6 +8,14 @@ export const ROLES = {
   MEDIA_MANAGER: "media_manager"
 }
 
+// Every non-student role. Derived from ROLES so any future role is
+// automatically included without needing a separate edit here.
+export const STAFF_ROLES = Object.values(ROLES).filter((r) => r !== ROLES.STUDENT);
+
+// Staff roles that get a personal "My Attendance"/"My Leaves" self-service view.
+// Admin is excluded since they already manage everyone via the admin pages.
+export const SELF_ATTENDANCE_ROLES = STAFF_ROLES.filter((r) => r !== ROLES.ADMIN);
+
 export const imageCategories = [
   { value: "nature & landscapes", label: "nature & landscapes" },
   { value: "wildlife & animals", label: "wildlife & animals" },

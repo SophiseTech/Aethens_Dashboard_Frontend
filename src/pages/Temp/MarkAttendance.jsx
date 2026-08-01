@@ -14,13 +14,13 @@ function MarkAttendance() {
   
   const getStudentsByCenter = studentStore(state => state.getStudentsByCenter);
   const students = studentStore(state => state.students);
-  
-  const getFacultiesByCenter = facultyStore(state => state.getFacultiesByCenter);
-  const faculties = facultyStore(state => state.faculties);
+
+  const getStaffByCenter = facultyStore(state => state.getStaffByCenter);
+  const staff = facultyStore(state => state.staff);
 
   useEffect(() => {
     getStudentsByCenter(0);
-    getFacultiesByCenter(100);
+    getStaffByCenter(100);
   }, []);
 
   const onFinish = async (values) => {
@@ -31,10 +31,10 @@ function MarkAttendance() {
       await markAttendance(selectedStudent?.details_id?.admissionNumber);
       form.resetFields(['targetId']);
     } else {
-      const selectedFaculty = faculties.find(faculty => faculty._id === values.targetId);
-      if(!selectedFaculty) return handleError("No such faculty exists");
+      const selectedStaff = staff.find(member => member._id === values.targetId);
+      if(!selectedStaff) return handleError("No such staff member exists");
       const timestamp = new Date().toISOString();
-      await processSwipe(selectedFaculty._id, timestamp);
+      await processSwipe(selectedStaff._id, timestamp);
       form.resetFields(['targetId']);
     }
   };
@@ -48,21 +48,21 @@ function MarkAttendance() {
     if (attendanceType === 'student') {
       return students?.map(student => ({ label: student.username, value: student._id }));
     } else {
-      return faculties?.map(faculty => ({ label: faculty.username || faculty.email, value: faculty._id }));
+      return staff?.map(member => ({ label: member.username || member.email, value: member._id }));
     }
-  }, [students, faculties, attendanceType]);
+  }, [students, staff, attendanceType]);
 
   return (
     <Card title="Mark Attendance" className="max-w-md mx-auto mt-10 shadow-lg">
       <div className="mb-6 flex justify-center">
         <Radio.Group value={attendanceType} onChange={onTypeChange} buttonStyle="solid">
           <Radio.Button value="student">Student</Radio.Button>
-          <Radio.Button value="faculty">Faculty</Radio.Button>
+          <Radio.Button value="staff">Staff</Radio.Button>
         </Radio.Group>
       </div>
       <Form form={form} layout="vertical" onFinish={onFinish}>
         <Form.Item
-          label={attendanceType === 'student' ? 'Student Name' : 'Faculty Name'}
+          label={attendanceType === 'student' ? 'Student Name' : 'Staff Name'}
           name="targetId"
           rules={[{ required: true, message: 'Please select a person' }]}
         >
@@ -72,7 +72,7 @@ function MarkAttendance() {
             filterOption={(inputValue, option) =>
               option?.label?.toLowerCase().includes(inputValue.toLowerCase())
             }
-            placeholder={attendanceType === 'student' ? 'Search Student...' : 'Search Faculty...'}
+            placeholder={attendanceType === 'student' ? 'Search Student...' : 'Search Staff...'}
           />
         </Form.Item>
         <Form.Item>
