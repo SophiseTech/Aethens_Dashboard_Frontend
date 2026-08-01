@@ -4,7 +4,8 @@ export const ROLES = {
   ADMIN: "admin",
   FACULTY: "faculty",
   OPERATIONS_MANAGER: "operations_manager",
-  ACADEMIC_MANAGER: "academic_manager"
+  ACADEMIC_MANAGER: "academic_manager",
+  MEDIA_MANAGER: "media_manager"
 }
 
 export const imageCategories = [
@@ -285,7 +286,8 @@ export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
 export const GLOBAL_USER_ROLES = [
   ROLES.ADMIN,
   ROLES.OPERATIONS_MANAGER,
-  ROLES.ACADEMIC_MANAGER
+  ROLES.ACADEMIC_MANAGER,
+  ROLES.MEDIA_MANAGER
 ]
 
 export const DIPLOMA_APPLY_URL = "https://app.schoolofathens.art/diploma/apply"

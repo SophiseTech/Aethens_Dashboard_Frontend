@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Row, Col, Card, Statistic, Spin, message, Select, Modal, Button, TimePicker } from "antd";
+import { Row, Col, Card, Statistic, Spin, message, Select, Modal, Button, TimePicker, Form, DatePicker, Input } from "antd";
 import {
     CheckCircleOutlined,
     ClockCircleOutlined,
@@ -45,6 +45,11 @@ function AdminFacultyAttendance() {
     const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
     const [adjustSessions, setAdjustSessions] = useState([]);
     const [adjustConfirmLoading, setAdjustConfirmLoading] = useState(false);
+
+    // Add leave states
+    const [isAddLeaveModalOpen, setIsAddLeaveModalOpen] = useState(false);
+    const [addLeaveLoading, setAddLeaveLoading] = useState(false);
+    const [addLeaveForm] = Form.useForm();
 
     // Fetch holidays on mount and when center changes
     useEffect(() => {
@@ -330,6 +335,35 @@ function AdminFacultyAttendance() {
         }
     };
 
+    const handleOpenAddLeaveModal = () => {
+        addLeaveForm.resetFields();
+        setIsAddLeaveModalOpen(true);
+    };
+
+    const handleAddLeave = async (values) => {
+        const [fromDate, toDate] = values.dateRange;
+
+        try {
+            setAddLeaveLoading(true);
+            await leaveService.addLeaveForFaculty({
+                facultyId: selectedFaculty,
+                fromDate: fromDate.format("YYYY-MM-DD"),
+                toDate: toDate.format("YYYY-MM-DD"),
+                leaveType: values.leaveType,
+                reason: values.reason
+            });
+
+            message.success("Leave added successfully");
+            setIsAddLeaveModalOpen(false);
+            addLeaveForm.resetFields();
+            fetchMonthlyData();
+        } catch (error) {
+            console.error("Add leave error:", error);
+        } finally {
+            setAddLeaveLoading(false);
+        }
+    };
+
     const stats = monthlyData?.stats || {
         totalDays: 0,
         fullDays: 0,
@@ -347,23 +381,34 @@ function AdminFacultyAttendance() {
                 <div className="space-y-6">
                     {/* Faculty Selector */}
                     <Card>
-                        <div className="flex items-center gap-4">
-                            <label style={{ fontWeight: 500, minWidth: 100 }}>Select Faculty:</label>
-                            <Select
-                                showSearch
-                                style={{ width: 350 }}
-                                placeholder="Select a faculty"
-                                value={selectedFaculty}
-                                onChange={setSelectedFaculty}
-                                optionFilterProp="children"
-                                filterOption={(input, option) =>
-                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                }
-                                options={faculties.map(faculty => ({
-                                    value: faculty._id,
-                                    label: `${faculty.username} (${faculty.email})`
-                                }))}
-                            />
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-4">
+                                <label style={{ fontWeight: 500, minWidth: 100 }}>Select Faculty:</label>
+                                <Select
+                                    showSearch
+                                    style={{ width: 350 }}
+                                    placeholder="Select a faculty"
+                                    value={selectedFaculty}
+                                    onChange={setSelectedFaculty}
+                                    optionFilterProp="children"
+                                    filterOption={(input, option) =>
+                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                    }
+                                    options={faculties.map(faculty => ({
+                                        value: faculty._id,
+                                        label: `${faculty.username} (${faculty.email})`
+                                    }))}
+                                />
+                            </div>
+                            {selectedFaculty && (
+                                <Button
+                                    type="primary"
+                                    icon={<PlusOutlined />}
+                                    onClick={handleOpenAddLeaveModal}
+                                >
+                                    Add Leave
+                                </Button>
+                            )}
                         </div>
                     </Card>
 
@@ -553,6 +598,74 @@ function AdminFacultyAttendance() {
                                 Add Swipe Session
                             </Button>
                         </div>
+                    </Modal>
+
+                    {/* Add Leave Modal */}
+                    <Modal
+                        title={
+                            <div className="border-b pb-3">
+                                <span className="text-lg font-semibold">Add Leave</span>
+                                <div className="text-xs text-gray-500 mt-1 font-normal">
+                                    Faculty: <strong className="text-gray-700">{selectedFacultyInfo?.username}</strong> ({selectedFacultyInfo?.email})
+                                </div>
+                            </div>
+                        }
+                        open={isAddLeaveModalOpen}
+                        onOk={() => addLeaveForm.submit()}
+                        onCancel={() => setIsAddLeaveModalOpen(false)}
+                        confirmLoading={addLeaveLoading}
+                        okText="Add Leave"
+                        cancelText="Cancel"
+                        destroyOnClose
+                    >
+                        <Form
+                            form={addLeaveForm}
+                            layout="vertical"
+                            onFinish={handleAddLeave}
+                            className="mt-4"
+                        >
+                            <Form.Item
+                                name="dateRange"
+                                label="Leave Duration"
+                                rules={[
+                                    { required: true, message: "Please select leave duration" }
+                                ]}
+                            >
+                                <DatePicker.RangePicker
+                                    style={{ width: "100%" }}
+                                    format="DD-MM-YYYY"
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="leaveType"
+                                label="Leave Type"
+                                rules={[
+                                    { required: true, message: "Please select leave type" }
+                                ]}
+                            >
+                                <Select placeholder="Select leave type">
+                                    <Select.Option value="CASUAL">Casual Leave</Select.Option>
+                                    <Select.Option value="SICK">Sick Leave</Select.Option>
+                                    <Select.Option value="PERMISSION">Permission</Select.Option>
+                                </Select>
+                            </Form.Item>
+
+                            <Form.Item
+                                name="reason"
+                                label="Reason"
+                                rules={[
+                                    { max: 500, message: "Reason cannot exceed 500 characters" }
+                                ]}
+                            >
+                                <Input.TextArea
+                                    rows={4}
+                                    placeholder="Enter reason for leave"
+                                    maxLength={500}
+                                    showCount
+                                />
+                            </Form.Item>
+                        </Form>
                     </Modal>
                 </div>
             </Spin>

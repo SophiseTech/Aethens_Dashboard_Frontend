@@ -318,6 +318,17 @@ const getMenuConfig = (role) => {
     },
   ];
 
+  const mediaManagerItems = [
+    { label: "Blog Posts", icon: <FileTextOutlined />, key: "blog-posts", path: "/admin/blog-posts" },
+    { label: "Newsletters", icon: <FileTextOutlined />, key: "newsletters", path: "/admin/newsletters" },
+    { label: "Shop Items", icon: <ShopOutlined />, key: "shop-items", path: "/admin/shop-items" },
+    { label: "Art Works", icon: <PictureOutlined />, key: "art-works", path: "/admin/art-works" },
+    { label: "Student of the Week", icon: <PictureOutlined />, key: "student-of-week", path: "/admin/student-of-the-week" },
+    { label: "Latest Videos", icon: <PictureOutlined />, key: "latest-videos", path: "/admin/latest-videos" },
+    { label: "Gallery", icon: <PictureOutlined />, key: "gallery", path: "/gallery" },
+    { label: "Activity Gallery", icon: <PictureOutlined />, key: "activity-gallery", path: "/activity-gallery" },
+  ];
+
   const academicManagerItems = [
     {
       label: "Students",
@@ -627,6 +638,8 @@ const getMenuConfig = (role) => {
       return [...commonItems, ...operationsManagerItems];
     case ROLES.STUDENT:
       return [...commonItems, ...studentItems];
+    case ROLES.MEDIA_MANAGER:
+      return [...commonItems, ...mediaManagerItems];
     default:
       return commonItems;
   }

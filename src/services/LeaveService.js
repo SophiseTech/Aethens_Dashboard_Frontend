@@ -61,6 +61,40 @@ class LeaveService {
     }
 
     /**
+     * Add a leave directly for a faculty member (admin only, auto-approved)
+     * @param {Object} leaveData - Leave data
+     * @param {string} leaveData.facultyId - Faculty user ID
+     * @param {string} leaveData.fromDate - Start date (YYYY-MM-DD)
+     * @param {string} leaveData.toDate - End date (YYYY-MM-DD)
+     * @param {string} leaveData.leaveType - CASUAL | SICK | PERMISSION
+     * @param {string} leaveData.reason - Reason for leave
+     * @returns {Promise} Created leave record
+     */
+    async addLeaveForFaculty(leaveData) {
+        try {
+            const { facultyId, fromDate, toDate, leaveType, reason } = leaveData;
+
+            if (!facultyId || !fromDate || !toDate || !leaveType) {
+                throw new Error("Please fill all required fields");
+            }
+
+            const response = await post("/v2/leave/admin/add", {
+                facultyId,
+                fromDate,
+                toDate,
+                leaveType,
+                reason
+            });
+
+            if (!response || !response.data) throw new Error("An error occurred. Please try again");
+            return response.data;
+        } catch (error) {
+            handleError(error);
+            throw error;
+        }
+    }
+
+    /**
      * Approve a leave application (admin only)
      * @param {string} leaveId - ID of the leave to approve
      * @returns {Promise} Updated leave record

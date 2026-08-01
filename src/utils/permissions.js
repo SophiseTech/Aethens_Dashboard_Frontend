@@ -78,40 +78,40 @@ const permissions = {
     view: [ROLES.ADMIN]
   },
   adminBlogPost: {
-    view: [ROLES.ADMIN],
-    add: [ROLES.ADMIN],
-    edit: [ROLES.ADMIN],
-    delete: [ROLES.ADMIN]
+    view: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    add: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    edit: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    delete: [ROLES.ADMIN, ROLES.MEDIA_MANAGER]
   },
   adminNewsletter: {
-    view: [ROLES.ADMIN],
-    add: [ROLES.ADMIN],
-    edit: [ROLES.ADMIN],
-    delete: [ROLES.ADMIN]
+    view: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    add: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    edit: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    delete: [ROLES.ADMIN, ROLES.MEDIA_MANAGER]
   },
   adminShopItem: {
-    view: [ROLES.ADMIN],
-    add: [ROLES.ADMIN],
-    edit: [ROLES.ADMIN],
-    delete: [ROLES.ADMIN]
+    view: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    add: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    edit: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    delete: [ROLES.ADMIN, ROLES.MEDIA_MANAGER]
   },
   adminArtWork: {
-    view: [ROLES.ADMIN],
-    add: [ROLES.ADMIN],
-    edit: [ROLES.ADMIN],
-    delete: [ROLES.ADMIN]
+    view: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    add: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    edit: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    delete: [ROLES.ADMIN, ROLES.MEDIA_MANAGER]
   },
   adminStudentOfTheWeek: {
-    view: [ROLES.ADMIN],
-    add: [ROLES.ADMIN],
-    edit: [ROLES.ADMIN],
-    delete: [ROLES.ADMIN]
+    view: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    add: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    edit: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    delete: [ROLES.ADMIN, ROLES.MEDIA_MANAGER]
   },
   adminLatestVideos: {
-    view: [ROLES.ADMIN],
-    add: [ROLES.ADMIN],
-    edit: [ROLES.ADMIN],
-    delete: [ROLES.ADMIN]
+    view: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    add: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    edit: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
+    delete: [ROLES.ADMIN, ROLES.MEDIA_MANAGER]
   },
   session_status: {
     delete: [ROLES.ADMIN]

@@ -93,7 +93,7 @@ export const generalRoutes = [
     title: "Terms and Conditions | School Of Athens",
   },
   {
-    element: <Protected roles={[ROLES.STUDENT, ROLES.MANAGER, ROLES.FACULTY, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER]} />,
+    element: <Protected roles={[ROLES.STUDENT, ROLES.MANAGER, ROLES.FACULTY, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER, ROLES.MEDIA_MANAGER]} />,
     children: [
       {
         element: <SidebarLayout />,
@@ -130,7 +130,7 @@ export const generalRoutes = [
     ],
   },
   {
-    element: <Protected roles={[ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN]} />,
+    element: <Protected roles={[ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN, ROLES.MEDIA_MANAGER]} />,
     children: [
       {
         element: <SidebarLayout />,
@@ -149,7 +149,7 @@ export const generalRoutes = [
     ],
   },
   {
-    element: <Protected roles={[ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER]} />,
+    element: <Protected roles={[ROLES.FACULTY, ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER, ROLES.MEDIA_MANAGER]} />,
     children: [
       {
         element: <SidebarLayout />,
@@ -386,7 +386,61 @@ export const generalRoutes = [
             ),
             title: "Centers",
           },
-
+          {
+            path: "/admin/courses",
+            element: (
+              <LazyLoader>
+                <AdminCourses />
+              </LazyLoader>
+            ),
+            title: "Courses",
+          },
+          {
+            path: "/admin/diploma-courses",
+            element: (
+              <LazyLoader>
+                <AdminDiplomaCourses />
+              </LazyLoader>
+            ),
+            title: "Diploma Courses",
+          },
+          {
+            path: "/admin/diploma-batches",
+            element: (
+              <LazyLoader>
+                <AdminDiplomaBatches />
+              </LazyLoader>
+            ),
+            title: "Diploma Batches",
+          },
+          {
+            path: "/admin/diploma-intakes",
+            element: (
+              <LazyLoader>
+                <AdminDiplomaIntakes />
+              </LazyLoader>
+            ),
+            title: "Diploma Intakes",
+          },
+          {
+            path: "/admin/diploma-timetable",
+            element: (
+              <LazyLoader>
+                <AdminDiplomaTimetable />
+              </LazyLoader>
+            ),
+            title: "Diploma Timetable",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    element: <Protected roles={[ROLES.ADMIN, ROLES.MEDIA_MANAGER]} />,
+    children: [
+      {
+        element: <SidebarLayout />,
+        children: [
           {
             path: "/admin/blog-posts",
             element: (
@@ -530,51 +584,6 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Latest Videos",
-          },
-          {
-            path: "/admin/courses",
-            element: (
-              <LazyLoader>
-                <AdminCourses />
-              </LazyLoader>
-            ),
-            title: "Courses",
-          },
-          {
-            path: "/admin/diploma-courses",
-            element: (
-              <LazyLoader>
-                <AdminDiplomaCourses />
-              </LazyLoader>
-            ),
-            title: "Diploma Courses",
-          },
-          {
-            path: "/admin/diploma-batches",
-            element: (
-              <LazyLoader>
-                <AdminDiplomaBatches />
-              </LazyLoader>
-            ),
-            title: "Diploma Batches",
-          },
-          {
-            path: "/admin/diploma-intakes",
-            element: (
-              <LazyLoader>
-                <AdminDiplomaIntakes />
-              </LazyLoader>
-            ),
-            title: "Diploma Intakes",
-          },
-          {
-            path: "/admin/diploma-timetable",
-            element: (
-              <LazyLoader>
-                <AdminDiplomaTimetable />
-              </LazyLoader>
-            ),
-            title: "Diploma Timetable",
           },
         ],
       },

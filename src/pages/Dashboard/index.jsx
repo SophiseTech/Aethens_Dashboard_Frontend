@@ -3,6 +3,7 @@ import userStore from '@stores/UserStore';
 import { ROLES } from '@utils/constants';
 import { Spin } from 'antd';
 import { lazy, Suspense } from 'react';
+import { Navigate } from 'react-router-dom';
 import AcademicManager from './AcademicManager';
 
 // ✅ Define lazy imports ONCE here
@@ -28,6 +29,8 @@ function Dashboard() {
         return <Admin />;
       case ROLES.ACADEMIC_MANAGER:
         return <AcademicManager />;
+      case ROLES.MEDIA_MANAGER:
+        return <Navigate to="/admin/blog-posts" replace />;
       default:
         return <p>404</p>;
     }
