@@ -3,6 +3,7 @@ import { Skeleton } from 'antd';
 import useStudentDashboardView from '@hooks/business/useStudentDashboardView';
 
 const Attendance = lazy(() => import('@pages/Dashboard/widgets/Attendance'));
+const DiplomaTimetable = lazy(() => import('@pages/Dashboard/widgets/DiplomaTimetable'));
 const CourseStat = lazy(() => import('@pages/Dashboard/widgets/CourseStat'));
 const Transaction = lazy(() => import('@pages/Dashboard/widgets/Transaction'));
 const Updates = lazy(() => import('@pages/Dashboard/widgets/Updates'));
@@ -11,13 +12,14 @@ const Announcement = lazy(() => import('@pages/Dashboard/widgets/Announcement'))
 function Student() {
 
   const { dashboardInfo } = useStudentDashboardView()
+  const ScheduleWidget = dashboardInfo.isDiploma ? DiplomaTimetable : Attendance
 
   return (
     <>
       {/* Desktop */}
       <div className='flex gap-5 flex-1 pb-5 pr-5 items-start min-h-full h-auto max-lg:hidden'>
         <Suspense fallback={<Loader />}>
-          <Attendance />
+          <ScheduleWidget />
           <div className='flex-1 flex flex-col gap-5 min-h-full h-auto'>
             <CourseStat finalProject={dashboardInfo.finalProject} />
             <div className='flex gap-5'>
@@ -37,7 +39,7 @@ function Student() {
           <div className='flex gap-5 flex-col md:flex-row'>
             <CourseStat finalProject={dashboardInfo.finalProject} />
             <Announcement />
-            <Attendance />
+            <ScheduleWidget />
           </div>
           <Updates />
           <Transaction />

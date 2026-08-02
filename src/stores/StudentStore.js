@@ -27,6 +27,10 @@ const studentStore = create((set, get) => ({
   projectOpenedStudents: [],
   activeStudent: null,
   reusableIdCards: [],
+  enrollment: null,
+  enrollmentLoading: false,
+  timetable: { batch: null, term: null, slots: [], holidays: [] },
+  timetableLoading: false,
 
   getStudentsByCenter: async (limit = 10, page = 1, status = null, courseId = null, fromBranch = null, toBranch = null) => {
     try {
@@ -186,6 +190,29 @@ const studentStore = create((set, get) => ({
       handleInternalError(error);
     } finally {
       set({ loading: false });
+    }
+  },
+  getMyEnrollment: async (userId) => {
+    try {
+      set({ enrollmentLoading: true });
+      const enrollment = await enrollmentService.getMyEnrollment(userId);
+      set({ enrollment: enrollment || null });
+      return enrollment;
+    } catch (error) {
+      handleInternalError(error);
+    } finally {
+      set({ enrollmentLoading: false });
+    }
+  },
+  getMyTimetable: async (month, year) => {
+    try {
+      set({ timetableLoading: true });
+      const timetable = await studentService.getMyTimetable({ month, year });
+      set({ timetable: timetable || { batch: null, term: null, slots: [], holidays: [] } });
+    } catch (error) {
+      handleInternalError(error);
+    } finally {
+      set({ timetableLoading: false });
     }
   },
   search: async (limit, filters = {}, page = 1) => {
