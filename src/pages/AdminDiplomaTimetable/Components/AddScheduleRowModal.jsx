@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Modal, Form, Select, TimePicker, Button, message } from 'antd';
+import { Modal, Form, Select, TimePicker, DatePicker, Button, message } from 'antd';
+import dayjs from 'dayjs';
 import { PlusOutlined } from '@ant-design/icons';
 import { useStore } from 'zustand';
 import batchScheduleStore from '@stores/BatchScheduleStore';
@@ -53,10 +54,18 @@ function AddScheduleRowModal({ batchId }) {
                 end_time: values.time_range?.[1]?.toDate(),
                 faculty_id: values.facultyId,
                 subject_id: values.subjectId,
+                termStartDate: values.termDateRange?.[0]?.toDate(),
+                termEndDate: values.termDateRange?.[1]?.toDate(),
             };
 
-            await create(scheduleData);
-            message.success('Schedule row added successfully');
+            const result = await create(scheduleData);
+            if (result?.reusedTermDates) {
+                message.info(
+                    `This term's dates are already set to ${dayjs(result.termStartDate).format('D MMM YYYY')} – ${dayjs(result.termEndDate).format('D MMM YYYY')}; using those instead.`
+                );
+            } else {
+                message.success('Schedule row added successfully');
+            }
             handleCancel();
         } catch (error) {
             if (error.errorFields) {
@@ -120,6 +129,15 @@ function AddScheduleRowModal({ batchId }) {
                             options={subjectOptions}
                             disabled={!selectedCourseId}
                         />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="termDateRange"
+                        label="Term Start / End Date"
+                        tooltip="Only used if this is the first row created for this term — if the term already has rows, its existing dates are kept."
+                        rules={[{ required: true, message: 'Please select the term start and end date' }]}
+                    >
+                        <DatePicker.RangePicker style={{ width: '100%' }} />
                     </Form.Item>
 
                     <Form.Item

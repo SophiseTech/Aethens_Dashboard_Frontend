@@ -16,9 +16,9 @@ class BatchScheduleService {
     }
   }
 
-  async deactivateTerm({ diplomaBatch_id, term }) {
+  async advanceTerm({ diplomaBatch_id, term }) {
     try {
-      const response = await post("/v2/batch-schedule/deactivate-term", { diplomaBatch_id, term });
+      const response = await post("/v2/batch-schedule/advance-term", { diplomaBatch_id, term });
       if (!response?.data) throw new Error("An error occurred. Please try again");
       return response.data;
     } catch (error) {

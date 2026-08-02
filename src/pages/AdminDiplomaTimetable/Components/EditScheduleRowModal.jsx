@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Modal, Form, Select, TimePicker, Typography, message } from 'antd';
+import { Modal, Form, Select, TimePicker, DatePicker, Typography, message } from 'antd';
 import { useStore } from 'zustand';
 import dayjs from 'dayjs';
 import batchScheduleStore from '@stores/BatchScheduleStore';
@@ -30,6 +30,9 @@ function EditScheduleRowModal({ schedule, batchId, visible, onCancel, onSave }) 
                 time_range: schedule.start_time && schedule.end_time
                     ? [dayjs(schedule.start_time), dayjs(schedule.end_time)]
                     : undefined,
+                termDateRange: schedule.termStartDate && schedule.termEndDate
+                    ? [dayjs(schedule.termStartDate), dayjs(schedule.termEndDate)]
+                    : undefined,
                 facultyId: schedule.faculty_id?._id || schedule.faculty_id,
                 centerId: schedule.center_id?._id || schedule.center_id,
             });
@@ -46,10 +49,12 @@ function EditScheduleRowModal({ schedule, batchId, visible, onCancel, onSave }) 
                 end_time: values.time_range?.[1]?.toDate(),
                 faculty_id: values.facultyId,
                 center_id: values.centerId,
+                termStartDate: values.termDateRange?.[0]?.toDate(),
+                termEndDate: values.termDateRange?.[1]?.toDate(),
             };
 
             await update(schedule._id, scheduleData, batchId);
-            message.success('Schedule row updated successfully');
+            message.success('Schedule row updated successfully — term dates apply to every row in this term');
             onSave();
             form.resetFields();
         } catch (error) {
@@ -104,6 +109,14 @@ function EditScheduleRowModal({ schedule, batchId, visible, onCancel, onSave }) 
                     rules={[{ required: true, message: 'Please select the class time' }]}
                 >
                     <TimePicker.RangePicker use12Hours format="h:mm A" style={{ width: '100%' }} />
+                </Form.Item>
+
+                <Form.Item
+                    name="termDateRange"
+                    label="Term Start / End Date"
+                    tooltip="Changing this updates every row in this term, not just this one."
+                >
+                    <DatePicker.RangePicker style={{ width: '100%' }} />
                 </Form.Item>
 
                 <Form.Item

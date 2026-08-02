@@ -18,7 +18,7 @@ function BatchScheduleManager() {
     const [advancing, setAdvancing] = useState(false);
 
     const { batchOptions, loading: loadingBatches } = useDiplomaBatches({ enabled: true });
-    const { batchSchedules, loading, getByBatch, deactivateTerm } = batchScheduleStore();
+    const { batchSchedules, loading, getByBatch, advanceTerm } = batchScheduleStore();
 
     useEffect(() => {
         if (selectedBatchId) getByBatch(selectedBatchId, { includeInactive });
@@ -49,8 +49,12 @@ function BatchScheduleManager() {
     const handleAdvanceTerm = async () => {
         try {
             setAdvancing(true);
-            await deactivateTerm({ diplomaBatch_id: selectedBatchId, term: selectedTerm });
-            message.success(`Term ${selectedTerm} deactivated`);
+            const result = await advanceTerm({ diplomaBatch_id: selectedBatchId, term: selectedTerm });
+            if (result?.nextTermConfigured) {
+                message.success(`Term ${selectedTerm} deactivated — generated ${result.generatedSlots} slot(s) for Term ${selectedTerm + 1}`);
+            } else {
+                message.success(`Term ${selectedTerm} deactivated — Term ${selectedTerm + 1} not configured yet`);
+            }
             setSelectedTerm(selectedTerm + 1);
         } catch (error) {
             // handled by store

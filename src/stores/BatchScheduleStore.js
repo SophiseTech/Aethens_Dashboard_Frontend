@@ -20,10 +20,10 @@ const batchScheduleStore = create((set, get) => ({
     }
   },
 
-  deactivateTerm: async (payload) => {
+  advanceTerm: async (payload) => {
     try {
       set({ loading: true })
-      const response = await batchScheduleService.deactivateTerm(payload)
+      const response = await batchScheduleService.advanceTerm(payload)
       if (payload.diplomaBatch_id) {
         await get().getByBatch(payload.diplomaBatch_id, get().activeFilters)
       }
