@@ -5,6 +5,7 @@ import useStudentDashboardView from '@hooks/business/useStudentDashboardView';
 const Attendance = lazy(() => import('@pages/Dashboard/widgets/Attendance'));
 const DiplomaTimetable = lazy(() => import('@pages/Dashboard/widgets/DiplomaTimetable'));
 const CourseStat = lazy(() => import('@pages/Dashboard/widgets/CourseStat'));
+const DiplomaCourseStat = lazy(() => import('@pages/Dashboard/widgets/DiplomaCourseStat'));
 const Transaction = lazy(() => import('@pages/Dashboard/widgets/Transaction'));
 const Updates = lazy(() => import('@pages/Dashboard/widgets/Updates'));
 const Announcement = lazy(() => import('@pages/Dashboard/widgets/Announcement'));
@@ -13,6 +14,7 @@ function Student() {
 
   const { dashboardInfo } = useStudentDashboardView()
   const ScheduleWidget = dashboardInfo.isDiploma ? DiplomaTimetable : Attendance
+  const CourseStatWidget = dashboardInfo.isDiploma ? DiplomaCourseStat : CourseStat
 
   return (
     <>
@@ -21,7 +23,7 @@ function Student() {
         <Suspense fallback={<Loader />}>
           <ScheduleWidget />
           <div className='flex-1 flex flex-col gap-5 min-h-full h-auto'>
-            <CourseStat finalProject={dashboardInfo.finalProject} />
+            <CourseStatWidget finalProject={dashboardInfo.finalProject} />
             <div className='flex gap-5'>
               <div className='w-1/2 flex flex-col gap-5'>
                 <Announcement />
@@ -37,7 +39,7 @@ function Student() {
       <Suspense fallback={<Loader />}>
         <div className='flex gap-5 flex-col lg:hidden'>
           <div className='flex gap-5 flex-col md:flex-row'>
-            <CourseStat finalProject={dashboardInfo.finalProject} />
+            <CourseStatWidget finalProject={dashboardInfo.finalProject} />
             <Announcement />
             <ScheduleWidget />
           </div>

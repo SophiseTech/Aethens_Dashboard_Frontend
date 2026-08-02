@@ -235,6 +235,16 @@ class StudentService {
     }
   }
 
+  async getMyDiplomaSummary() {
+    try {
+      const response = await get(`/v2/students/me/diploma-summary`);
+      if (!response) throw new Error("An error occured. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
 }
 
 const studentService = new StudentService();

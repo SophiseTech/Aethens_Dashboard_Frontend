@@ -31,6 +31,8 @@ const studentStore = create((set, get) => ({
   enrollmentLoading: false,
   timetable: { batch: null, term: null, slots: [], holidays: [] },
   timetableLoading: false,
+  diplomaSummary: null,
+  diplomaSummaryLoading: false,
 
   getStudentsByCenter: async (limit = 10, page = 1, status = null, courseId = null, fromBranch = null, toBranch = null) => {
     try {
@@ -202,6 +204,17 @@ const studentStore = create((set, get) => ({
       handleInternalError(error);
     } finally {
       set({ enrollmentLoading: false });
+    }
+  },
+  getMyDiplomaSummary: async () => {
+    try {
+      set({ diplomaSummaryLoading: true });
+      const summary = await studentService.getMyDiplomaSummary();
+      set({ diplomaSummary: summary || null });
+    } catch (error) {
+      handleInternalError(error);
+    } finally {
+      set({ diplomaSummaryLoading: false });
     }
   },
   getMyTimetable: async (month, year) => {
