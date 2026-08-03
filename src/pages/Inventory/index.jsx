@@ -21,7 +21,13 @@ function Inventory() {
 
   const isAdmin = user?.role === ROLES.ADMIN;
   const isOpsManager = user?.role === ROLES.OPERATIONS_MANAGER;
-  const centerId = isAdmin || isOpsManager ? selectedCenter : user?.center_id;
+  const isPurchaseManager = user?.role === ROLES.PURCHASE_MANAGER;
+  // Purchase managers default to their own (central store) inventory, but can
+  // browse other centers via the center selector like admin/ops managers do.
+  const centerId = isAdmin || isOpsManager
+    ? selectedCenter
+    : (isPurchaseManager && selectedCenter && selectedCenter !== 'all') ? selectedCenter : user?.center_id;
+  const isViewingOwnCenter = !isPurchaseManager || centerId === user?.center_id;
 
   useEffect(() => {
     // Clear inventory when "all" is selected or center changes to invalid value
@@ -66,7 +72,7 @@ function Inventory() {
       {permissions.inventory.request.includes(user?.role) && <Button variant="filled" color="orange" onClick={() => setDrawerState(true)}>
         Requests
       </Button>}
-      {!isAdmin && !isOpsManager && <AddToCenterModal />}
+      {!isAdmin && !isOpsManager && isViewingOwnCenter && <AddToCenterModal />}
     </Flex>
   );
 

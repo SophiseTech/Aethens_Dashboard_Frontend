@@ -28,9 +28,10 @@ function EditUser() {
     const dobValue = Form.useWatch("DOB", form);
     const roleValue = Form.useWatch("role", form);
 
-    // Fetch centers on mount
+    // Fetch centers on mount — explicitly opt into seeing the central store so it can be
+    // assigned to a user (e.g. a purchase_manager), since getCenters excludes it by default.
     useEffect(() => {
-        centersService.getCenters({}, 0, 200).then((res) => {
+        centersService.getCenters({ query: { is_central_store: { $in: [true, false] } } }, 0, 200).then((res) => {
             setCenters(res?.centers ?? []);
         });
     }, []);
@@ -113,11 +114,14 @@ function EditUser() {
         { value: "inactive", label: "Inactive" },
     ];
 
-    const centerOptions =
-        centers?.map((c) => ({
-            value: c._id,
-            label: c.center_name || c.location,
-        })) ?? [];
+    const centerOptions = (
+        roleValue === ROLES.PURCHASE_MANAGER
+            ? centers?.filter((c) => c.is_central_store)
+            : centers
+    )?.map((c) => ({
+        value: c._id,
+        label: c.center_name || c.location,
+    })) ?? [];
 
     return (
         <Title
@@ -198,7 +202,7 @@ function EditUser() {
                                 options={statusOptions}
                             />
                         </Col>
-                        {!GLOBAL_USER_ROLES.includes(roleValue) && (
+                        {(!GLOBAL_USER_ROLES.includes(roleValue) || roleValue === ROLES.PURCHASE_MANAGER) && (
                             <Col xs={24} md={12}>
                                 <CustomSelect
                                     name="center_id"

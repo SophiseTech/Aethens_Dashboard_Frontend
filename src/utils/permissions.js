@@ -62,10 +62,13 @@ const permissions = {
     delete: [ROLES.ADMIN]
   },
   inventory: {
-    view: [ROLES.MANAGER, ROLES.ADMIN],
-    addToCenter: [ROLES.MANAGER],
-    request: [ROLES.MANAGER],
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.PURCHASE_MANAGER],
+    addToCenter: [ROLES.MANAGER, ROLES.PURCHASE_MANAGER],
+    request: [ROLES.MANAGER, ROLES.PURCHASE_MANAGER],
     approve: [ROLES.ADMIN]
+  },
+  centralStoreLedger: {
+    view: [ROLES.ADMIN, ROLES.PURCHASE_MANAGER]
   },
   // Admin-only content management (dashboard frontend)
   adminUsers: {

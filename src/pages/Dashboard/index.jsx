@@ -31,6 +31,8 @@ function Dashboard() {
         return <AcademicManager />;
       case ROLES.MEDIA_MANAGER:
         return <Navigate to="/admin/blog-posts" replace />;
+      case ROLES.PURCHASE_MANAGER:
+        return <Navigate to="/purchase-manager/inventory" replace />;
       default:
         return <p>404</p>;
     }

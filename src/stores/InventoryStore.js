@@ -143,11 +143,11 @@ const inventoryStore = create((set, get) => ({
       set({ createLoading: true })
       const inventory = await inventoryService.addItemToCenter(data)
       if (inventory) {
-        // Refresh center inventory after adding
+        // Refresh center inventory after adding (bounded — a center's full
+        // inventory can be large, so pull just the first page back)
         const centerId = data.center_id || userStore.getState().user?.center_id;
         if (centerId) {
-          const updatedInventory = await inventoryService.getCenterInventory(centerId)
-          if (updatedInventory) set({ inventory: updatedInventory })
+          await get().getCenterInventory(centerId, '', '', 10, 1)
         }
         handleSuccess("Item added to center inventory")
       }
@@ -159,17 +159,13 @@ const inventoryStore = create((set, get) => ({
   },
 
   // Update item in center's inventory (v2)
+  // Note: the caller (CenterInventoryList) already re-fetches the current page
+  // with the correct search/pagination after this resolves, so no refresh here.
   updateCenterItem: async (itemId, data) => {
     try {
       set({ createLoading: true })
       const result = await inventoryService.updateCenterItem(itemId, data)
       if (result) {
-        // Refresh center inventory after update
-        const centerId = data.center_id || userStore.getState().user?.center_id;
-        if (centerId) {
-          const updatedInventory = await inventoryService.getCenterInventory(centerId)
-          if (updatedInventory) set({ inventory: updatedInventory })
-        }
         handleSuccess("Center inventory item updated")
       }
     } catch (error) {

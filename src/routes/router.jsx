@@ -1,6 +1,7 @@
 import { facultyRoutes } from '@/routes/faculty';
 import { generalRoutes } from '@/routes/general';
 import { managerRoutes } from '@/routes/manager';
+import { purchaseManagerRoutes } from '@/routes/purchaseManager';
 import { Route, Routes } from 'react-router-dom';
 
 const renderRoutes = (routes) => {
@@ -14,7 +15,7 @@ const renderRoutes = (routes) => {
 };
 
 const Router = () => {
-  const pageRoutes = renderRoutes([...generalRoutes, ...managerRoutes, ...facultyRoutes]);
+  const pageRoutes = renderRoutes([...generalRoutes, ...managerRoutes, ...facultyRoutes, ...purchaseManagerRoutes]);
   return <Routes>{pageRoutes}</Routes>;
 };
 

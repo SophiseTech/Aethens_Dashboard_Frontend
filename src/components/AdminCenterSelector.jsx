@@ -4,7 +4,7 @@ import centerStore from "@stores/CentersStore";
 import { Select } from "antd";
 import userStore from "@stores/UserStore";
 import { useLocation } from "react-router-dom";
-import { ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES } from "@utils/constants";
+import { ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES, GLOBAL_USER_ROLES } from "@utils/constants";
 
 const AdminCenterSelector = () => {
   const location = useLocation();
@@ -28,7 +28,7 @@ const AdminCenterSelector = () => {
 
   return (
     <>
-      {(user.role === "admin" || user.role === "operations_manager" || user.role === "academic_manager") && (
+      {(GLOBAL_USER_ROLES.includes(user.role)) && (
         <Select
           value={selectedCenter}
           onChange={(value) =>

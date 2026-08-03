@@ -646,6 +646,21 @@ const getMenuConfig = (role) => {
     },
   ];
 
+  const purchaseManagerItems = [
+    {
+      label: "Central Store",
+      icon: <ShopOutlined />,
+      key: "central-store-inventory",
+      path: "/purchase-manager/inventory",
+    },
+    {
+      label: "Inventory Ledger",
+      icon: <AccountBookOutlined />,
+      key: "central-store-ledger",
+      path: "/purchase-manager/ledger",
+    },
+  ];
+
   switch (role) {
     case ROLES.ADMIN:
       return [...commonItems, ...adminItems];
@@ -661,6 +676,8 @@ const getMenuConfig = (role) => {
       return [...commonItems, ...studentItems];
     case ROLES.MEDIA_MANAGER:
       return [...commonItems, ...mediaManagerItems];
+    case ROLES.PURCHASE_MANAGER:
+      return purchaseManagerItems;
     default:
       return commonItems;
   }

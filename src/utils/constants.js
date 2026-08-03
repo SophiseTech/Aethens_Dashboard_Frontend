@@ -5,7 +5,8 @@ export const ROLES = {
   FACULTY: "faculty",
   OPERATIONS_MANAGER: "operations_manager",
   ACADEMIC_MANAGER: "academic_manager",
-  MEDIA_MANAGER: "media_manager"
+  MEDIA_MANAGER: "media_manager",
+  PURCHASE_MANAGER: "purchase_manager"
 }
 
 // Every non-student role. Derived from ROLES so any future role is
@@ -295,7 +296,8 @@ export const GLOBAL_USER_ROLES = [
   ROLES.ADMIN,
   ROLES.OPERATIONS_MANAGER,
   ROLES.ACADEMIC_MANAGER,
-  ROLES.MEDIA_MANAGER
+  ROLES.MEDIA_MANAGER,
+  ROLES.PURCHASE_MANAGER
 ]
 
 export const DIPLOMA_APPLY_URL = "https://app.schoolofathens.art/diploma/apply"

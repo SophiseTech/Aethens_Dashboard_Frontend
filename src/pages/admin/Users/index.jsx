@@ -37,7 +37,7 @@ function AdminUsers() {
       if (filters.role) {
         params.role = filters.role;
       } else {
-        params.role = [ROLES.FACULTY, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER, ROLES.MEDIA_MANAGER].join(",");
+        params.role = [ROLES.FACULTY, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER, ROLES.MEDIA_MANAGER, ROLES.PURCHASE_MANAGER].join(",");
       }
       if (filters.status) params.status = filters.status;
       if (filters.center_id && filters.center_id !== "all") params.center_id = filters.center_id;
@@ -196,6 +196,7 @@ function AdminUsers() {
             { value: ROLES.MANAGER, label: "Manager" },
             { value: ROLES.OPERATIONS_MANAGER, label: "Operations Manager" },
             { value: ROLES.MEDIA_MANAGER, label: "Media Manager" },
+            { value: ROLES.PURCHASE_MANAGER, label: "Purchase Manager" },
           ]}
         />
         <Select

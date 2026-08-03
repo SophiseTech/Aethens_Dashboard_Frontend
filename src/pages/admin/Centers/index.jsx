@@ -20,7 +20,9 @@ function AdminCenters() {
   const load = useCallback(async () => {
     try {
       setLoading(true);
-      const filters = search.trim() ? { search: search.trim() } : {};
+      // Explicitly opt into seeing the central store here — getCenters excludes it by default elsewhere.
+      const filters = { query: { is_central_store: { $in: [true, false] } } };
+      if (search.trim()) filters.search = search.trim();
       const res = await centersService.getCenters(filters, 0, 500);
       setList(res?.centers ?? []);
     } catch (e) {
@@ -64,6 +66,7 @@ function AdminCenters() {
       maxCount: record.maxCount,
       rescheduleAutoApprovalMaxCount: autoApproval,
       autoReject: record.autoReject ?? false,
+      is_central_store: record.is_central_store ?? false,
     });
     setModalOpen(true);
   };
@@ -187,6 +190,7 @@ function AdminCenters() {
       }
     },
     { title: "Auto Reject", dataIndex: "autoReject", key: "autoReject", render: (val) => <Tag color={val ? "red" : "default"}>{val ? "Enabled" : "Disabled"}</Tag> },
+    { title: "Central Store", dataIndex: "is_central_store", key: "is_central_store", render: (val) => <Tag color={val ? "gold" : "default"}>{val ? "Yes" : "No"}</Tag> },
     {
       title: "Actions",
       key: "actions",
@@ -269,6 +273,9 @@ function AdminCenters() {
             </Row>
           </Form.Item>
           <Form.Item name="autoReject" label="Enable Auto Reject" valuePropName="checked">
+            <Switch />
+          </Form.Item>
+          <Form.Item name="is_central_store" label="Central Store" valuePropName="checked" tooltip="Marks this center as the single central store. Only one center can be flagged.">
             <Switch />
           </Form.Item>
         </Form>

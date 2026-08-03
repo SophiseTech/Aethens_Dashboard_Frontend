@@ -25,7 +25,13 @@ function CenterInventoryList() {
 
   const isAdmin = user?.role === ROLES.ADMIN;
   const isOpsManager = user?.role === ROLES.OPERATIONS_MANAGER;
-  const centerId = isAdmin || isOpsManager ? selectedCenter : user?.center_id;
+  const isPurchaseManager = user?.role === ROLES.PURCHASE_MANAGER;
+  // Purchase managers default to their own (central store) inventory, but can
+  // browse other centers via the center selector like admin/ops managers do.
+  const centerId = isAdmin || isOpsManager
+    ? selectedCenter
+    : (isPurchaseManager && selectedCenter && selectedCenter !== 'all') ? selectedCenter : user?.center_id;
+  const isViewingOwnCenter = !isPurchaseManager || centerId === user?.center_id;
 
   // Reset search and page when tab changes
   useEffect(() => {
@@ -71,7 +77,7 @@ function CenterInventoryList() {
     {
       title: 'Action',
       key: 'action',
-      render: (_, record) => (!isOpsManager &&
+      render: (_, record) => (!isOpsManager && isViewingOwnCenter &&
         <Button type="primary" onClick={() => setEditEntry(record)}>
           Edit
         </Button>
