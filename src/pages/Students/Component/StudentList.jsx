@@ -149,7 +149,7 @@ function StudentList() {
             currentPage
           );
         } else {
-          getStudentsByCenter(10, currentPage, statusFilter, selectedCourses, fromBranch, toBranchParam);
+          getStudentsByCenter(10, currentPage, statusFilter, selectedCourses, fromBranch, toBranchParam, true);
         }
       } else if (selectedView === "Active Students") {
         if (searchQuery) {
@@ -159,7 +159,7 @@ function StudentList() {
             currentPage
           );
         } else {
-          getStudentsByCenter(10, currentPage, "active", selectedCourses, fromBranch, toBranchParam);
+          getStudentsByCenter(10, currentPage, "active", selectedCourses, fromBranch, toBranchParam, true);
         }
       } else if (selectedView === "Todays Students") {
         getTodaysSessionAttendees(user, selectedCenter);

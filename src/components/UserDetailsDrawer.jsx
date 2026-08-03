@@ -44,6 +44,7 @@ const UserDetailsDrawer = ({
   visible = false,
   onClose = () => { },
   isStudentDetail = false,
+  isDiploma = false,
 }) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -103,7 +104,7 @@ const UserDetailsDrawer = ({
         placement="right"
         onClose={onClose}
         open={visible}
-        width={isStudentDetail && [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER].includes(loggedinUser.role) ? 750 : 500}
+        width={isStudentDetail && !isDiploma && [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER].includes(loggedinUser.role) ? 750 : 500}
         closable={true}
         styles={{
           header: {
@@ -134,7 +135,7 @@ const UserDetailsDrawer = ({
         }
       >
         <Row gutter={24}>
-          {isStudentDetail && [ROLES.MANAGER, ROLES.OPERATIONS_MANAGER, ROLES.ADMIN].includes(loggedinUser.role) && (
+          {isStudentDetail && !isDiploma && [ROLES.MANAGER, ROLES.OPERATIONS_MANAGER, ROLES.ADMIN].includes(loggedinUser.role) && (
             <Col span={10}>
               <Card bordered={false} style={{ boxShadow: "none", background: "transparent" }}>
                 <Title level={5} style={{ marginBottom: "16px" }}>Limits</Title>
@@ -218,7 +219,7 @@ const UserDetailsDrawer = ({
               )}
             </Col>
           )}
-          <Col span={isStudentDetail && [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER].includes(loggedinUser.role) ? 14 : 24}>
+          <Col span={isStudentDetail && !isDiploma && [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER].includes(loggedinUser.role) ? 14 : 24}>
             <div key={refreshKey}>
               <Card
                 bordered={false}
@@ -371,25 +372,55 @@ const UserDetailsDrawer = ({
                     Additional Information
                   </Title>
                   <Row gutter={[16, 16]}>
-                    <Col span={24}>
-                      <Text strong>Course Enrolled:</Text>
-                      <Text style={{ marginLeft: "8px" }}>
-                        {user?.details_id?.course?.course_name}
-                      </Text>
-                    </Col>
-                    <Col span={24}>
-                      <Text strong>
-                        <CalendarOutlined style={{ marginRight: "8px" }} />
-                        Course Joined Date:
-                      </Text>
-                      <Text style={{ marginLeft: "8px" }}>
-                        {formatDate(user?.details_id?.enrollment_date) || "N/A"}
-                      </Text>
-                    </Col>
-                    {/* <Col span={24}>
-              <Text strong>Role:</Text>
-              <Text style={{ marginLeft: '8px' }}>{user?.role}</Text>
-            </Col> */}
+                    {isDiploma ? (
+                      <>
+                        <Col span={24}>
+                          <Text strong>Course Enrolled:</Text>
+                          <Text style={{ marginLeft: "8px" }}>
+                            {user?.enrollment?.courseName}
+                          </Text>
+                        </Col>
+                        <Col span={24}>
+                          <Text strong>Batch:</Text>
+                          <Text style={{ marginLeft: "8px" }}>
+                            {user?.enrollment?.batchName}
+                          </Text>
+                        </Col>
+                        <Col span={24}>
+                          <Text strong>Intake:</Text>
+                          <Text style={{ marginLeft: "8px" }}>
+                            {user?.enrollment?.intakeName}
+                          </Text>
+                        </Col>
+                        <Col span={24}>
+                          <Text strong>
+                            <CalendarOutlined style={{ marginRight: "8px" }} />
+                            Course Joined Date:
+                          </Text>
+                          <Text style={{ marginLeft: "8px" }}>
+                            {formatDate(user?.enrollment?.start_date) || "N/A"}
+                          </Text>
+                        </Col>
+                      </>
+                    ) : (
+                      <>
+                        <Col span={24}>
+                          <Text strong>Course Enrolled:</Text>
+                          <Text style={{ marginLeft: "8px" }}>
+                            {user?.details_id?.course?.course_name}
+                          </Text>
+                        </Col>
+                        <Col span={24}>
+                          <Text strong>
+                            <CalendarOutlined style={{ marginRight: "8px" }} />
+                            Course Joined Date:
+                          </Text>
+                          <Text style={{ marginLeft: "8px" }}>
+                            {formatDate(user?.details_id?.enrollment_date) || "N/A"}
+                          </Text>
+                        </Col>
+                      </>
+                    )}
                     <Col span={24}>
                       <Text strong>Status:</Text>
                       <Text
@@ -398,29 +429,38 @@ const UserDetailsDrawer = ({
                         {user?.status}
                       </Text>
                     </Col>
-                    {user && (
-                      <>
-                        <Col span={24}>
-                          <Text strong>Attendance:</Text>
-                          <Text style={{ marginLeft: 8 }}>
-                            {user?.regularAttendedCount || 0}/{user?.details_id?.course?.total_session} (
-                            {user?.regularAttendedCount || user?.details_id?.course?.total_session
-                              ? Math.round(
-                                ((user?.regularAttendedCount) /
-                                  (user?.details_id?.course?.total_session)) *
-                                100
-                              )
-                              : 0}
-                            %)
-                          </Text>
-                        </Col>
-                        <Col span={24}>
-                          <Text strong>Additional Sessions:</Text>
-                          <Text style={{ marginLeft: 8 }}>
-                            {user?.additionalAttendedCount || 0}
-                          </Text>
-                        </Col>
-                      </>
+                    {isDiploma ? (
+                      <Col span={24}>
+                        <Text strong>Attendance:</Text>
+                        <Text style={{ marginLeft: 8 }}>
+                          {user?.attendance?.attended || 0}/{user?.attendance?.total || 0}
+                        </Text>
+                      </Col>
+                    ) : (
+                      user && (
+                        <>
+                          <Col span={24}>
+                            <Text strong>Attendance:</Text>
+                            <Text style={{ marginLeft: 8 }}>
+                              {user?.regularAttendedCount || 0}/{user?.details_id?.course?.total_session} (
+                              {user?.regularAttendedCount || user?.details_id?.course?.total_session
+                                ? Math.round(
+                                  ((user?.regularAttendedCount) /
+                                    (user?.details_id?.course?.total_session)) *
+                                  100
+                                )
+                                : 0}
+                              %)
+                            </Text>
+                          </Col>
+                          <Col span={24}>
+                            <Text strong>Additional Sessions:</Text>
+                            <Text style={{ marginLeft: 8 }}>
+                              {user?.additionalAttendedCount || 0}
+                            </Text>
+                          </Col>
+                        </>
+                      )
                     )}
                   </Row>
                 </Card>
@@ -431,7 +471,7 @@ const UserDetailsDrawer = ({
                   bordered={false}
                   style={{ boxShadow: "none", background: "transparent" }}
                 >
-                  <DrawerActionButtons userDetails={user} />
+                  <DrawerActionButtons userDetails={user} isDiploma={isDiploma} />
                 </Card>
               )}
               {user?.role === ROLES.STUDENT && user?.details_id?.migrated?.history && user?.details_id?.migrated?.history.length > 0 && (
@@ -490,6 +530,7 @@ UserDetailsDrawer.propTypes = {
   onClose: PropTypes.func,
   showActions: PropTypes.bool,
   isStudentDetail: PropTypes.bool,
+  isDiploma: PropTypes.bool,
 };
 
 export default UserDetailsDrawer;

@@ -29,6 +29,9 @@ function Bills() {
   const { searchStudents, students } = useSearchableStudents()
   const [searchParams, setSearchParams] = useSearchParams();
   const student_id = searchParams.get("student_id")
+  const staff_id = searchParams.get("staff_id")
+  // Both params scope the same "generated_for" field — a bill can be raised for a student or a staff member
+  const generatedForId = student_id || staff_id
   const { user } = useStore(userStore)
   const { selectedCenter } = useStore(centersStore);
   const { courses, getCourses, total: courseTotal } = useStore(courseStore)
@@ -37,9 +40,9 @@ function Bills() {
   // const [lineItemSearchFunction, setLneItemSearchFunction] = useState(() => { })
 
   useEffect(() => {
-    console.log(stateFilters?.query?.generated_for != student_id, stateFilters?.query?.generated_for, student_id);
+    console.log(stateFilters?.query?.generated_for != generatedForId, stateFilters?.query?.generated_for, generatedForId);
 
-    if (!bills || stateFilters?.query?.generated_for != student_id || bills.length <= 0 || user.role === 'admin' || user.role === 'operations_manager') {
+    if (!bills || stateFilters?.query?.generated_for != generatedForId || bills.length <= 0 || user.role === 'admin' || user.role === 'operations_manager') {
       let filters = _.cloneDeep(stateFilters);
       filters.query = filters.query || {};
 
@@ -48,8 +51,8 @@ function Bills() {
 
       if (user.role === ROLES.STUDENT) {
         filters.query.generated_for = user._id
-      } else if (student_id) {
-        filters.query.generated_for = student_id
+      } else if (generatedForId) {
+        filters.query.generated_for = generatedForId
       } else {
         delete filters.query.generated_for
       }
@@ -67,7 +70,7 @@ function Bills() {
       fetchBills(10, filters)
 
     }
-  }, [student_id, urlStatus, selectedCenter])
+  }, [generatedForId, urlStatus, selectedCenter])
 
   const fetchBills = (limit = 10, filters = {}) => {
     getBills(limit, {

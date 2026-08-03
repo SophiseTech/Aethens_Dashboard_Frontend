@@ -33,8 +33,12 @@ const studentStore = create((set, get) => ({
   timetableLoading: false,
   diplomaSummary: null,
   diplomaSummaryLoading: false,
+  studentTimetable: { batch: null, term: null, slots: [], holidays: [] },
+  studentTimetableLoading: false,
+  studentDiplomaSummary: null,
+  studentDiplomaSummaryLoading: false,
 
-  getStudentsByCenter: async (limit = 10, page = 1, status = null, courseId = null, fromBranch = null, toBranch = null) => {
+  getStudentsByCenter: async (limit = 10, page = 1, status = null, courseId = null, fromBranch = null, toBranch = null, excludeDiploma = false) => {
     try {
       set({ loading: true });
 
@@ -71,7 +75,8 @@ const studentStore = create((set, get) => ({
         status, // Pass the status filter
         courseId, // Pass the course filter
         fromBranch, // Pass the fromBranch filter
-        toBranch // Pass the toBranch filter
+        toBranch, // Pass the toBranch filter
+        excludeDiploma // Pass the diploma-exclusion filter
       );
 
       if (users) {
@@ -226,6 +231,28 @@ const studentStore = create((set, get) => ({
       handleInternalError(error);
     } finally {
       set({ timetableLoading: false });
+    }
+  },
+  getStudentDiplomaSummary: async (studentId) => {
+    try {
+      set({ studentDiplomaSummaryLoading: true });
+      const summary = await studentService.getStudentDiplomaSummary(studentId);
+      set({ studentDiplomaSummary: summary || null });
+    } catch (error) {
+      handleInternalError(error);
+    } finally {
+      set({ studentDiplomaSummaryLoading: false });
+    }
+  },
+  getStudentTimetable: async (studentId, month, year) => {
+    try {
+      set({ studentTimetableLoading: true });
+      const timetable = await studentService.getStudentTimetable(studentId, { month, year });
+      set({ studentTimetable: timetable || { batch: null, term: null, slots: [], holidays: [] } });
+    } catch (error) {
+      handleInternalError(error);
+    } finally {
+      set({ studentTimetableLoading: false });
     }
   },
   search: async (limit, filters = {}, page = 1) => {

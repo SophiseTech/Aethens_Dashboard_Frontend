@@ -65,7 +65,7 @@ function StudentList() {
       if (searchQuery) {
         search(10, { searchQuery, query: { role: ROLES.STUDENT, center_id: user.center_id }, page: currentPage }, currentPage);
       } else {
-        getStudentsByCenter(10, currentPage);
+        getStudentsByCenter(10, currentPage, null, null, null, null, true);
       }
       setVisitedPages(new Set([1]));
     } else if (selectedView === 'Todays Students') {
@@ -216,7 +216,7 @@ function StudentList() {
       if (searchQuery) {
         search(pageSize, { searchQuery, query: { role: ROLES.STUDENT }, page }, page);
       } else {
-        getStudentsByCenter(pageSize, page);
+        getStudentsByCenter(pageSize, page, null, null, null, null, true);
       }
       setVisitedPages((prev) => new Set(prev).add(page));
     }

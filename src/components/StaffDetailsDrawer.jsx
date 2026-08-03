@@ -24,6 +24,7 @@ import {
     CalendarFilled,
     ThunderboltOutlined,
     IdcardOutlined,
+    AccountBookOutlined,
 } from "@ant-design/icons";
 import { formatDate } from "@utils/helper";
 import PropTypes from "prop-types";
@@ -295,6 +296,11 @@ const StaffDrawerActionButtons = ({ user }) => {
         nav(`${base}?user_id=${user._id}`);
     };
 
+    // Bills page only exists under /manager (Admin is granted access to it too), unlike the /admin routes above
+    const handleViewBills = () => {
+        nav(`/manager/bills?staff_id=${user._id}`);
+    };
+
     return (
         <>
             <Divider style={{ margin: "16px 0" }} />
@@ -331,6 +337,14 @@ const StaffDrawerActionButtons = ({ user }) => {
                         icon={<CalendarFilled />}
                     >
                         View Leaves
+                    </Button>
+                    <Button
+                        onClick={handleViewBills}
+                        variant="filled"
+                        color="blue"
+                        icon={<AccountBookOutlined />}
+                    >
+                        View Bills
                     </Button>
                 </Flex>
             </Card>

@@ -105,21 +105,24 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
     }
   ];
 
-  const onFilterApply = (newFilters) => {
-    if (filters?.query?.generated_for) {
-      onLoadMore(10, { query: { generated_for: filters.query.generated_for, ...newFilters } })
-    } else {
-      onLoadMore(10, { query: newFilters })
-    }
+  // Context filters that scope the whole page (center, pre-selected student/staff) and must
+  // survive panel filter apply/reset — losing center_id here would leak bills across centers.
+  const STICKY_FILTER_KEYS = ['generated_for', 'center_id']
 
+  const getStickyFilters = () => {
+    const stickyFilters = {}
+    STICKY_FILTER_KEYS.forEach((key) => {
+      if (filters?.query?.[key] !== undefined) stickyFilters[key] = filters.query[key]
+    })
+    return stickyFilters
+  }
+
+  const onFilterApply = (newFilters) => {
+    onLoadMore(10, { query: { ...getStickyFilters(), ...newFilters } })
   }
 
   const onReset = () => {
-    if (filters?.query?.generated_for) {
-      onLoadMore(10, { query: { generated_for: filters.query.generated_for } })
-    } else {
-      onLoadMore(10, { query: {} })
-    }
+    onLoadMore(10, { query: getStickyFilters() })
   }
 
   return (

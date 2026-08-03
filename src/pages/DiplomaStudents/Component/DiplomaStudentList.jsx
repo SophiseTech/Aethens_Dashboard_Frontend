@@ -156,6 +156,7 @@ function DiplomaStudentList() {
         onClose={() => setDrawerVisible(false)}
         showActions
         isStudentDetail
+        isDiploma
       />
     </>
   );

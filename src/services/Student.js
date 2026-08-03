@@ -245,6 +245,30 @@ class StudentService {
     }
   }
 
+  async getStudentTimetable(studentId, { month, year } = {}) {
+    try {
+      const params = new URLSearchParams();
+      if (month !== undefined && month !== null) params.set("month", month);
+      if (year !== undefined && year !== null) params.set("year", year);
+      const queryString = params.toString();
+      const response = await get(`/v2/students/${studentId}/timetable${queryString ? `?${queryString}` : ""}`);
+      if (!response) throw new Error("An error occured. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async getStudentDiplomaSummary(studentId) {
+    try {
+      const response = await get(`/v2/students/${studentId}/diploma-summary`);
+      if (!response) throw new Error("An error occured. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
 }
 
 const studentService = new StudentService();

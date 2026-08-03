@@ -14,6 +14,7 @@ const Activities = lazy(() => import("@pages/Activities"))
 const ManagerMaterials = lazy(() => import("@pages/ManagerMaterials"))
 const FacultyDevelopmentProgram = lazy(() => import("@pages/FacultyDevelopmentProgram/Faculty"))
 const FacultyAttendance = lazy(() => import("@pages/Attendance/FacultyAttendance"))
+const DiplomaAttendance = lazy(() => import("@pages/Attendance/DiplomaAttendance"))
 const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCourseHistory"))
 const Slots = lazy(() => import("@pages/Slots/ManagerSlots"))
 const MyAttendance = lazy(() => import("@pages/FacultyAttendance/MyAttendance"))
@@ -96,6 +97,13 @@ export const facultyRoutes = [
               <LazyLoader element={<FacultyAttendance />} />
             ),
             title: "Attendance",
+          },
+          {
+            path: "/faculty/diploma-attendance/:id",
+            element: (
+              <LazyLoader element={<DiplomaAttendance />} />
+            ),
+            title: "Diploma Attendance",
           },
           {
             path: "/faculty/slots",

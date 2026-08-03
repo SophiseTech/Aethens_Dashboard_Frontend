@@ -17,7 +17,7 @@ import logger from '@utils/logger';
 
 const { Title } = Typography;
 
-function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
+function ViewStudentSessions({ student, isModalOpen, setIsModalOpen, isDiploma = false }) {
   const [selectedMonth, setSelectedMonth] = useState(dayjs().startOf('month'));
   const [slots, setSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -407,7 +407,7 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen }) {
             <Button type="link" danger onClick={() => handleMarkAbsent(record)}>Mark Absent</Button>
           )}
 
-          {!['attended', 'requested',].includes(record.status?.toLowerCase()) && (
+          {!isDiploma && !['attended', 'requested',].includes(record.status?.toLowerCase()) && (
             <Popconfirm
               title="Are you sure you want to reschedule this slot?"
               onConfirm={() => {

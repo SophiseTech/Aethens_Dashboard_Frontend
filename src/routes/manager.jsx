@@ -24,6 +24,8 @@ const ManagerPayslips = lazy(() => import("@pages/Payslips/Manager"));
 const ManagerFacultyDevelopmentProgram = lazy(() => import("@pages/FacultyDevelopmentProgram/Manager"));
 const ManagerMaterials = lazy(() => import("@pages/ManagerMaterials"));
 const FacultyAttendance = lazy(() => import("@pages/Attendance/FacultyAttendance"))
+const DiplomaAttendance = lazy(() => import("@pages/Attendance/DiplomaAttendance"))
+const AddSessionStatus = lazy(() => import("@pages/Students/AddSessionStatus"))
 const ManagerSlots = lazy(() => import("@pages/Slots/ManagerSlots"))
 const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCourseHistory"))
 const ManagerAnnouncementPage = lazy(() => import("@pages/Announcement/ManagerAnnouncement"))
@@ -157,6 +159,20 @@ export const managerRoutes = [
               <LazyLoader element={<FacultyAttendance />} />
             ),
             title: "Attendance",
+          },
+          {
+            path: "/manager/diploma-attendance/:id",
+            element: (
+              <LazyLoader element={<DiplomaAttendance />} />
+            ),
+            title: "Diploma Attendance",
+          },
+          {
+            path: "/manager/session-status/:studentId",
+            element: (
+              <LazyLoader element={<AddSessionStatus />} />
+            ),
+            title: "Add Session Status",
           },
           {
             path: "/manager/slots",

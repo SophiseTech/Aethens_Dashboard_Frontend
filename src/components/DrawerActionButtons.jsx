@@ -30,7 +30,7 @@ const ActionSection = ({ title, children }) => {
   );
 };
 
-function DrawerActionButtons({ userDetails }) {
+function DrawerActionButtons({ userDetails, isDiploma = false }) {
   const { user } = useStore(userStore);
   const nav = useNavigate();
 
@@ -54,7 +54,8 @@ function DrawerActionButtons({ userDetails }) {
       key: 'allot_sessions',
       component: (props) => <AllotSessions {...props} />,
       section: 'Sessions & Attendance',
-      roles: [ROLES.MANAGER, ROLES.ADMIN]
+      roles: [ROLES.MANAGER, ROLES.ADMIN],
+      diplomaHidden: true
     },
     {
       key: 'view_attendance',
@@ -62,7 +63,7 @@ function DrawerActionButtons({ userDetails }) {
       color: 'orange',
       section: 'Sessions & Attendance',
       roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER],
-      action: () => navigateWithStudentContext(`/manager/attendance/${studentId}/c/${courseId}`)
+      action: () => navigateWithStudentContext(isDiploma ? `/manager/diploma-attendance/${studentId}` : `/manager/attendance/${studentId}/c/${courseId}`)
     },
     {
       key: 'view_attendance_faculty',
@@ -70,7 +71,7 @@ function DrawerActionButtons({ userDetails }) {
       color: 'cyan',
       section: 'Sessions & Attendance',
       roles: [ROLES.FACULTY],
-      action: () => navigateWithStudentContext(`/faculty/attendance/${studentId}/c/${courseId}`)
+      action: () => navigateWithStudentContext(isDiploma ? `/faculty/diploma-attendance/${studentId}` : `/faculty/attendance/${studentId}/c/${courseId}`)
     },
     {
       key: 'session_status',
@@ -143,7 +144,8 @@ function DrawerActionButtons({ userDetails }) {
       color: 'orange',
       section: 'Academics',
       roles: [ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],
-      action: () => navigateWithStudentContext(`/manager/final-project/student/${studentId}/details`)
+      action: () => navigateWithStudentContext(`/manager/final-project/student/${studentId}/details`),
+      diplomaHidden: true
     },
     {
       key: 'view_final_project_faculty',
@@ -151,7 +153,8 @@ function DrawerActionButtons({ userDetails }) {
       color: 'gold',
       section: 'Academics',
       roles: [ROLES.FACULTY],
-      action: () => navigateWithStudentContext(`/faculty/final-project/student/${studentId}/details`)
+      action: () => navigateWithStudentContext(`/faculty/final-project/student/${studentId}/details`),
+      diplomaHidden: true
     },
     {
       key: 'view_activities_academic',
@@ -201,7 +204,8 @@ function DrawerActionButtons({ userDetails }) {
       key: 'migrate_course',
       component: (props) => <MigrateCourse {...props} />,
       section: 'Administration',
-      roles: [ROLES.MANAGER, ROLES.ADMIN]
+      roles: [ROLES.MANAGER, ROLES.ADMIN],
+      diplomaHidden: true
     },
     {
       key: 'migrate_center',
@@ -218,7 +222,7 @@ function DrawerActionButtons({ userDetails }) {
   ];
 
   // 1. Filter allowed actions
-  const allowedActions = ACTION_REGISTRY.filter(a => a.roles.includes(user.role));
+  const allowedActions = ACTION_REGISTRY.filter(a => a.roles.includes(user.role) && !(isDiploma && a.diplomaHidden));
 
   // 2. Group these actions by 'section'
   const sections = ['Sessions & Attendance', 'Academics', 'Financials', 'Administration'];
@@ -252,7 +256,7 @@ function DrawerActionButtons({ userDetails }) {
       })}
 
       {/* Centralized Modals */}
-      <ViewStudentSessions isModalOpen={isSessionModalOpen} setIsModalOpen={setIsSessionModalOpen} student={userDetails} />
+      <ViewStudentSessions isModalOpen={isSessionModalOpen} setIsModalOpen={setIsSessionModalOpen} student={userDetails} isDiploma={isDiploma} />
       <FeeTracker student={userDetails} visible={isFeeModalOpen} onCancel={handleFeeCancel} />
       <ProjectDetailModal handleCancel={handleProjectCancel} handleOk={handleProjectOk} isModalOpen={isProjectModalOpen} student_id={selectedProjectStudent} />
     </div>
@@ -261,6 +265,7 @@ function DrawerActionButtons({ userDetails }) {
 
 DrawerActionButtons.propTypes = {
   userDetails: PropTypes.object,
+  isDiploma: PropTypes.bool,
 };
 
 DrawerActionButtons.defaultProps = {
