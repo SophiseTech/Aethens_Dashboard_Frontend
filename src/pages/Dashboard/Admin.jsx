@@ -24,6 +24,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useStore } from "zustand";
 import AdminCenterSelector from "@components/AdminCenterSelector";
+import FeeKpis from "./ManagerWidgets/FeeKpis";
 
 function Admin() {
   const [dateRange, setDateRange] = useState(getMonthRange(new Date()));
@@ -114,6 +115,11 @@ function Admin() {
       <Row gutter={[20, 20]}>
         <Col xs={24}>
           <FinancialSummary />
+        </Col>
+      </Row>
+      <Row gutter={[20, 20]}>
+        <Col xs={24}>
+          <FeeKpis />
         </Col>
       </Row>
       {canViewExpenses && (

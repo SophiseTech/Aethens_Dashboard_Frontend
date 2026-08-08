@@ -3,8 +3,20 @@ import { FeeService } from '@services/Fee';
 
 const feeStore = create((set) => ({
   feeDetails: null,
+  kpis: null,
   loading: false,
   error: null,
+  getFeeKpis: async (filters = {}) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await FeeService.getFeeKpis(filters);
+      set({ kpis: response.data, loading: false });
+      return response.data;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
   getFeeDetailsByStudent: async (studentId) => {
     set({ loading: true, error: null });
     try {

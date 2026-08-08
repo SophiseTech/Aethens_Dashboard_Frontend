@@ -14,6 +14,9 @@ export const FeeService = {
   getUnpaidReport: (filters = {}) => {
     return post(`/fees/unpaid-report`, { filters });
   },
+  getFeeKpis: (filters = {}) => {
+    return post(`/fees/kpis`, { filters });
+  },
   generatePartialBalanceBill: (feeAccountId) => {
     return post(`/fees/${feeAccountId}/generate-partial-bill`);
   },

@@ -5,7 +5,7 @@ import IncomeStat from '@pages/Dashboard/ManagerWidgets/IncomeStat'
 import StudentChart from '@pages/Dashboard/ManagerWidgets/StudentChart'
 import StudentCounts from '@pages/Dashboard/ManagerWidgets/StudentCounts'
 import TodayTasks from '@pages/Dashboard/ManagerWidgets/TodayTasks'
-import FeeReport from '@pages/Dashboard/ManagerWidgets/FeeReport'
+import FeeKpis from '@pages/Dashboard/ManagerWidgets/FeeKpis'
 import IncomeReport from '@pages/Dashboard/ManagerWidgets/IncomeReport'
 import AttendanceReport from '@pages/Dashboard/ManagerWidgets/AttendanceReport'
 import OverDurationStudents from '@pages/Dashboard/ManagerWidgets/OverDurationStudents'
@@ -122,14 +122,16 @@ function Manager() {
           </Col>
         </Row>
       )}
+      <Row gutter={[20, 20]}>
+        <Col xs={24}>
+          <FeeKpis />
+        </Col>
+      </Row>
       <Row gutter={[20, 20]} align={'stretch'}>
-        <Col xs={24} tablet={24} lg={8}>
+        <Col xs={24} tablet={24} lg={12}>
           <TodayTasks />
         </Col>
-        <Col xs={24} tablet={24} lg={8}>
-          <FeeReport dateRange={dateRange} />
-        </Col>
-        <Col xs={24} tablet={24} lg={8}>
+        <Col xs={24} tablet={24} lg={12}>
           <OverDurationStudents />
         </Col>
       </Row>
