@@ -18,7 +18,7 @@ function EditAllotedMaterials({ selectedRowKeys, student_id, handleOk }) {
   const { getItems, total: inventoryTotal, editItem } = useStore(inventoryStore)
   const [selecteItems, setSelecteItems] = useState({})
   const [totals, setTotals] = useState({})
-  const { editMaterials, loading, materials } = useStore(materialStore)
+  const { editMaterialsBulk, loading, materials } = useStore(materialStore)
   const [items, setItems] = useState([])
 
   const [modal, contextHolder] = Modal.useModal()
@@ -52,7 +52,7 @@ function EditAllotedMaterials({ selectedRowKeys, student_id, handleOk }) {
   }, [selectedRowKeys])
 
 
-  const handleMarkCollectedWithInvoice = async () => {
+  const handleMarkCollectedWithInvoice = async (values) => {
     modal.confirm({
       title: 'Confirm Payment',
       icon: <ExclamationCircleOutlined />,
@@ -60,42 +60,61 @@ function EditAllotedMaterials({ selectedRowKeys, student_id, handleOk }) {
       okText: "Yes",
       cancelText: "No",
       onOk: async () => {
-        const bill = await generateInvoice({ status: "paid" })
-        await handleMarkCollected({ bill_id: bill._id })
+        const bill = await generateInvoice({ status: "paid", values })
+        await handleMarkCollected({ bill_id: bill._id }, values)
         handleOk()
       },
       onCancel: async () => {
-        const bill = await generateInvoice({ status: "unpaid" })
-        await handleMarkCollected({ bill_id: bill._id })
+        const bill = await generateInvoice({ status: "unpaid", values })
+        await handleMarkCollected({ bill_id: bill._id }, values)
         handleOk()
       }
     });
   }
 
-  const generateInvoice = async ({ status = "unpaid" }) => {
+  // Merges each selected material with its live, possibly-edited form row
+  // (qty/rate/discount/etc). Used by both generateInvoice (bill line items)
+  // and handleMarkCollected (actual stock deduction + persisted qty) so the
+  // invoice and the inventory movement always agree on the same numbers.
+  const resolveEditedItems = (values) => {
+    const materialMap = new Map(materials.map((m) => [m._id, m]));
+    return selectedRowKeys.map((key, index) => {
+      const material = materialMap.get(key);
+      const formItem = values?.items?.[index] || {};
+
+      return {
+        _id: key,
+        material,
+        qty: formItem.qty ?? material?.qty,
+        taxAmnt: formItem.taxAmnt ?? material?.taxAmnt,
+        subtotal: formItem.subtotal ?? material?.subtotal,
+        total: formItem.total ?? material?.total,
+        taxes: formItem.taxes ?? material?.taxes,
+        rate: formItem.rate ?? material?.rate,
+        discount: formItem.discount ?? material?.discount,
+        discountType: formItem.discountType ?? material?.discountType,
+      }
+    })
+  }
+
+  const generateInvoice = async ({ status = "unpaid", values }) => {
     const invoiceData = await getInvoiceNo()
     const invoiceNo = invoiceData?.invoiceNo || 0;
     const center_initial = invoiceData?.center_initial || '';
 
-    const materialMap = new Map(materials.map((m) => [m._id, m]));
-
-    const items = selectedRowKeys.map((key, index) => {
-      const material = materialMap.get(key);
-
-      return {
-        item: material.inventory_item_id?._id,
-        item_type: "InventoryItem",
-        qty: material.qty,
-        taxAmnt: material.taxAmnt,
-        subtotal: material.subtotal,
-        total: material.total,
-        taxes: material.taxes,
-        rate: material.rate,
-        discount: material.discount,
-        discountType: material.discountType,
-        name: material?.inventory_item_id?.name,
-      }
-    })
+    const items = resolveEditedItems(values).map(edited => ({
+      item: edited.material?.inventory_item_id?._id,
+      item_type: "InventoryItemV2",
+      qty: edited.qty,
+      taxAmnt: edited.taxAmnt,
+      subtotal: edited.subtotal,
+      total: edited.total,
+      taxes: edited.taxes,
+      rate: edited.rate,
+      discount: edited.discount,
+      discountType: edited.discountType,
+      name: edited.material?.inventory_item_id?.name,
+    }))
 
     const data = {
       subtotal: totals.subtotal,
@@ -111,15 +130,31 @@ function EditAllotedMaterials({ selectedRowKeys, student_id, handleOk }) {
       generated_for: student_id,
       subject: "Materials",
       payment_method: "cash",
-      payment_date: new Date()
+      payment_date: new Date(),
+      // Stock is deducted by handleMarkCollected below (StudentMaterial
+      // "collected" flow) — skip the bill's own reconciliation to avoid
+      // double-decrementing the same items.
+      skipInventoryReconciliation: true
     }
     const bill = await createBill(data)
     return bill
   }
 
-  const handleMarkCollected = async (updateData = {}) => {
-    // Backend now automatically deducts inventory when marking as collected
-    await editMaterials(selectedRowKeys, { status: "collected", collected_on: new Date(), ...updateData })
+  const handleMarkCollected = async (sharedFields = {}, values) => {
+    // Per-item update so each row's edited qty (not the stale stored qty)
+    // is both persisted and used to compute the inventory deduction.
+    const updates = resolveEditedItems(values).map(edited => ({
+      _id: edited._id,
+      qty: edited.qty,
+      rate: edited.rate,
+      discount: edited.discount,
+      discountType: edited.discountType,
+      taxes: edited.taxes,
+      taxAmnt: edited.taxAmnt,
+      subtotal: edited.subtotal,
+      total: edited.total,
+    }))
+    await editMaterialsBulk(updates, { status: "collected", collected_on: new Date(), ...sharedFields })
   }
 
   const itemsOptions = useMemo(() => items?.filter(item => (item.type === "default" || (item.quantity > 0 && item.type === "materials")))

@@ -64,6 +64,7 @@ function GenerateBill({
 
   const initialValues = useMemo(() => {
     if (!bill) return defaultInitialValues;
+
     return {
       invoiceNo: bill.invoiceNo || 0,
       items: bill.items?.map((item) => ({
@@ -100,9 +101,9 @@ function GenerateBill({
   const getItemType = (selectedSubject) => {
     switch (selectedSubject) {
       case "materials":
-        return "InventoryItem";
+        return "InventoryItemV2";
       case "gallery":
-        return "InventoryItem";
+        return "InventoryItemV2";
       case "course":
         return "Course";
       default:

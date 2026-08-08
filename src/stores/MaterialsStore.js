@@ -59,6 +59,31 @@ const materialStore = create((set, get) => ({
       set({ loading: false })
     }
   },
+  // Per-item update — each entry in `updates` (an array of { _id, ...fields })
+  // can carry its own qty/rate/discount/etc, unlike editMaterials' single
+  // updateData applied uniformly to every id.
+  editMaterialsBulk: async (updates, sharedFields = {}) => {
+    try {
+      set({ loading: true })
+      if (!updates?.length) throw new Error("Bad Data")
+      const { materials } = get()
+      const updated = await materialsService.editMaterialsBulk(updates, sharedFields)
+      if (updated && materials) {
+        const updatesById = new Map(updates.map(u => [u._id, u]))
+        const updatedMaterials = materials.map(item => {
+          const edit = updatesById.get(item._id)
+          return edit ? { ...item, ...sharedFields, ...edit } : item
+        })
+        set({ materials: updatedMaterials })
+        handleSuccess("Material(s) Updated Succesfully")
+      }
+      return updated
+    } catch (error) {
+      handleInternalError(error)
+    } finally {
+      set({ loading: false })
+    }
+  },
   editMaterialsByBillId: async (id, updateData) => {
     try {
       set({ loading: true })
@@ -91,6 +116,7 @@ const materialStore = create((set, get) => ({
         }
         set({ materials: updatedMaterials })
         handleSuccess("Materials Created Succesfully")
+        return newMaterial
       }
     } catch (error) {
       handleInternalError(error)

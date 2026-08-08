@@ -77,7 +77,7 @@ function Bills() {
       ...stateFilters, ...filters, populate: [
         { path: "generated_for", populate: { path: "details_id", model: "Student" } }, // Deep populate details_id
         { path: "generated_by" },
-        { path: "items.item", model: "Course" }
+        { path: "items.item" }
       ]
     })
   }

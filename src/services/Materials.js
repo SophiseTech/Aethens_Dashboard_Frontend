@@ -22,6 +22,16 @@ class MaterialsService {
     }
   }
 
+  async editMaterialsBulk(updates, sharedFields) {
+    try {
+      const response = await put(`/materials/bulk`, { updates, sharedFields })
+      if (!response || !response.data) throw new Error("An error occured. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
   async editMaterialsByBillId(id, updateData) {
     try {
       const response = await put(`/materials/byBillId`, { updateData, id })
