@@ -6,7 +6,8 @@ import CreateProject from '@pages/FinalProject/Components/CreateProject';
 import ProjectOpenedStudentsList from '@pages/FinalProject/Components/ProjectOpenedStudentsList';
 import { formatDate } from '@utils/helper';
 import { Avatar, Button, Card, Segmented, Space, Spin, Table, Tag, Typography } from 'antd';
-import { useEffect } from 'react';
+import { debounce } from 'lodash';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useStore } from 'zustand';
 import centersStore from '@stores/CentersStore';
@@ -18,13 +19,14 @@ const { Text, Title } = Typography
 
 function FinalProjectManagerView() {
   const { getStatusConfig, fetchPendingSubmissions, pendingSubmissions, loading, listProjects, projectsInfo, handlePaginationChange,
-    selectedView, setView, projectFetchLoading
+    selectedView, setView, projectFetchLoading, setFilters
   } = useFinalProject()
   // const { loading: projectOpenedStudentsLoading } = useStudents()
   const nav = useNavigate()
   const { projectId } = useParams()
   const { selectedCenter } = useStore(centersStore);
   const { user } = useStore(userStore);
+  const [studentName, setStudentName] = useState('')
 
   useEffect(() => {
     if ((user.role === ROLES.ADMIN || user.role === ROLES.ACADEMIC_MANAGER) && selectedCenter) {
@@ -39,6 +41,9 @@ function FinalProjectManagerView() {
     if ((user.role === ROLES.ADMIN || user.role === ROLES.ACADEMIC_MANAGER) && selectedCenter) {
       query.centerId = selectedCenter;
     }
+
+    // Persisted in the store so paginating (handlePaginationChange) keeps the search applied
+    setFilters({ studentName });
 
     listProjects({
       query: query,
@@ -56,9 +61,14 @@ function FinalProjectManagerView() {
           select: "course_name"
         }
       ],
-      pagination: projectsInfo.pagination
+      pagination: { ...projectsInfo.pagination, page: 1 }
     })
-  }, [selectedView, selectedCenter])
+  }, [selectedView, selectedCenter, studentName])
+
+  const handleStudentSearch = useCallback(
+    debounce((value) => setStudentName(value.trim()), 300),
+    []
+  )
 
   const onViewStudents = (projectId, studentId) => {
     nav(`/manager/final-project/${projectId}/student/${studentId}/phases`);
@@ -171,6 +181,7 @@ function FinalProjectManagerView() {
           }}
           loading={projectFetchLoading}
           onView={onViewStudents}
+          onSearch={handleStudentSearch}
           title={selectedView === 'completed' ? 'Completed Students' : 'Opened Students'}
         />
       </div>

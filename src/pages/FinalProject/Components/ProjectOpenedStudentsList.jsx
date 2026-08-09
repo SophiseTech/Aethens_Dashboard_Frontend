@@ -1,11 +1,11 @@
 import { BookOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
 import { formatDate } from '@utils/helper';
-import { Avatar, Button, Card, Space, Table, Tag, Typography } from 'antd';
+import { Avatar, Button, Card, Input, Space, Table, Tag, Typography } from 'antd';
 import PropTypes from 'prop-types';
 
 const { Text, Title } = Typography;
 
-function ProjectOpenedStudentsList({ projectsInfo = [], loading, onView, title = 'Project Opened Students' }) {
+function ProjectOpenedStudentsList({ projectsInfo = [], loading, onView, onSearch, title = 'Project Opened Students' }) {
 
   const columns = [
     {
@@ -65,7 +65,17 @@ function ProjectOpenedStudentsList({ projectsInfo = [], loading, onView, title =
 
   return (
     <Card>
-      <Title level={4}>{title}</Title>
+      <Space className='w-full mb-4' style={{ justifyContent: 'space-between' }}>
+        <Title level={4} style={{ margin: 0 }}>{title}</Title>
+        {onSearch &&
+          <Input.Search
+            placeholder='Search by student name'
+            allowClear
+            onChange={(e) => onSearch(e.target.value)}
+            style={{ maxWidth: 280 }}
+          />
+        }
+      </Space>
       <Table
         columns={columns}
         dataSource={projectsInfo?.projects || []}
@@ -93,6 +103,7 @@ ProjectOpenedStudentsList.propTypes = {
   }),
   loading: PropTypes.bool,
   onView: PropTypes.func.isRequired,
+  onSearch: PropTypes.func,
   title: PropTypes.string,
 };
 

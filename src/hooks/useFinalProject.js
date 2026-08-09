@@ -35,7 +35,8 @@ export const useFinalProject = () => {
     listProjects,
     getLatestSubmission,
     projectFetchLoading,
-    skipProject
+    skipProject,
+    setFilters
   } = useFinalProjectStore();
   const { selectedCenter } =
     centersStore();
@@ -355,6 +356,7 @@ export const useFinalProject = () => {
     setView,
     selectedView,
     projectFetchLoading,
-    skipProject
+    skipProject,
+    setFilters
   };
 };
