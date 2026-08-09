@@ -14,6 +14,7 @@ import SlotRescheduleModal from '@pages/Slots/Components/SlotRescheduleModal';
 import useModal from '@hooks/useModal';
 import holidayService from '@services/Holiday'
 import logger from '@utils/logger';
+import MonthlyReport from '@pages/Attendance/Components/MonthlyReport';
 
 const { Title } = Typography;
 
@@ -94,13 +95,14 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen, isDiploma =
     resetAssignment();
   };
 
-  const fetchSlots = async () => {
+  const fetchSlots = async (monthOverride) => {
     try {
       setLoadingSlots(true);
 
+      const month = monthOverride ?? selectedMonth;
       // Support both legacy numeric month (0-11) and new dayjs month object
-      const isNumberMonth = typeof selectedMonth === 'number';
-      const monthDayjs = isNumberMonth ? dayjs().month(selectedMonth) : selectedMonth;
+      const isNumberMonth = typeof month === 'number';
+      const monthDayjs = isNumberMonth ? dayjs().month(month) : month;
 
       const start = (monthDayjs && monthDayjs.startOf ? monthDayjs.startOf('month') : dayjs().startOf('month')).toDate();
       const end = (monthDayjs && monthDayjs.endOf ? monthDayjs.endOf('month') : dayjs().endOf('month')).toDate();
@@ -432,59 +434,68 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen, isDiploma =
       open={isModalOpen}
       footer={null}
       onCancel={handleCancel}
-      width={800}
+      width={1200}
       destroyOnClose
     >
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
         {(permissions.student.edit.includes(user?.role) || user?.role === "academic_manager" || user?.role === "operations_manager") && (
-          <Card loading={assignmentLoading} size="small" title="Today's Faculty Assignment">
-            {!currentAssignment ? (
-              <Flex vertical gap={12}>
-                <Empty description="No assignment found for today" />
-                {!!assignments?.length && (
+          <Flex gap={20} className='max-sm:flex-col'>
+            <Card loading={assignmentLoading} size="small" title="Today's Faculty Assignment" className='w-full sm:w-1/2 xl:w-3/4'>
+              {!currentAssignment ? (
+                <Flex vertical gap={12}>
+                  <Empty description="No assignment found for today" />
+                  {!!assignments?.length && (
+                    <Select
+                      value={selectedSlotId}
+                      onChange={setSelectedSlotId}
+                      options={assignments.map((item) => ({
+                        label: `${dayjs(item?.slot?.start_date).format("DD MMM h:mm A")} (${item?.slot?.status || "-"})`,
+                        value: item?.slotId || item?.slot?._id,
+                      }))}
+                    />
+                  )}
+                  <Flex justify="end">
+                    <Button type="primary" onClick={() => setAssignmentModalOpen(true)}>
+                      Assign Faculty
+                    </Button>
+                  </Flex>
+                </Flex>
+              ) : (
+                <Flex vertical gap={12}>
                   <Select
-                    value={selectedSlotId}
+                    value={selectedSlotId || currentAssignment?.slotId || currentAssignment?.slot?._id}
                     onChange={setSelectedSlotId}
-                    options={assignments.map((item) => ({
+                    options={(assignments || []).map((item) => ({
                       label: `${dayjs(item?.slot?.start_date).format("DD MMM h:mm A")} (${item?.slot?.status || "-"})`,
                       value: item?.slotId || item?.slot?._id,
                     }))}
                   />
-                )}
-                <Flex justify="end">
-                  <Button type="primary" onClick={() => setAssignmentModalOpen(true)}>
-                    Assign Faculty
-                  </Button>
+                  <Descriptions size="small" column={1} bordered>
+                    <Descriptions.Item label="Status">{currentAssignment?.assignmentStatus}</Descriptions.Item>
+                    <Descriptions.Item label="Source">{currentAssignment?.assignmentSource}</Descriptions.Item>
+                    <Descriptions.Item label="Assigned Faculty">
+                      {currentAssignment?.faculty?.username || 'Unassigned'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Assigned At">
+                      {currentAssignment?.assignedAt ? dayjs(currentAssignment.assignedAt).format('DD MMM YYYY h:mm A') : '-'}
+                    </Descriptions.Item>
+                  </Descriptions>
+                  <Flex justify="end">
+                    <Button type="primary" onClick={() => setAssignmentModalOpen(true)}>
+                      Reassign Faculty
+                    </Button>
+                  </Flex>
                 </Flex>
-              </Flex>
-            ) : (
-              <Flex vertical gap={12}>
-                <Select
-                  value={selectedSlotId || currentAssignment?.slotId || currentAssignment?.slot?._id}
-                  onChange={setSelectedSlotId}
-                  options={(assignments || []).map((item) => ({
-                    label: `${dayjs(item?.slot?.start_date).format("DD MMM h:mm A")} (${item?.slot?.status || "-"})`,
-                    value: item?.slotId || item?.slot?._id,
-                  }))}
-                />
-                <Descriptions size="small" column={1} bordered>
-                  <Descriptions.Item label="Status">{currentAssignment?.assignmentStatus}</Descriptions.Item>
-                  <Descriptions.Item label="Source">{currentAssignment?.assignmentSource}</Descriptions.Item>
-                  <Descriptions.Item label="Assigned Faculty">
-                    {currentAssignment?.faculty?.username || 'Unassigned'}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Assigned At">
-                    {currentAssignment?.assignedAt ? dayjs(currentAssignment.assignedAt).format('DD MMM YYYY h:mm A') : '-'}
-                  </Descriptions.Item>
-                </Descriptions>
-                <Flex justify="end">
-                  <Button type="primary" onClick={() => setAssignmentModalOpen(true)}>
-                    Reassign Faculty
-                  </Button>
-                </Flex>
-              </Flex>
-            )}
-          </Card>
+              )}
+            </Card>
+            <MonthlyReport
+              slots={slots}
+              loading={loadingSlots}
+              month={selectedMonth?.format?.("MMMM YYYY")}
+              width='w-full md:w-1/2 xl:1/4'
+            />
+          </Flex>
+
         )}
 
         {/* <Flex gap={10} wrap>
@@ -543,17 +554,13 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen, isDiploma =
               picker="month"
               style={{ width: 200 }}
               value={selectedMonth}
-              onChange={(date) => setSelectedMonth(date)}
+              onChange={(date) => {
+                setSelectedMonth(date);
+                if (date) fetchSlots(date);
+              }}
               disabled={loadingSlots}
               format="MMMM YYYY"
             />
-            <Button
-              onClick={fetchSlots}
-              loading={loadingSlots}
-              type="primary"
-            >
-              Load Slots
-            </Button>
           </Space>
 
           <Space size="middle">

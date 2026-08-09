@@ -3,9 +3,9 @@ import AttendanceCalendar from '@pages/Dashboard/Components/AttendanceCalendar'
 import { months } from '@utils/constants'
 import { Spin } from 'antd'
 
-function MonthlyReport({ slots, loading, month }) {
+function MonthlyReport({ slots, loading, month, width = "2xl:w-1/2 lg:w-3/4", className = "" }) {
   return (
-    <div className='p-2 border border-border rounded-3xl flex flex-col gap-5 h-fit 2xl:w-1/2 lg:w-3/4'>
+    <div className={`flex flex-col gap-5 p-2 rounded-3xl border border-border h-fit ${width} ${className}`}>
 
       <div className='flex justify-between items-center | p-2 2xl:p-4 pb-0'>
         <h1 className='font-bold | text-sm 2xl:text-xl'>Attendance</h1>
@@ -15,7 +15,7 @@ function MonthlyReport({ slots, loading, month }) {
         </div>
       </div>
 
-      {loading ? <div className='w-full h-52 flex items-center justify-center'><Spin /> </div> : <AttendanceCalendar slots={slots} month={month} />}
+      {loading ? <div className='flex justify-center items-center w-full h-52'><Spin /> </div> : <AttendanceCalendar slots={slots} month={month} />}
     </div>
   )
 }
