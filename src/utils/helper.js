@@ -92,6 +92,43 @@ export const groupActivities = (activities) => {
   }, {});
 }
 
+// Builds a chronological list of course-switch points from a student's course
+// history plus their current course. `courseHistories` need not be pre-sorted.
+export const buildCourseSwitches = (courseHistories = [], currentCourse) => {
+  const timeline = [
+    ...courseHistories
+      .filter((history) => history?.start_date && history?.course_name)
+      .map((history) => ({ course_name: history.course_name, start_date: history.start_date })),
+    ...(currentCourse?.start_date && currentCourse?.course_name ? [currentCourse] : []),
+  ].sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+
+  return timeline.slice(1).map((entry, index) => ({
+    date: entry.start_date,
+    fromCourse: timeline[index].course_name,
+    toCourse: entry.course_name,
+  }))
+}
+
+// Interleaves course-switch markers into a feed of activities sorted newest-first,
+// inserting a marker right before the first (i.e. newest) activity that predates it.
+export const mergeActivityFeed = (activities = [], courseSwitches = []) => {
+  if (!activities.length) return []
+
+  const items = []
+  let switchIndex = courseSwitches.length - 1
+
+  activities.forEach((activity) => {
+    const activityDate = new Date(activity.createdAt)
+    while (switchIndex >= 0 && activityDate < new Date(courseSwitches[switchIndex].date)) {
+      items.push({ type: 'course-change', key: `course-change-${switchIndex}`, data: courseSwitches[switchIndex] })
+      switchIndex--
+    }
+    items.push({ type: 'activity', key: activity._id, data: activity })
+  })
+
+  return items
+}
+
 export function groupByMonthName(data) {
   // Step 1: Group by "Month Year"
   const groupedData = data.reduce((groups, item) => {
