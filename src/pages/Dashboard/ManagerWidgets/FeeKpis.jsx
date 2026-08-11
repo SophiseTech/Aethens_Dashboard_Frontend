@@ -83,7 +83,12 @@ function FeeKpis() {
       title: 'Due Month',
       dataIndex: 'dueMonth',
       key: 'dueMonth',
-      render: (month) => dayjs(month).format('MMM YYYY'),
+      render: (month, row) => (
+        <>
+          {dayjs(month).format('MMM YYYY')}
+          {row.carriedOver && <Tag color='volcano' className='ml-1'>Carried Over</Tag>}
+        </>
+      ),
     },
     {
       title: 'Amount',

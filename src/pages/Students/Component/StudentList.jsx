@@ -11,6 +11,7 @@ import centersStore from "@stores/CentersStore";
 import facultyAssignmentStore from "@stores/FacultyAssignmentStore";
 import Chip from '@components/Chips/Chip';
 import RegularityTag from "./RegularityTag";
+import FacultyStudentCounts from "./FacultyStudentCounts";
 
 function StudentList() {
   const {
@@ -261,6 +262,18 @@ function StudentList() {
       });
     }
 
+    // Order by assigned faculty name (unassigned students last)
+    if (selectedView === "Current Students") {
+      data = [...data].sort((a, b) => {
+        if (!a.facultyName && b.facultyName) return 1;
+        if (a.facultyName && !b.facultyName) return -1;
+        return (
+          (a.facultyName || "").localeCompare(b.facultyName || "") ||
+          (a.username || "").localeCompare(b.username || "")
+        );
+      });
+    }
+
     return data;
   }, [
     students,
@@ -273,6 +286,23 @@ function StudentList() {
     user?.center_id,
     todaysSessionAttendees,
   ]);
+
+  // Faculty -> assigned student count, for the Current Students summary cards
+  const facultySummary = useMemo(() => {
+    if (selectedView !== "Current Students") return [];
+
+    const counts = new Map();
+    studentsToDisplay.forEach((student) => {
+      const name = student.facultyName || "Unassigned";
+      counts.set(name, (counts.get(name) || 0) + 1);
+    });
+
+    return Array.from(counts, ([facultyName, count]) => ({ facultyName, count })).sort((a, b) => {
+      if (a.facultyName === "Unassigned") return 1;
+      if (b.facultyName === "Unassigned") return -1;
+      return a.facultyName.localeCompare(b.facultyName);
+    });
+  }, [studentsToDisplay, selectedView]);
 
   console.log("search query: ", searchQuery, searchResults, currentPage);
 
@@ -607,6 +637,8 @@ function StudentList() {
           ? (searchQuery ? searchTotal : total)
           : studentsToDisplay.length) !== 1) && 's'}
       </div>
+
+      <FacultyStudentCounts data={facultySummary} />
 
       <Table
         columns={columns}
