@@ -199,6 +199,12 @@ const getMenuConfig = (role) => {
       path: "/manager/announcements",
     },
     {
+      label: "WhatsApp Campaigns",
+      icon: <MessageOutlined />,
+      key: "whatsapp-campaigns",
+      path: "/manager/whatsapp-campaigns",
+    },
+    {
       label: "Notifications",
       icon: <BellOutlined />,
       key: "notifications",
@@ -325,6 +331,12 @@ const getMenuConfig = (role) => {
       path: "/manager/announcements",
     },
     {
+      label: "WhatsApp Campaigns",
+      icon: <MessageOutlined />,
+      key: "whatsapp-campaigns",
+      path: "/manager/whatsapp-campaigns",
+    },
+    {
       label: "Notifications",
       icon: <BellOutlined />,
       key: "notifications",
@@ -436,6 +448,12 @@ const getMenuConfig = (role) => {
       icon: <ClockCircleOutlined />,
       key: "announcements",
       path: "/manager/announcements",
+    },
+    {
+      label: "WhatsApp Campaigns",
+      icon: <MessageOutlined />,
+      key: "whatsapp-campaigns",
+      path: "/manager/whatsapp-campaigns",
     },
     {
       label: "Holidays",
@@ -559,6 +577,12 @@ const getMenuConfig = (role) => {
       icon: <ClockCircleOutlined />,
       key: "announcements",
       path: "/manager/announcements",
+    },
+    {
+      label: "WhatsApp Campaigns",
+      icon: <MessageOutlined />,
+      key: "whatsapp-campaigns",
+      path: "/manager/whatsapp-campaigns",
     },
     {
       label: "Notifications",
