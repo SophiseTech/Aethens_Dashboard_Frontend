@@ -41,6 +41,8 @@ const SyllabusGallery = lazy(() => import("@pages/SyllabusGallery"))
 const Expenses = lazy(() => import("@pages/Expenses"))
 const Ledgers = lazy(() => import("@pages/Ledgers"))
 const DiplomaPreRegistrationManager = lazy(() => import("@pages/DiplomaPreRegistration/Manager"))
+const Reports = lazy(() => import("@pages/Reports"))
+const FinancialReports = lazy(() => import("@pages/Reports/Financial"))
 
 export const LazyLoader = ({ element }) => {
   const location = useLocation();
@@ -258,6 +260,26 @@ export const managerRoutes = [
             path: "/manager/diploma-registrations",
             element: <LazyLoader element={<DiplomaPreRegistrationManager />} />,
             title: "Diploma Registrations",
+          },
+        ]
+      }
+    ]
+  },
+  {
+    element: <Protected roles={[ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER]} />,
+    children: [
+      {
+        element: <SidebarLayout />,
+        children: [
+          {
+            path: "/manager/reports",
+            element: <LazyLoader element={<Reports />} />,
+            title: "Reports"
+          },
+          {
+            path: "/manager/reports/financial",
+            element: <LazyLoader element={<FinancialReports />} />,
+            title: "Financial Reports"
           },
         ]
       }

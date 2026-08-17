@@ -289,7 +289,8 @@ export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
   "/manager/attendance-register",
   "/manager/tasks",
   "/manager/expenses",
-  "/manager/ledgers"
+  "/manager/ledgers",
+  "/manager/reports/financial"
 ]
 
 export const GLOBAL_USER_ROLES = [

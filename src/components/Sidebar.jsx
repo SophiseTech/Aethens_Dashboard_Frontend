@@ -94,6 +94,14 @@ const getMenuConfig = (role) => {
       ],
     },
     {
+      label: "Reports",
+      icon: <FileTextOutlined />,
+      key: "reports",
+      children: [
+        { label: "Financial", key: "reports-financial", path: "/manager/reports/financial" },
+      ],
+    },
+    {
       label: "Operations",
       icon: <ClockCircleOutlined />,
       key: "operations",
@@ -284,6 +292,14 @@ const getMenuConfig = (role) => {
         { label: "Bills", key: "bills", path: "/manager/bills" },
         { label: "Inventory", key: "inventory", path: "/manager/inventory" },
         { label: "Audits", key: "audits", path: "/manager/audits" }
+      ],
+    },
+    {
+      label: "Reports",
+      icon: <FileTextOutlined />,
+      key: "reports",
+      children: [
+        { label: "Financial", key: "reports-financial", path: "/manager/reports/financial" },
       ],
     },
     {
@@ -567,6 +583,12 @@ const getMenuConfig = (role) => {
       icon: <DollarOutlined />,
       key: "bills",
       path: "/manager/bills",
+    },
+    {
+      label: "Financial Reports",
+      icon: <FileTextOutlined />,
+      key: "reports-financial",
+      path: "/manager/reports/financial",
     },
     {
       label: "Payslips",
