@@ -36,6 +36,13 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
     }
   }
 
+  const ZohoStatus = ({ billStatus, syncStatus }) => {
+    if (billStatus === 'draft' || billStatus === 'migration_closed') return null
+    if (syncStatus === 'synced') return <Chip size='xs' glow={false} type='success' label='Zoho ✓' />
+    if (syncStatus === 'failed') return <Chip size='xs' glow={false} type='danger' label='Zoho failed' />
+    return <Chip size='xs' glow={false} type='warning' label='Zoho pending' />
+  }
+
   const formatBill = (bill) => {
     const prefix = bill.center_initial || bill.center_id?.center_initial || ''
     const invoiceLabel = bill.invoiceNo ? `${prefix}${bill.invoiceNo}` : 'Draft'
@@ -62,6 +69,7 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
               FY '{fy}
             </span>
           )}
+          <ZohoStatus billStatus={bill.status} syncStatus={bill.zoho?.syncStatus} />
         </p>
         <p>Paid On: <strong>{formatDate(bill.payment_date)}</strong></p>
         <p className='capitalize'>Mode: <strong>{bill.payment_method?.replace("_", " ")}</strong></p>

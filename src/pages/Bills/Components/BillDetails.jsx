@@ -13,7 +13,7 @@ import { downloadPdf, toISTStartOfDayISO } from '@utils/helper';
 import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
 import InvoicePdf from '@pages/Bills/Components/Invoice';
 import InvoiceHtml from '@pages/Bills/Components/InvoiceHtml';
-import { CheckSquareOutlined, DownloadOutlined, EditOutlined, RestOutlined } from '@ant-design/icons';
+import { CheckSquareOutlined, DownloadOutlined, EditOutlined, LinkOutlined, ReloadOutlined, RestOutlined } from '@ant-design/icons';
 import billStore from '@stores/BillStore';
 import inventoryService from '@/services/Inventory';
 import courseService from '@/services/Course';
@@ -38,7 +38,7 @@ function BillDetails() {
   const { selectedCenter } = useStore(centersStore);
   const nav = useNavigate();
   const invoiceRef = useRef(null);
-  const { finalizeBill } = billStore();
+  const { finalizeBill, resyncZoho, getZohoOrgConfig, zohoOrgConfig } = billStore();
   const [lineItems, setLineItems] = useState([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -47,6 +47,16 @@ function BillDetails() {
       setBill(bills.find(bill => bill._id === id) || {});
     }
   }, [bills, id]);
+
+  useEffect(() => {
+    if (bill?.zoho?.syncStatus === 'synced' && !zohoOrgConfig) {
+      getZohoOrgConfig();
+    }
+  }, [bill?.zoho?.syncStatus, zohoOrgConfig, getZohoOrgConfig]);
+
+  const handleRetryZohoSync = async () => {
+    if (id) await resyncZoho(id);
+  };
 
   const handleRecordPayment = async (values) => {
     if (id && bill) {
@@ -195,6 +205,37 @@ function BillDetails() {
           {permissions.bills?.record_payment?.includes(user.role) && bill?.status !== 'draft' &&
             <RecordPaymentModal handleRecordPayment={handleRecordPayment} bill={bill} />
           }
+
+          {bill?.zoho?.syncStatus === 'synced' && zohoOrgConfig?.organizationId && (
+            <Button
+              className='rounded-full'
+              color='default'
+              icon={<LinkOutlined />}
+              variant='outlined'
+              onClick={() => {
+                const region = zohoOrgConfig.accountsDomain?.match(/accounts\.zoho\.(.+)$/)?.[1] || 'in';
+                window.open(
+                  `https://books.zoho.${region}/app/${zohoOrgConfig.organizationId}#/invoices/${bill.zoho.invoiceId}`,
+                  '_blank',
+                  'noopener,noreferrer'
+                );
+              }}
+            >
+              {bill.zoho.invoiceNumber ? `View in Zoho (${bill.zoho.invoiceNumber})` : 'View in Zoho'}
+            </Button>
+          )}
+
+          {bill?.zoho?.syncStatus === 'failed' && permissions.bills?.zoho_resync?.includes(user.role) && (
+            <Button
+              className='rounded-full'
+              color='default'
+              icon={<ReloadOutlined />}
+              variant='outlined'
+              onClick={handleRetryZohoSync}
+            >
+              Retry Zoho Sync
+            </Button>
+          )}
 
 
           <PDFDownloadLink

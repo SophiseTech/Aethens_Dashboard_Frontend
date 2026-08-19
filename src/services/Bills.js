@@ -73,6 +73,25 @@ class BillServices {
     }
   }
 
+  async resyncBillZoho(id) {
+    try {
+      const response = await post(`/v2/zoho/bills/${id}/resync`)
+      if (!response || !response.data) throw new Error("An error occured. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
+  async getZohoConfig() {
+    try {
+      const response = await get(`/v2/zoho/config`)
+      return response?.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
   async exportBills({ dateRange, centerIds, selectedFields, status, subject }) {
     try {
       const response = await post(`/bills/export`, {

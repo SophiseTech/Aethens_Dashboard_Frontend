@@ -17,6 +17,7 @@ const billStore = create((set, get) => ({
   invoiceNo: 0,
   center_initial: '',
   summary: {},
+  zohoOrgConfig: null,
   getBills: async (limit = 2, customFilters = {}) => {
     try {
       set({ loading: true })
@@ -132,6 +133,40 @@ const billStore = create((set, get) => ({
       handleInternalError(error);
     } finally {
       set({ createLoading: false });
+    }
+  },
+  getZohoOrgConfig: async () => {
+    try {
+      const { zohoOrgConfig } = get()
+      if (zohoOrgConfig) return zohoOrgConfig
+      const config = await billService.getZohoConfig()
+      if (config) set({ zohoOrgConfig: config })
+      return config
+    } catch (error) {
+      handleInternalError(error)
+    }
+  },
+  resyncZoho: async (id) => {
+    try {
+      set({ createLoading: true })
+      if (!id) throw new Error("Bad Data")
+      const { bills } = get()
+      const bill = await billService.resyncBillZoho(id)
+      if (bill) {
+        const updatedBills = bills.map(item => (
+          item._id === bill._id ? bill : item
+        ))
+        set({ bills: updatedBills })
+        if (bill.zoho?.syncStatus === "synced") {
+          handleSuccess("Bill synced to Zoho successfully")
+        } else {
+          handleInternalError(new Error(bill.zoho?.errorMessage || "Zoho sync failed again"))
+        }
+      }
+    } catch (error) {
+      handleInternalError(error)
+    } finally {
+      set({ createLoading: false })
     }
   },
   getInvoiceNo: async () => {

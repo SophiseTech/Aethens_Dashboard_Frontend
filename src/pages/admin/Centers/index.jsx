@@ -1,10 +1,33 @@
 import { useState, useEffect, useCallback } from "react";
-import { Table, Button, Flex, Modal, Form, Input, InputNumber, Switch, Tag, message, Row, Col, Tooltip } from "antd";
+import { Table, Button, Flex, Modal, Form, Input, InputNumber, Select, Switch, Tag, message, Row, Col, Tooltip } from "antd";
 import Title from "@components/layouts/Title";
 import userStore from "@stores/UserStore";
 import permissions from "@utils/permissions";
 import centersService from "@services/Centers";
 import { useStore } from "zustand";
+
+// Zoho Books place_of_supply state codes — must match server/lib/zoho/gstStateCodes.js
+const GST_STATE_OPTIONS = [
+  { label: "Jammu & Kashmir", value: "JK" }, { label: "Himachal Pradesh", value: "HP" },
+  { label: "Punjab", value: "PB" }, { label: "Chandigarh", value: "CH" },
+  { label: "Uttarakhand", value: "UK" }, { label: "Haryana", value: "HR" },
+  { label: "Delhi", value: "DL" }, { label: "Rajasthan", value: "RJ" },
+  { label: "Uttar Pradesh", value: "UP" }, { label: "Bihar", value: "BR" },
+  { label: "Sikkim", value: "SK" }, { label: "Arunachal Pradesh", value: "AR" },
+  { label: "Nagaland", value: "NL" }, { label: "Manipur", value: "MN" },
+  { label: "Mizoram", value: "MZ" }, { label: "Tripura", value: "TR" },
+  { label: "Meghalaya", value: "ML" }, { label: "Assam", value: "AS" },
+  { label: "West Bengal", value: "WB" }, { label: "Jharkhand", value: "JH" },
+  { label: "Odisha", value: "OR" }, { label: "Chhattisgarh", value: "CG" },
+  { label: "Madhya Pradesh", value: "MP" }, { label: "Gujarat", value: "GJ" },
+  { label: "Dadra & Nagar Haveli and Daman & Diu", value: "DN" },
+  { label: "Maharashtra", value: "MH" }, { label: "Andhra Pradesh", value: "AP" },
+  { label: "Karnataka", value: "KA" }, { label: "Goa", value: "GA" },
+  { label: "Lakshadweep", value: "LD" }, { label: "Kerala", value: "KL" },
+  { label: "Tamil Nadu", value: "TN" }, { label: "Puducherry", value: "PY" },
+  { label: "Andaman & Nicobar Islands", value: "AN" }, { label: "Telangana", value: "TS" },
+  { label: "Ladakh", value: "LA" }, { label: "Other Territory", value: "OT" },
+];
 
 function AdminCenters() {
   const { user } = useStore(userStore);
@@ -63,6 +86,7 @@ function AdminCenters() {
       center_name: record.center_name,
       location: record.location,
       center_initial: record.center_initial,
+      state: record.state,
       maxCount: record.maxCount,
       rescheduleAutoApprovalMaxCount: autoApproval,
       autoReject: record.autoReject ?? false,
@@ -143,6 +167,7 @@ function AdminCenters() {
     { title: "Center name", dataIndex: "center_name", key: "center_name" },
     { title: "Location", dataIndex: "location", key: "location" },
     { title: "Initial", dataIndex: "center_initial", key: "center_initial" },
+    { title: "State", dataIndex: "state", key: "state", render: (val) => val || "—" },
     { title: "Max Count", dataIndex: "maxCount", key: "maxCount", render: (val) => val ?? "—" },
     {
       title: "Auto Approve Limit",
@@ -240,6 +265,19 @@ function AdminCenters() {
           </Form.Item>
           <Form.Item name="center_initial" label="Center initial" rules={[{ max: 5 }]}>
             <Input placeholder="e.g. SOA" maxLength={5} />
+          </Form.Item>
+          <Form.Item
+            name="state"
+            label="State"
+            tooltip="Used as the default GST place of supply when syncing this center's bills to Zoho Books"
+          >
+            <Select
+              showSearch
+              allowClear
+              placeholder="Select state"
+              options={GST_STATE_OPTIONS}
+              optionFilterProp="label"
+            />
           </Form.Item>
           <Form.Item name="maxCount" label="Max Count" rules={[{ type: "number", min: 0, message: "Must be a positive number" }]}>
             <InputNumber min={0} placeholder="e.g. 30" style={{ width: "100%" }} />
