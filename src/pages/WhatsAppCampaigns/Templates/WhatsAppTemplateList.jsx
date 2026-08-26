@@ -35,6 +35,20 @@ export default function WhatsAppTemplateList() {
     { title: "Language", dataIndex: "language", width: 90 },
     { title: "Category", dataIndex: "category", render: (v) => <Tag>{v}</Tag> },
     {
+      title: "Header",
+      dataIndex: "headerType",
+      render: (v, record) => {
+        if (!v || v === "none") return null;
+        const missingImage = (v === "image" || v === "document") && !record.headerExampleUrl;
+        return (
+          <Space>
+            <Tag>{v}</Tag>
+            {missingImage && <Tag color="red">Missing header image</Tag>}
+          </Space>
+        );
+      },
+    },
+    {
       title: "Approval",
       dataIndex: "approvalStatus",
       render: (v) => <Tag color={STATUS_COLORS[v]}>{v}</Tag>,

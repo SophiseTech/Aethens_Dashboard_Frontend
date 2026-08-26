@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Input, Select, Switch, Button, Table, message } from "antd";
-import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Modal, Input, Select, Switch, Button, Table, Upload, message } from "antd";
+import { PlusOutlined, DeleteOutlined, UploadOutlined } from "@ant-design/icons";
 import useWhatsAppTemplateStore from "@/stores/WhatsAppTemplateStore";
+import s3Service from "@/services/S3Service";
 
 export default function WhatsAppTemplateForm() {
   const { modalOpen, setModalOpen, selected, create, update, loading } = useWhatsAppTemplateStore();
@@ -14,6 +15,7 @@ export default function WhatsAppTemplateForm() {
     bodyText: "",
     headerType: "none",
     headerText: "",
+    headerExampleUrl: "",
     footerText: "",
     variables: [],
     active: true,
@@ -29,6 +31,7 @@ export default function WhatsAppTemplateForm() {
           bodyText: selected.bodyText || "",
           headerType: selected.headerType || "none",
           headerText: selected.headerText || "",
+          headerExampleUrl: selected.headerExampleUrl || "",
           footerText: selected.footerText || "",
           variables: selected.variables || [],
           active: selected.active !== false,
@@ -41,6 +44,7 @@ export default function WhatsAppTemplateForm() {
           bodyText: "",
           headerType: "none",
           headerText: "",
+          headerExampleUrl: "",
           footerText: "",
           variables: [],
           active: true,
@@ -65,6 +69,9 @@ export default function WhatsAppTemplateForm() {
   const handleSubmit = async () => {
     if (!form.name) return message.error("Name is required");
     if (!form.bodyText) return message.error("Body text is required");
+    if ((form.headerType === "image" || form.headerType === "document") && !form.headerExampleUrl) {
+      return message.error(`Header ${form.headerType} is required`);
+    }
     try {
       if (isEdit) {
         await update(selected._id, form);
@@ -126,6 +133,42 @@ export default function WhatsAppTemplateForm() {
         />
         {form.headerType === "text" && (
           <Input placeholder="Header text" value={form.headerText} onChange={(e) => setForm((f) => ({ ...f, headerText: e.target.value }))} />
+        )}
+        {(form.headerType === "image" || form.headerType === "document") && (
+          <div className="flex items-center gap-2">
+            <Upload
+              listType={form.headerType === "image" ? "picture" : "text"}
+              maxCount={1}
+              showUploadList={{ showRemoveIcon: true }}
+              accept={form.headerType === "image" ? "image/*" : undefined}
+              customRequest={async ({ file, onSuccess, onError }) => {
+                try {
+                  const reader = new FileReader();
+                  reader.onload = async () => {
+                    try {
+                      const [url] = await s3Service.uploadFiles({
+                        files: [{ data: reader.result, fileName: file.name, fileType: file.type, path: "whatsapp-templates" }],
+                      });
+                      if (!url) throw new Error("Upload failed");
+                      setForm((f) => ({ ...f, headerExampleUrl: url }));
+                      onSuccess(url);
+                    } catch (error) {
+                      message.error("Header upload failed");
+                      onError(error);
+                    }
+                  };
+                  reader.readAsDataURL(file);
+                } catch (error) {
+                  onError(error);
+                }
+              }}
+            >
+              <Button icon={<UploadOutlined />}>Upload header {form.headerType}</Button>
+            </Upload>
+            {form.headerExampleUrl && form.headerType === "image" && (
+              <img src={form.headerExampleUrl} alt="Header preview" style={{ maxHeight: 60 }} />
+            )}
+          </div>
         )}
 
         <Input.TextArea
