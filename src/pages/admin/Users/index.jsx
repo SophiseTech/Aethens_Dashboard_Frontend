@@ -8,7 +8,7 @@ import permissions from "@utils/permissions";
 import usersV2Service from "@services/UsersV2";
 import centersService from "@services/Centers";
 import { useStore } from "zustand";
-import { ROLES } from "@utils/constants";
+import { ROLES, STAFF_ROLES } from "@utils/constants";
 
 function AdminUsers() {
   const { user } = useStore(userStore);
@@ -37,7 +37,7 @@ function AdminUsers() {
       if (filters.role) {
         params.role = filters.role;
       } else {
-        params.role = [ROLES.FACULTY, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER, ROLES.MEDIA_MANAGER, ROLES.PURCHASE_MANAGER].join(",");
+        params.role = STAFF_ROLES.join(",");
       }
       if (filters.status) params.status = filters.status;
       if (filters.center_id && filters.center_id !== "all") params.center_id = filters.center_id;
