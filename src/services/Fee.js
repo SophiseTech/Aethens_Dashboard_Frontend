@@ -17,6 +17,9 @@ export const FeeService = {
   getFeeKpis: (filters = {}) => {
     return post(`/fees/kpis`, { filters });
   },
+  sendFeeReminder: (payload) => {
+    return post(`/fees/reminder`, payload);
+  },
   generatePartialBalanceBill: (feeAccountId) => {
     return post(`/fees/${feeAccountId}/generate-partial-bill`);
   },

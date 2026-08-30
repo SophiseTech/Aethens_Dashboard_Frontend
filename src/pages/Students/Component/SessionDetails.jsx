@@ -15,6 +15,7 @@ import useModal from '@hooks/useModal';
 import holidayService from '@services/Holiday'
 import logger from '@utils/logger';
 import MonthlyReport from '@pages/Attendance/Components/MonthlyReport';
+import AllocationHistoryModal from '@pages/Students/Component/AllocationHistoryModal';
 
 const { Title } = Typography;
 
@@ -564,6 +565,9 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen, isDiploma =
           </Space>
 
           <Space size="middle">
+            {(permissions.sessions.edit.includes(user?.role) || permissions.sessions.delete.includes(user?.role)) && (
+              <AllocationHistoryModal studentId={student._id} />
+            )}
             {permissions.sessions.edit.includes(user?.role) && (
               <Button
                 onClick={handleSyncSlots}

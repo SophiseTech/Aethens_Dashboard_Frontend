@@ -12,6 +12,20 @@ const SessionStore = create((set, get) => ({
   availableSessions: [],
   loading: false,
   sessions: [],
+  allocationHistory: [],
+  loadingHistory: false,
+  getAllocationHistory: async (studentId) => {
+    try {
+      set({ loadingHistory: true })
+      const data = await sessionService.getAllocationHistory(studentId)
+      set({ allocationHistory: data || [] })
+      return data
+    } catch (error) {
+      handleInternalError(error)
+    } finally {
+      set({ loadingHistory: false })
+    }
+  },
   getAllSessions: async (date) => {
     try {
       set({ loading: true })

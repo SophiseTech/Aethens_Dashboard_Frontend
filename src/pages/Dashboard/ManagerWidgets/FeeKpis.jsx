@@ -1,10 +1,14 @@
 import { useMemo } from 'react';
+import { useStore } from 'zustand';
 import { Card, Col, Row, Table, Tag, Empty, Typography } from 'antd';
 import { WarningOutlined, ClockCircleOutlined, CalendarOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import DataDisplay from '@pages/Dashboard/Components/DataDisplay';
 import EChart from '@pages/Dashboard/Chart/EChart';
 import FeeTracker from '@pages/Students/Component/FeeTracker';
+import FeeReminderModal from '@pages/Dashboard/ManagerWidgets/FeeReminderModal';
 import useFeeKpis from '@hooks/useFeeKpis';
+import userStore from '@stores/UserStore';
+import permissions from '@utils/permissions';
 import dayjs from 'dayjs';
 
 const { Text } = Typography;
@@ -27,6 +31,8 @@ function FeeKpis() {
     openStudent,
     closeModal,
   } = useFeeKpis();
+  const { user } = useStore(userStore);
+  const canSendReminder = permissions.fee_reminder.send.includes(user?.role);
 
   const aging = kpis?.overdue?.aging;
 
@@ -65,6 +71,24 @@ function FeeKpis() {
       key: 'oldestOverdueDays',
       render: (days) => days ? `${days}d` : '-',
     },
+    ...(canSendReminder ? [{
+      title: 'Action',
+      key: 'action',
+      render: (_, row) => (
+        <div onClick={(e) => e.stopPropagation()}>
+          <FeeReminderModal
+            row={{
+              studentId: row.studentId,
+              studentName: row.studentName,
+              amount: row.overdueAmount,
+              dueDate: row.oldestOverdueDate,
+            }}
+            disabled={!row.oldestOverdueDate}
+            disabledReason='No fixed due date to remind against'
+          />
+        </div>
+      ),
+    }] : []),
   ];
 
   const lapsedColumns = [
@@ -96,6 +120,22 @@ function FeeKpis() {
       key: 'amount',
       render: (amount) => <Text strong>{formatCurrency(amount)}</Text>,
     },
+    ...(canSendReminder ? [{
+      title: 'Action',
+      key: 'action',
+      render: (_, row) => (
+        <div onClick={(e) => e.stopPropagation()}>
+          <FeeReminderModal
+            row={{
+              studentId: row.studentId,
+              studentName: row.studentName,
+              amount: row.amount,
+              dueDate: row.dueMonth,
+            }}
+          />
+        </div>
+      ),
+    }] : []),
   ];
 
   return (

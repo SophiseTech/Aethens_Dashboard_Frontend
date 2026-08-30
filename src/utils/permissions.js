@@ -187,6 +187,9 @@ const permissions = {
   },
   finalProjectPhase: {
     approve: [ROLES.ADMIN, ROLES.ACADEMIC_MANAGER]
+  },
+  fee_reminder: {
+    send: [ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER]
   }
 }
 

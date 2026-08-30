@@ -17,6 +17,17 @@ const feeStore = create((set) => ({
       throw error;
     }
   },
+  sendFeeReminder: async (payload) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await FeeService.sendFeeReminder(payload);
+      set({ loading: false });
+      return response.data;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
   getFeeDetailsByStudent: async (studentId) => {
     set({ loading: true, error: null });
     try {

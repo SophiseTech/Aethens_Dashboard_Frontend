@@ -43,6 +43,16 @@ class SessionService {
     }
   }
 
+  async getAllocationHistory(studentId) {
+    try {
+      const response = await post("/sessions/allocationHistory", { studentId })
+      if (!response) throw new Error("An error occured. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
   async getAllSessions(date) {
     try {
       const { user } = userStore.getState();
