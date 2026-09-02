@@ -1,4 +1,5 @@
 import Sidebar from '@components/Sidebar';
+import AnnouncementModal from '@components/AnnouncementModal';
 import { Layout } from 'antd'
 import React from 'react'
 import { Outlet } from 'react-router-dom';
@@ -8,6 +9,7 @@ const { Header, Content, Footer, Sider } = Layout;
 function SidebarLayout() {
   return (
     <Sidebar>
+      <AnnouncementModal />
       <div className='h-screen max-h-screen overflow-auto w-full'>
         <Outlet />
       </div>
