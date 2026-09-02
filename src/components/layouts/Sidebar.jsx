@@ -9,8 +9,8 @@ const { Header, Content, Footer, Sider } = Layout;
 function SidebarLayout() {
   return (
     <Sidebar>
-      <AnnouncementModal />
-      <div className='h-screen max-h-screen overflow-auto w-full'>
+      {/* <AnnouncementModal /> */}
+      <div className='overflow-auto w-full h-screen max-h-screen'>
         <Outlet />
       </div>
     </Sidebar>
@@ -23,7 +23,7 @@ function SidebarLayout() {
   >
     <Sidebar />
   </Sider> */}
-  {/* <Content className='h-full max-h-full overflow-auto'>
+{/* <Content className='overflow-auto h-full max-h-full'>
   
 </Content> */}
 
