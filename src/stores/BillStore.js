@@ -7,10 +7,18 @@ import _ from "lodash"
 import { create } from "zustand"
 import centersStore from "./CentersStore"
 
+// Keeps a deep-linked `selectedBill` (one not in the paginated `bills` slice) in step
+// with mutations. Returns a partial `set` payload — `{}` when nothing to sync.
+const syncSelectedBill = (get, updatedBill) =>
+  get().selectedBill?._id === updatedBill?._id ? { selectedBill: updatedBill } : {}
+
 const billStore = create((set, get) => ({
   bills: [],
+  selectedBill: null,
+  selectedBillLoading: false,
   loading: true,
   createLoading: false,
+  invoiceLoading: false,
   lastRefKey: 0,
   total: 0,
   filters: {},
@@ -22,7 +30,6 @@ const billStore = create((set, get) => ({
     try {
       set({ loading: true })
       const { lastRefKey, bills: prevBills, filters: stateFilters } = get()
-      console.log(stateFilters, customFilters);
 
       const { bills, total } = await billService.getBills(
         customFilters,
@@ -38,7 +45,10 @@ const billStore = create((set, get) => ({
         })
       }
       if (customFilters) {
-        const filters = _.cloneDeep({ ...stateFilters, ...customFilters })
+        // `populate` is a request concern, not a filter — keep it out of persisted state
+        // so `_.isEqual(stateFilters.query, customFilters.query)` paging checks stay clean.
+        const { populate, ...persistableFilters } = { ...stateFilters, ...customFilters }
+        const filters = _.cloneDeep(persistableFilters)
         if (filters.generated_on) {
           if (!filters.generated_on.$lte) {
             delete filters.generated_on.$lte
@@ -66,7 +76,7 @@ const billStore = create((set, get) => ({
         const updatedBills = bills.map(item => (
           item._id === bill._id ? bill : item
         ))
-        set({ bills: updatedBills })
+        set({ bills: updatedBills, ...syncSelectedBill(get, bill) })
         handleSuccess("Bill Updated Succesfully")
       }
     } catch (error) {
@@ -83,7 +93,8 @@ const billStore = create((set, get) => ({
       await billService.deleteBill(id)
       if (bills) {
         const updatedBills = bills.filter(bill => bill._id !== id)
-        set({ bills: updatedBills })
+        const clearSelected = get().selectedBill?._id === id ? { selectedBill: null } : {}
+        set({ bills: updatedBills, ...clearSelected })
         handleSuccess("Bill Deleted Succesfully")
       }
     } catch (error) {
@@ -124,7 +135,8 @@ const billStore = create((set, get) => ({
         );
         set({
           bills: updatedBills,
-          invoiceNo: finalizedBill.invoiceNo || get().invoiceNo
+          invoiceNo: finalizedBill.invoiceNo || get().invoiceNo,
+          ...syncSelectedBill(get, finalizedBill)
         });
         handleSuccess("Draft Finalized Successfully");
         return finalizedBill;
@@ -156,7 +168,7 @@ const billStore = create((set, get) => ({
         const updatedBills = bills.map(item => (
           item._id === bill._id ? bill : item
         ))
-        set({ bills: updatedBills })
+        set({ bills: updatedBills, ...syncSelectedBill(get, bill) })
         if (bill.zoho?.syncStatus === "synced") {
           handleSuccess("Bill synced to Zoho successfully")
         } else {
@@ -171,7 +183,8 @@ const billStore = create((set, get) => ({
   },
   getInvoiceNo: async () => {
     try {
-      set({ loading: true })
+      // Own flag — must not toggle the bills-list `loading` and flash a spinner over it.
+      set({ invoiceLoading: true })
       const invoiceDoc = await billService.getInvoiceNumber()
       if (invoiceDoc && invoiceDoc.invoiceNo) {
         set({
@@ -186,7 +199,22 @@ const billStore = create((set, get) => ({
     } catch (error) {
       handleInternalError(error)
     } finally {
-      set({ loading: false })
+      set({ invoiceLoading: false })
+    }
+  },
+  getBillById: async (id) => {
+    try {
+      if (!id) return
+      set({ selectedBillLoading: true })
+      const bill = await billService.getBillById(id)
+      // Only touch `selectedBill` — never `bills` / `lastRefKey` / `total` / `filters`,
+      // so the paginated list is left exactly as the user loaded it.
+      if (bill) set({ selectedBill: bill })
+      return bill
+    } catch (error) {
+      handleInternalError(error)
+    } finally {
+      set({ selectedBillLoading: false })
     }
   },
   getSummary: async (filters) => {

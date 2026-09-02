@@ -3,12 +3,32 @@ import { del, get, post, put } from "@utils/Requests"
 import centersStore from "@stores/CentersStore";
 import userStore from "@stores/UserStore";
 
+// Shared populate spec so the list fetch and the single-bill fetch stay in sync.
+export const BILL_POPULATE = [
+  { path: "generated_for", populate: { path: "details_id", model: "Student" } }, // Deep populate details_id
+  { path: "generated_by" },
+  { path: "items.item" },
+]
+
 class BillServices {
   async getBills(filters = {}, lastRefKey = 0, limit = 10) {
     try {
       const response = await post(`/bills/getBills?lastRef=${lastRefKey}&limit=${limit}`, { filters })
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
+  // No GET /bills/:id endpoint exists — reuse getBills with an _id query.
+  async getBillById(id) {
+    try {
+      const response = await post(`/bills/getBills?lastRef=0&limit=1`, {
+        filters: { query: { _id: id }, populate: BILL_POPULATE },
+      })
+      if (!response || !response.data) throw new Error("An error occured. Please try again")
+      return response.data.bills?.[0]
     } catch (error) {
       handleError(error)
     }

@@ -1,15 +1,12 @@
-import centersService from '@/services/Centers'
 import courseService from '@/services/Course'
 import inventoryService from '@/services/Inventory'
+import { BILL_POPULATE } from '@/services/Bills'
 import Title from '@components/layouts/Title'
 import useSearchableStudents from '@hooks/useSearchableStudents'
 import BillsLayot from '@pages/Bills/Components/BillsLayot'
 import GenerateBillButton from '@pages/Bills/Components/GenerateBillButton'
 import billStore from '@stores/BillStore'
 import centersStore from '@stores/CentersStore'
-import courseStore from '@stores/CourseStore'
-import inventoryStore from '@stores/InventoryStore'
-import studentStore from '@stores/StudentStore'
 import userStore from '@stores/UserStore'
 import { ROLES } from '@utils/constants'
 import { toISTStartOfDayISO } from '@utils/helper'
@@ -24,30 +21,27 @@ import { useStore } from 'zustand'
 function Bills() {
 
   const { getBills, bills, loading, createBill, total, getInvoiceNo, invoiceNo, center_initial, filters: stateFilters } = billStore()
-  const { getItems } = inventoryStore()
-  // const { getStudentsByCenter, total: studentTotal, students } = studentStore()
   const { searchStudents, students } = useSearchableStudents()
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const student_id = searchParams.get("student_id")
   const staff_id = searchParams.get("staff_id")
   // Both params scope the same "generated_for" field — a bill can be raised for a student or a staff member
   const generatedForId = student_id || staff_id
   const { user } = useStore(userStore)
   const { selectedCenter } = useStore(centersStore);
-  const { courses, getCourses, total: courseTotal } = useStore(courseStore)
   const [lineItems, setLineItems] = useState([])
   const urlStatus = searchParams.get("status")
-  // const [lineItemSearchFunction, setLneItemSearchFunction] = useState(() => { })
 
   useEffect(() => {
-    console.log(stateFilters?.query?.generated_for != generatedForId, stateFilters?.query?.generated_for, generatedForId);
-
-    if (!bills || stateFilters?.query?.generated_for != generatedForId || bills.length <= 0 || user.role === 'admin' || user.role === 'operations_manager') {
+    // Refetch only when the context actually changed — not on every remount/re-render.
+    // Center changes are covered because `selectedCenter` is a dependency.
+    if (!bills || bills.length <= 0 || stateFilters?.query?.generated_for != generatedForId) {
       let filters = _.cloneDeep(stateFilters);
       filters.query = filters.query || {};
 
-      // Only display bills generated till today (this will hide post dated installment bills)
-      filters.query.generated_on = { $lte: dayjs().endOf("month") }
+      // Only display bills generated till today (this will hide post dated installment bills).
+      // ISO string (not a live dayjs) so the query stays plain JSON for store `_.isEqual` paging checks.
+      filters.query.generated_on = { $lte: dayjs().endOf("month").toISOString() }
 
       if (user.role === ROLES.STUDENT) {
         filters.query.generated_for = user._id
@@ -64,28 +58,19 @@ function Bills() {
       if (urlStatus && ['paid', 'unpaid'].includes(urlStatus)) {
         filters.query.status = urlStatus
       }
-      console.log("useeffect filters: ", filters.query);
 
-      // filters = { ...filters, query: { ...filters.query, ...stateFilters.query } }
       fetchBills(10, filters)
 
     }
   }, [generatedForId, urlStatus, selectedCenter])
 
   const fetchBills = (limit = 10, filters = {}) => {
-    getBills(limit, {
-      ...stateFilters, ...filters, populate: [
-        { path: "generated_for", populate: { path: "details_id", model: "Student" } }, // Deep populate details_id
-        { path: "generated_by" },
-        { path: "items.item" }
-      ]
-    })
+    getBills(limit, { ...stateFilters, ...filters, populate: BILL_POPULATE })
   }
 
   const handleDebouncedCustomerSearch = useCallback(
     debounce((searchQuery) => {
       try {
-        console.log(searchQuery);
         searchStudents(0, 15, { searchQuery });
       } catch (error) {
         console.error(error);
@@ -95,8 +80,6 @@ function Bills() {
   );
 
   const loadInitData = async ({ itemType, centerId }) => {
-    console.log(itemType, centerId);
-
     if (!invoiceNo || invoiceNo === 0 || user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER) {
       user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER ? getInvoiceNo(centerId) : getInvoiceNo();
     }
@@ -139,12 +122,7 @@ function Bills() {
         setLineItems(mappedItems)
       }
     }
-    // if (studentTotal === 0 || students.length < studentTotal || user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER) {
-    //   getStudentsByCenter(0)
-    // }
   }
-  console.log(students);
-
 
   const customerOptions = useMemo(() => students?.map(item => ({ label: item.username, value: item._id, data: item?.wallet })), [students])
 

@@ -50,7 +50,10 @@ const AdminArtWorks = lazy(() => import("@pages/admin/ArtWorks"));
 const AdminStudentOfTheWeek = lazy(() => import("@pages/admin/StudentOfTheWeek"));
 const AdminLatestVideos = lazy(() => import("@pages/admin/LatestVideos"));
 
-const LazyLoader = ({ children }) => {
+// `stableKey` opts a route out of the pathname-keyed Suspense. Parent routes that
+// own an <Outlet> must set it, otherwise opening a child route (e.g. /bills/:id)
+// changes location.pathname, remounts this Suspense, and tears down the parent page.
+const LazyLoader = ({ children, stableKey = false }) => {
   const location = useLocation()
   return (<Suspense
     fallback={
@@ -58,7 +61,7 @@ const LazyLoader = ({ children }) => {
         <Spin size="large" />
       </div>
     }
-    key={location.pathname}
+    key={stableKey ? "static" : location.pathname}
   >
     {children}
   </Suspense>)
@@ -248,7 +251,7 @@ export const generalRoutes = [
           },
           {
             path: "/bills",
-            element: <LazyLoader>
+            element: <LazyLoader stableKey>
               <Bills />
             </LazyLoader>,
             title: "Bills",

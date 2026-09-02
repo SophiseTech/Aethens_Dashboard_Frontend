@@ -3,7 +3,7 @@ import Invoice from '@pages/Bills/Components/Invoice';
 import RecordPaymentModal from '@pages/Bills/Components/RecordPaymentModal';
 import userStore from '@stores/UserStore';
 import permissions from '@utils/permissions';
-import { Button, Popconfirm } from 'antd';
+import { Button, Empty, Popconfirm, Spin } from 'antd';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useStore } from 'zustand';
@@ -38,15 +38,23 @@ function BillDetails() {
   const { selectedCenter } = useStore(centersStore);
   const nav = useNavigate();
   const invoiceRef = useRef(null);
-  const { finalizeBill, resyncZoho, getZohoOrgConfig, zohoOrgConfig } = billStore();
+  const { finalizeBill, resyncZoho, getZohoOrgConfig, zohoOrgConfig, selectedBill, selectedBillLoading, getBillById } = billStore();
   const [lineItems, setLineItems] = useState([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
-    if (bills && bills.length > 0) {
-      setBill(bills.find(bill => bill._id === id) || {});
+    if (!id) return;
+    const fromList = bills?.find(item => item._id === id);
+    if (fromList) {
+      setBill(fromList);
+    } else if (selectedBill?._id === id) {
+      // Resolved via the single-bill fetch below (deep link / bill on an unloaded page).
+      setBill(selectedBill);
+    } else {
+      setBill({});
+      getBillById(id);
     }
-  }, [bills, id]);
+  }, [bills, id, selectedBill]);
 
   useEffect(() => {
     if (bill?.zoho?.syncStatus === 'synced' && !zohoOrgConfig) {
@@ -157,7 +165,8 @@ function BillDetails() {
       center_initial: bill?.center_initial
     });
   };
-  console.log(bill);
+
+  const billResolved = Boolean(bill?._id);
   return (
     <div className='flex flex-col rounded-xl lg:flex-1 lg:h-full lg:overflow-auto bg-card'>
       <div className='border-b border-border flex justify-between | p-5 2xl:p-10'>
@@ -273,7 +282,11 @@ function BillDetails() {
         </div>
       </div>
       <div className='lg:flex-1 lg:overflow-auto h-auto lg:h-full | p-5 lg:p-10'>
-        {/android/i.test(navigator.userAgent) ? (
+        {!billResolved ? (
+          <div className='flex justify-center items-center w-full' style={{ minHeight: 600 }}>
+            {selectedBillLoading ? <Spin size='large' /> : <Empty description='Bill not found' />}
+          </div>
+        ) : /android/i.test(navigator.userAgent) ? (
           // Android Chrome cannot render blob: PDFs inside iframes — shows "Open in" instead.
           // Use a plain HTML preview for Android; PDFViewer works fine on iOS/iPad/desktop.
           <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'auto', minHeight: 600 }}>
