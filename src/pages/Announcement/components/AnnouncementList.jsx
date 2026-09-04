@@ -1,8 +1,10 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import useAnnouncementStore from "@/stores/AnnouncementStore";
 import { formatDate } from "@utils/helper";
-import { Button, Empty, Input, Select, Switch, Tooltip } from "antd";
+import { Button, Empty, Input, Select, Switch, Tag, Tooltip } from "antd";
 import { EditOutlined, LoadingOutlined, RestOutlined } from "@ant-design/icons";
+import { useStore } from "zustand";
+import centersStore from "@stores/CentersStore";
 
 const statusOptions = [
   { value: "all", label: "All" },
@@ -21,6 +23,19 @@ export default function AnnouncementList() {
     setDeleteModalOpen,
     update,
   } = useAnnouncementStore();
+  const { centers, getCenters } = useStore(centersStore);
+
+  useEffect(() => {
+    if (!centers || centers.length <= 0) {
+      getCenters(0);
+    }
+  }, []);
+
+  const centerNameById = useMemo(() => {
+    const map = new Map();
+    (centers || []).forEach((c) => map.set(c._id, c.center_name));
+    return map;
+  }, [centers]);
 
   const filtered = useMemo(() => {
     let filtered = announcements;
@@ -65,6 +80,7 @@ export default function AnnouncementList() {
             <thead>
               <tr className="text-left text-gray-700 border-b">
                 <th className="p-3">Title</th>
+                <th className="p-3">Target</th>
                 <th className="p-3">Created At</th>
                 <th className="p-3">Expiry Date</th>
                 <th className="p-3">Status</th>
@@ -75,6 +91,20 @@ export default function AnnouncementList() {
               {filtered.map((a) => (
                 <tr key={a.id} className="border-b hover:bg-gray-50">
                   <td className="p-3">{a.title}</td>
+                  <td className="p-3">
+                    {a.is_all_centers ? (
+                      <Tag color="blue">All Centers</Tag>
+                    ) : a.center_ids?.length > 0 ? (
+                      a.center_ids.map((c) => {
+                        const id = typeof c === "object" ? c._id : c;
+                        return (
+                          <Tag key={id}>{centerNameById.get(id) || id}</Tag>
+                        );
+                      })
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
                   <td className="p-3">{formatDate(new Date(a.created_at))}</td>
                   <td className="p-3">{a.expires_at ? formatDate(new Date(a.expires_at)) : "-"}</td>
                   <td className="p-3">

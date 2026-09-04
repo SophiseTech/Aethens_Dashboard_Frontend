@@ -23,6 +23,7 @@ export default function AnnouncementForm() {
   const { user } = userStore();
 
   const isEdit = Boolean(selected);
+  const canTargetCenters = [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER].includes(user.role);
 
   const centerOptions = useMemo(
     () =>
@@ -38,13 +39,14 @@ export default function AnnouncementForm() {
     body: "",
     expires_at: "",
     is_published: false,
-    center_id: "",
+    is_all_centers: false,
+    center_ids: [],
   });
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (!centers || centers.length <= 0) {
-      getCenters();
+      getCenters(0);
     }
   }, []);
 
@@ -58,10 +60,11 @@ export default function AnnouncementForm() {
             ? dayjs(selected.expires_at.slice(0, 10))
             : "",
           is_published: !!selected.is_published,
-          center_id: selected.center_id
+          is_all_centers: !!selected.is_all_centers,
+          center_ids: (selected.center_ids || []).map((c) => (typeof c === "object" ? c._id : c)),
         });
       } else {
-        setForm({ title: "", body: "", expires_at: "", is_published: false, center_id: "" });
+        setForm({ title: "", body: "", expires_at: "", is_published: false, is_all_centers: false, center_ids: [] });
       }
       setErrors({});
     }
@@ -72,21 +75,28 @@ export default function AnnouncementForm() {
     if (!form.title) errs.title = "Title is required";
     if (!form.body) errs.body = "Body is required";
     if (!form.expires_at) errs.expires_at = "Expiry date is required";
+    if (canTargetCenters && !form.is_all_centers && form.center_ids.length === 0) {
+      errs.center_ids = "Select at least one center, or choose All Centers";
+    }
     setErrors(errs);
+    if (errs.center_ids) message.warning(errs.center_ids);
     return Object.keys(errs).length === 0;
   };
 
   const handleSubmit = async () => {
     if (!validate()) return;
     try {
+      let finalData = { ...form };
+      if (!canTargetCenters) {
+        delete finalData.center_ids;
+        delete finalData.is_all_centers;
+      } else if (finalData.is_all_centers) {
+        finalData.center_ids = [];
+      }
       if (isEdit) {
-        await update(selected._id, form);
+        await update(selected._id, finalData);
         message.success("Announcement updated", 2);
       } else {
-        let finalData = form;
-        if (user.role === ROLES.MANAGER) {
-          delete finalData.center_id;
-        }
         await create(finalData);
         message.success("Announcement created");
       }
@@ -128,14 +138,28 @@ export default function AnnouncementForm() {
           error={errors.expires_at}
           required
         />
-        {(user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER) && (
-          <Select
-            style={{ width: 150 }}
-            options={centerOptions}
-            value={form.center_id}
-            placeholder="Select Center"
-            onChange={(value) => setForm((f) => ({ ...f, center_id: value }))}
-          />
+        {canTargetCenters && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={form.is_all_centers}
+                onChange={(checked) =>
+                  setForm((f) => ({ ...f, is_all_centers: checked, center_ids: checked ? [] : f.center_ids }))
+                }
+              />
+              <span>All Centers</span>
+            </div>
+            {!form.is_all_centers && (
+              <Select
+                mode="multiple"
+                style={{ width: "100%" }}
+                options={centerOptions}
+                value={form.center_ids}
+                placeholder="Select Centers"
+                onChange={(value) => setForm((f) => ({ ...f, center_ids: value }))}
+              />
+            )}
+          </div>
         )}
         <div className="flex items-center gap-2">
           <Switch

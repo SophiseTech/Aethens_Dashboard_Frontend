@@ -1,4 +1,5 @@
 import { Button, Modal, Table, DatePicker, Space, Typography, Card, Flex, Tag, message, Empty, Popconfirm, Descriptions, Select } from 'antd';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import studentStore from '@stores/StudentStore';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
@@ -156,6 +157,11 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen, isDiploma =
     } finally {
       setDeallocating(false);
     }
+  };
+
+  const handleMonthChange = (month) => {
+    setSelectedMonth(month);
+    if (month) fetchSlots(month);
   };
 
   const handleSyncSlots = async () => {
@@ -550,17 +556,24 @@ function ViewStudentSessions({ student, isModalOpen, setIsModalOpen, isDiploma =
         </Flex> */}
 
         <Flex justify="space-between" align="center">
-          <Space size="middle" align="center">
+          <Space size="small" align="center">
+            <Button
+              icon={<LeftOutlined />}
+              onClick={() => handleMonthChange(selectedMonth.clone().subtract(1, 'month'))}
+              disabled={loadingSlots}
+            />
             <DatePicker
               picker="month"
               style={{ width: 200 }}
               value={selectedMonth}
-              onChange={(date) => {
-                setSelectedMonth(date);
-                if (date) fetchSlots(date);
-              }}
+              onChange={handleMonthChange}
               disabled={loadingSlots}
               format="MMMM YYYY"
+            />
+            <Button
+              icon={<RightOutlined />}
+              onClick={() => handleMonthChange(selectedMonth.clone().add(1, 'month'))}
+              disabled={loadingSlots}
             />
           </Space>
 
