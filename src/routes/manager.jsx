@@ -44,6 +44,7 @@ const Ledgers = lazy(() => import("@pages/Ledgers"))
 const DiplomaPreRegistrationManager = lazy(() => import("@pages/DiplomaPreRegistration/Manager"))
 const Reports = lazy(() => import("@pages/Reports"))
 const FinancialReports = lazy(() => import("@pages/Reports/Financial"))
+const StudentReports = lazy(() => import("@pages/Reports/Students"))
 
 // `stableKey` opts a route out of the pathname-keyed Suspense. Parent routes that
 // own an <Outlet> must set it, otherwise opening a child route (e.g. /bills/:id)
@@ -291,6 +292,11 @@ export const managerRoutes = [
             path: "/manager/reports/financial",
             element: <LazyLoader element={<FinancialReports />} />,
             title: "Financial Reports"
+          },
+          {
+            path: "/manager/reports/students",
+            element: <LazyLoader element={<StudentReports />} />,
+            title: "Student Reports"
           },
         ]
       }

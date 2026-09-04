@@ -99,6 +99,7 @@ const getMenuConfig = (role) => {
       key: "reports",
       children: [
         { label: "Financial", key: "reports-financial", path: "/manager/reports/financial" },
+        { label: "Students", key: "reports-students", path: "/manager/reports/students" },
       ],
     },
     {
@@ -306,6 +307,7 @@ const getMenuConfig = (role) => {
       key: "reports",
       children: [
         { label: "Financial", key: "reports-financial", path: "/manager/reports/financial" },
+        { label: "Students", key: "reports-students", path: "/manager/reports/students" },
       ],
     },
     {
@@ -613,6 +615,12 @@ const getMenuConfig = (role) => {
       icon: <FileTextOutlined />,
       key: "reports-financial",
       path: "/manager/reports/financial",
+    },
+    {
+      label: "Student Reports",
+      icon: <FileTextOutlined />,
+      key: "reports-students",
+      path: "/manager/reports/students",
     },
     {
       label: "Payslips",

@@ -1,5 +1,5 @@
 import { Card } from 'antd';
-import { DollarOutlined } from '@ant-design/icons';
+import { DollarOutlined, TeamOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import Title from '@components/layouts/Title';
 
@@ -10,6 +10,13 @@ const REPORT_CATEGORIES = [
     description: 'Download finance-related reports (audit report, and more to come).',
     icon: <DollarOutlined className="text-2xl" />,
     path: '/manager/reports/financial',
+  },
+  {
+    key: 'students',
+    label: 'Students',
+    description: 'View students deactivated within a selected date range.',
+    icon: <TeamOutlined className="text-2xl" />,
+    path: '/manager/reports/students',
   },
 ];
 

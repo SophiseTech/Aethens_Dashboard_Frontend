@@ -7,6 +7,14 @@ function useReports() {
     loading,
     setSelectedMonth,
     downloadFinancialAuditReport,
+    deactivatedStudents,
+    deactivatedStudentsTotal,
+    deactivatedStudentsLoading,
+    deactivatedStudentsDownloading,
+    deactivatedDateRange,
+    setDeactivatedDateRange,
+    getDeactivatedStudentsReport,
+    downloadDeactivatedStudentsReport,
   } = useStore(reportStore);
 
   return {
@@ -14,6 +22,14 @@ function useReports() {
     loading,
     setSelectedMonth,
     downloadFinancialAuditReport,
+    deactivatedStudents,
+    deactivatedStudentsTotal,
+    deactivatedStudentsLoading,
+    deactivatedStudentsDownloading,
+    deactivatedDateRange,
+    setDeactivatedDateRange,
+    getDeactivatedStudentsReport,
+    downloadDeactivatedStudentsReport,
   };
 }
 
