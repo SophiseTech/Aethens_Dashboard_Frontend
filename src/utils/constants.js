@@ -310,3 +310,15 @@ export const DEFAULT_COURSE_LEVEL = "level1"
 // Fallback used before a course is selected / for courses saved before this
 // field existed. Mirrors the schema default in server/model/Courses.js.
 export const DEFAULT_NUMBER_OF_INSTALLMENTS = 6
+
+// Standard student deactivation reasons shown in the Deactivate Student modal.
+// "other" reveals a free-text field for a custom reason.
+export const STUDENT_DEACTIVATION_REASONS = [
+  { label: "Course Completed", value: "course_completed" },
+  { label: "Fee Non-Payment", value: "fee_non_payment" },
+  { label: "Personal Reasons", value: "personal_reasons" },
+  { label: "Relocated", value: "relocated" },
+  { label: "Disciplinary Action", value: "disciplinary_action" },
+  { label: "Not Interested / Discontinued", value: "discontinued" },
+  { label: "Other", value: "other" },
+]

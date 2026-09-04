@@ -31,7 +31,7 @@ import CustomImageUploadWithCrop from "@components/form/CustomImageUploadWithCro
 import EditUserModal from "./EditUserModal"; // Import the new EditUserModal component
 import studentStore from "@stores/StudentStore";
 import { useStore } from "zustand";
-import { ROLES } from "@utils/constants";
+import { ROLES, STUDENT_DEACTIVATION_REASONS } from "@utils/constants";
 import DrawerActionButtons from "@components/DrawerActionButtons";
 import userStore from "@stores/UserStore";
 import PropTypes from "prop-types";
@@ -429,6 +429,27 @@ const UserDetailsDrawer = ({
                         {user?.status}
                       </Text>
                     </Col>
+                    {user?.status !== "active" && (user?.deactivation_reason || user?.deactivated_at) && (
+                      <>
+                        <Col span={24}>
+                          <Text strong>Deactivation Reason:</Text>
+                          <Text style={{ marginLeft: "8px" }}>
+                            {user?.deactivation_reason === "other"
+                              ? user?.deactivation_reason_other
+                              : STUDENT_DEACTIVATION_REASONS.find((r) => r.value === user?.deactivation_reason)?.label || user?.deactivation_reason || "N/A"}
+                          </Text>
+                        </Col>
+                        <Col span={24}>
+                          <Text strong>
+                            <CalendarOutlined style={{ marginRight: "8px" }} />
+                            Deactivated At:
+                          </Text>
+                          <Text style={{ marginLeft: "8px" }}>
+                            {formatDate(user?.deactivated_at) || "N/A"}
+                          </Text>
+                        </Col>
+                      </>
+                    )}
                     {isDiploma ? (
                       <Col span={24}>
                         <Text strong>Attendance:</Text>

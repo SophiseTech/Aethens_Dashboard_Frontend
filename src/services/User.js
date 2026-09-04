@@ -96,9 +96,9 @@ class UserService {
     }
   }
 
-  async deactivateUsers(userId, cardReturned = false) {
+  async deactivateUsers(userId, cardReturned = false, { reason, reasonOther, deactivatedAt } = {}) {
     try {
-      await post(`/user/deactivateUser`, { userId, cardReturned })
+      await post(`/user/deactivateUser`, { userId, cardReturned, reason, reasonOther, deactivatedAt })
     } catch (error) {
       handleError(error)
     }

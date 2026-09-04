@@ -314,15 +314,23 @@ const studentStore = create((set, get) => ({
       set({ loading: false });
     }
   },
-  deactivateStudent: async (id, cardReturned = false) => {
+  deactivateStudent: async (id, cardReturned = false, deactivationDetails = {}) => {
     try {
       set({ loading: true });
       if (!id) throw new Error("Bad Data");
-      await userService.deactivateUsers(id, cardReturned);
+      await userService.deactivateUsers(id, cardReturned, deactivationDetails);
       const { students } = get();
       if (students) {
         const updatedStudents = students.map((item) =>
-          item._id === id ? { ...item, status: "inactive" } : item
+          item._id === id
+            ? {
+              ...item,
+              status: "inactive",
+              deactivation_reason: deactivationDetails.reason,
+              deactivation_reason_other: deactivationDetails.reasonOther,
+              deactivated_at: deactivationDetails.deactivatedAt,
+            }
+            : item
         );
         set({ students: updatedStudents });
         handleSuccess("User details updated Succesfully");
@@ -341,7 +349,9 @@ const studentStore = create((set, get) => ({
       const { students } = get();
       if (students) {
         const updatedStudents = students.map((item) =>
-          item._id === id ? { ...item, status: "active" } : item
+          item._id === id
+            ? { ...item, status: "active", deactivation_reason: undefined, deactivation_reason_other: undefined, deactivated_at: undefined }
+            : item
         );
         set({ students: updatedStudents });
         handleSuccess("User details updated Succesfully");
