@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Modal, Form, Input, InputNumber, Select, Button, Radio, Tabs, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import courseStore from '@stores/CourseStore';
-import { DEFAULT_COURSE_LEVEL } from '@utils/constants';
+import { DEFAULT_COURSE_LEVEL, DEFAULT_NUMBER_OF_INSTALLMENTS } from '@utils/constants';
 import ModulesFormSection from './ModulesFormSection';
 import ImagesSelector from './ImagesSelector';
 import MaterialItemsSelector from './MaterialItemsSelector';
@@ -62,6 +62,7 @@ function AddCourseModal() {
                 },
                 syllabusType: values.syllabusType || 'general',
                 level: values.level || DEFAULT_COURSE_LEVEL,
+                numberOfInstallments: values.numberOfInstallments || DEFAULT_NUMBER_OF_INSTALLMENTS,
             };
 
             // Add optional fields only if they have values
@@ -122,6 +123,7 @@ function AddCourseModal() {
                         duration_type: 'month',
                         syllabusType: 'general',
                         level: DEFAULT_COURSE_LEVEL,
+                        numberOfInstallments: DEFAULT_NUMBER_OF_INSTALLMENTS,
                     }}
                 >
                     <Tabs defaultActiveKey="1">
@@ -171,6 +173,19 @@ function AddCourseModal() {
                                     placeholder="Enter course rate"
                                     style={{ width: '100%' }}
                                     prefix="₹"
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="numberOfInstallments"
+                                label="Default Number of Installments"
+                                tooltip="Pre-fills the installment count in the enroll modal when this course is selected with a monthly payment plan. Staff can still override it per enrollment."
+                                rules={[{ required: true, message: 'Please enter the default number of installments' }]}
+                            >
+                                <InputNumber
+                                    min={1}
+                                    placeholder="e.g. 6"
+                                    style={{ width: '100%' }}
                                 />
                             </Form.Item>
 

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Form, Input, InputNumber, Select, Radio, Tabs, message } from 'antd';
 import courseStore from '@stores/CourseStore';
-import { DEFAULT_COURSE_LEVEL } from '@utils/constants';
+import { DEFAULT_COURSE_LEVEL, DEFAULT_NUMBER_OF_INSTALLMENTS } from '@utils/constants';
 import ModulesFormSection from './ModulesFormSection';
 import ImagesSelector from './ImagesSelector';
 import MaterialItemsSelector from './MaterialItemsSelector';
@@ -30,6 +30,7 @@ function EditCourseModal({ course, visible, onCancel, onSave }) {
                 duration_type: course.duration?.type || 'month',
                 syllabusType: course.syllabusType || 'general',
                 level: course.level || DEFAULT_COURSE_LEVEL,
+                numberOfInstallments: course.numberOfInstallments || DEFAULT_NUMBER_OF_INSTALLMENTS,
                 images: course.images || [],
                 modules: course.modules || [],
                 // Normalize: items may be plain IDs or populated objects
@@ -82,6 +83,7 @@ function EditCourseModal({ course, visible, onCancel, onSave }) {
                 },
                 syllabusType: values.syllabusType || 'general',
                 level: values.level || DEFAULT_COURSE_LEVEL,
+                numberOfInstallments: values.numberOfInstallments || DEFAULT_NUMBER_OF_INSTALLMENTS,
             };
 
             // Add optional fields only if they have values
@@ -194,6 +196,19 @@ function EditCourseModal({ course, visible, onCancel, onSave }) {
                                 placeholder="Enter course rate"
                                 style={{ width: '100%' }}
                                 prefix="₹"
+                            />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="numberOfInstallments"
+                            label="Default Number of Installments"
+                            tooltip="Pre-fills the installment count in the enroll modal when this course is selected with a monthly payment plan. Staff can still override it per enrollment."
+                            rules={[{ required: true, message: 'Please enter the default number of installments' }]}
+                        >
+                            <InputNumber
+                                min={1}
+                                placeholder="e.g. 6"
+                                style={{ width: '100%' }}
                             />
                         </Form.Item>
 

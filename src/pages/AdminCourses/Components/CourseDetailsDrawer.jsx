@@ -185,6 +185,12 @@ const CourseDetailsDrawer = ({ course, visible, onClose, onRefresh }) => {
                                     : course.duration?.count || 'N/A'}
                             </Text>
                         </Col>
+
+                        <Col span={12}>
+                            <Text strong>Default Installments:</Text>
+                            <br />
+                            <Text>{course.numberOfInstallments || 'N/A'}</Text>
+                        </Col>
                     </Row>
                 </Card>
 

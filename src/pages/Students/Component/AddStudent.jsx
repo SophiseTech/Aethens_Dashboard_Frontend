@@ -11,7 +11,7 @@ import useCourse from '@hooks/useCourse';
 import SessionStore from '@stores/SessionStore';
 import studentStore from '@stores/StudentStore';
 import userStore from '@stores/UserStore';
-import { DEFAULT_COURSE_LEVEL, feeOptions, ROLES } from '@utils/constants';
+import { DEFAULT_COURSE_LEVEL, DEFAULT_NUMBER_OF_INSTALLMENTS, feeOptions, ROLES } from '@utils/constants';
 import { Button, Divider, Form, message, Modal } from 'antd';
 import dayjs from 'dayjs';
 import { Typography } from 'antd';
@@ -55,7 +55,7 @@ function AddStudent() {
     total_course_fee: 0,
     type: "single",
     paidAmount: 0,
-    numberOfInstallments: 6,
+    numberOfInstallments: DEFAULT_NUMBER_OF_INSTALLMENTS,
     isFeeEnabled: true,
     reg_fee: 3500,
     start_date: null
@@ -83,6 +83,7 @@ function AddStudent() {
       if (feeType === 'partial') {
         form.setFieldValue("paidAmount", courseDetails?.rate || 0)
       }
+      form.setFieldValue("numberOfInstallments", courseDetails?.numberOfInstallments || DEFAULT_NUMBER_OF_INSTALLMENTS)
     }
   }, [selectedCourse])
 

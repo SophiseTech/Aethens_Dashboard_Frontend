@@ -306,3 +306,7 @@ export const DIPLOMA_APPLY_URL = "https://app.schoolofathens.art/diploma/apply"
 // Open-ended course grouping (level1, level2, ...). Pickers show this level
 // by default and reveal the rest via a "View all" action.
 export const DEFAULT_COURSE_LEVEL = "level1"
+
+// Fallback used before a course is selected / for courses saved before this
+// field existed. Mirrors the schema default in server/model/Courses.js.
+export const DEFAULT_NUMBER_OF_INSTALLMENTS = 6
