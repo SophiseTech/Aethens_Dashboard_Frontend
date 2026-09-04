@@ -9,10 +9,16 @@ function useCourse() {
 
     course,
     courses,
-    loading
+    loading,
+
+    pickerCourses,
+    pickerTotal,
+    pickerLoading,
+    getPickerCourses
   } = courseStore()
 
   const courseOptions = useMemo(() => courses?.map(course => ({label: course.course_name, value: course._id})) || [], [courses]) || []
+  const pickerOptions = useMemo(() => pickerCourses?.map(course => ({label: course.course_name, value: course._id})) || [], [pickerCourses])
 
   return {
     getCourse,
@@ -21,7 +27,13 @@ function useCourse() {
     course,
     courses,
     loading,
-    courseOptions
+    courseOptions,
+
+    pickerCourses,
+    pickerTotal,
+    pickerLoading,
+    getPickerCourses,
+    pickerOptions
   }
 }
 

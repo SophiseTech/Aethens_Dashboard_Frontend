@@ -7,12 +7,12 @@ import CustomSubmit from '@components/form/CustomSubmit';
 import SessionDateSelector from '@components/form/SessionDateSelector';
 import ProfileImageUploader from '@components/ProfileImageUploader';
 import centersStore from '@stores/CentersStore';
-import courseStore from '@stores/CourseStore';
+import useCourse from '@hooks/useCourse';
 import SessionStore from '@stores/SessionStore';
 import studentStore from '@stores/StudentStore';
 import userStore from '@stores/UserStore';
-import { feeOptions, ROLES } from '@utils/constants';
-import { Divider, Form, message, Modal } from 'antd';
+import { DEFAULT_COURSE_LEVEL, feeOptions, ROLES } from '@utils/constants';
+import { Button, Divider, Form, message, Modal } from 'antd';
 import dayjs from 'dayjs';
 import { Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
@@ -30,7 +30,8 @@ function AddStudent() {
   const { enroll, loading } = studentStore()
   const [form] = Form.useForm();
   const dobValue = Form.useWatch('DOB', form);
-  const { getCourses, courses, total } = useStore(courseStore)
+  const { getPickerCourses, pickerCourses, pickerTotal, pickerLoading, pickerOptions } = useCourse()
+  const [showAllCourses, setShowAllCourses] = useState(false)
   const { getAvailableSessions, loading: sessionsLoading, availableSessions } = SessionStore()
   const { centers, getCenters } = useStore(centersStore);
   const { reusableIdCards, getReusableCards } = studentStore()
@@ -61,9 +62,7 @@ function AddStudent() {
   }
 
   useEffect(() => {
-    if (!courses || total === 0 || courses.length < total) {
-      getCourses(0)
-    }
+    getPickerCourses({ query: { level: DEFAULT_COURSE_LEVEL } })
     getCenters();
   }, [])
 
@@ -76,7 +75,7 @@ function AddStudent() {
 
   useEffect(() => {
     if (selectedCourse) {
-      const courseDetails = courses.find(course => course._id === selectedCourse)
+      const courseDetails = pickerCourses.find(course => course._id === selectedCourse)
       if (!courseDetails) {
         handleError("No Course Found")
       }
@@ -136,7 +135,6 @@ function AddStudent() {
     form.resetFields()
   }
 
-  const options = useMemo(() => courses?.map(course => ({ label: course.course_name, value: course._id })), [courses])
   const centerOptions = useMemo(() => centers?.map(center => ({ label: center.center_name, value: center._id })), [centers])
 
   const getFieldsByFeeType = (feeType) => {
@@ -193,7 +191,42 @@ function AddStudent() {
           <CustomInput label={"Alternative Mobile Number"} name={"phone_alt"} placeholder={"+91 7845784785"} />
           <CustomInput label={"Email"} name={"email"} type='email' placeholder={"john@doe.com"} />
           <CustomInput label={"School / University / Company Name"} name={"school_uni_work"} placeholder={"Name of your School / University / Company"} />
-          <CustomSelect name={"course_id"} options={options} label={"Select Course"} />
+          <CustomSelect
+            name={"course_id"}
+            options={pickerOptions}
+            label={"Select Course"}
+            loading={pickerLoading}
+            dropdownRender={(menu) => (
+              <>
+                {menu}
+                {!showAllCourses && (
+                  <div className='p-2 text-center border-t'>
+                    <Button
+                      type="link"
+                      loading={pickerLoading}
+                      onClick={() => {
+                        setShowAllCourses(true)
+                        getPickerCourses({})
+                      }}
+                    >
+                      View all courses
+                    </Button>
+                  </div>
+                )}
+                {showAllCourses && pickerCourses.length > 0 && pickerCourses.length < pickerTotal && (
+                  <div className='p-2 text-center border-t'>
+                    <Button
+                      type="link"
+                      loading={pickerLoading}
+                      onClick={() => getPickerCourses({}, true)}
+                    >
+                      Load more ({pickerCourses.length}/{pickerTotal})
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          />
           <SessionDateSelector
             name="sessionSchedule"
             label="Session Schedule"

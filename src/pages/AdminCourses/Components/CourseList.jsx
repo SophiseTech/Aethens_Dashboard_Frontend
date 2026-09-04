@@ -77,6 +77,12 @@ function CourseList() {
             ),
         },
         {
+            title: 'Level',
+            dataIndex: 'level',
+            key: 'level',
+            render: (level) => level || 'N/A',
+        },
+        {
             title: 'Duration',
             key: 'duration',
             render: (_, record) => {

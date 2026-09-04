@@ -302,3 +302,7 @@ export const GLOBAL_USER_ROLES = [
 ]
 
 export const DIPLOMA_APPLY_URL = "https://app.schoolofathens.art/diploma/apply"
+
+// Open-ended course grouping (level1, level2, ...). Pickers show this level
+// by default and reveal the rest via a "View all" action.
+export const DEFAULT_COURSE_LEVEL = "level1"

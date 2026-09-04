@@ -1,6 +1,7 @@
 
 import courseService from "@/services/Course"
 import handleInternalError from "@utils/handleInternalError"
+import _ from "lodash"
 import { create } from "zustand"
 
 const courseStore = create((set, get) => ({
@@ -77,6 +78,40 @@ const courseStore = create((set, get) => ({
       handleInternalError(error)
     } finally {
       set({ loading: false })
+    }
+  },
+
+  // Filter-aware paginated course picker (e.g. enroll modal course Select).
+  // Kept separate from `courses`/`lastRefKey`/`total` above, which many other
+  // consumers share and reload unfiltered — mixing a filtered fetch into that
+  // array would corrupt their pagination bookkeeping.
+  pickerCourses: [],
+  pickerTotal: 0,
+  pickerLastRefKey: 0,
+  pickerLoading: false,
+  pickerFilters: {},
+
+  getPickerCourses: async (filters = {}, loadMore = false) => {
+    try {
+      set({ pickerLoading: true })
+      const { pickerLastRefKey, pickerCourses: prevCourses, pickerFilters: stateFilters } = get()
+      const isNewFilter = !_.isEqual(stateFilters, filters)
+      const lastRef = isNewFilter || !loadMore ? 0 : pickerLastRefKey
+      const PICKER_PAGE_SIZE = 20
+
+      const { courses, total } = await courseService.getCourses(filters, lastRef, PICKER_PAGE_SIZE)
+      if (courses) {
+        set({
+          pickerCourses: (loadMore && !isNewFilter) ? [...prevCourses, ...courses] : courses,
+          pickerTotal: total || 0,
+          pickerLastRefKey: lastRef + courses.length,
+          pickerFilters: filters,
+        })
+      }
+    } catch (error) {
+      handleInternalError(error)
+    } finally {
+      set({ pickerLoading: false })
     }
   },
 

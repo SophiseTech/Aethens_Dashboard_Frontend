@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Modal, Form, Input, InputNumber, Select, Radio, Tabs, message } from 'antd';
 import courseStore from '@stores/CourseStore';
+import { DEFAULT_COURSE_LEVEL } from '@utils/constants';
 import ModulesFormSection from './ModulesFormSection';
 import ImagesSelector from './ImagesSelector';
 import MaterialItemsSelector from './MaterialItemsSelector';
@@ -11,8 +12,13 @@ const { TabPane } = Tabs;
 
 function EditCourseModal({ course, visible, onCancel, onSave }) {
     const [form] = Form.useForm();
-    const { updateCourse, loading } = courseStore();
+    const { updateCourse, loading, courses } = courseStore();
     const [syllabusType, setSyllabusType] = useState('general');
+
+    const levelOptions = useMemo(() => (
+        Array.from(new Set((courses || []).map(c => c.level).filter(Boolean)))
+            .map(level => ({ label: level, value: level }))
+    ), [courses]);
 
     useEffect(() => {
         if (visible && course) {
@@ -23,6 +29,7 @@ function EditCourseModal({ course, visible, onCancel, onSave }) {
                 duration_count: course.duration?.count,
                 duration_type: course.duration?.type || 'month',
                 syllabusType: course.syllabusType || 'general',
+                level: course.level || DEFAULT_COURSE_LEVEL,
                 images: course.images || [],
                 modules: course.modules || [],
                 // Normalize: items may be plain IDs or populated objects
@@ -74,6 +81,7 @@ function EditCourseModal({ course, visible, onCancel, onSave }) {
                     type: values.duration_type,
                 },
                 syllabusType: values.syllabusType || 'general',
+                level: values.level || DEFAULT_COURSE_LEVEL,
             };
 
             // Add optional fields only if they have values
@@ -148,6 +156,20 @@ function EditCourseModal({ course, visible, onCancel, onSave }) {
                             rules={[{ required: true, message: 'Please enter course name' }]}
                         >
                             <Input placeholder="Enter course name" />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="level"
+                            label="Level"
+                            tooltip="Groups courses for pickers (e.g. the enroll modal shows level1 by default). Pick an existing level or type a new one."
+                            rules={[{ required: true, message: 'Please select or enter a level' }]}
+                        >
+                            <Select
+                                mode="tags"
+                                maxCount={1}
+                                options={levelOptions}
+                                placeholder="Select or type a level (e.g. level1)"
+                            />
                         </Form.Item>
 
                         <Form.Item
