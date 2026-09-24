@@ -115,6 +115,20 @@ class StudentService {
     }
   }
 
+  async markCourseCompleted(studentId) {
+    try {
+      const response = await post(`/students/markCompleted/${studentId}`);
+      if (!response) throw new Error("An error occurred. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async markEnrollmentCompleted(studentId) {
+    return this.markCourseCompleted(studentId);
+  }
+
   async getCourseHistory(lastRef = 0, limit = 10, filters = {}) {
     try {
       const response = await post(

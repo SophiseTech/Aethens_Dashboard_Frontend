@@ -394,6 +394,15 @@ function StudentList() {
       filteredValue: selectedView === "All Students" || selectedView === "Active Students"
         ? (selectedCourses.length > 0 ? selectedCourses : null)
         : null,
+      render: (courseName, record) => {
+        const isCompleted = record?.isCourseCompleted || record?.enrollmentStatus === "completed";
+        return (
+          <div className="flex items-center gap-2">
+            <span>{courseName || "—"}</span>
+            {isCompleted && <Tag color="green">Completed</Tag>}
+          </div>
+        );
+      },
     },
     // {
     //   title: "Email",

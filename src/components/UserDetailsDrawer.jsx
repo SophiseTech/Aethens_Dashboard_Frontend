@@ -52,6 +52,13 @@ const UserDetailsDrawer = ({
   const { user: loggedinUser } = useStore(userStore);
   const [profileImageLoading, setProfileImageLoading] = useState(false);
 
+  const storeStudent = useStore(studentStore, (state) =>
+    state.students?.find((s) => s._id === user?._id) ||
+    state.searchResults?.find((s) => s._id === user?._id) ||
+    (state.activeStudent?._id === user?._id ? state.activeStudent : null)
+  );
+  const currentUser = storeStudent ? { ...user, ...storeStudent } : user;
+
   const [limits, setLimits] = useState({
     rescheduleLimit: user?.details_id?.rescheduleLimit ?? 4,
     additionalLimit: user?.details_id?.additionalLimit ?? 2,
@@ -259,13 +266,18 @@ const UserDetailsDrawer = ({
                     )}
                   </Col>
                   <Col>
-                    <Title level={4} style={{ marginBottom: 0 }}>
-                      {user?.username}
-                    </Title>
+                    <Flex align="center" gap={8} wrap="wrap">
+                      <Title level={4} style={{ marginBottom: 0 }}>
+                        {currentUser?.username}
+                      </Title>
+                      {(currentUser?.isCourseCompleted || currentUser?.enrollmentStatus === "completed") && (
+                        <Tag color="green">Completed</Tag>
+                      )}
+                    </Flex>
                     {(!isStudentDetail ||
                       loggedinUser.role === ROLES.MANAGER ||
                       loggedinUser.role === ROLES.STUDENT) && (
-                        <Text type="secondary">{user?.email}</Text>
+                        <Text type="secondary">{currentUser?.email}</Text>
                       )}
                   </Col>
                 </Row>
@@ -492,7 +504,7 @@ const UserDetailsDrawer = ({
                   bordered={false}
                   style={{ boxShadow: "none", background: "transparent" }}
                 >
-                  <DrawerActionButtons userDetails={user} isDiploma={isDiploma} />
+                  <DrawerActionButtons userDetails={currentUser} isDiploma={isDiploma} />
                 </Card>
               )}
               {user?.role === ROLES.STUDENT && user?.details_id?.migrated?.history && user?.details_id?.migrated?.history.length > 0 && (

@@ -360,6 +360,35 @@ const studentStore = create((set, get) => ({
       handleInternalError(error);
     }
   },
+  markCourseCompleted: async (id) => {
+    try {
+      set({ loading: true });
+      if (!id) throw new Error("Bad Data");
+      const result = await studentService.markCourseCompleted(id);
+      const { students, searchResults, activeStudent } = get();
+
+      const updater = (item) =>
+        item._id === id
+          ? { ...item, isCourseCompleted: true, enrollmentStatus: "completed" }
+          : item;
+
+      if (students) {
+        set({ students: students.map(updater) });
+      }
+      if (searchResults) {
+        set({ searchResults: searchResults.map(updater) });
+      }
+      if (activeStudent && activeStudent._id === id) {
+        set({ activeStudent: updater(activeStudent) });
+      }
+      return result;
+    } catch (error) {
+      handleInternalError(error);
+      throw error;
+    } finally {
+      set({ loading: false });
+    }
+  },
   getActiveSessions: async (id) => {
     try {
       set({ loading: true });
