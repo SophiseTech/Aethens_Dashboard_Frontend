@@ -49,6 +49,7 @@ const AdminShopItems = lazy(() => import("@pages/admin/ShopItems"));
 const AdminArtWorks = lazy(() => import("@pages/admin/ArtWorks"));
 const AdminStudentOfTheWeek = lazy(() => import("@pages/admin/StudentOfTheWeek"));
 const AdminLatestVideos = lazy(() => import("@pages/admin/LatestVideos"));
+const Certificates = lazy(() => import("@pages/Certificates"));
 
 // `stableKey` opts a route out of the pathname-keyed Suspense. Parent routes that
 // own an <Outlet> must set it, otherwise opening a child route (e.g. /bills/:id)
@@ -388,6 +389,15 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Centers",
+          },
+          {
+            path: "/admin/certificates",
+            element: (
+              <LazyLoader>
+                <Certificates />
+              </LazyLoader>
+            ),
+            title: "Certificates",
           },
           {
             path: "/admin/courses",

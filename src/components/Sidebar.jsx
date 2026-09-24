@@ -114,9 +114,7 @@ const getMenuConfig = (role) => {
           path: "/manager/enquiry-slots",
         },
         { label: "Targets", key: "targets", path: "/manager/targets" },
-
-
-
+        { label: "Certificates", key: "certificates", path: "/admin/certificates" },
       ],
     },
     {
