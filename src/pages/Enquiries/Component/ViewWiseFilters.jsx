@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import CustomInput from '@components/form/CustomInput'
 import CustomSelect from '@components/form/CustomSelect'
 import CustomDatePicker from '@components/form/CustomDatePicker'
-import { age_categories, closing_remarks, demoStatuses, EnquiryModeOptions, foundUsOptions } from '@utils/constants'
+import { age_categories, classPreferenceOptions, closing_remarks, demoStatuses, EnquiryModeOptions, foundUsOptions } from '@utils/constants'
 import CustomCheckbox from '@components/form/CustomCheckBox'
 import { useEffect, useMemo } from 'react'
 import courseStore from '@stores/CourseStore'
@@ -12,7 +12,7 @@ import { toISTDateString } from '@utils/helper'
 /**
  * ViewWiseFilters
  * Props:
- * - selectedView: string (All, New, Demo, Enrolled, Closed)
+ * - selectedView: string (All, New, Demo, Unfollowed, Enrolled, Closed)
  * - onApply: function(filters) called when user submits filters
  * - onClear: function() called when user resets filters
  */
@@ -37,12 +37,14 @@ function ViewWiseFilters({ selectedView = 'All', onApply = () => { }, onClear = 
   const defaultViewsConfig = {
     All: [
       { name: 'phoneNumber', label: 'Name or Phone', type: 'input' },
+      { name: 'classPreference', label: 'Class Preference', type: 'select', options: classPreferenceOptions },
       { name: 'courseId', label: 'Course', type: 'select', options: courseOptions },
       { name: 'startDate', label: 'From', type: 'date' },
       { name: 'endDate', label: 'To', type: 'date' },
     ],
     New: [
       { name: 'phoneNumber', label: 'Phone', type: 'input' },
+      { name: 'classPreference', label: 'Class Preference', type: 'select', options: classPreferenceOptions },
       { name: 'ageCategory', label: 'Age Category', type: 'select', options: age_categories },
       { name: 'foundUsBy', label: 'Found Us By', type: 'select', options: foundUsOptions },
       { name: 'modeOfEnquiry', label: 'Mode of Enquiry', type: 'select', options: EnquiryModeOptions },
@@ -54,6 +56,7 @@ function ViewWiseFilters({ selectedView = 'All', onApply = () => { }, onClear = 
     ],
     Demo: [
       { name: 'phoneNumber', label: 'Phone', type: 'input' },
+      { name: 'classPreference', label: 'Class Preference', type: 'select', options: classPreferenceOptions },
       { name: 'demo_startDate', label: 'Demo From', type: 'date' },
       { name: 'demo_endDate', label: 'Demo To', type: 'date' },
       { name: 'demoSlotStatus', label: 'Status', type: 'select', options: demoStatuses },
@@ -61,11 +64,18 @@ function ViewWiseFilters({ selectedView = 'All', onApply = () => { }, onClear = 
     ],
     Enrolled: [
       { name: 'phoneNumber', label: 'Phone', type: 'input' },
+      { name: 'classPreference', label: 'Class Preference', type: 'select', options: classPreferenceOptions },
       { name: 'enrolled_startDate', label: 'Enrolled From', type: 'date' },
       { name: 'enrolled_endDate', label: 'Enrolled To', type: 'date' },
     ],
+    Unfollowed: [
+      { name: 'phoneNumber', label: 'Name or Phone', type: 'input' },
+      { name: 'classPreference', label: 'Class Preference', type: 'select', options: classPreferenceOptions },
+      { name: 'courseId', label: 'Course', type: 'select', options: courseOptions },
+    ],
     Closed: [
       { name: 'phoneNumber', label: 'Phone', type: 'input' },
+      { name: 'classPreference', label: 'Class Preference', type: 'select', options: classPreferenceOptions },
       { name: 'closedReason', label: 'Closed Reason', type: 'select', options: closing_remarks },
       { name: 'closed_startDate', label: 'Closed From', type: 'date' },
       { name: 'closed_endDate', label: 'Closed To', type: 'date' },
@@ -77,6 +87,7 @@ function ViewWiseFilters({ selectedView = 'All', onApply = () => { }, onClear = 
   const handleFinish = (values) => {
     // include stage when a specific view is selected
     if (selectedView && selectedView !== 'All') values.stage = selectedView
+    // (the Unfollowed tab passes stage: 'Unfollowed', which the API expands to open stages + staleness)
 
     // Normalize filters before sending to the API
     const normalized = {}

@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { useStore } from 'zustand';
 import courseStore from '@stores/CourseStore';
 import CustomSelect from "@components/form/CustomSelect";
-import { age_categories } from "@utils/constants";
+import { age_categories, classPreferenceOptions } from "@utils/constants";
 import centersStore from "@stores/CentersStore";
 
 const { TextArea } = Input;
@@ -28,6 +28,7 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
         ageCategory: enquiry?.ageCategory,
         foundUsBy: enquiry?.foundUsBy,
         modeOfEnquiry: enquiry?.modeOfEnquiry,
+        classPreference: enquiry?.classPreference,
         stage: enquiry?.stage,
         selectedCourses: enquiry?.selectedCourses?.map(c => c._id),
         remarks: enquiry?.remarks || "",
@@ -101,6 +102,10 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
             <Select.Option value="Call">Call</Select.Option>
             <Select.Option value="Online">Online</Select.Option>
           </Select>
+        </Form.Item>
+
+        <Form.Item label="Class Preference" name="classPreference">
+          <Select placeholder="Weekday or Weekend" options={classPreferenceOptions} allowClear />
         </Form.Item>
 
         <Form.Item label="Courses Interested" name="selectedCourses">

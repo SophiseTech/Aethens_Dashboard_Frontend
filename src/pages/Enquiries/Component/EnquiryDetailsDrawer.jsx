@@ -22,6 +22,7 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import { formatDate, formatTime } from "@utils/helper";
+import { MESSAGE_STATUS_COLORS } from "@utils/whatsappMessageStatus";
 import enquiryStore from "@stores/EnquiryStore";
 import { useStore } from "zustand";
 import EditEnquiryModal from "./EditEnquiryModal";
@@ -190,6 +191,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
               <Title level={4} style={{ marginBottom: 0 }} className="flex items-center">
                 {enquiry?.name}
                 {enquiry?.isTransferred ? (<Tag style={{ marginLeft: 8 }} color="blue">Transferred</Tag>) : null}
+                {enquiry?.isUnfollowed ? (<Tag style={{ marginLeft: 8 }} color="red">Not followed up</Tag>) : null}
               </Title>
               <Text>Enquiry No: {enquiry?.enquiryNumber}</Text><br />
               <Text>{age_categories.find(item => item.value == enquiry?.ageCategory)?.label}</Text>
@@ -225,6 +227,9 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
             </Col>
             <Col span={24}>
               <Text strong>Mode:</Text> <Text>{enquiry?.modeOfEnquiry}</Text>
+            </Col>
+            <Col span={24}>
+              <Text strong>Class Preference:</Text> <Text>{enquiry?.classPreference || "N/A"}</Text>
             </Col>
 
             <Col span={24}>
@@ -285,6 +290,19 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
                 <Text strong>Status:</Text>{" "}
                 <Tag color="cyan">{enquiry?.demoSlot?.status}</Tag>
                 <br />
+                {enquiry?.demoSlot?.confirmationMessage ? (
+                  <>
+                    <Text strong>Confirmation Message:</Text>{" "}
+                    <Tag color={MESSAGE_STATUS_COLORS[enquiry.demoSlot.confirmationMessage.status]}>
+                      {enquiry.demoSlot.confirmationMessage.status}
+                    </Tag>
+                    {enquiry.demoSlot.confirmationMessage.status === "failed" &&
+                    enquiry.demoSlot.confirmationMessage.errorMessage ? (
+                      <Text type="danger"> ({enquiry.demoSlot.confirmationMessage.errorMessage})</Text>
+                    ) : null}
+                    <br />
+                  </>
+                ) : null}
                 {
                   enquiry?.demoSlot?.notes ? (
                     <>

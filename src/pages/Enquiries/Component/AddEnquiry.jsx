@@ -10,7 +10,7 @@ import enquiryService from '@/services/Enquiry';
 import { Alert, Form, Modal } from 'antd';
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useStore } from 'zustand';
-import { age_categories, EnquiryModeOptions, foundUsOptions, ROLES } from '@utils/constants';
+import { age_categories, classPreferenceOptions, EnquiryModeOptions, foundUsOptions, ROLES } from '@utils/constants';
 import userStore from '@stores/UserStore';
 import centersStore from '@stores/CentersStore';
 
@@ -139,6 +139,7 @@ function AddEnquiry() {
             <CustomSelect label={"Center"} name={"centerId"} options={centerOptions}/>
           )}
           <CustomSelect name={"modeOfEnquiry"} options={EnquiryModeOptions} label={"Mode of Enquiry"} />
+          <CustomSelect name={"classPreference"} options={classPreferenceOptions} label={"Class Preference"} required={false} />
           {/* <CustomSelect name={"selectedCourses"} options={options} label={"Select Course"} mode="multiple"/> */}
           <CustomSubmit className='bg-primary' label={existence ? 'Proceed' : 'Check'} loading={loading} />
         </CustomForm>

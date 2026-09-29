@@ -114,8 +114,11 @@ const getMenuConfig = (role) => {
           path: "/manager/enquiry-slots",
         },
         { label: "Targets", key: "targets", path: "/manager/targets" },
-
-
+        {
+          label: "Enquiry Documents",
+          key: "enquiry-document-sets",
+          path: "/manager/enquiry-document-sets",
+        },
 
       ],
     },
@@ -322,7 +325,11 @@ const getMenuConfig = (role) => {
           path: "/manager/enquiry-slots",
         },
         { label: "Targets", key: "targets", path: "/manager/targets" },
-
+        {
+          label: "Enquiry Documents",
+          key: "enquiry-document-sets",
+          path: "/manager/enquiry-document-sets",
+        },
 
       ],
     },
@@ -549,6 +556,12 @@ const getMenuConfig = (role) => {
       icon: <AimOutlined />,
       key: "targets",
       path: "/manager/targets",
+    },
+    {
+      label: "Enquiry Documents",
+      icon: <FileTextOutlined />,
+      key: "enquiry-document-sets",
+      path: "/manager/enquiry-document-sets",
     },
     {
       label: "Slots",

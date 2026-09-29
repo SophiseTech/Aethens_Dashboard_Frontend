@@ -218,6 +218,8 @@ export const foundUsOptions = [{ label: "Social Media", value: "Social Media" },
 { label: "Walk-in", value: "Walk-in" },
 { label: "Referral", value: "Referral" },
 { label: "Google Maps", value: "Google Maps" }];
+export const classPreferenceOptions = [{ label: "Weekday", value: "Weekday" }, { label: "Weekend", value: "Weekend" }];
+
 export const EnquiryModeOptions = [{ label: "Walk-in", value: "Walk-in" }, { label: "Call", value: "Call" }, { label: "Online", value: "Online" }];
 
 export const demoStatuses = [

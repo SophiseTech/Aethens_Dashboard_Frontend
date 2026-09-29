@@ -1,14 +1,6 @@
-// WhatsApp message-status -> Ant Tag colour. No shared helper exists elsewhere.
-export const MESSAGE_STATUS_COLORS = {
-  queued: "default",
-  sent: "cyan",
-  delivered: "blue",
-  read: "green",
-  failed: "red",
-  undeliverable: "red",
-};
-
-export const MESSAGE_STATUSES = ["queued", "sent", "delivered", "read", "failed", "undeliverable"];
+// Re-exported for existing importers — the canonical source is now the shared util
+// so non-campaign UI (e.g. the Enquiry drawer) can reuse the same colour map.
+export { MESSAGE_STATUS_COLORS, MESSAGE_STATUSES } from "@utils/whatsappMessageStatus";
 
 // JobRun.status -> Ant Tag colour.
 export const RUN_STATUS_COLORS = {

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Segmented, Table, Tooltip, message } from "antd";
+import { Segmented, Table, Tag, Tooltip, message } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import enquiryStore from "@stores/EnquiryStore";
 import EnquiryDetailsDrawer from "@pages/Enquiries/Component/EnquiryDetailsDrawer";
@@ -128,6 +128,11 @@ function EnquiryList() {
             {value}
           </p>
           {record?.isTransferred && (<Chip key={value} label="Transferred" size="xs" type="draft" glow={false} />)}
+          {record?.isUnfollowed && (
+            <Tooltip title={`No update for ${dayjs().diff(dayjs(record.updatedAt), "day")} days`}>
+              <Tag color="red" className="!m-0">Not followed up</Tag>
+            </Tooltip>
+          )}
         </div>
       ),
     },
@@ -148,6 +153,11 @@ function EnquiryList() {
       }
     },
     {
+      title: "Class Pref.",
+      dataIndex: "classPreference",
+      render: (value) => value || "-",
+    },
+    {
       title: selectedView === "Demo" ? "Demo Date" : "Created At",
       dataIndex: "createdAt",
       render: (_, row) => {
@@ -162,7 +172,11 @@ function EnquiryList() {
     {
       title: "Updated At",
       dataIndex: "updatedAt",
-      render: (value) => formatDateTime(value)
+      render: (value, record) => (
+        <span className={record?.isUnfollowed ? "text-red-500 font-semibold" : ""}>
+          {formatDateTime(value)}
+        </span>
+      )
     },
     {
       title: "Status",
@@ -200,7 +214,7 @@ function EnquiryList() {
   return (
     <>
       <Segmented
-        options={["Dashboard", "All", "New", "Demo", "Enrolled", "Closed"]}
+        options={["Dashboard", "All", "New", "Demo", "Unfollowed", "Enrolled", "Closed"]}
         className="w-fit"
         value={selectedView}
         onChange={(view) => {
@@ -240,6 +254,7 @@ function EnquiryList() {
               pageSize: 10,
             }}
             rowKey="_id"
+            rowClassName={(record) => (record?.isUnfollowed ? "bg-red-50" : "")}
           />
 
           <EnquiryDetailsDrawer
