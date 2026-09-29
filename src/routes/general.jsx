@@ -50,6 +50,8 @@ const AdminArtWorks = lazy(() => import("@pages/admin/ArtWorks"));
 const AdminStudentOfTheWeek = lazy(() => import("@pages/admin/StudentOfTheWeek"));
 const AdminLatestVideos = lazy(() => import("@pages/admin/LatestVideos"));
 const Certificates = lazy(() => import("@pages/Certificates"));
+const SlotRequestRedirect = lazy(() => import("@pages/Slots/Components/SlotRequestRedirect"));
+const NotificationsRedirect = lazy(() => import("@pages/Notifications/NotificationsRedirect"));
 
 // `stableKey` opts a route out of the pathname-keyed Suspense. Parent routes that
 // own an <Outlet> must set it, otherwise opening a child route (e.g. /bills/:id)
@@ -222,6 +224,33 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Slots",
+          },
+          {
+            path: "/slot-requests",
+            element: (
+              <LazyLoader>
+                <SlotRequestRedirect />
+              </LazyLoader>
+            ),
+            title: "Slot Requests",
+          },
+          {
+            path: "/slot-requests/:id",
+            element: (
+              <LazyLoader>
+                <SlotRequestRedirect />
+              </LazyLoader>
+            ),
+            title: "Slot Requests",
+          },
+          {
+            path: "/notifications",
+            element: (
+              <LazyLoader>
+                <NotificationsRedirect />
+              </LazyLoader>
+            ),
+            title: "Notifications",
           },
           {
             path: "/attendance",

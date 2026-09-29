@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Badge, Popover, List, Avatar, Spin, Empty, Button, message } from 'antd';
 import { BellOutlined, CheckCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import { useStore } from 'zustand';
+import { useSearchParams } from 'react-router-dom';
 import notificationStore from '@stores/notificationStore';
 import userStore from '@stores/UserStore';
 import { formatDate } from '@utils/helper';
@@ -17,10 +18,29 @@ const NotificationBell = () => {
   const [pushModalOpen, setPushModalOpen] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(true);
   const [isSupported, setIsSupported] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     getNotifications();
   }, [getNotifications]);
+
+  useEffect(() => {
+    if (searchParams.get('notifications') === 'open' || searchParams.get('openNotifications') === 'true') {
+      setPopoverOpen(true);
+      getNotifications();
+    }
+  }, [searchParams, getNotifications]);
+
+  const handleOpenChange = (newOpen) => {
+    setPopoverOpen(newOpen);
+    if (!newOpen && (searchParams.get('notifications') === 'open' || searchParams.get('openNotifications') === 'true')) {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete('notifications');
+      nextParams.delete('openNotifications');
+      setSearchParams(nextParams, { replace: true });
+    }
+  };
 
   const checkPushStatus = useCallback(async () => {
     const supported = pushNotificationService.isPushSupported();
@@ -165,6 +185,8 @@ const NotificationBell = () => {
     <>
       <Popover
         content={notificationContent}
+        open={popoverOpen}
+        onOpenChange={handleOpenChange}
         title={
           <div className="flex items-center justify-between">
             <span>Unread Notifications</span>

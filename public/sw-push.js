@@ -29,11 +29,7 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  const targetUrl = event.notification.data?.url;
-  let finalPath = '/notifications';
-  if (targetUrl && typeof targetUrl === 'string' && targetUrl.startsWith('/') && !targetUrl.startsWith('//')) {
-    finalPath = targetUrl;
-  }
+  const finalPath = '/?notifications=open';
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
