@@ -1,6 +1,7 @@
 import Chip from '@components/Chips/Chip'
 import BillsList from '@pages/Bills/Components/BillsList'
 import ExportBillsModal from '@pages/Bills/Components/ExportBillsModal'
+import inventoryService from '@services/Inventory'
 import billStore from '@stores/BillStore'
 import materialStore from '@stores/MaterialsStore'
 import userStore from '@stores/UserStore'
@@ -8,7 +9,8 @@ import { formatDate } from '@utils/helper'
 import permissions from '@utils/permissions'
 import { Empty, Tag } from 'antd'
 import dayjs from 'dayjs'
-import React, { useMemo } from 'react'
+import debounce from 'lodash/debounce'
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import { Outlet, useParams, useSearchParams } from 'react-router-dom'
 import { useStore } from 'zustand'
 
@@ -81,11 +83,86 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
 
   const formattedBills = useMemo(() => bills?.map(formatBill), [bills])
 
+  const [materials, setMaterials] = useState([])
+  const [materialsLoading, setMaterialsLoading] = useState(false)
+  const [materialsHasMore, setMaterialsHasMore] = useState(true)
+  const searchQueryRef = useRef('')
+  const lastRefKeyRef = useRef(0)
+  const isFetchingRef = useRef(false)
+  const selectedOptionsRef = useRef([])
+
+  const PAGE_SIZE = 20
+
+  const fetchMaterials = useCallback(async (lastRef = 0, query = '', append = false) => {
+    if (isFetchingRef.current) return
+    isFetchingRef.current = true
+    setMaterialsLoading(true)
+    try {
+      const response = await inventoryService.getInventoryItems(lastRef, PAGE_SIZE, {
+        type: 'materials',
+        searchQuery: query,
+      })
+      const items = response?.items || []
+      const newOptions = items.map((item) => ({
+        label: item.name,
+        value: item._id,
+      }))
+
+      setMaterials((prev) => {
+        const combined = append
+          ? [...prev, ...newOptions]
+          : [...selectedOptionsRef.current, ...newOptions]
+        const seen = new Set()
+        return combined.filter((item) => {
+          if (seen.has(item.value)) return false
+          seen.add(item.value)
+          return true
+        })
+      })
+
+      lastRefKeyRef.current = lastRef + items.length
+      setMaterialsHasMore(items.length >= PAGE_SIZE)
+    } catch {
+      setMaterialsHasMore(false)
+    } finally {
+      setMaterialsLoading(false)
+      isFetchingRef.current = false
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchMaterials(0, '', false)
+  }, [fetchMaterials])
+
+  const debouncedMaterialsSearch = useMemo(
+    () =>
+      debounce((query) => {
+        searchQueryRef.current = query
+        lastRefKeyRef.current = 0
+        fetchMaterials(0, query, false)
+      }, 350),
+    [fetchMaterials]
+  )
+
+  const handleMaterialsSearch = (value) => {
+    debouncedMaterialsSearch(value)
+  }
+
+  const handleMaterialsPopupScroll = (e) => {
+    const { target } = e
+    if (
+      target.scrollTop + target.offsetHeight >= target.scrollHeight - 15 &&
+      materialsHasMore &&
+      !materialsLoading
+    ) {
+      fetchMaterials(lastRefKeyRef.current, searchQueryRef.current, true)
+    }
+  }
+
   const customFilters = [
-    { key: 'invoice_search', type: 'input', placeholder: 'Search Invoice (e.g., WFD1001)' },
-    { key: 'student_name', type: 'input', placeholder: 'Search Student Name' },
+    { key: 'invoice_search', type: 'input', placeholder: 'Search Invoice (e.g., WFD1001)', span: 12 },
     {
-      key: 'subject', type: 'select', placeholder: 'Select Subject', options: [
+      key: 'subject', type: 'select', placeholder: 'Select Subject', span: 12, options: [
         { value: '', label: 'Select Subject' },
         { value: 'course', label: 'Course' },
         { value: 'materials', label: 'Materials' },
@@ -93,23 +170,42 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
         { value: 'registration', label: 'Registration' }
       ]
     },
+    { key: 'student_name', type: 'input', placeholder: 'Search Student Name', span: 24 },
     {
-      key: 'payment_method', type: 'select', placeholder: 'Select Payment Method', options: [
+      key: 'payment_method', type: 'select', placeholder: 'Select Payment Method', span: 12, options: [
         { value: '', label: 'Select' },
         { value: 'cash', label: 'Cash' },
         { value: 'credit_card', label: 'Credit Card' },
         { value: 'bank_transfer', label: 'Bank Transfer' },
       ]
     },
-    { key: 'payment_date', type: 'date', placeholder: 'Select Payment Date' },
-    { key: 'generated_on', type: 'range', placeholder: 'Select Generated Date' },
+    { key: 'payment_date', type: 'date', placeholder: 'Select Payment Date', span: 12 },
+    { key: 'generated_on', type: 'range', placeholder: 'Select Generated Date', span: 24 },
     {
-      key: 'status', type: 'select', placeholder: 'Select Status', options: [
+      key: 'status', type: 'select', placeholder: 'Select Status', span: 24, options: [
         { value: '', label: 'Select' },
         { value: 'paid', label: 'Paid' },
         { value: 'unpaid', label: 'Unpaid' },
         { value: 'draft', label: 'Draft' },
       ]
+    },
+    {
+      key: 'materials',
+      type: 'select',
+      mode: 'multiple',
+      placeholder: 'Select Materials',
+      options: materials,
+      span: 24,
+      loading: materialsLoading,
+      onSearch: handleMaterialsSearch,
+      onPopupScroll: handleMaterialsPopupScroll,
+      filterOption: false,
+      onChange: (selectedIds) => {
+        if (Array.isArray(selectedIds)) {
+          const selectedObjs = materials.filter((m) => selectedIds.includes(m.value))
+          selectedOptionsRef.current = selectedObjs
+        }
+      }
     }
   ];
 
