@@ -17,8 +17,6 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
   const { centers, getCenters } = useStore(centersStore)
   const options = useMemo(() => courses?.map(course => ({ label: course.course_name, value: course._id })), [courses])
   const [form] = Form.useForm();
-  console.log(enquiry);
-
 
   useEffect(() => {
     if (enquiry) {
@@ -51,7 +49,13 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
 
   const handleOk = () => {
     form.validateFields().then((values) => {
-      onSave(values);
+      const sanitizedValues = {
+        ...values,
+        ...(values.phoneNumber && typeof values.phoneNumber === 'string'
+          ? { phoneNumber: values.phoneNumber.trim().replace(/[\s()-]/g, '') }
+          : {}),
+      };
+      onSave(sanitizedValues);
     });
   };
 
