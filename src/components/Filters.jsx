@@ -1,4 +1,4 @@
-import { Input, Select, DatePicker, Button, Flex, notification } from 'antd';
+import { Input, Select, DatePicker, Button, Flex, notification, Row, Col } from 'antd';
 import _ from 'lodash';
 import React, { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
@@ -12,7 +12,7 @@ const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defau
   // Convert formatted defaultValues back to dayjs objects
   useEffect(() => {
     const convertedDefaults = _.mapValues(defaultValues, (value) => {
-      if (_.isObject(value)) {
+      if (_.isPlainObject(value) && (value.$gte || value.$lte)) {
         const val = []
         if (value.$gte) {
           val.push(dayjs(value.$gte))
@@ -26,23 +26,20 @@ const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defau
         }
         return val;
       }
-      // if (_.isObject(value) && Object.hasOwn(value, '$gte') && Object.hasOwn(value, '$lte')) {
-      //   return [dayjs(value.$gte), dayjs(value.$lte)]; // Convert to range format
-      // }
       return dayjs.isDayjs(value) ? dayjs(value) : value;
     });
     setFilterValues(convertedDefaults);
   }, [defaultValues]);
 
-  useEffect(() => {
-    console.log('defaultValues changed');
-  }, [defaultValues]);
-
-  const handleChange = (key) => (value) => {
+  const handleChange = (key, customOnChange) => (value) => {
+    const nextVal = value?.target ? value.target.value : value;
     setFilterValues((prev) => ({
       ...prev,
-      [key]: value?.target ? value.target.value : value
+      [key]: nextVal
     }));
+    if (typeof customOnChange === 'function') {
+      customOnChange(nextVal);
+    }
   };
 
   const resetFilter = () => {
@@ -51,7 +48,12 @@ const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defau
   };
 
   const applyFilter = () => {
-    if (_.isEmpty(filterValues)) {
+    const activeFilters = _.pickBy(
+      filterValues,
+      (value) => value !== null && value !== undefined && value !== "" && (!Array.isArray(value) || value.length > 0)
+    );
+
+    if (_.isEmpty(activeFilters)) {
       notification.info({
         message: "Alert",
         description: "Please apply any filter",
@@ -60,8 +62,7 @@ const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defau
       return;
     }
 
-    const formattedFilters = _.pickBy(filterValues, (value) => value !== null && value !== undefined && value !== "");
-    console.log("FormattedFilters0::", formattedFilters)
+    const formattedFilters = { ...activeFilters };
 
     // Format date and range filters
     Object.keys(formattedFilters).forEach((key) => {
@@ -86,17 +87,18 @@ const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defau
         }
       }
     });
-    console.log("FormattedFilters::", formattedFilters)
+
     onApply(formattedFilters);
   };
-  console.log(filterValues);
 
-  const renderFilter = ({ key, type, placeholder, options }) => {
+  const renderFilter = (filter) => {
+    const { key, type, placeholder, options, mode, onSearch, onPopupScroll, loading, filterOption, notFoundContent, onChange } = filter;
+    const isMultiple = mode === 'multiple';
     const commonProps = {
       placeholder,
-      onChange: handleChange(key),
-      style: { width: '100%', marginBottom: 10 },
-      value: filterValues[key] || undefined
+      onChange: handleChange(key, onChange),
+      style: { width: '100%' },
+      value: filterValues[key] !== undefined ? filterValues[key] : (isMultiple ? [] : undefined)
     };
 
     switch (type) {
@@ -108,9 +110,25 @@ const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defau
         return <DatePicker {...commonProps} value={filterValues[key] || null} />;
       case 'select':
         return (
-          <Select {...commonProps}>
+          <Select
+            {...commonProps}
+            mode={mode}
+            loading={loading}
+            onSearch={onSearch}
+            onPopupScroll={onPopupScroll}
+            showSearch
+            allowClear
+            maxTagCount="responsive"
+            filterOption={
+              filterOption !== undefined
+                ? filterOption
+                : (input, option) =>
+                    (option?.children ?? option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
+            }
+            notFoundContent={notFoundContent}
+          >
             {options?.map(({ value, label }) => (
-              <Select.Option key={value} value={value}>{label}</Select.Option>
+              <Select.Option key={value} value={value} label={label}>{label}</Select.Option>
             ))}
           </Select>
         );
@@ -125,10 +143,14 @@ const Filters = ({ filters = [], onApply = () => { }, onReset = () => { }, defau
 
   return (
     <div className='p-3 mb-3 rounded-xl border bg-card border-border'>
-      {filters.map((filter) => (
-        <div key={filter.key}>{renderFilter(filter)}</div>
-      ))}
-      <Flex gap={5}>
+      <Row gutter={[8, 8]}>
+        {filters.map((filter) => (
+          <Col span={filter.span || 24} key={filter.key}>
+            {renderFilter(filter)}
+          </Col>
+        ))}
+      </Row>
+      <Flex gap={5} className='mt-2'>
         <Button variant='filled' color='green' onClick={applyFilter}>
           Apply
         </Button>

@@ -1,6 +1,7 @@
 import useModal from '@hooks/useModal'
 import AllotSessions from '@pages/Students/Component/AllotSessions'
 import DeactivateStudent from '@pages/Students/Component/DeactivateStudent'
+import MarkAsCompleted from '@pages/Students/Component/MarkAsCompleted'
 import MigrateCenter from '@pages/Students/Component/MigrateCenter'
 import MigrateCourse from '@pages/Students/Component/MigrateCourse'
 import ProjectDetailModal from '@pages/Students/Component/ProjectDetailModal'
@@ -200,6 +201,13 @@ function DrawerActionButtons({ userDetails, isDiploma = false }) {
     },
 
     // --- Administration ---
+    {
+      key: 'mark_course_completed',
+      component: (props) => <MarkAsCompleted {...props} />,
+      section: 'Administration',
+      roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.ACADEMIC_MANAGER],
+      diplomaHidden: true
+    },
     {
       key: 'migrate_course',
       component: (props) => <MigrateCourse {...props} />,

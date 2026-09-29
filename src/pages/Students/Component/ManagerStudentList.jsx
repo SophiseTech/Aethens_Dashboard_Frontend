@@ -144,10 +144,23 @@ function StudentList() {
     {
       title: 'Course',
       key: 'course',
-      render: (_, record) =>
-        record?.student?.details_id?.course?.course_name ||
-        record?.details_id?.course?.course_name ||
-        '—',
+      render: (_, record) => {
+        const courseName =
+          record?.student?.details_id?.course?.course_name ||
+          record?.details_id?.course?.course_name ||
+          '—';
+        const isCompleted =
+          record?.student?.isCourseCompleted ||
+          record?.isCourseCompleted ||
+          record?.enrollmentStatus === 'completed' ||
+          record?.student?.enrollmentStatus === 'completed';
+        return (
+          <div className="flex items-center gap-2">
+            <span>{courseName}</span>
+            {isCompleted && <Tag color="green">Completed</Tag>}
+          </div>
+        );
+      },
     },
     {
       title: 'Attendance',

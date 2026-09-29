@@ -49,6 +49,13 @@ const permissions = {
     delete: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]
   },
+  certificates: {
+    view: [ROLES.ADMIN],
+    add: [ROLES.ADMIN],
+    edit: [ROLES.ADMIN],
+    delete: [ROLES.ADMIN],
+    export: [ROLES.ADMIN],
+  },
   audits: {
     create: [ROLES.ADMIN],
     view: [ROLES.MANAGER, ROLES.ADMIN],

@@ -47,17 +47,35 @@ function AddEnquiry() {
   const handleOk = async () => {
     setIsModalOpen(false);
   };
+  const cleanPhoneNumber = (val) =>
+    typeof val === "string" ? val.trim().replace(/[\s()-]/g, "") : val;
+
   const handleCancel = () => {
     setIsModalOpen(false);
+    setExistence(null);
+    checkedRef.current = false;
+  };
+
+  const handlePhoneChange = () => {
+    if (checkedRef.current || existence !== null) {
+      checkedRef.current = false;
+      setExistence(null);
+    }
   };
 
   const checkedRef = useRef(false);
   const [existence, setExistence] = useState(null); // { exists: bool, count: number }
 
   const onSubmit = async (values) => {
+    const cleanedPhone = cleanPhoneNumber(values.phoneNumber);
+    const submissionValues = {
+      ...values,
+      phoneNumber: cleanedPhone,
+    };
+
     // If we've already checked existence, proceed to create enquiry
     if (checkedRef.current) {
-      const created = await addEnquiry(values);
+      const created = await addEnquiry(submissionValues);
       await getEnquiries(10, 1);
       // reset check state
       setExistence(null);
@@ -68,8 +86,7 @@ function AddEnquiry() {
 
     // First click: check if enquiry exists for phoneNumber
     try {
-      const phone = values.phoneNumber;
-      const res = await enquiryService.enquiryExists('phoneNumber', phone);
+      const res = await enquiryService.enquiryExists('phoneNumber', cleanedPhone);
       // normalize response: support { count } or { exists }
       const existsCount = (res && (res.count ?? (res.exists ? res.exists : 0))) || 0;
       const existsObj = { exists: Number(existsCount) > 0, count: Number(existsCount) };
@@ -106,7 +123,12 @@ function AddEnquiry() {
           resetOnFinish={(result) => Boolean(result && result.reset === true)}
         >
           <CustomInput label={"Full Name"} name={"name"} placeholder={"John Doe"} />
-          <CustomInput label={"Mobile Number"} name={"phoneNumber"} placeholder={"+91 7845784785"} />
+          <CustomInput
+            label={"Mobile Number"}
+            name={"phoneNumber"}
+            placeholder={"+91 7845784785"}
+            inputProps={{ onChange: handlePhoneChange }}
+          />
           <CustomInput label={"Place"} name={"place"} placeholder={"Enter place"} required={false} />
           {existence !== null && (
             <div className="mb-3">

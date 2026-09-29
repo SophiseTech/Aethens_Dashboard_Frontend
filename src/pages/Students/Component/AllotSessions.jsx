@@ -72,9 +72,11 @@ function AllotSessions({ student }) {
     { label: "Regular", value: "regular", },
   ]
 
+  const isCompleted = Boolean(student?.isCourseCompleted || student?.enrollmentStatus === 'completed');
+
   return (
     <>
-      <Button onClick={showModal} variant='filled' color='green' disabled={!isUserActive(student)}>
+      <Button onClick={showModal} variant='filled' color='green' disabled={!isUserActive(student) || isCompleted}>
         Allot Sessions
       </Button>
       <Modal

@@ -119,7 +119,7 @@ const getMenuConfig = (role) => {
           key: "enquiry-document-sets",
           path: "/manager/enquiry-document-sets",
         },
-
+        { label: "Certificates", key: "certificates", path: "/admin/certificates" },
       ],
     },
     {

@@ -1,21 +1,60 @@
-import React, { useEffect, useState } from 'react';
-import { Badge, Popover, List, Avatar, Spin, Empty, message } from 'antd';
-import { BellOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { useEffect, useState, useCallback } from 'react';
+import { Badge, Popover, List, Avatar, Spin, Empty, Button, message } from 'antd';
+import { BellOutlined, CheckCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import { useStore } from 'zustand';
+import { useSearchParams } from 'react-router-dom';
 import notificationStore from '@stores/notificationStore';
+import userStore from '@stores/UserStore';
 import { formatDate } from '@utils/helper';
+import pushNotificationService from '@services/PushNotificationService';
+import PushNotificationSettingsModal from '@pages/Notifications/components/PushNotificationSettingsModal';
 
 const NotificationBell = () => {
   const { notifications, loading, getNotifications, markAsRead } = useStore(notificationStore);
+  const { user } = useStore(userStore);
   const [clickedId, setClickedId] = useState(null);
   const [markingRead, setMarkingRead] = useState(null);
   const [hoveredId, setHoveredId] = useState(null);
+  const [pushModalOpen, setPushModalOpen] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(true);
+  const [isSupported, setIsSupported] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     getNotifications();
   }, [getNotifications]);
 
-  // Filter to show only unread notifications
+  useEffect(() => {
+    if (searchParams.get('notifications') === 'open' || searchParams.get('openNotifications') === 'true') {
+      setPopoverOpen(true);
+      getNotifications();
+    }
+  }, [searchParams, getNotifications]);
+
+  const handleOpenChange = (newOpen) => {
+    setPopoverOpen(newOpen);
+    if (!newOpen && (searchParams.get('notifications') === 'open' || searchParams.get('openNotifications') === 'true')) {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete('notifications');
+      nextParams.delete('openNotifications');
+      setSearchParams(nextParams, { replace: true });
+    }
+  };
+
+  const checkPushStatus = useCallback(async () => {
+    const supported = pushNotificationService.isPushSupported();
+    setIsSupported(supported);
+    if (supported) {
+      const subscribed = await pushNotificationService.checkDeviceSubscription();
+      setIsSubscribed(subscribed);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkPushStatus();
+  }, [checkPushStatus]);
+
   const unreadNotifications = notifications.filter(n => !n.is_read);
   const unreadCount = unreadNotifications.length;
 
@@ -27,11 +66,10 @@ const NotificationBell = () => {
       try {
         await markAsRead(notification._id);
         message.success({ content: 'Marked as read', duration: 1.5, icon: <CheckCircleOutlined style={{ color: '#4F651E' }} /> });
-      } catch (error) {
+      } catch {
         message.error('Failed to mark as read');
       } finally {
         setMarkingRead(null);
-        // Keep clicked effect for a moment before removing
         setTimeout(() => setClickedId(null), 500);
       }
     }
@@ -39,6 +77,23 @@ const NotificationBell = () => {
 
   const notificationContent = (
     <div style={{ width: 350, maxHeight: '50vh', overflowY: 'auto' }}>
+      {!isSubscribed && isSupported && (
+        <div className="flex items-center justify-between p-2 mb-2 bg-amber-50 border border-amber-200 rounded text-xs">
+          <div className="flex items-center gap-1.5 text-amber-800">
+            <BellOutlined />
+            <span>Enable alerts on this device</span>
+          </div>
+          <Button
+            type="primary"
+            size="small"
+            onClick={() => setPushModalOpen(true)}
+            style={{ fontSize: '11px', height: '26px' }}
+          >
+            Turn on
+          </Button>
+        </div>
+      )}
+
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>
           <Spin />
@@ -127,11 +182,43 @@ const NotificationBell = () => {
   );
 
   return (
-    <Popover content={notificationContent} title="Unread Notifications" trigger="click" placement="bottomRight">
-      <Badge count={unreadCount}>
-        <BellOutlined style={{ fontSize: '24px', cursor: 'pointer' }} className='border border-stone-200 p-3 rounded-full' />
-      </Badge>
-    </Popover>
+    <>
+      <Popover
+        content={notificationContent}
+        open={popoverOpen}
+        onOpenChange={handleOpenChange}
+        title={
+          <div className="flex items-center justify-between">
+            <span>Unread Notifications</span>
+            <Button
+              type="text"
+              size="small"
+              icon={<SettingOutlined />}
+              onClick={() => setPushModalOpen(true)}
+              className="text-xs text-gray-500 hover:text-primary flex items-center gap-1"
+              style={{ padding: '0 4px', height: '24px' }}
+            >
+              Push Settings
+            </Button>
+          </div>
+        }
+        trigger="click"
+        placement="bottomRight"
+      >
+        <Badge count={unreadCount}>
+          <BellOutlined style={{ fontSize: '24px', cursor: 'pointer' }} className="border border-stone-200 p-3 rounded-full" />
+        </Badge>
+      </Popover>
+
+      <PushNotificationSettingsModal
+        open={pushModalOpen}
+        onClose={() => {
+          setPushModalOpen(false);
+          checkPushStatus();
+        }}
+        isAdmin={user?.role === 'admin'}
+      />
+    </>
   );
 };
 
