@@ -179,7 +179,7 @@ function MigrateCourse({ student }) {
 
     Modal.confirm({
       title: 'Confirm Course Migration',
-      content: `This will migrate the student to the selected course. Existing slots will be updated.${walletLine}${copyLine}`,
+      content: `This will migrate the student to the selected course. Current-course slots will be deactivated and pending slot requests rejected. Unpaid current-course bills will be closed and materials not yet collected will be marked as not collected.${walletLine}${copyLine}`,
       okText: 'Migrate Course',
       cancelText: 'Cancel',
       okType: 'primary',

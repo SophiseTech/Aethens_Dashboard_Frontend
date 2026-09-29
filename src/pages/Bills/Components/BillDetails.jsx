@@ -234,7 +234,7 @@ function BillDetails() {
             </Button>
           )}
 
-          {bill?.zoho?.syncStatus === 'failed' && permissions.bills?.zoho_resync?.includes(user.role) && (
+          {['failed', 'void_failed'].includes(bill?.zoho?.syncStatus) && permissions.bills?.zoho_resync?.includes(user.role) && (
             <Button
               className='rounded-full'
               color='default'
@@ -242,7 +242,7 @@ function BillDetails() {
               variant='outlined'
               onClick={handleRetryZohoSync}
             >
-              Retry Zoho Sync
+              {bill.zoho.syncStatus === 'void_failed' ? 'Retry Zoho Void' : 'Retry Zoho Sync'}
             </Button>
           )}
 

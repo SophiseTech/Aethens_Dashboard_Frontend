@@ -171,6 +171,8 @@ const billStore = create((set, get) => ({
         set({ bills: updatedBills, ...syncSelectedBill(get, bill) })
         if (bill.zoho?.syncStatus === "synced") {
           handleSuccess("Bill synced to Zoho successfully")
+        } else if (bill.zoho?.syncStatus === "voided") {
+          handleSuccess("Zoho invoice voided successfully")
         } else {
           handleInternalError(new Error(bill.zoho?.errorMessage || "Zoho sync failed again"))
         }

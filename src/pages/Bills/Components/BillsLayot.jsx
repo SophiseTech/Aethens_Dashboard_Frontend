@@ -37,7 +37,14 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
   }
 
   const ZohoStatus = ({ billStatus, syncStatus }) => {
-    if (billStatus === 'draft' || billStatus === 'migration_closed') return null
+    if (billStatus === 'draft') return null
+    if (billStatus === 'migration_closed') {
+      // Only invoices that reached Zoho need voiding; others have no Zoho status to show
+      if (syncStatus === 'voided') return <Chip size='xs' glow={false} type='success' label='Zoho voided' />
+      if (syncStatus === 'void_failed') return <Chip size='xs' glow={false} type='danger' label='Zoho void failed' />
+      if (syncStatus === 'void_pending') return <Chip size='xs' glow={false} type='warning' label='Zoho void pending' />
+      return null
+    }
     if (syncStatus === 'synced') return <Chip size='xs' glow={false} type='success' label='Zoho ✓' />
     if (syncStatus === 'failed') return <Chip size='xs' glow={false} type='danger' label='Zoho failed' />
     return <Chip size='xs' glow={false} type='warning' label='Zoho pending' />
