@@ -12,7 +12,7 @@ import SessionStore from '@stores/SessionStore';
 import studentStore from '@stores/StudentStore';
 import userStore from '@stores/UserStore';
 import { DEFAULT_COURSE_LEVEL, DEFAULT_NUMBER_OF_INSTALLMENTS, feeOptions, ROLES } from '@utils/constants';
-import { Button, Divider, Form, message, Modal } from 'antd';
+import { Alert, Button, Divider, Form, message, Modal } from 'antd';
 import dayjs from 'dayjs';
 import { Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
@@ -23,9 +23,24 @@ import handleError from '@utils/handleError';
 
 const { Text } = Typography;
 
-function AddStudent() {
+/**
+ * Direct student enrollment modal.
+ * Standalone it renders its own "+" trigger. When `open` is passed it is controlled by the
+ * parent (no trigger) — used to enroll from an enquiry: `enquiry` prefills the form and is
+ * sent as enquiry_id so the server links the student and moves the enquiry to Enrolled.
+ */
+function AddStudent({ open, onClose, enquiry, onEnrolled }) {
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const isControlled = open !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isModalOpen = isControlled ? open : internalOpen;
+  const setIsModalOpen = (value) => {
+    if (isControlled) {
+      if (!value) onClose?.();
+    } else {
+      setInternalOpen(value);
+    }
+  };
   const { user } = userStore()
   const { enroll, loading } = studentStore()
   const [form] = Form.useForm();
@@ -72,6 +87,27 @@ function AddStudent() {
       getReusableCards(centerToFetch);
     }
   }, [selectedCenter, user.center_id, isModalOpen]);
+
+  // Prefill from the enquiry each time the modal opens for one
+  useEffect(() => {
+    if (!isModalOpen || !enquiry) return;
+    form.resetFields();
+    form.setFieldsValue({
+      username: enquiry.name || "",
+      phone: enquiry.phoneNumber || "",
+      center_id: enquiry.centerId?._id || enquiry.centerId || undefined,
+    });
+  }, [isModalOpen, enquiry?._id]);
+
+  // Preselect the enquiry's first course once it is available in the course picker
+  useEffect(() => {
+    if (!isModalOpen || !enquiry) return;
+    const enquiryCourseId = enquiry.selectedCourses?.[0]?._id || enquiry.selectedCourses?.[0];
+    if (!enquiryCourseId || form.getFieldValue("course_id")) return;
+    if (pickerCourses.some(course => course._id === enquiryCourseId)) {
+      form.setFieldValue("course_id", enquiryCourseId);
+    }
+  }, [isModalOpen, enquiry?._id, pickerCourses]);
 
   useEffect(() => {
     if (selectedCourse) {
@@ -125,15 +161,25 @@ function AddStudent() {
       delete values.sessionSchedule; // Remove the intermediate field
     }
 
-    console.log(values);
+    if (enquiry?._id) {
+      values.enquiry_id = enquiry._id;
+    }
+
+    let response;
     try {
-      await enroll(values)
-      message.success("Student Enrolled Successfully")
+      response = await enroll(values)
     } catch (error) {
       return;
     }
+    // The server reports a failed enquiry link in the message while the enrollment itself succeeded
+    if (enquiry?._id && response?.message?.includes("enquiry could not be updated")) {
+      message.warning(response.message)
+    } else {
+      message.success("Student Enrolled Successfully")
+    }
     handleOk()
     form.resetFields()
+    onEnrolled?.(response)
   }
 
   const centerOptions = useMemo(() => centers?.map(center => ({ label: center.center_name, value: center._id })), [centers])
@@ -166,15 +212,23 @@ function AddStudent() {
 
   return (
     <>
-      <PlusCircleFilled className='text-3xl text-primary' onClick={showModal} />
+      {!isControlled && <PlusCircleFilled className='text-3xl text-primary' onClick={showModal} />}
       <Modal
-        title={"Enroll Student"}
+        title={enquiry ? `Enroll Student from Enquiry #${enquiry.enquiryNumber}` : "Enroll Student"}
         open={isModalOpen}
         footer={null}
         onCancel={handleCancel}
         width={'50%'}
       >
         <CustomForm form={form} initialValues={initialValues} action={onSubmit} resetOnFinish={false}>
+          {enquiry && (
+            <Alert
+              className='mb-4'
+              type='info'
+              showIcon
+              message="Details are prefilled from the enquiry. Once enrolled, the enquiry moves to Enrolled, is linked to this student, and its manager tasks are closed."
+            />
+          )}
           <ProfileImageUploader
             name={"profile_img"}
             form={form}

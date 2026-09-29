@@ -28,7 +28,8 @@ class StudentService {
     courseType,
     diplomaCourse_id,
     diplomaBatch_id,
-    diplomaIntake_id
+    diplomaIntake_id,
+    enquiry_id
   }) {
     try {
       const isDiploma = courseType === "diploma";
@@ -66,7 +67,8 @@ class StudentService {
         courseType,
         diplomaCourse_id,
         diplomaBatch_id,
-        diplomaIntake_id
+        diplomaIntake_id,
+        enquiry_id
       });
       if (!response || !response.data)
         throw new Error("An error occured. Please try again");

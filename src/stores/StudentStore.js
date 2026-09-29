@@ -176,6 +176,7 @@ const studentStore = create((set, get) => ({
         throw new Error("Unauthorized");
       const response = await studentService.enroll(data);
       set({ students: [...students, response.data] });
+      return response;
     } catch (error) {
       handleInternalError(error);
       throw error;

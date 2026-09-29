@@ -13,6 +13,7 @@ import {
   Form,
   DatePicker,
   Input,
+  message,
 } from "antd";
 import {
   UserOutlined,
@@ -29,12 +30,12 @@ import EditEnquiryModal from "./EditEnquiryModal";
 import CloseEnquiryModal from './CloseEnquiryModal';
 import { age_categories } from "@utils/constants";
 import BranchTransferCard from "@pages/Enquiries/Component/BranchTranserCard";
-import CustomSelect from "@components/form/CustomSelect";
 import EnquiryDemoBookModal from "@pages/Enquiries/Component/EnquiryDemoBookModal";
 import EnquiryDemoRescheduleModal from "@pages/Enquiries/Component/EnquiryDemoRescheduleModal";
 import permissions from "@utils/permissions";
 import userStore from "@stores/UserStore";
 import ReopenEnquiryModal from "./ReopenEnquiryModal";
+import AddStudent from "@pages/Students/Component/AddStudent";
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
@@ -55,7 +56,6 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
     bookDemoSlot,
     addfollowUpDate,
     rescheduleSlot,
-    enrollStudent
   } = useStore(enquiryStore);
   const [form] = Form.useForm();
 
@@ -65,11 +65,36 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
   const handleEditClick = () => setIsEditModalVisible(true);
   const handleCloseClick = () => setIsCloseModalVisible(true);
 
+  // Enrolling creates the student through the Add Student modal, which links the enquiry
+  const openEnrollment = () => {
+    if (!permissions.student.add.includes(user?.role)) {
+      message.error("You don't have permission to enroll students");
+      return false;
+    }
+    setEnrolled(true);
+    return true;
+  };
+
+  const handleEnrolled = async () => {
+    setEnrolled(false);
+    await fetchEnquiries?.();
+    onClose();
+  };
+
   const handleSave = async (values) => {
+    const movingToEnrolled = values.stage === "Enrolled" && enquiry?.stage !== "Enrolled";
     const updateData = {
       ...values,
       selectedCourses: values.selectedCourses,
     };
+    if (movingToEnrolled) {
+      // Save the other edits now; the stage changes once the student is enrolled
+      delete updateData.stage;
+      await editEnquiry(enquiry._id, updateData);
+      setIsEditModalVisible(false);
+      openEnrollment();
+      return;
+    }
     await editEnquiry(enquiry._id, updateData);
     // await getEnquiries(10, 1);
     await fetchEnquiries()
@@ -117,20 +142,6 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
         reason: values.reason
       };
       await rescheduleSlot(enquiry._id, updatedData);
-      setReschduleSlot(false);
-      // await getEnquiries(10, 1);
-      await fetchEnquiries()
-      onClose();
-    })
-  }
-
-  const handleEnrollSlot = async () => {
-    form.validateFields().then(async (values) => {
-      const updatedData = {
-        enrollmentDate: values.enrollmentDate.toISOString(),
-        enrollmentCourse: values.enrollmentCourse
-      };
-      await enrollStudent(enquiry._id, updatedData);
       setReschduleSlot(false);
       // await getEnquiries(10, 1);
       await fetchEnquiries()
@@ -274,6 +285,13 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
               <br />
               <Text strong>Enrolled Date : </Text>{" "}
               <Text>{(formatDate(enquiry?.enrollmentDate))}</Text>
+              {enquiry?.student_id ? (
+                <>
+                  <br />
+                  <Text strong>Student : </Text>{" "}
+                  <Text>{enquiry.student_id.username} ({enquiry.student_id.email})</Text>
+                </>
+              ) : null}
             </Card>
           </>
         ) : null}
@@ -445,7 +463,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
         {(parentPage === "slotlist" || parentPage === "enquiryList") &&
           enquiry?.stage === "Demo" &&
           enquiry?.demoSlot?.status === "Completed" &&
-          permissions.enquiries.edit.includes(user?.role) ? <Button type="primary" block onClick={() => setEnrolled(true)}>
+          permissions.enquiries.edit.includes(user?.role) ? <Button type="primary" block onClick={openEnrollment}>
           Enroll Student
         </Button> : null
         }
@@ -497,37 +515,13 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
         enquiry={enquiry}
       />
 
-      {/* Enroll Slot Modal */}
-      <Modal
-        title="Enroll Slot for Student"
+      {/* Enroll: direct Add Student flow, linked to this enquiry */}
+      <AddStudent
         open={isEnrolled}
-        onCancel={() => setEnrolled(false)}
-        onOk={handleEnrollSlot}
-        okText="Confirm"
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="enrollmentDate"
-            label="Enrollment Date"
-            rules={[{ required: true }]}
-          >
-            <DatePicker showTime className="w-full" />
-          </Form.Item>
-
-          <Form.Item
-            name="enrollmentCourse"
-            label="Enrolled Course"
-            rules={[{ required: true }]}
-          >
-            <CustomSelect
-              options={enquiry?.selectedCourses?.map((c) => ({
-                label: c.course_name,
-                value: c.course_name,
-              }))}
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
+        onClose={() => setEnrolled(false)}
+        enquiry={enquiry}
+        onEnrolled={handleEnrolled}
+      />
 
       {/* Book Demo Slot Modal */}
       <EnquiryDemoBookModal

@@ -14,6 +14,10 @@ import permissions from '@utils/permissions';
 import userStore from '@stores/UserStore';
 import InstallmentManager from './InstallmentManager';
 
+// Installments display in due-date order (earliest first), regardless of storage order
+const sortByDueDate = (installments) =>
+  [...(installments || [])].sort((a, b) => new Date(a.month) - new Date(b.month));
+
 const FeeTracker = ({ student, visible, onCancel }) => {
   const {
     feeDetails,
@@ -52,7 +56,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
   // Build items array for partial payments
   const partialItems = useMemo(() => {
     if (!feeDetails || !isPartialPayment) return [];
-    const items = [...(feeDetails.feeAccount?.installments || [])];
+    const items = sortByDueDate(feeDetails.feeAccount?.installments);
     // Use summary.balance (derived from paid bills) rather than the raw DB field
     // which can be stale when the initial paidAmount was set on account creation.
     const remainingBalance = feeDetails.summary?.balance ?? 0;
@@ -69,7 +73,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
 
   // Separate installments into current/past months and upcoming months
   const installments = useMemo(() => {
-    return feeDetails?.feeAccount?.installments || [];
+    return sortByDueDate(feeDetails?.feeAccount?.installments);
   }, [feeDetails]);
 
   const { currentAndPastInstallments, upcomingInstallments } = useMemo(() => {
