@@ -13,6 +13,7 @@ const NOTIFICATION_TYPE_OPTIONS = [
   { label: 'Student Deactivation', value: 'student_deactivation' },
   { label: 'Final Project', value: 'final_project' },
   { label: 'Holiday', value: 'holiday' },
+  { label: 'Test Notification', value: 'test' },
 ];
 
 export default function PushNotificationSettingsModal({ open, onClose, isAdmin }) {
@@ -20,6 +21,7 @@ export default function PushNotificationSettingsModal({ open, onClose, isAdmin }
   const [permission, setPermission] = useState('default');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
+  const [testingPush, setTestingPush] = useState(false);
 
   const [adminConfig, setAdminConfig] = useState([]);
   const [loadingConfig, setLoadingConfig] = useState(false);
@@ -85,6 +87,27 @@ export default function PushNotificationSettingsModal({ open, onClose, isAdmin }
       setPermission(perm);
     } finally {
       setSubscribing(false);
+    }
+  };
+
+  const handleSendTestNotification = async () => {
+    setTestingPush(true);
+    try {
+      const res = await pushNotificationService.sendTestNotification({
+        message: 'This is a test notification from Aethens Dashboard!',
+        type: 'test',
+        title: 'Test Notification',
+      });
+      const pushResult = res?.notification?.pushResult || res?.pushResult;
+      if (pushResult && pushResult.successful > 0) {
+        message.success(`Test push notification delivered to ${pushResult.successful} device(s)!`);
+      } else {
+        message.success('Test notification created successfully!');
+      }
+    } catch (err) {
+      message.error(err.message || 'Failed to send test push notification');
+    } finally {
+      setTestingPush(false);
     }
   };
 
@@ -154,6 +177,18 @@ export default function PushNotificationSettingsModal({ open, onClose, isAdmin }
                 onChange={handleToggleSubscription}
                 style={{ minWidth: '44px', minHeight: '22px' }}
               />
+            </div>
+          )}
+          {isSubscribed && (
+            <div className="mt-2 flex justify-end">
+              <Button
+                size="small"
+                loading={testingPush}
+                onClick={handleSendTestNotification}
+                style={{ minHeight: '36px' }}
+              >
+                Send Test Notification
+              </Button>
             </div>
           )}
         </div>

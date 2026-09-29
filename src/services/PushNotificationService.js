@@ -159,6 +159,11 @@ export const pushNotificationService = {
     const res = await put('/notifications/push/config', { enabledTypes });
     return res?.data;
   },
+
+  sendTestNotification: async (payload = {}) => {
+    const res = await post('/notifications/test', payload);
+    return res?.data;
+  },
 };
 
 export default pushNotificationService;
