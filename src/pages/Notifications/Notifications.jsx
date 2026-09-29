@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { Input, Select, Row, Col } from "antd";
+import { useEffect, useState } from "react";
+import { Input, Select, Row, Col, Button } from "antd";
+import { BellOutlined } from "@ant-design/icons";
 import { useStore } from "zustand";
 import notificationStore from "@stores/notificationStore";
 import userStore from "@stores/UserStore";
@@ -7,11 +8,13 @@ import userService from "@services/User";
 import NotificationList from "./components/NotificationList";
 import Title from "@components/layouts/Title";
 import centersStore from "@stores/CentersStore";
+import PushNotificationSettingsModal from "./components/PushNotificationSettingsModal";
 
 const { Search } = Input;
 const { Option } = Select;
 
 export default function Notifications() {
+  const [pushSettingsOpen, setPushSettingsOpen] = useState(false);
   const {
     allNotifications,
     totalNotifications,
@@ -128,6 +131,15 @@ export default function Notifications() {
               />
             </div>
           </Col>
+          <Col>
+            <Button
+              icon={<BellOutlined />}
+              onClick={() => setPushSettingsOpen(true)}
+              style={{ minHeight: "44px" }}
+            >
+              Push Settings
+            </Button>
+          </Col>
         </Row>
 
         <NotificationList
@@ -141,6 +153,12 @@ export default function Notifications() {
           }}
           handleTableChange={handleTableChange}
           onToggleReadStatus={toggleReadStatus}
+        />
+
+        <PushNotificationSettingsModal
+          open={pushSettingsOpen}
+          onClose={() => setPushSettingsOpen(false)}
+          isAdmin={isAdmin}
         />
       </div>
     </Title>
