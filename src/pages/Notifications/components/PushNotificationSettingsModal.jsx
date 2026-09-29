@@ -179,7 +179,7 @@ export default function PushNotificationSettingsModal({ open, onClose, isAdmin }
               />
             </div>
           )}
-          {isSubscribed && (
+          {isAdmin && isSubscribed && (
             <div className="mt-2 flex justify-end">
               <Button
                 size="small"
