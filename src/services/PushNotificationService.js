@@ -1,8 +1,9 @@
 import { get, post, put } from '@utils/Requests';
 
 function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const cleanString = (base64String || '').trim();
+  const padding = '='.repeat((4 - (cleanString.length % 4)) % 4);
+  const base64 = (cleanString + padding).replace(/-/g, '+').replace(/_/g, '/');
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
   for (let i = 0; i < rawData.length; ++i) {
@@ -11,22 +12,14 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
-async function getServiceWorkerRegistration(timeoutMs = 6000) {
+async function getServiceWorkerRegistration(timeoutMs = 10000) {
   if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
     throw new Error('Service Worker is not supported in this browser.');
   }
 
-  let registration = await navigator.serviceWorker.getRegistration();
+  const registration = await navigator.serviceWorker.getRegistration();
   if (registration?.active) {
     return registration;
-  }
-
-  if (!registration) {
-    try {
-      registration = await navigator.serviceWorker.register('/sw.js');
-    } catch {
-      // Continue to race ready vs timeout
-    }
   }
 
   const timeoutPromise = new Promise((_, reject) =>
@@ -34,7 +27,7 @@ async function getServiceWorkerRegistration(timeoutMs = 6000) {
       () =>
         reject(
           new Error(
-            'Service Worker could not be activated. Please refresh the page and ensure push notifications are supported.'
+            'Service Worker could not be activated. Please reload the page and ensure push notifications are supported.'
           )
         ),
       timeoutMs
@@ -94,14 +87,23 @@ export const pushNotificationService = {
     }
 
     const applicationServerKey = urlBase64ToUint8Array(publicKey);
-    const registration = await getServiceWorkerRegistration(8000);
+    const registration = await getServiceWorkerRegistration(10000);
 
     let subscription = await registration.pushManager.getSubscription();
     if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey,
-      });
+      try {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey,
+        });
+      } catch (err) {
+        if (err.message?.includes('push service error') || err.name === 'AbortError') {
+          throw new Error(
+            'Push service unreachable. If using Brave browser, enable "Use Google services for push messaging" in brave://settings/privacy. Also ensure your network is not blocking Google push services.'
+          );
+        }
+        throw err;
+      }
     }
 
     const subJson = subscription.toJSON();
@@ -124,12 +126,12 @@ export const pushNotificationService = {
         try {
           await post('/notifications/push/unsubscribe', { endpoint: subscription.endpoint });
         } catch {
-          // Continue even if backend call fails to ensure client unsubscription
+          // Continue unsubscription on client
         }
         await subscription.unsubscribe();
       }
     } catch {
-      // Ignore error during unsubscribe
+      // Ignore errors during unsubscribe
     }
   },
 
