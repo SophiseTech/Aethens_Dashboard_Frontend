@@ -11,6 +11,39 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
+async function getServiceWorkerRegistration(timeoutMs = 6000) {
+  if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+    throw new Error('Service Worker is not supported in this browser.');
+  }
+
+  let registration = await navigator.serviceWorker.getRegistration();
+  if (registration?.active) {
+    return registration;
+  }
+
+  if (!registration) {
+    try {
+      registration = await navigator.serviceWorker.register('/sw.js');
+    } catch {
+      // Continue to race ready vs timeout
+    }
+  }
+
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(
+      () =>
+        reject(
+          new Error(
+            'Service Worker could not be activated. Please refresh the page and ensure push notifications are supported.'
+          )
+        ),
+      timeoutMs
+    )
+  );
+
+  return await Promise.race([navigator.serviceWorker.ready, timeoutPromise]);
+}
+
 export const pushNotificationService = {
   isPushSupported: () => {
     return (
@@ -33,8 +66,12 @@ export const pushNotificationService = {
 
   getCurrentSubscription: async () => {
     if (!pushNotificationService.isPushSupported()) return null;
-    const registration = await navigator.serviceWorker.ready;
-    return await registration.pushManager.getSubscription();
+    try {
+      const registration = await getServiceWorkerRegistration(3000);
+      return await registration.pushManager.getSubscription();
+    } catch {
+      return null;
+    }
   },
 
   subscribeDevice: async () => {
@@ -57,7 +94,7 @@ export const pushNotificationService = {
     }
 
     const applicationServerKey = urlBase64ToUint8Array(publicKey);
-    const registration = await navigator.serviceWorker.ready;
+    const registration = await getServiceWorkerRegistration(8000);
 
     let subscription = await registration.pushManager.getSubscription();
     if (!subscription) {
@@ -79,16 +116,20 @@ export const pushNotificationService = {
   unsubscribeDevice: async () => {
     if (!pushNotificationService.isPushSupported()) return;
 
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.getSubscription();
+    try {
+      const registration = await getServiceWorkerRegistration(3000);
+      const subscription = await registration.pushManager.getSubscription();
 
-    if (subscription) {
-      try {
-        await post('/notifications/push/unsubscribe', { endpoint: subscription.endpoint });
-      } catch {
-        // Continue even if backend call fails to ensure client unsubscription
+      if (subscription) {
+        try {
+          await post('/notifications/push/unsubscribe', { endpoint: subscription.endpoint });
+        } catch {
+          // Continue even if backend call fails to ensure client unsubscription
+        }
+        await subscription.unsubscribe();
       }
-      await subscription.unsubscribe();
+    } catch {
+      // Ignore error during unsubscribe
     }
   },
 
