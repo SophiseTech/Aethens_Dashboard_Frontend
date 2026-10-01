@@ -164,6 +164,57 @@ export const pushNotificationService = {
     const res = await post('/notifications/test', payload);
     return res?.data;
   },
+
+  getPromptStatus: async () => {
+    try {
+      const res = await get('/notifications/push/prompt-status');
+      return res?.data || { pushPromptDismissed: false, lastPushPromptDismissedAt: null, hasActiveSubscription: false };
+    } catch {
+      return { pushPromptDismissed: false, lastPushPromptDismissedAt: null, hasActiveSubscription: false };
+    }
+  },
+
+  dismissPrompt: async ({ permanent = false } = {}) => {
+    try {
+      const res = await post('/notifications/push/prompt-dismiss', { permanent });
+      return res?.data;
+    } catch {
+      return null;
+    }
+  },
+
+  silentAutoResubscribe: async () => {
+    if (!pushNotificationService.isPushSupported()) return null;
+    if (Notification.permission !== 'granted') return null;
+
+    try {
+      const existingSub = await pushNotificationService.getCurrentSubscription();
+      if (existingSub) {
+        return existingSub;
+      }
+
+      const publicKey = await pushNotificationService.getPublicKey();
+      if (!publicKey) return null;
+
+      const applicationServerKey = urlBase64ToUint8Array(publicKey);
+      const registration = await getServiceWorkerRegistration(5000);
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey,
+      });
+
+      const subJson = subscription.toJSON();
+      await post('/notifications/push/subscribe', {
+        endpoint: subJson.endpoint,
+        keys: subJson.keys,
+      });
+
+      return subscription;
+    } catch {
+      return null;
+    }
+  },
 };
 
 export default pushNotificationService;
