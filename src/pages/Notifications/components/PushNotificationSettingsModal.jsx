@@ -13,6 +13,7 @@ const NOTIFICATION_TYPE_OPTIONS = [
   { label: 'Student Deactivation', value: 'student_deactivation' },
   { label: 'Final Project', value: 'final_project' },
   { label: 'Holiday', value: 'holiday' },
+  { label: 'Upcoming Class Reminder', value: 'class_reminder' },
   { label: 'Test Notification', value: 'test' },
 ];
 
