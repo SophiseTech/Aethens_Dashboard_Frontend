@@ -37,6 +37,14 @@ async function getServiceWorkerRegistration(timeoutMs = 10000) {
   return await Promise.race([navigator.serviceWorker.ready, timeoutPromise]);
 }
 
+async function registerSubscription(subscription) {
+  const subJson = subscription.toJSON();
+  await post('/notifications/push/subscribe', {
+    endpoint: subJson.endpoint,
+    keys: subJson.keys,
+  });
+}
+
 export const pushNotificationService = {
   isPushSupported: () => {
     return (
@@ -106,11 +114,7 @@ export const pushNotificationService = {
       }
     }
 
-    const subJson = subscription.toJSON();
-    await post('/notifications/push/subscribe', {
-      endpoint: subJson.endpoint,
-      keys: subJson.keys,
-    });
+    await registerSubscription(subscription);
 
     return subscription;
   },
@@ -168,9 +172,9 @@ export const pushNotificationService = {
   getPromptStatus: async () => {
     try {
       const res = await get('/notifications/push/prompt-status');
-      return res?.data || { pushPromptDismissed: false, lastPushPromptDismissedAt: null, hasActiveSubscription: false };
+      return res?.data || { pushPromptDismissed: false, lastPushPromptDismissedAt: null };
     } catch {
-      return { pushPromptDismissed: false, lastPushPromptDismissedAt: null, hasActiveSubscription: false };
+      return { pushPromptDismissed: false, lastPushPromptDismissedAt: null };
     }
   },
 
@@ -204,11 +208,28 @@ export const pushNotificationService = {
         applicationServerKey,
       });
 
-      const subJson = subscription.toJSON();
-      await post('/notifications/push/subscribe', {
-        endpoint: subJson.endpoint,
-        keys: subJson.keys,
-      });
+      await registerSubscription(subscription);
+
+      return subscription;
+    } catch {
+      return null;
+    }
+  },
+
+  ensureDeviceRegistered: async () => {
+    if (!pushNotificationService.isPushSupported()) return null;
+    if (Notification.permission !== 'granted') return null;
+
+    try {
+      const subscription = await pushNotificationService.getCurrentSubscription();
+      if (!subscription) {
+        return await pushNotificationService.silentAutoResubscribe();
+      }
+
+      const res = await get(`/notifications/push/status?endpoint=${encodeURIComponent(subscription.endpoint)}`);
+      if (!res?.data?.subscribed) {
+        await registerSubscription(subscription);
+      }
 
       return subscription;
     } catch {

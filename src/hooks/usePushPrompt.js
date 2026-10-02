@@ -5,7 +5,7 @@ import userStore from '@stores/UserStore';
 const STORAGE_KEY_PERMANENT = 'push_prompt_permanently_dismissed';
 const STORAGE_KEY_UNTIL = 'push_prompt_dismissed_until';
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-const PROMPT_DELAY_MS = 30000;
+const PROMPT_DELAY_MS = 1000;
 
 export default function usePushPrompt() {
   const { user } = userStore();
@@ -21,14 +21,7 @@ export default function usePushPrompt() {
     const permission = pushNotificationService.getPermissionState();
 
     if (permission === 'granted') {
-      try {
-        const sub = await pushNotificationService.getCurrentSubscription();
-        if (!sub) {
-          await pushNotificationService.silentAutoResubscribe();
-        }
-      } catch {
-        // Silent failure for auto-resubscription
-      }
+      await pushNotificationService.ensureDeviceRegistered();
       return;
     }
 
@@ -56,10 +49,6 @@ export default function usePushPrompt() {
         } catch {
           // Ignore storage quota
         }
-        return;
-      }
-
-      if (backendStatus?.hasActiveSubscription) {
         return;
       }
 
