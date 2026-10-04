@@ -53,7 +53,7 @@ function CourseStat({ finalProject = {} }) {
 
         <Progress value={(regularCount / course?.total_session) * 100} curr={regularCount} total={course?.total_session} />
 
-        <div className='flex flex-col gap-5'>
+        <div className='flex flex-col gap-5 max-lg:w-full'>
 
           <div className='flex gap-5'>
             <div className='flex gap-5 text-white'>

@@ -11,6 +11,8 @@ function useFeeKpis() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
+  // Row whose reminder dialog is open; one shared dialog for both tables.
+  const [reminderRow, setReminderRow] = useState(null);
 
   useEffect(() => {
     getFeeKpis({});
@@ -52,6 +54,9 @@ function useFeeKpis() {
     setSelectedStudent(null);
   }, []);
 
+  const openReminder = useCallback((row) => setReminderRow(row), []);
+  const closeReminder = useCallback(() => setReminderRow(null), []);
+
   return {
     kpis,
     loading,
@@ -60,6 +65,9 @@ function useFeeKpis() {
     modalVisible,
     openStudent,
     closeModal,
+    reminderRow,
+    openReminder,
+    closeReminder,
   };
 }
 

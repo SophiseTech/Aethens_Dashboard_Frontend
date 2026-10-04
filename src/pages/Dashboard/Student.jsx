@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
-import { Skeleton } from 'antd';
+import { Col, Row, Skeleton } from 'antd';
 import useStudentDashboardView from '@hooks/business/useStudentDashboardView';
+import MasonryLayout from '@components/MasonryLayout';
 
 const Attendance = lazy(() => import('@pages/Dashboard/widgets/Attendance'));
 const DiplomaTimetable = lazy(() => import('@pages/Dashboard/widgets/DiplomaTimetable'));
@@ -19,13 +20,13 @@ function Student() {
   return (
     <>
       {/* Desktop */}
-      <div className='flex gap-5 flex-1 pb-5 pr-5 items-start min-h-full h-auto max-lg:hidden'>
+      <div className='flex flex-1 gap-5 items-start pr-5 pb-5 h-auto min-h-full max-lg:hidden'>
         <Suspense fallback={<Loader />}>
           <ScheduleWidget />
-          <div className='flex-1 flex flex-col gap-5 min-h-full h-auto'>
+          <div className='flex flex-col flex-1 gap-5 h-auto min-h-full'>
             <CourseStatWidget finalProject={dashboardInfo.finalProject} />
             <div className='flex gap-5'>
-              <div className='w-1/2 flex flex-col gap-5'>
+              <div className='flex flex-col gap-5 w-1/2'>
                 <Announcement />
                 <Updates />
               </div>
@@ -37,14 +38,18 @@ function Student() {
 
       {/* Mobile */}
       <Suspense fallback={<Loader />}>
-        <div className='flex gap-5 flex-col lg:hidden'>
-          <div className='flex gap-5 flex-col md:flex-row'>
+        <div className='flex flex-col gap-5 lg:hidden'>
+          <div className='flex flex-col gap-5 lg:flex-row'>
             <CourseStatWidget finalProject={dashboardInfo.finalProject} />
             <Announcement />
-            <ScheduleWidget />
           </div>
-          <Updates />
-          <Transaction />
+          <>
+            <MasonryLayout>
+              <ScheduleWidget />
+              <Transaction />
+              <Updates />
+            </MasonryLayout>
+          </>
         </div>
       </Suspense>
     </>
@@ -52,20 +57,20 @@ function Student() {
 }
 
 const Loader = ({ className = "" }) => (
-  <div className='w-screen h-screen flex gap-5'>
+  <div className='flex gap-5 w-screen h-screen'>
     <Skeleton.Node
       active
       fullSize
       className='!w-full !h-full'
     />
-    <div className='w-full h-full flex flex-col gap-5'>
+    <div className='flex flex-col gap-5 w-full h-full'>
       <Skeleton.Node
         active
         fullSize
         className='!w-full !h-full'
       />
-      <div className='w-full h-full flex gap-5'>
-        <div className='w-full h-full flex flex-col gap-5'>
+      <div className='flex gap-5 w-full h-full'>
+        <div className='flex flex-col gap-5 w-full h-full'>
           <Skeleton.Node
             active
             fullSize

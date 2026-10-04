@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useStore } from 'zustand';
-import { Card, Col, Row, Table, Tag, Empty, Typography } from 'antd';
-import { WarningOutlined, ClockCircleOutlined, CalendarOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Row, Table, Tag, Empty, Typography } from 'antd';
+import { WarningOutlined, ClockCircleOutlined, CalendarOutlined, ExclamationCircleOutlined, MessageOutlined } from '@ant-design/icons';
 import DataDisplay from '@pages/Dashboard/Components/DataDisplay';
 import EChart from '@pages/Dashboard/Chart/EChart';
 import FeeTracker from '@pages/Students/Component/FeeTracker';
@@ -30,6 +30,9 @@ function FeeKpis() {
     modalVisible,
     openStudent,
     closeModal,
+    reminderRow,
+    openReminder,
+    closeReminder,
   } = useFeeKpis();
   const { user } = useStore(userStore);
   const canSendReminder = permissions.fee_reminder.send.includes(user?.role);
@@ -76,16 +79,20 @@ function FeeKpis() {
       key: 'action',
       render: (_, row) => (
         <div onClick={(e) => e.stopPropagation()}>
-          <FeeReminderModal
-            row={{
+          <Button
+            size='small'
+            icon={<MessageOutlined />}
+            disabled={!row.oldestOverdueDate}
+            title={!row.oldestOverdueDate ? 'No fixed due date to remind against' : undefined}
+            onClick={() => openReminder({
               studentId: row.studentId,
               studentName: row.studentName,
               amount: row.overdueAmount,
               dueDate: row.oldestOverdueDate,
-            }}
-            disabled={!row.oldestOverdueDate}
-            disabledReason='No fixed due date to remind against'
-          />
+            })}
+          >
+            Reminder
+          </Button>
         </div>
       ),
     }] : []),
@@ -125,14 +132,18 @@ function FeeKpis() {
       key: 'action',
       render: (_, row) => (
         <div onClick={(e) => e.stopPropagation()}>
-          <FeeReminderModal
-            row={{
+          <Button
+            size='small'
+            icon={<MessageOutlined />}
+            onClick={() => openReminder({
               studentId: row.studentId,
               studentName: row.studentName,
               amount: row.amount,
               dueDate: row.dueMonth,
-            }}
-          />
+            })}
+          >
+            Reminder
+          </Button>
         </div>
       ),
     }] : []),
@@ -246,6 +257,8 @@ function FeeKpis() {
           </Card>
         </Col>
       </Row>
+
+      {reminderRow && <FeeReminderModal row={reminderRow} onClose={closeReminder} />}
 
       {modalVisible && selectedStudent && (
         <FeeTracker

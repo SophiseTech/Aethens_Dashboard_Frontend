@@ -2,6 +2,8 @@ import { del, get, post, put } from "@utils/Requests";
 
 export async function listWhatsAppTemplates(params = {}) {
   const query = new URLSearchParams();
+  if (params.name) query.set("name", params.name);
+  if (params.language) query.set("language", params.language);
   if (params.category) query.set("category", params.category);
   if (params.approvalStatus) query.set("approvalStatus", params.approvalStatus);
   const res = await get(`/v2/whatsapp-templates?${query.toString()}`);
