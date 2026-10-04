@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom';
 import notificationStore from '@stores/notificationStore';
 import userStore from '@stores/UserStore';
 import { formatDate } from '@utils/helper';
+import { isForOtherAccount } from '@utils/pushNotification';
 import pushNotificationService from '@services/PushNotificationService';
 import PushNotificationSettingsModal from '@pages/Notifications/components/PushNotificationSettingsModal';
 
@@ -26,11 +27,14 @@ const NotificationBell = () => {
   }, [getNotifications]);
 
   useEffect(() => {
+    // A push click for another account on this browser is handled by ForUserGuard;
+    // don't open this account's panel as if it were the clicked notification.
+    if (isForOtherAccount(searchParams, user?._id)) return;
     if (searchParams.get('notifications') === 'open' || searchParams.get('openNotifications') === 'true') {
       setPopoverOpen(true);
       getNotifications();
     }
-  }, [searchParams, getNotifications]);
+  }, [searchParams, getNotifications, user?._id]);
 
   const handleOpenChange = (newOpen) => {
     setPopoverOpen(newOpen);

@@ -37,12 +37,31 @@ async function getServiceWorkerRegistration(timeoutMs = 10000) {
   return await Promise.race([navigator.serviceWorker.ready, timeoutPromise]);
 }
 
-async function registerSubscription(subscription) {
+// The service worker (public/sw-push.js) is a static file and can't read Vite env, but
+// it needs the API origin and the current endpoint to report a rotated subscription
+// (pushsubscriptionchange), where Chrome often provides no oldSubscription.
+function sendConfigToServiceWorker(registration, endpoint) {
+  try {
+    registration?.active?.postMessage({
+      type: 'PUSH_CONFIG',
+      apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+      endpoint,
+    });
+  } catch {
+    // Non-critical: only affects subscription-rotation recovery
+  }
+}
+
+// Upserts this browser's subscription and links it to the logged-in account.
+// Idempotent; called on login, app load and enable. Never removes other accounts'
+// links, so a shared device keeps receiving for everyone who has logged in on it.
+async function registerSubscription(subscription, registration) {
   const subJson = subscription.toJSON();
   await post('/notifications/push/subscribe', {
     endpoint: subJson.endpoint,
     keys: subJson.keys,
   });
+  sendConfigToServiceWorker(registration, subJson.endpoint);
 }
 
 export const pushNotificationService = {
@@ -61,7 +80,7 @@ export const pushNotificationService = {
   },
 
   getPublicKey: async () => {
-    const res = await get('/notifications/push/public-key');
+    const res = await get('/notifications/push/public/public-key');
     return res?.data?.publicKey;
   },
 
@@ -114,29 +133,29 @@ export const pushNotificationService = {
       }
     }
 
-    await registerSubscription(subscription);
+    await registerSubscription(subscription, registration);
 
     return subscription;
   },
 
-  unsubscribeDevice: async () => {
-    if (!pushNotificationService.isPushSupported()) return;
+  // Turns notifications off for the logged-in account on this browser only. Must NOT
+  // call subscription.unsubscribe(): the endpoint is shared by every account that has
+  // logged in on this browser, and unsubscribing would cut them all off.
+  disableForThisAccount: async () => {
+    const subscription = await pushNotificationService.getCurrentSubscription();
+    if (!subscription) return;
+    await post('/notifications/push/unsubscribe-account', { endpoint: subscription.endpoint });
+  },
 
-    try {
-      const registration = await getServiceWorkerRegistration(3000);
-      const subscription = await registration.pushManager.getSubscription();
+  // "Your devices": every browser the logged-in account receives notifications on.
+  getDevices: async () => {
+    const res = await get('/notifications/push/devices');
+    return res?.data || [];
+  },
 
-      if (subscription) {
-        try {
-          await post('/notifications/push/unsubscribe', { endpoint: subscription.endpoint });
-        } catch {
-          // Continue unsubscription on client
-        }
-        await subscription.unsubscribe();
-      }
-    } catch {
-      // Ignore errors during unsubscribe
-    }
+  // Removes the logged-in account's link to another (or this) device's endpoint.
+  removeDevice: async (endpoint) => {
+    await post('/notifications/push/unsubscribe-account', { endpoint });
   },
 
   checkDeviceSubscription: async () => {
@@ -187,50 +206,27 @@ export const pushNotificationService = {
     }
   },
 
-  silentAutoResubscribe: async () => {
-    if (!pushNotificationService.isPushSupported()) return null;
-    if (Notification.permission !== 'granted') return null;
-
-    try {
-      const existingSub = await pushNotificationService.getCurrentSubscription();
-      if (existingSub) {
-        return existingSub;
-      }
-
-      const publicKey = await pushNotificationService.getPublicKey();
-      if (!publicKey) return null;
-
-      const applicationServerKey = urlBase64ToUint8Array(publicKey);
-      const registration = await getServiceWorkerRegistration(5000);
-
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey,
-      });
-
-      await registerSubscription(subscription);
-
-      return subscription;
-    } catch {
-      return null;
-    }
-  },
-
+  // Login + every app load while logged in, once permission is already granted (never
+  // prompts). Reuses the browser's subscription, or creates one if there is none, and
+  // always POSTs it so the server links this account and refreshes lastSeenAt.
   ensureDeviceRegistered: async () => {
     if (!pushNotificationService.isPushSupported()) return null;
     if (Notification.permission !== 'granted') return null;
 
     try {
-      const subscription = await pushNotificationService.getCurrentSubscription();
+      const registration = await getServiceWorkerRegistration(5000);
+      let subscription = await registration.pushManager.getSubscription();
+
       if (!subscription) {
-        return await pushNotificationService.silentAutoResubscribe();
+        const publicKey = await pushNotificationService.getPublicKey();
+        if (!publicKey) return null;
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
       }
 
-      const res = await get(`/notifications/push/status?endpoint=${encodeURIComponent(subscription.endpoint)}`);
-      if (!res?.data?.subscribed) {
-        await registerSubscription(subscription);
-      }
-
+      await registerSubscription(subscription, registration);
       return subscription;
     } catch {
       return null;

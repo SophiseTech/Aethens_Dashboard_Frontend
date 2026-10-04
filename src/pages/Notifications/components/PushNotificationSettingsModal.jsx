@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { Modal, Switch, Checkbox, Button, Alert, Spin, message, Typography, Divider, Space } from 'antd';
 import { BellOutlined, SettingOutlined } from '@ant-design/icons';
 import pushNotificationService from '@services/PushNotificationService';
+import usePushDevices from '@hooks/usePushDevices';
+import PushDevicesList from './PushDevicesList';
 
 const { Text, Paragraph } = Typography;
 
@@ -27,6 +29,9 @@ export default function PushNotificationSettingsModal({ open, onClose, isAdmin }
   const [adminConfig, setAdminConfig] = useState([]);
   const [loadingConfig, setLoadingConfig] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
+
+  const { devices, currentEndpoint, loading: loadingDevices, removingEndpoint, refresh: refreshDevices, removeDevice } =
+    usePushDevices(open && isSupported);
 
   const checkStatus = useCallback(async () => {
     const supported = pushNotificationService.isPushSupported();
@@ -76,12 +81,14 @@ export default function PushNotificationSettingsModal({ open, onClose, isAdmin }
         await pushNotificationService.subscribeDevice();
         setIsSubscribed(true);
         setPermission('granted');
-        message.success('Push notifications enabled for this device');
+        message.success('Push notifications enabled for your account on this device');
       } else {
-        await pushNotificationService.unsubscribeDevice();
+        // Unlinks only this account; other accounts on this browser keep receiving.
+        await pushNotificationService.disableForThisAccount();
         setIsSubscribed(false);
-        message.info('Push notifications disabled for this device');
+        message.info('Push notifications turned off for your account on this device');
       }
+      refreshDevices();
     } catch (err) {
       message.error(err.message || 'Failed to update push subscription');
       const perm = pushNotificationService.getPermissionState();
@@ -89,6 +96,11 @@ export default function PushNotificationSettingsModal({ open, onClose, isAdmin }
     } finally {
       setSubscribing(false);
     }
+  };
+
+  const handleRemoveDevice = async (endpoint) => {
+    const wasThisDevice = await removeDevice(endpoint);
+    if (wasThisDevice) setIsSubscribed(false);
   };
 
   const handleSendTestNotification = async () => {
@@ -167,9 +179,11 @@ export default function PushNotificationSettingsModal({ open, onClose, isAdmin }
           ) : (
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
               <Space direction="vertical" size={2}>
-                <Text strong>Enable on this device</Text>
+                <Text strong>Enable for my account on this device</Text>
                 <Text type="secondary" className="text-xs">
-                  {isSubscribed ? 'Notifications are active on this browser' : 'Turn on to receive instant alerts'}
+                  {isSubscribed
+                    ? 'Your notifications are active on this browser'
+                    : 'Turn on to receive instant alerts. Other accounts on this browser are not affected.'}
                 </Text>
               </Space>
               <Switch
@@ -193,6 +207,25 @@ export default function PushNotificationSettingsModal({ open, onClose, isAdmin }
             </div>
           )}
         </div>
+
+        {isSupported && (
+          <>
+            <Divider className="my-3" />
+            <div>
+              <Text strong className="text-base">Your devices</Text>
+              <Paragraph type="secondary" className="mb-2 text-xs">
+                Browsers where your account receives notifications. Removing one only affects your account.
+              </Paragraph>
+              <PushDevicesList
+                devices={devices}
+                currentEndpoint={currentEndpoint}
+                loading={loadingDevices}
+                removingEndpoint={removingEndpoint}
+                onRemove={handleRemoveDevice}
+              />
+            </div>
+          </>
+        )}
 
         {isAdmin && (
           <>

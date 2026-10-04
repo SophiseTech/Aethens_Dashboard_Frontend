@@ -1,6 +1,7 @@
 import Sidebar from '@components/Sidebar';
 import AnnouncementModal from '@components/AnnouncementModal';
 import PushPromptModal from '@components/PushPromptModal';
+import ForUserGuard from '@components/ForUserGuard';
 import { Layout } from 'antd'
 import React from 'react'
 import { Outlet } from 'react-router-dom';
@@ -12,6 +13,7 @@ function SidebarLayout() {
     <Sidebar>
       {/* <AnnouncementModal /> */}
       <PushPromptModal />
+      <ForUserGuard />
       <div className='overflow-auto w-full h-screen max-h-screen'>
         <Outlet />
       </div>
