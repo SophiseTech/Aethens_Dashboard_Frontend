@@ -5,7 +5,7 @@ import userStore from '@stores/UserStore';
 import permissions from '@utils/permissions';
 import { Button, Empty, Popconfirm, Spin } from 'antd';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import { useStore } from 'zustand';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -13,6 +13,10 @@ import { downloadPdf, toISTStartOfDayISO } from '@utils/helper';
 import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
 import InvoicePdf from '@pages/Bills/Components/Invoice';
 import InvoiceHtml from '@pages/Bills/Components/InvoiceHtml';
+import PayOnlineButton from '@pages/Bills/Components/PayOnlineButton';
+import PaymentConfirmation from '@pages/Bills/Components/PaymentConfirmation';
+import usePaytmCheckout from '@/hooks/usePaytmCheckout';
+import paymentService from '@services/Payment';
 import { CheckSquareOutlined, DownloadOutlined, EditOutlined, LinkOutlined, ReloadOutlined, RestOutlined } from '@ant-design/icons';
 import billStore from '@stores/BillStore';
 import inventoryService from '@/services/Inventory';
@@ -41,6 +45,46 @@ function BillDetails() {
   const { finalizeBill, resyncZoho, getZohoOrgConfig, zohoOrgConfig, selectedBill, selectedBillLoading, getBillById } = billStore();
   const [lineItems, setLineItems] = useState([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const [externalTransaction, setExternalTransaction] = useState(null);
+
+  const {
+    startCheckout,
+    loading: checkoutLoading,
+    paymentResult,
+    resetCheckout,
+  } = usePaytmCheckout({
+    onPaymentSuccess: (result) => {
+      setExternalTransaction(result);
+      setIsConfirmationOpen(true);
+      if (id) getBillById(id);
+    },
+    onPaymentFailure: (result) => {
+      setExternalTransaction(result);
+      setIsConfirmationOpen(true);
+    },
+  });
+
+  useEffect(() => {
+    const paymentStatus = searchParams.get('paymentStatus');
+    const orderId = searchParams.get('orderId');
+    if (orderId && paymentStatus) {
+      paymentService.getPaymentStatus(orderId).then((res) => {
+        if (res) {
+          setExternalTransaction(res);
+          setIsConfirmationOpen(true);
+          if (id) getBillById(id);
+        }
+      });
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('paymentStatus');
+      newParams.delete('orderId');
+      newParams.delete('billId');
+      newParams.delete('msg');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, id, getBillById, setSearchParams]);
 
   useEffect(() => {
     if (!id) return;
@@ -215,6 +259,14 @@ function BillDetails() {
             <RecordPaymentModal handleRecordPayment={handleRecordPayment} bill={bill} />
           }
 
+          {user.role === 'student' && bill?.status === 'unpaid' && (
+            <PayOnlineButton
+              bill={bill}
+              onPay={(billId) => startCheckout(billId)}
+              loading={checkoutLoading}
+            />
+          )}
+
           {bill?.zoho?.syncStatus === 'synced' && zohoOrgConfig?.organizationId && (
             <Button
               className='rounded-full'
@@ -316,6 +368,22 @@ function BillDetails() {
           />
         )}
       </Suspense>
+
+      <PaymentConfirmation
+        isOpen={isConfirmationOpen}
+        onClose={() => {
+          setIsConfirmationOpen(false);
+          setExternalTransaction(null);
+          resetCheckout();
+          if (id) getBillById(id);
+        }}
+        transaction={externalTransaction || paymentResult}
+        bill={bill}
+        onRetry={() => {
+          setIsConfirmationOpen(false);
+          startCheckout(bill?._id);
+        }}
+      />
     </div>
   );
 }
