@@ -1,63 +1,33 @@
 import EChart from '@pages/Dashboard/Chart/EChart';
 import { Card } from 'antd';
-import React, { useMemo, useEffect } from 'react'
-import { Row, Col, Typography } from "antd";
+import { useMemo } from 'react'
 import { useStore } from 'zustand';
 import billStore from '@stores/BillStore';
-import expensesStore from '@stores/ExpensesStore';
 import dayjs from 'dayjs';
-const { Title, Paragraph } = Typography;
 
 function IncomeChart() {
   const { summary: incomeSummary } = useStore(billStore)
-  const { expenseSummary, getExpenseSummary } = useStore(expensesStore)
 
-  // Fetch expense summary with date range grouping
-  useEffect(() => {
-    getExpenseSummary({}, 'day');
-  }, [getExpenseSummary]);
+  // groupedResult is already one row per day, sorted by date (BillService.getSummary)
+  const { dates, billedData, paidData } = useMemo(() => {
+    const rows = incomeSummary?.groupedResult || [];
+    return {
+      dates: rows.map(row => new Date(row._id).setHours(0, 0, 0, 0)),
+      billedData: rows.map(row => row.totalIncome ?? null),
+      paidData: rows.map(row => row.totalPaid ?? null),
+    };
+  }, [incomeSummary]);
 
-  const allDates = useMemo(() => {
-    if (incomeSummary && expenseSummary) {
-      return [
-        ...new Set([
-          ...(incomeSummary?.groupedResult?.map(item => new Date(item._id).setHours(0, 0, 0, 0)) || []),
-          ...(expenseSummary?.groupedResult?.map(item => new Date(item._id).setHours(0, 0, 0, 0)) || []),
-        ]),
-      ]
-    }
-    return []
-  }, [incomeSummary, expenseSummary])
-
-  // Memoize the income and expense data
-  const incomeData = useMemo(() => allDates.map(date => {
-    const incomeItem = incomeSummary?.groupedResult?.find(i => new Date(i._id).setHours(0, 0, 0, 0) === date);
-    return incomeItem ? incomeItem.totalIncome : null; // Return null if date not found
-  }), [allDates, incomeSummary]); // Recompute when allDates or income changes
-
-  // Memoize paid data for Loss Report
-  const paidData = useMemo(() => allDates.map(date => {
-    const paidItem = incomeSummary?.groupedResult?.find(i => new Date(i._id).setHours(0, 0, 0, 0) === date);
-    return paidItem ? paidItem.totalPaid : null;
-  }), [allDates, incomeSummary]);
-
-  const expenseData = useMemo(() => allDates.map(date => {
-    const expenseItem = expenseSummary?.groupedResult?.find(e => new Date(e._id).setHours(0, 0, 0, 0) === date);
-    return expenseItem ? expenseItem.totalExpense : null; // Return null if date not found
-  }), [allDates, expenseSummary]); // Recompute when allDates or expense changes
-
-  const options = {
+  const options = useMemo(() => ({
     chart: {
       type: "line",
-      // width: "100%",
-      // height: "auto",
       toolbar: {
         show: false,
       },
     },
     xaxis: {
       type: 'datetime',
-      categories: allDates,
+      categories: dates,
       labels: {
         show: true,
         align: "right",
@@ -68,8 +38,7 @@ function IncomeChart() {
           fontSize: 'clamp(10px, 1.5vw, 12px)',
         },
         formatter: function (value) {
-          // Format the label as a date (e.g., 'dd MMM yyyy')
-          return dayjs(value).format('DD MMM, YYYY'); // You can adjust the locale as needed
+          return dayjs(value).format('DD MMM, YYYY');
         }
       },
       tooltip: {
@@ -77,7 +46,6 @@ function IncomeChart() {
       }
     },
     yaxis: {
-      seriesName: 'Income',
       labels: {
         show: true,
         align: "left",
@@ -92,18 +60,9 @@ function IncomeChart() {
         }
       },
     },
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        columnWidth: "10%",
-        borderRadius: 10,
-        borderRadiusApplication: 'around'
-      },
-    },
     stroke: {
       show: true,
       width: 2,
-      colors: ["transparent"],
     },
     dataLabels: {
       enabled: false,
@@ -112,17 +71,14 @@ function IncomeChart() {
       show: true,
       borderColor: "#ccc",
       strokeDashArray: 2,
-      // padding: {
-      //   right: 90
-      // }
     },
-  }
+  }), [dates]);
 
-  const series = [
+  const series = useMemo(() => [
     {
       name: 'Total Billed',
       type: 'line',
-      data: incomeData,
+      data: billedData,
       color: "#59a14f"
     },
     {
@@ -131,16 +87,10 @@ function IncomeChart() {
       data: paidData,
       color: "#f28e2b"
     },
-    {
-      name: 'Total Expense',
-      type: 'bar',
-      data: expenseData,
-      color: "#2E2EFF"
-    },
-  ];
+  ], [billedData, paidData]);
 
   return (
-    <Card className='border border-border w-full' title="Income vs Paid vs Expense">
+    <Card className='border border-border w-full' title="Billed vs Paid">
       <EChart
         series={series}
         options={options}
