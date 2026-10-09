@@ -4,9 +4,10 @@ import { ROLES } from '@utils/constants';
 import { Spin } from 'antd';
 import { lazy, Suspense } from 'react';
 import { Navigate } from 'react-router-dom';
-import AcademicManager from './AcademicManager';
-
-// ✅ Define lazy imports ONCE here
+// ✅ Define lazy imports ONCE here. Every role dashboard is lazy — a static import
+// here would pull its dependencies (e.g. the 564 KB charts chunk) in before the
+// current role's dashboard can start loading.
+const AcademicManager = lazy(() => import('@pages/Dashboard/AcademicManager'));
 const Student = lazy(() => import('@pages/Dashboard/Student'));
 const Manager = lazy(() => import('@pages/Dashboard/Manager'));
 const Admin = lazy(() => import('@pages/Dashboard/Admin'));

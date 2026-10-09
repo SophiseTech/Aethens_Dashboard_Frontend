@@ -76,5 +76,17 @@ export default defineConfig({
       "@services": "/src/services",
       '@': '/src'
     }
-  }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        // Stable vendor chunks: a deploy that only changes app code leaves these
+        // cached in the browser instead of re-downloading the whole bundle.
+        manualChunks: {
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-antd": ["antd", "@ant-design/icons"],
+        },
+      },
+    },
+  },
 })

@@ -1,6 +1,4 @@
 import dayjs from "dayjs";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 import _ from "lodash";
 import React from "react";
 import utc from "dayjs/plugin/utc";
@@ -278,10 +276,16 @@ export const getDiscountRate = (discount, rate, discountType) => {
   return (discountType === "percentage" || !discountType) ? (rate * (discount / 100)) : discount
 }
 
-export const downloadPdf = (ref, name) => {
+// html2canvas + jsPDF (~540 KB) are loaded on first use — this module is imported
+// almost everywhere, so static imports would put them in the main bundle.
+export const downloadPdf = async (ref, name) => {
   const input = ref.current;
+  const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+    import("html2canvas"),
+    import("jspdf"),
+  ]);
 
-  html2canvas(input, {
+  return html2canvas(input, {
     scale: 2, // Increase scale for better quality
     useCORS: true, // Allow cross-origin images
     logging: true, // Enable logging for debugging
