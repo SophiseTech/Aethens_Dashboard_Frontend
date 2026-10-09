@@ -94,7 +94,7 @@ html.student-ui {
   --s-accent: #D1E499;
   --s-danger: #B3261E;
   --s-display: "Plus Jakarta Sans", "Roboto", system-ui, sans-serif;
-  --s-tabbar-h: 64px;
+  --s-tabbar-h: 68px;
   color: var(--s-ink);
 }
 
@@ -155,7 +155,7 @@ html.student-ui .page-title {
   border-radius: 9px;
   background: var(--s-ochre);
   color: var(--s-ink);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   line-height: 14px;
   text-align: center;
@@ -186,7 +186,7 @@ html.student-ui .page-title {
   background: transparent;
   border: 0;
   color: var(--s-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -338,8 +338,8 @@ html.student-ui .page-title {
   }
 
   html.student-ui .page-title {
-    font-size: 20px;
-    line-height: 1.2;
+    font-size: 22px;
+    line-height: 1.25;
   }
 
   /* The hamburger this padding made room for doesn't exist for students */
@@ -388,7 +388,7 @@ html.student-ui .page-title {
 }
 
 .home-next__kicker {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   color: rgb(255 255 255 / 0.82);
 }
@@ -405,7 +405,7 @@ html.student-ui .page-title {
 .home-next__weekday {
   display: block;
   margin-bottom: 6px;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: 0;
   color: rgb(255 255 255 / 0.9);
@@ -413,13 +413,13 @@ html.student-ui .page-title {
 
 .home-next__time {
   margin-top: 14px;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
 }
 
 .home-next__meta {
   margin-top: 2px;
-  font-size: 15px;
+  font-size: 16px;
   color: rgb(255 255 255 / 0.85);
 }
 
@@ -430,7 +430,7 @@ html.student-ui .page-title {
   border-radius: 999px;
   background: var(--s-ochre);
   color: var(--s-ink);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -444,7 +444,7 @@ html.student-ui .page-title {
 
 .home-next__placeholder {
   min-height: 200px;
-  font-size: 15px;
+  font-size: 16px;
   color: rgb(255 255 255 / 0.8);
 }
 
@@ -463,7 +463,7 @@ html.student-ui .page-title {
   min-height: 44px;
   padding: 0 18px;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -498,7 +498,7 @@ html.student-ui .page-title {
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 8px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
 }
 
@@ -526,7 +526,7 @@ html.student-ui .page-title {
 
 .home-section__title {
   font-family: var(--s-display);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--s-ink);
@@ -535,7 +535,7 @@ html.student-ui .page-title {
 .home-section__link,
 .home-section__link:hover {
   padding: 8px 0;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--s-olive);
 }
@@ -549,7 +549,7 @@ html.student-ui .page-title {
 
 .home-section__empty {
   padding: 16px;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--s-muted);
 }
 
@@ -593,14 +593,14 @@ html.student-ui .page-title {
   flex: none;
   width: 44px;
   text-align: center;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--s-muted);
 }
 
 .home-row__date strong {
   display: block;
   font-family: var(--s-display);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   line-height: 1.15;
   color: var(--s-ink);
@@ -612,7 +612,7 @@ html.student-ui .page-title {
 }
 
 .home-row__title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 1.35;
   display: -webkit-box;
@@ -623,7 +623,7 @@ html.student-ui .page-title {
 
 .home-row__body {
   margin-top: 2px;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.45;
   color: var(--s-muted);
   display: -webkit-box;
@@ -634,13 +634,13 @@ html.student-ui .page-title {
 
 .home-row__sub {
   margin-top: 2px;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--s-muted);
 }
 
 .home-row__note {
   margin-top: 4px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--s-ochre-ink);
 }
@@ -651,7 +651,7 @@ html.student-ui .page-title {
   padding: 0 4px;
   background: transparent;
   border: 0;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--s-olive);
   cursor: pointer;
@@ -662,13 +662,13 @@ html.student-ui .page-title {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  font-size: 13px;
+  font-size: 14px;
   text-align: right;
   color: var(--s-muted);
 }
 
 .home-row__trailing strong {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--s-ink);
 }
@@ -685,6 +685,6 @@ html.student-ui .page-title {
 
 .home-row__chevron {
   flex: none;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--s-muted);
 }
