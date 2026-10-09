@@ -42,6 +42,14 @@ function FinancialSummary() {
     const rateColor =
         collectionRate >= 80 ? PRIMARY : collectionRate >= 50 ? SECONDARY : DANGER;
 
+    // Expected = fees scheduled for the range (paid or not); compared with course fees
+    // actually collected on bills in the same range.
+    const expectedFees = summary?.projectedIncome?.selectedRange || 0;
+    const collectedFees = totalSplit?.fees?.totalPaid || 0;
+    const expectedRate = expectedFees ? Math.round((collectedFees / expectedFees) * 100) : 0;
+    const expectedRateColor =
+        expectedRate >= 80 ? PRIMARY : expectedRate >= 50 ? SECONDARY : DANGER;
+
     return (
         <Card
             className="border border-border w-full"
@@ -141,18 +149,25 @@ function FinancialSummary() {
                     </Card>
                 </Col>
 
-                {/* Projected (Selected Range) */}
+                {/* Expected fees (selected range) vs collected */}
                 <Col xs={12} sm={8} lg={6}>
-                    <Card size="small" className="border border-border text-center bg-card">
-                        <Statistic
-                            title={<span className="text-xs text-gray-500">Projected (Selected)</span>}
-                            value={summary?.projectedIncome?.selectedRange || 0}
-                            precision={0}
-                            prefix="₹"
-                            valueStyle={{ color: SECONDARY, fontSize: 18 }}
-                            formatter={(v) => Number(v).toLocaleString('en-IN')}
-                        />
-                    </Card>
+                    <Tooltip title="Course fees scheduled for the selected period (paid or not), compared with fees collected. Inactive students count only for what they have already paid.">
+                        <Card size="small" className="border border-border text-center bg-card">
+                            <Statistic
+                                title={<span className="text-xs text-gray-500">Expected Fees</span>}
+                                value={expectedFees}
+                                precision={0}
+                                prefix="₹"
+                                valueStyle={{ color: SECONDARY, fontSize: 18 }}
+                                formatter={(v) => Number(v).toLocaleString('en-IN')}
+                            />
+                            <div className="text-xs text-gray-500 mt-1">
+                                Collected {fmt(collectedFees)}
+                                {' · '}
+                                <span style={{ color: expectedRateColor, fontWeight: 600 }}>{expectedRate}%</span>
+                            </div>
+                        </Card>
+                    </Tooltip>
                 </Col>
 
                 {/* Projected (Upcoming Month) */}
@@ -161,7 +176,7 @@ function FinancialSummary() {
                         <Statistic
                             title={
                                 <span className="text-xs text-gray-500">
-                                    Projected ({summary?.projectedIncome?.upcomingMonthName || 'Upcoming Month'})
+                                    Expected ({summary?.projectedIncome?.upcomingMonthName || 'Upcoming Month'})
                                 </span>
                             }
                             value={summary?.projectedIncome?.upcomingMonth || 0}
