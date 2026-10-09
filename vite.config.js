@@ -28,7 +28,7 @@ export default defineConfig({
 
       manifest: {
         name: "School of Athens CRM",
-        short_name: "CRM",
+        short_name: "School Of Athens",
 
         description: "School Management System",
 
@@ -57,7 +57,7 @@ export default defineConfig({
             type: "image/png"
           },
           {
-            src: "/icons/icon-512-maskable.png",
+            src: "/icons/launchericon-512x512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable"
