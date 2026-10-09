@@ -8,6 +8,8 @@ import FeeTracker from '@pages/Students/Component/FeeTracker';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import logger from '@utils/logger';
+import { useStore } from 'zustand';
+import centerStore from '@stores/CentersStore';
 
 const { Text } = Typography;
 
@@ -18,18 +20,17 @@ function FeeReport({ dateRange }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [modalLoading, setModalLoading] = useState(false);
     const navigate = useNavigate();
+    const { selectedCenter } = useStore(centerStore);
 
     const fetchUnpaidReport = async () => {
         try {
             setLoading(true);
-            const filters = {};
+            const filters = { query: { center_id: selectedCenter } };
 
             if (dateRange?.firstDay && dateRange?.lastDay) {
-                filters.query = {
-                    dateRange: {
-                        $gte: dateRange.firstDay,
-                        $lte: dateRange.lastDay
-                    }
+                filters.query.dateRange = {
+                    $gte: dateRange.firstDay,
+                    $lte: dateRange.lastDay
                 };
             }
 
@@ -44,7 +45,7 @@ function FeeReport({ dateRange }) {
 
     useEffect(() => {
         fetchUnpaidReport();
-    }, [dateRange]);
+    }, [dateRange, selectedCenter]);
 
     const handleItemClick = async (item) => {
         if (!item.studentId) return;

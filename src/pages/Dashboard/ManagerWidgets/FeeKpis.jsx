@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useStore } from 'zustand';
-import { Button, Card, Col, Row, Table, Tag, Empty, Typography } from 'antd';
+import { Button, Card, Col, Row, Table, Tag, Empty, Typography, Spin } from 'antd';
 import { WarningOutlined, ClockCircleOutlined, CalendarOutlined, ExclamationCircleOutlined, MessageOutlined } from '@ant-design/icons';
 import DataDisplay from '@pages/Dashboard/Components/DataDisplay';
 import EChart from '@pages/Dashboard/Chart/EChart';
@@ -160,8 +160,9 @@ function FeeKpis() {
       }
       loading={loading && !kpis}
     >
+      <Spin spinning={loading && !!kpis}>
       <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} lg={8}>
+        <Col xs={24} sm={12} lg={6}>
           <DataDisplay
             title='Total Overdue'
             count={formatCurrency(kpis?.overdue?.totalAmount)}
@@ -169,14 +170,14 @@ function FeeKpis() {
             icon={<WarningOutlined className='text-xl text-white' />}
           />
         </Col>
-        <Col xs={24} sm={12} lg={8}>
+        <Col xs={24} sm={12} lg={6}>
           <DataDisplay
             title='Defaulters'
             count={kpis?.overdue?.defaultersCount}
             icon={<ExclamationCircleOutlined className='text-xl text-white' />}
           />
         </Col>
-        <Col xs={24} sm={12} lg={8}>
+        <Col xs={24} sm={12} lg={6}>
           <DataDisplay
             title='Due This Month'
             count={formatCurrency(kpis?.dueThisMonth?.amount)}
@@ -184,15 +185,7 @@ function FeeKpis() {
             icon={<CalendarOutlined className='text-xl text-white' />}
           />
         </Col>
-        <Col xs={24} sm={12} lg={8}>
-          <DataDisplay
-            title='Upcoming Dues (30d)'
-            count={formatCurrency(kpis?.upcomingDues?.next30?.amount)}
-            // prefix='₹'
-            icon={<CalendarOutlined className='text-xl text-white' />}
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={8}>
+        <Col xs={24} sm={12} lg={6}>
           <DataDisplay
             title='Needs Current-Month Fee'
             count={kpis?.lapsedActive?.count}
@@ -257,6 +250,7 @@ function FeeKpis() {
           </Card>
         </Col>
       </Row>
+      </Spin>
 
       {reminderRow && <FeeReminderModal row={reminderRow} onClose={closeReminder} />}
 

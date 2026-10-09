@@ -8,6 +8,7 @@ import { isAndroid } from 'react-device-detect';
 import { useStore } from 'zustand';
 import feeStore from '@stores/FeeStore';
 import { formatDate, toISTStartOfDayISO } from '@utils/helper';
+import { BILL_STATUS, BILL_STATUS_TAGS } from '@utils/constants';
 import CustomInput from '@components/form/CustomInput';
 import { paymentMethods } from '@utils/constants';
 import permissions from '@utils/permissions';
@@ -17,6 +18,11 @@ import InstallmentManager from './InstallmentManager';
 // Installments display in due-date order (earliest first), regardless of storage order
 const sortByDueDate = (installments) =>
   [...(installments || [])].sort((a, b) => new Date(a.month) - new Date(b.month));
+
+const BillStatusTag = ({ status }) => {
+  const tag = BILL_STATUS_TAGS[status] || BILL_STATUS_TAGS[BILL_STATUS.UNPAID];
+  return <Tag color={tag.color}>{tag.label}</Tag>;
+};
 
 const FeeTracker = ({ student, visible, onCancel }) => {
   const {
@@ -354,7 +360,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       key: 'paymentDate',
       render: (_, record) => {
         const bill = getBillForInstallment(record);
-        if (bill?.status === 'unpaid') return '-';
+        if (bill && bill.status !== BILL_STATUS.PAID) return '-';
         return bill ? formatDate(bill.payment_date) : '—';
       },
     },
@@ -364,11 +370,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       render: (_, record) => {
         const bill = getBillForInstallment(record);
         if (!bill) return <Tag color="default">No Bill</Tag>;
-        return (
-          <Tag color={bill.status === 'paid' ? 'green' : 'orange'}>
-            {bill.status === 'paid' ? 'Paid' : 'Unpaid'}
-          </Tag>
-        );
+        return <BillStatusTag status={bill.status} />;
       },
     },
     {
@@ -412,7 +414,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         return (
           <Space>
             {/* If a bill exists and is unpaid, allow marking the bill as paid */}
-            {bill && bill.status !== 'paid' && (
+            {bill?.status === BILL_STATUS.UNPAID && (
               <Button
                 type="primary"
                 size="small"
@@ -589,7 +591,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       title: 'Paid On',
       dataIndex: 'payment_date',
       key: 'payment_date',
-      render: (date, record) => record?.status === 'unpaid' ? '—' : formatDate(date),
+      render: (date, record) => record?.status === BILL_STATUS.PAID ? formatDate(date) : '—',
     },
     {
       title: 'Total',
@@ -601,11 +603,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => (
-        <Tag color={status === 'paid' ? 'green' : 'orange'}>
-          {status === 'paid' ? 'Paid' : 'Unpaid'}
-        </Tag>
-      ),
+      render: (status) => <BillStatusTag status={status} />,
     },
     {
       title: 'Action',
@@ -614,7 +612,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         if (!permissions.fee_tracker.edit.includes(user?.role)) return null;
         if (record.subject !== 'course') return null;
 
-        if (record.status === 'paid') {
+        if (record.status === BILL_STATUS.PAID) {
           return (
             <Button
               type="primary"
@@ -627,6 +625,9 @@ const FeeTracker = ({ student, visible, onCancel }) => {
             </Button>
           );
         }
+
+        // Draft bills must be finalized first; migration-closed bills are cancelled
+        if (record.status !== BILL_STATUS.UNPAID) return null;
 
         return (
           <Button

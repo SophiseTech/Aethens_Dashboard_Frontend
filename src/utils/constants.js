@@ -197,6 +197,21 @@ export const PHASE_STATUS = {
   REJECTED: 'rejected'
 };
 
+// Mirrors server/model/Bills.js BILL_STATUS
+export const BILL_STATUS = {
+  DRAFT: 'draft',
+  PAID: 'paid',
+  UNPAID: 'unpaid',
+  MIGRATION_CLOSED: 'migration_closed',
+};
+
+export const BILL_STATUS_TAGS = {
+  [BILL_STATUS.DRAFT]: { label: 'Draft', color: 'default' },
+  [BILL_STATUS.PAID]: { label: 'Paid', color: 'green' },
+  [BILL_STATUS.UNPAID]: { label: 'Unpaid', color: 'orange' },
+  [BILL_STATUS.MIGRATION_CLOSED]: { label: 'Closed', color: 'red' },
+};
+
 export const age_categories = [
   { label: "5 - 7 Years", value: "5_7_years" },
   { label: "8 - 14 Years", value: "7_8_years" },
