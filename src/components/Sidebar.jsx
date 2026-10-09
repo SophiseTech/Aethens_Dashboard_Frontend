@@ -29,6 +29,7 @@ import Target from "@/assets/Target";
 import SubMenu from "@components/SubMenu";
 import UserDetailsDrawer from "@components/UserDetailsDrawer";
 import StudentContextHoverDrawer from "@components/StudentContextHoverDrawer";
+import StudentMobileNav from "@components/student/StudentMobileNav";
 import userStore from "@stores/UserStore";
 import studentStore from "@stores/StudentStore";
 import { ROLES } from "@utils/constants";
@@ -905,6 +906,8 @@ function Sidebar({ children }) {
     return findOpenKey(menuConfig);
   }, [pathname, menuConfig]);
 
+  const isStudent = user?.role === ROLES.STUDENT;
+
   const handleMenuClick = ({ key }) => {
     const findPath = (items) => {
       for (const item of items) {
@@ -965,7 +968,18 @@ function Sidebar({ children }) {
       />
 
       <div className="drawer-content">
-        <MobileMenuButton />
+        {isStudent ? (
+          <StudentMobileNav
+            menuItems={menuConfig}
+            selectedKey={selectedKeys[0]}
+            user={user}
+            onNavigate={handleMenuClick}
+            onProfile={handleProfileClick}
+            onLogout={handleLogout}
+          />
+        ) : (
+          <MobileMenuButton />
+        )}
         {children}
       </div>
 

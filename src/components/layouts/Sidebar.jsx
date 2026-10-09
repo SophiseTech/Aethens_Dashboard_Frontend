@@ -14,7 +14,7 @@ function SidebarLayout() {
       {/* <AnnouncementModal /> */}
       <PushPromptModal />
       <ForUserGuard />
-      <div className='overflow-auto w-full h-screen max-h-screen'>
+      <div className='overflow-auto w-full h-screen max-h-screen app-content'>
         <Outlet />
       </div>
     </Sidebar>

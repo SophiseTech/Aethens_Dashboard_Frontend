@@ -1,5 +1,6 @@
 import Title from '@components/layouts/Title';
 import userStore from '@stores/UserStore';
+import useMediaQuery, { DESKTOP_QUERY } from '@hooks/useMediaQuery';
 import { ROLES } from '@utils/constants';
 import { Spin } from 'antd';
 import { lazy, Suspense } from 'react';
@@ -15,6 +16,9 @@ const ManagerStudents = lazy(() => import('@pages/Students/ManagerStudents'));
 
 function Dashboard() {
   const { user } = userStore();
+  const isDesktop = useMediaQuery(DESKTOP_QUERY);
+  // Matches the "Home" tab students see below the desktop breakpoint.
+  const title = user.role === ROLES.STUDENT && !isDesktop ? "Home" : "Dashboard";
 
   const renderDashboard = () => {
     switch (user.role) {
@@ -40,7 +44,7 @@ function Dashboard() {
   };
 
   return (
-    <Title title="Dashboard">
+    <Title title={title}>
       <Suspense fallback={<Spin />}>
         {renderDashboard()}
       </Suspense>
