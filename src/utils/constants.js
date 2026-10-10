@@ -235,6 +235,9 @@ export const foundUsOptions = [{ label: "Social Media", value: "Social Media" },
 { label: "Google Maps", value: "Google Maps" }];
 export const classPreferenceOptions = [{ label: "Weekday", value: "Weekday" }, { label: "Weekend", value: "Weekend" }];
 
+// Edit Enquiry → Enrolled: create the student via Add Student, or only mark the enquiry enrolled
+export const ENQUIRY_ENROLL_MODES = Object.freeze({ REGISTER: "register", WITHOUT_REGISTRATION: "withoutRegistration" });
+
 export const EnquiryModeOptions = [{ label: "Walk-in", value: "Walk-in" }, { label: "Call", value: "Call" }, { label: "Online", value: "Online" }];
 
 export const demoStatuses = [

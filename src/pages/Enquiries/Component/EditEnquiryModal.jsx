@@ -1,10 +1,10 @@
 import { useEffect, useMemo } from "react";
-import { Modal, Form, Input, Select, DatePicker } from "antd";
+import { Modal, Form, Input, Select, DatePicker, Radio } from "antd";
 import dayjs from "dayjs";
 import { useStore } from 'zustand';
 import courseStore from '@stores/CourseStore';
 import CustomSelect from "@components/form/CustomSelect";
-import { age_categories, classPreferenceOptions } from "@utils/constants";
+import { age_categories, classPreferenceOptions, ENQUIRY_ENROLL_MODES as ENROLL_MODES } from "@utils/constants";
 import centersStore from "@stores/CentersStore";
 
 const { TextArea } = Input;
@@ -17,6 +17,13 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
   const { centers, getCenters } = useStore(centersStore)
   const options = useMemo(() => courses?.map(course => ({ label: course.course_name, value: course._id })), [courses])
   const [form] = Form.useForm();
+  const selectedStage = Form.useWatch("stage", form);
+  const enrollMode = Form.useWatch("enrollMode", form);
+  const isMovingToEnrolled = selectedStage === "Enrolled" && enquiry?.stage !== "Enrolled";
+  const interestedCourseOptions = useMemo(
+    () => (enquiry?.selectedCourses || []).map((c) => ({ label: c.course_name, value: c._id })),
+    [enquiry]
+  );
 
   useEffect(() => {
     if (enquiry) {
@@ -37,6 +44,8 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
         demoNotes: enquiry?.demoSlot?.notes || "",
         centerId: enquiry?.centerId?._id || enquiry?.centerId,
         place: enquiry?.place || "",
+        enrollMode: ENROLL_MODES.REGISTER,
+        enrollmentCourseId: undefined,
       });
     }
   }, [enquiry]);
@@ -129,6 +138,23 @@ const EditEnquiryModal = ({ enquiry, visible, onCancel, onSave }) => {
             ))}
           </Select>
         </Form.Item>
+
+        {isMovingToEnrolled && (
+          <>
+            <Form.Item label="How to enroll" name="enrollMode">
+              <Radio.Group>
+                <Radio value={ENROLL_MODES.REGISTER}>Register student</Radio>
+                <Radio value={ENROLL_MODES.WITHOUT_REGISTRATION}>Mark enrolled without registration</Radio>
+              </Radio.Group>
+            </Form.Item>
+
+            {enrollMode === ENROLL_MODES.WITHOUT_REGISTRATION && (
+              <Form.Item label="Enrolled Course" name="enrollmentCourseId">
+                <Select placeholder="Select enrolled course (optional)" options={interestedCourseOptions} allowClear />
+              </Form.Item>
+            )}
+          </>
+        )}
 
         {/* Demo Slot Fields */}
         <Form.Item label="Demo Status" name="demoSlotStatus">
