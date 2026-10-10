@@ -44,6 +44,22 @@ export const toISTDateString = (value) => (
   dayjs(value).tz(IST_TIMEZONE).format("YYYY-MM-DD")
 );
 
+// Two-digit financial year (Apr–Mar, IST) a date falls in — e.g. 1 Oct 2026 → "27".
+// Same rule as the server's InvoiceNumberService.getCurrentFY.
+export const getFinancialYear = (date) => {
+  const ist = dayjs(date).tz(IST_TIMEZONE);
+  const endYear = ist.month() >= 3 ? ist.year() + 1 : ist.year();
+  return String(endYear).slice(-2);
+};
+
+// Customer-facing invoice number, e.g. "BRK1959/27". The suffix is the bill's own
+// financial year (fixed when the number was issued), never the year it's printed in.
+export const getBillInvoiceLabel = (bill) => {
+  const initial = bill?.center_initial || bill?.center_id?.center_initial || "";
+  const financialYear = bill?.financial_year || getFinancialYear(bill?.generated_on || bill?.createdAt);
+  return `${initial}${bill?.invoiceNo ?? "Draft"}/${financialYear}`;
+};
+
 export const calculateAge = (dob) => {
   if (!dob) return null;
 

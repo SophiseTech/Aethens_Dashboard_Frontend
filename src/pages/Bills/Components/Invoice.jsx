@@ -6,6 +6,7 @@ import {
   StyleSheet,
 } from '@react-pdf/renderer';
 import dayjs from 'dayjs';
+import { getBillInvoiceLabel } from '@utils/helper';
 
 const styles = StyleSheet.create({
   page: {
@@ -171,7 +172,6 @@ const InvoicePdf = ({ bill }) => {
         return '';
     }
   }
-  const year = new Date().getFullYear().toString().slice(-2);
 
   return (
     <Document>
@@ -197,7 +197,7 @@ const InvoicePdf = ({ bill }) => {
                 <Text style={[styles.fontBold]}>
                   {bill?.status === 'draft'
                     ? "Invoice: DRAFT"
-                    : `Invoice: ${(bill?.center_initial || bill?.center_id?.center_initial || '')}${bill?.invoiceNo ?? 'Draft'}/${year}`}
+                    : `Invoice: ${getBillInvoiceLabel(bill)}`}
                 </Text>
                 <Text>Date: {dayjs(bill?.generated_on).format("DD/MM/YYYY")}</Text>
               </View>
