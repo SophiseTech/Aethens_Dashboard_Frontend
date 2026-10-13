@@ -50,14 +50,15 @@ export function iosNeedsSafari() {
 }
 
 // The Android APK (TWA) opens the site with an android-app:// referrer on the first
-// page only, so remember it for later navigations and reloads.
-function isTWA() {
+// page only, so remember it for reloads. sessionStorage, not localStorage: the TWA
+// shares Chrome's storage, and a persistent flag would mark normal Chrome tabs too.
+export function isTWA() {
   try {
     if (document.referrer?.startsWith('android-app://')) {
-      localStorage.setItem(TWA_FLAG_KEY, 'true');
+      sessionStorage.setItem(TWA_FLAG_KEY, 'true');
       return true;
     }
-    return localStorage.getItem(TWA_FLAG_KEY) === 'true';
+    return sessionStorage.getItem(TWA_FLAG_KEY) === 'true';
   } catch {
     return false;
   }
@@ -72,6 +73,15 @@ export function isStandalone() {
     window.navigator.standalone === true ||
     isTWA()
   );
+}
+
+// How the app is running when installed: "twa" (Android APK), "ios" (Home Screen web
+// app) or "pwa" (installed PWA). null in a normal browser tab.
+export function getInstalledMode() {
+  if (!isStandalone()) return null;
+  if (isTWA()) return 'twa';
+  if (window.navigator.standalone === true || isIOS()) return 'ios';
+  return 'pwa';
 }
 
 // Android Chrome: reports the PWA or the APK when either is installed (declared in

@@ -6,6 +6,7 @@ import ForUserGuard from '@components/ForUserGuard';
 import { ConfigProvider, Layout } from 'antd'
 import userStore from '@stores/UserStore';
 import useMediaQuery, { DESKTOP_QUERY } from '@hooks/useMediaQuery';
+import useAppUsageTracking from '@hooks/useAppUsageTracking';
 import { ROLES } from '@utils/constants';
 import { STUDENT_MOBILE_THEME } from '@/config/studentTheme';
 import React from 'react'
@@ -16,6 +17,7 @@ const { Header, Content, Footer, Sider } = Layout;
 function SidebarLayout() {
   const { user } = userStore()
   const isDesktop = useMediaQuery(DESKTOP_QUERY)
+  useAppUsageTracking()
   // Always wrapped, only the theme changes, so crossing the breakpoint (e.g. rotating
   // a tablet) restyles the page instead of remounting it.
   const theme = user?.role === ROLES.STUDENT && !isDesktop ? STUDENT_MOBILE_THEME : undefined
