@@ -3,6 +3,9 @@ import './index.css'
 import App from './App.jsx'
 import { ConfigProvider } from 'antd'
 import { registerSW } from "virtual:pwa-register";
+import { initPwaInstallListeners } from "@stores/PwaInstallStore";
+
+initPwaInstallListeners();
 
 createRoot(document.getElementById('root')).render(
   <ConfigProvider

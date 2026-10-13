@@ -21,9 +21,8 @@ export default defineConfig({
       },
 
       includeAssets: [
-        "favicon.ico",
-        "apple-touch-icon.png",
-        "mask-icon.svg"
+        "logo_small.jpeg",
+        "icons/launchericon-192x192.png"
       ],
 
       manifest: {
@@ -38,12 +37,22 @@ export default defineConfig({
 
         display: "standalone",
 
+        id: "/",
+
         start_url: "/",
 
         scope: "/",
 
 
         orientation: "portrait",
+
+        // Lets getInstalledRelatedApps() detect the installed PWA or the Android APK (TWA),
+        // so the install popup isn't shown to people who already have either
+        prefer_related_applications: false,
+        related_applications: [
+          { platform: "webapp", url: "https://app.schoolofathens.art/manifest.webmanifest" },
+          { platform: "play", id: "art.schoolofathens.app.twa" }
+        ],
 
         icons: [
           {

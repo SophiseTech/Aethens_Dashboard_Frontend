@@ -1,6 +1,7 @@
 import Sidebar from '@components/Sidebar';
 import AnnouncementModal from '@components/AnnouncementModal';
 import PushPromptModal from '@components/PushPromptModal';
+import PwaInstallModal from '@components/PwaInstallModal';
 import ForUserGuard from '@components/ForUserGuard';
 import { ConfigProvider, Layout } from 'antd'
 import userStore from '@stores/UserStore';
@@ -22,6 +23,7 @@ function SidebarLayout() {
   return (
     <Sidebar>
       {/* <AnnouncementModal /> */}
+      <PwaInstallModal />
       <PushPromptModal />
       <ForUserGuard />
       <ConfigProvider theme={theme}>

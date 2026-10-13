@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import pushNotificationService from '@services/PushNotificationService';
 import userStore from '@stores/UserStore';
+import pwaInstallStore from '@stores/PwaInstallStore';
 
 const STORAGE_KEY_PERMANENT = 'push_prompt_permanently_dismissed';
 const STORAGE_KEY_UNTIL = 'push_prompt_dismissed_until';
@@ -71,6 +72,8 @@ export default function usePushPrompt() {
     timerRef.current = setTimeout(async () => {
       const currentPermission = pushNotificationService.getPermissionState();
       if (currentPermission !== 'default') return;
+      // One popup at a time: install first, push is offered on a later load
+      if (pwaInstallStore.getState().installPromptVisible) return;
 
       const sub = await pushNotificationService.getCurrentSubscription();
       if (!sub) {
