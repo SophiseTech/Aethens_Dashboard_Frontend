@@ -151,7 +151,7 @@ function FinancialSummary() {
 
                 {/* Expected fees (selected range) vs collected */}
                 <Col xs={12} sm={8} lg={6}>
-                    <Tooltip title="Course fees scheduled for the selected period (paid or not), compared with fees collected. Inactive students count only for what they have already paid.">
+                    <Tooltip title="Course fees due in the selected period (paid or not): installments in their due month, one-time fees in the month the account was opened. Inactive students, and old accounts of students whose course was completed before a course change, count only what was paid. Compared with fees collected.">
                         <Card size="small" className="border border-border text-center bg-card">
                             <Statistic
                                 title={<span className="text-xs text-gray-500">Expected Fees</span>}
