@@ -31,6 +31,7 @@ function useStudentDashboardView() {
     finalProject: {
       project: latestSubmission?.projectId,
       phase: latestSubmission?.phaseId,
+      nextPhase: latestSubmission?.nextPhase,
       latestSubmission,
       loading: latestSubmissionLoading
     },

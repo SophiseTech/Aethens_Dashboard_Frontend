@@ -87,6 +87,15 @@ const HomeLayout = ({ schedule, finalProject, emptyAction, showProject = false }
             trailing={feed.project.status && <span>{feed.project.status.label}</span>}
             trailingTone={feed.project.status?.tone}
           />
+          {feed.project.next && (
+            <LinkRow
+              to={feed.project.next.path}
+              title={feed.project.next.title}
+              body='Ready to start.'
+              trailing={<span>Start</span>}
+              trailingTone='positive'
+            />
+          )}
         </HomeSection>
       )}
 

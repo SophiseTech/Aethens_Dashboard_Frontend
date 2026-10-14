@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useFinalProject } from '@hooks/useFinalProject';
 import useUser from '@hooks/useUser';
 import { ROLES } from '@utils/constants';
@@ -8,6 +8,9 @@ export const usePhaseView = () => {
   const { phaseId, studentId, projectId } = useParams();
   const { fetchPhaseDetails, currentPhaseInfo, submitPhase, submitReview, loading } = useFinalProject();
   const { user } = useUser();
+  const { pathname } = useLocation();
+  // Student, faculty and manager routes all end in /phase/:phaseId with a sibling /phases list.
+  const allPhasesPath = pathname.replace(/\/phase\/[^/]+\/?$/, '/phases');
 
   // Determine view context
   const viewContext = {
@@ -54,6 +57,7 @@ export const usePhaseView = () => {
     currentPhaseInfo: currentPhaseInfo,
     viewContext,
     loading,
+    allPhasesPath,
     onSubmit: handleSubmit,
     onReview: handleReview
   };

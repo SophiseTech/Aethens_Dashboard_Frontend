@@ -1,14 +1,12 @@
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import Title from '@components/layouts/Title';
 import { usePhaseView } from '@hooks/business/usePhaseView';
-import { useFinalProject } from '@hooks/useFinalProject';
-import useUser from '@hooks/useUser';
 import NewSubmissionForm from '@pages/FinalProject/Components/NewSubmissionForm';
 import PhaseHeader from '@pages/FinalProject/Components/PhaseHeader';
 import PhaseInstructions from '@pages/FinalProject/Components/PhaseInstructions';
 import SubmissionHistory from '@pages/FinalProject/Components/SubmissionHistory';
-import { ROLES } from '@utils/constants';
-import { Empty, Spin } from 'antd';
-import React, { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { Button, Empty, Spin } from 'antd';
+import { Link } from 'react-router-dom'
 
 
 function PhaseDetails() {
@@ -16,26 +14,40 @@ function PhaseDetails() {
     currentPhaseInfo,
     viewContext,
     loading,
+    allPhasesPath,
     onSubmit,
-    onReview
   } = usePhaseView();
 
-  if (loading) {
-    return <div className='w-full h-full flex items-center justify-center'><Spin size="large" /></div>
-  }
+  const renderContent = () => {
+    if (loading) {
+      return <div className='w-full h-full flex items-center justify-center'><Spin size="large" /></div>
+    }
 
-  if (!currentPhaseInfo.phase) {
-    return <Empty />
+    if (!currentPhaseInfo.phase) {
+      return <Empty />
+    }
+
+    return (
+      <div className="max-w-6xl w-full mx-auto">
+        <PhaseHeader {...currentPhaseInfo} />
+        <PhaseInstructions {...currentPhaseInfo} />
+        <SubmissionHistory submissions={currentPhaseInfo.submissions} />
+        {viewContext.canSubmit && currentPhaseInfo.canSubmit && <NewSubmissionForm {...currentPhaseInfo} onSubmit={onSubmit} />}
+      </div>
+    )
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 min-h-screen">
-
-      <PhaseHeader {...currentPhaseInfo} />
-      <PhaseInstructions {...currentPhaseInfo} />
-      <SubmissionHistory submissions={currentPhaseInfo.submissions} />
-      {viewContext.canSubmit && currentPhaseInfo.canSubmit && <NewSubmissionForm {...currentPhaseInfo} onSubmit={onSubmit} />}
-    </div>
+    <Title
+      title="Final Project"
+      button={
+        <Link to={allPhasesPath}>
+          <Button icon={<ArrowLeftOutlined />} variant="outlined">All phases</Button>
+        </Link>
+      }
+    >
+      {renderContent()}
+    </Title>
   )
 }
 

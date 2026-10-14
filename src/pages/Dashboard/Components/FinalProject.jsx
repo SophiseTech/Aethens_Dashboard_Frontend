@@ -48,11 +48,20 @@ function FinalProject({ finalProjectInfo = {} }) {
     }
   }
 
+  const nextPhase = finalProjectInfo?.nextPhase
+  const isApproved = finalProjectInfo?.latestSubmission?.status === "approved"
+  const allPhasesDone = isApproved && nextPhase === null
+
   const renderRequestButton = () => {
     const project = finalProjectInfo?.project
     const phase = finalProjectInfo?.phase
 
     if (!project || _.isEmpty(project)) { return }
+    if (isApproved && nextPhase?._id) {
+      return <Link to={`/student/final-project/${project._id}/phase/${nextPhase._id}`}>
+        <Button variant='filled' color='green' size='small'>Start next phase</Button>
+      </Link>
+    }
     return <Link to={`/student/final-project/${project._id}/phase/${phase?._id}`}>
       <Button variant='filled' color='green' size='small'>View More</Button>
     </Link>
@@ -82,11 +91,14 @@ function FinalProject({ finalProjectInfo = {} }) {
         <div className='space-y-2'>
           <p className='font-bold'>{finalProjectInfo?.project?.title} - {finalProjectInfo?.phase?.title}</p>
           <p className="| text-xs 2xl:text-sm">
-            {finalProjectInfo?.latestSubmission?.status === "approved" && "✅ Your last submission was approved. Great job!"}
+            {isApproved && (allPhasesDone ? "🎉 All phases completed. Great job!" : "✅ Your last submission was approved. Great job!")}
             {finalProjectInfo?.latestSubmission?.status === "under_review" && "⏳ Your last submission is under review. Please wait for feedback."}
             {finalProjectInfo?.latestSubmission?.status === "rejected" && "❌ Your last submission was rejected. Please review the feedback and resubmit."}
             {finalProjectInfo?.latestSubmission?.status === "not_started" && "🚀 You haven't started this phase yet. Click 'View More' to begin!"}
           </p>
+          {isApproved && nextPhase?.title && (
+            <p className="font-semibold | text-xs 2xl:text-sm">Next: {nextPhase.title}</p>
+          )}
         </div>
 
       </div>

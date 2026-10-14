@@ -61,11 +61,16 @@ function useStudentHomeFeed(finalProject) {
     : null
 
   const project = useMemo(() => {
-    const { project: info, phase, latestSubmission } = finalProject || {}
+    const { project: info, phase, nextPhase, latestSubmission } = finalProject || {}
     if (!info?._id) return null
+    const isApproved = latestSubmission?.status === "approved"
+    const status = PROJECT_STATUS[latestSubmission?.status] || null
     return {
       title: phase?.title ? `${info.title} · ${phase.title}` : info.title,
-      status: PROJECT_STATUS[latestSubmission?.status] || null,
+      status: isApproved && nextPhase === null ? { ...status, hint: "All phases completed." } : status,
+      next: isApproved && nextPhase?._id
+        ? { title: `Next: ${nextPhase.title}`, path: `/student/final-project/${info._id}/phase/${nextPhase._id}` }
+        : null,
       deadline: latestSubmission?.status === "approved" && info.endDate ? formatDate(info.endDate) : null,
       path: phase?._id ? `/student/final-project/${info._id}/phase/${phase._id}` : "/student/final-project",
     }
