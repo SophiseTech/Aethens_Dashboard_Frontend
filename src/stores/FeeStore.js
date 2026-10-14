@@ -91,7 +91,8 @@ const feeStore = create((set) => ({
       await FeeService.markInstallmentAsPaid(feeAccountId, installmentId, payload);
       set({ loading: false });
     } catch (error) {
-      set({ error: error.message, loading: false });
+      // Not stored in `error` — that replaces the whole fee tracker; the caller shows a toast instead.
+      set({ loading: false });
       throw error;
     }
   },

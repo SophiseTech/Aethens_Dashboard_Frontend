@@ -156,7 +156,9 @@ const permissions = {
     view: [ROLES.MANAGER, ROLES.ADMIN],
     add: [ROLES.MANAGER, ROLES.ADMIN],
     edit: [ROLES.MANAGER, ROLES.ADMIN],
-    delete: [ROLES.MANAGER, ROLES.ADMIN]
+    delete: [ROLES.MANAGER, ROLES.ADMIN],
+    // Marking an installment paid without a bill skips invoicing — admin only
+    mark_installment_paid: [ROLES.ADMIN]
   },
   sessions: {
     view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.ACADEMIC_MANAGER],

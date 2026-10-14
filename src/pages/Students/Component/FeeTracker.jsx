@@ -361,7 +361,9 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       render: (_, record) => {
         const bill = getBillForInstallment(record);
         if (bill && bill.status !== BILL_STATUS.PAID) return '-';
-        return bill ? formatDate(bill.payment_date) : '—';
+        if (bill) return formatDate(bill.payment_date);
+        // Marked paid without a bill — fall back to when it was marked
+        return record.paidDate ? formatDate(record.paidDate) : '—';
       },
     },
     {
@@ -439,7 +441,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
             )}
 
             {/* Mark installment as paid directly (no bill) — only shown when no bill has been generated yet */}
-            {record.status === 'pending' && (
+            {record.status === 'pending' && permissions.fee_tracker.mark_installment_paid?.includes(user?.role) && (
               <Popconfirm
                 title="Mark as Paid (No Bill)"
                 description={
