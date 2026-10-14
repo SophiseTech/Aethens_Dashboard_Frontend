@@ -93,9 +93,9 @@ class BillServices {
     }
   }
 
-  async resyncBillZoho(id) {
+  async resyncBillZoho(id, reason) {
     try {
-      const response = await post(`/v2/zoho/bills/${id}/resync`)
+      const response = await post(`/v2/zoho/bills/${id}/resync`, reason ? { reason } : {})
       if (!response || !response.data) throw new Error("An error occured. Please try again")
       return response.data
     } catch (error) {

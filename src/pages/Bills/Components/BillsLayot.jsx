@@ -49,6 +49,7 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
     }
     if (syncStatus === 'synced') return <Chip size='xs' glow={false} type='success' label='Zoho ✓' />
     if (syncStatus === 'failed') return <Chip size='xs' glow={false} type='danger' label='Zoho failed' />
+    if (syncStatus === 'reason_required') return <Chip size='xs' glow={false} type='danger' label='Zoho: reason needed' />
     return <Chip size='xs' glow={false} type='warning' label='Zoho pending' />
   }
 

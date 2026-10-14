@@ -1,9 +1,10 @@
 
 import Invoice from '@pages/Bills/Components/Invoice';
 import RecordPaymentModal from '@pages/Bills/Components/RecordPaymentModal';
+import ZohoReasonModal from '@pages/Bills/Components/ZohoReasonModal';
 import userStore from '@stores/UserStore';
 import permissions from '@utils/permissions';
-import { Button, Empty, Popconfirm, Spin } from 'antd';
+import { Button, Empty, message, Popconfirm, Spin } from 'antd';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useStore } from 'zustand';
@@ -41,6 +42,9 @@ function BillDetails() {
   const { finalizeBill, resyncZoho, getZohoOrgConfig, zohoOrgConfig, selectedBill, selectedBillLoading, getBillById } = billStore();
   const [lineItems, setLineItems] = useState([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // Zoho needs a reason to change a sent invoice: { mode: 'edit', values } holds a bill
+  // edit until the reason is given; { mode: 'resync' } is a retry of a reason_required sync.
+  const [zohoReasonRequest, setZohoReasonRequest] = useState(null);
 
   useEffect(() => {
     if (!id) return;
@@ -63,7 +67,12 @@ function BillDetails() {
   }, [bill?.zoho?.syncStatus, zohoOrgConfig, getZohoOrgConfig]);
 
   const handleRetryZohoSync = async () => {
-    if (id) await resyncZoho(id);
+    if (!id) return;
+    if (bill?.zoho?.syncStatus === 'reason_required') {
+      setZohoReasonRequest({ mode: 'resync' });
+      return;
+    }
+    await resyncZoho(id);
   };
 
   const handleRecordPayment = async (values) => {
@@ -153,17 +162,36 @@ function BillDetails() {
     return base;
   }, [students, bill]);
 
-  const handleEditDraftSave = async (values) => {
-    if (!id) return;
-    logger.debug(values)
+  const saveBillEdit = async (values, zohoUpdateReason) => {
     await editBill(id, {
       ...values,
       generated_on: toISTStartOfDayISO(values.generated_on),
       // status: 'draft',
       saveAsDraft: values.status === 'draft',
       invoiceNo: bill?.invoiceNo,
-      center_initial: bill?.center_initial
+      center_initial: bill?.center_initial,
+      ...(zohoUpdateReason ? { zohoUpdateReason } : {})
     });
+  };
+
+  const handleEditDraftSave = async (values) => {
+    if (!id) return;
+    logger.debug(values)
+    // The invoice already exists in Zoho — ask for the change reason before saving.
+    if (bill?.status !== 'draft' && bill?.zoho?.invoiceId) {
+      setZohoReasonRequest({ mode: 'edit', values });
+      return;
+    }
+    await saveBillEdit(values);
+  };
+
+  const handleZohoReasonSubmit = async (reason) => {
+    if (zohoReasonRequest?.mode === 'edit') {
+      await saveBillEdit(zohoReasonRequest.values, reason);
+    } else {
+      await resyncZoho(id, reason);
+    }
+    setZohoReasonRequest(null);
   };
 
   const billResolved = Boolean(bill?._id);
@@ -234,7 +262,7 @@ function BillDetails() {
             </Button>
           )}
 
-          {['failed', 'void_failed'].includes(bill?.zoho?.syncStatus) && permissions.bills?.zoho_resync?.includes(user.role) && (
+          {['failed', 'reason_required', 'void_failed'].includes(bill?.zoho?.syncStatus) && permissions.bills?.zoho_resync?.includes(user.role) && (
             <Button
               className='rounded-full'
               color='default'
@@ -316,6 +344,22 @@ function BillDetails() {
           />
         )}
       </Suspense>
+
+      <ZohoReasonModal
+        open={Boolean(zohoReasonRequest)}
+        title={zohoReasonRequest?.mode === 'edit' ? 'Reason for changing this invoice' : 'Update invoice in Zoho'}
+        description={
+          zohoReasonRequest?.mode === 'edit'
+            ? `This invoice is already in Zoho Books${bill?.zoho?.invoiceNumber ? ` (${bill.zoho.invoiceNumber})` : ''}. Zoho requires a reason to change it.`
+            : 'This invoice was changed and Zoho Books requires a reason to update it.'
+        }
+        submitLabel={zohoReasonRequest?.mode === 'edit' ? 'Save changes' : 'Sync to Zoho'}
+        onSubmit={handleZohoReasonSubmit}
+        onCancel={() => {
+          if (zohoReasonRequest?.mode === 'edit') message.info('Bill changes were not saved');
+          setZohoReasonRequest(null);
+        }}
+      />
     </div>
   );
 }
