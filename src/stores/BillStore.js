@@ -158,12 +158,12 @@ const billStore = create((set, get) => ({
       handleInternalError(error)
     }
   },
-  resyncZoho: async (id) => {
+  resyncZoho: async (id, reason) => {
     try {
       set({ createLoading: true })
       if (!id) throw new Error("Bad Data")
       const { bills } = get()
-      const bill = await billService.resyncBillZoho(id)
+      const bill = await billService.resyncBillZoho(id, reason)
       if (bill) {
         const updatedBills = bills.map(item => (
           item._id === bill._id ? bill : item

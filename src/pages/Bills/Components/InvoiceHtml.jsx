@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { getBillInvoiceLabel } from '@utils/helper';
 
 /**
  * InvoiceHtml: A plain HTML/CSS version of the invoice.
@@ -18,7 +19,6 @@ const InvoiceHtml = ({ bill }) => {
     const finalTotal = bill?.finalTotal ?? 0;
     const walletCreditAmount = bill?.walletCreditAmount ?? 0;
 
-    const year = new Date().getFullYear().toString().slice(-2);
 
     const getDiscountSymbol = (type) => {
         if (type === 'percentage') return '%';
@@ -46,7 +46,7 @@ const InvoiceHtml = ({ bill }) => {
                 <span style={{ fontWeight: 'bold' }}>
                     {bill?.status === 'draft'
                         ? "Invoice: DRAFT"
-                        : `Invoice: ${(bill?.center_initial || bill?.center_id?.center_initial || '')}${bill?.invoiceNo ?? 'Draft'}/${year}`}
+                        : `Invoice: ${getBillInvoiceLabel(bill)}`}
                 </span>
                 <span>Date: {dayjs(bill?.generated_on).format('DD/MM/YYYY')}</span>
             </div>

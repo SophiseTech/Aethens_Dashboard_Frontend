@@ -2,14 +2,6 @@
 
 This file provides guidance to Claude Code when working with the frontend.
 
-## Stack
-
-* **Framework:** React
-* **State Management:** Zustand
-* **UI:** Ant Design
-* **Forms:** Reusable components in `src/components/form`
-* **API:** Service layer
-
 ## Architecture
 
 ```
@@ -92,34 +84,6 @@ Before writing code, search for:
 Always extend existing functionality before creating something new.
 
 Design every implementation so it can be reused by future modules.
-
-## Service Guidelines
-
-* Group APIs by domain.
-* Reuse existing service methods.
-* Avoid duplicate API implementations.
-
-## Component Guidelines
-
-* Prefer small, composable components.
-* Extract reusable sections into child components.
-* Avoid monolithic components.
-
-## Performance
-
-* Avoid unnecessary re-renders.
-* Avoid unnecessary effects.
-* Memoize only when beneficial.
-* Keep derived data inside hooks.
-
-## Coding Rules
-
-* Functional components only.
-* Use async/await.
-* Prefer early returns.
-* Use descriptive names.
-* Avoid duplicate logic.
-* Use optional chaining where appropriate.
 
 ## Patterns to Avoid
 

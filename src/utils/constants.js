@@ -197,6 +197,21 @@ export const PHASE_STATUS = {
   REJECTED: 'rejected'
 };
 
+// Mirrors server/model/Bills.js BILL_STATUS
+export const BILL_STATUS = {
+  DRAFT: 'draft',
+  PAID: 'paid',
+  UNPAID: 'unpaid',
+  MIGRATION_CLOSED: 'migration_closed',
+};
+
+export const BILL_STATUS_TAGS = {
+  [BILL_STATUS.DRAFT]: { label: 'Draft', color: 'default' },
+  [BILL_STATUS.PAID]: { label: 'Paid', color: 'green' },
+  [BILL_STATUS.UNPAID]: { label: 'Unpaid', color: 'orange' },
+  [BILL_STATUS.MIGRATION_CLOSED]: { label: 'Closed', color: 'red' },
+};
+
 export const age_categories = [
   { label: "5 - 7 Years", value: "5_7_years" },
   { label: "8 - 14 Years", value: "7_8_years" },
@@ -219,6 +234,9 @@ export const foundUsOptions = [{ label: "Social Media", value: "Social Media" },
 { label: "Referral", value: "Referral" },
 { label: "Google Maps", value: "Google Maps" }];
 export const classPreferenceOptions = [{ label: "Weekday", value: "Weekday" }, { label: "Weekend", value: "Weekend" }];
+
+// Edit Enquiry → Enrolled: create the student via Add Student, or only mark the enquiry enrolled
+export const ENQUIRY_ENROLL_MODES = Object.freeze({ REGISTER: "register", WITHOUT_REGISTRATION: "withoutRegistration" });
 
 export const EnquiryModeOptions = [{ label: "Walk-in", value: "Walk-in" }, { label: "Call", value: "Call" }, { label: "Online", value: "Online" }];
 

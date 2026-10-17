@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import pushNotificationService from '@services/PushNotificationService';
 import userStore from '@stores/UserStore';
+import pwaInstallStore from '@stores/PwaInstallStore';
 
 const STORAGE_KEY_PERMANENT = 'push_prompt_permanently_dismissed';
 const STORAGE_KEY_UNTIL = 'push_prompt_dismissed_until';
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-const PROMPT_DELAY_MS = 30000;
+const PROMPT_DELAY_MS = 1000;
 
 export default function usePushPrompt() {
   const { user } = userStore();
@@ -21,14 +22,7 @@ export default function usePushPrompt() {
     const permission = pushNotificationService.getPermissionState();
 
     if (permission === 'granted') {
-      try {
-        const sub = await pushNotificationService.getCurrentSubscription();
-        if (!sub) {
-          await pushNotificationService.silentAutoResubscribe();
-        }
-      } catch {
-        // Silent failure for auto-resubscription
-      }
+      await pushNotificationService.ensureDeviceRegistered();
       return;
     }
 
@@ -59,10 +53,6 @@ export default function usePushPrompt() {
         return;
       }
 
-      if (backendStatus?.hasActiveSubscription) {
-        return;
-      }
-
       if (backendStatus?.lastPushPromptDismissedAt) {
         const lastDismissedMs = new Date(backendStatus.lastPushPromptDismissedAt).getTime();
         const nextEligibleMs = lastDismissedMs + SEVEN_DAYS_MS;
@@ -82,6 +72,8 @@ export default function usePushPrompt() {
     timerRef.current = setTimeout(async () => {
       const currentPermission = pushNotificationService.getPermissionState();
       if (currentPermission !== 'default') return;
+      // One popup at a time: install first, push is offered on a later load
+      if (pwaInstallStore.getState().installPromptVisible) return;
 
       const sub = await pushNotificationService.getCurrentSubscription();
       if (!sub) {

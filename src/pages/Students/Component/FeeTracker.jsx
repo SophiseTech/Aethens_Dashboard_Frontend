@@ -1,22 +1,28 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import dayjs from 'dayjs';
 import { Modal, Table, Spin, Alert, Row, Col, Statistic, Tag, Button, InputNumber, Form, DatePicker, Select, Card, Checkbox, Space, Divider, Flex, Popconfirm, message } from 'antd';
-import { WalletOutlined, DollarOutlined, CheckCircleOutlined, FileDoneOutlined, CheckSquareOutlined, PrinterOutlined, DownloadOutlined, ReloadOutlined, SettingOutlined } from '@ant-design/icons';
-import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
-import InvoicePdf from '@pages/Bills/Components/Invoice';
-import { isAndroid } from 'react-device-detect';
+import { WalletOutlined, DollarOutlined, CheckCircleOutlined, FileDoneOutlined, CheckSquareOutlined, PrinterOutlined, ReloadOutlined, SettingOutlined } from '@ant-design/icons';
 import { useStore } from 'zustand';
 import feeStore from '@stores/FeeStore';
 import { formatDate, toISTStartOfDayISO } from '@utils/helper';
+import { BILL_STATUS, BILL_STATUS_TAGS } from '@utils/constants';
 import CustomInput from '@components/form/CustomInput';
 import { paymentMethods } from '@utils/constants';
 import permissions from '@utils/permissions';
 import userStore from '@stores/UserStore';
 import InstallmentManager from './InstallmentManager';
 
+// Lazy: pulls in @react-pdf (~1.3 MB) only when an invoice is opened
+const InvoicePdfPreview = lazy(() => import('@pages/Students/Component/InvoicePdfPreview'));
+
 // Installments display in due-date order (earliest first), regardless of storage order
 const sortByDueDate = (installments) =>
   [...(installments || [])].sort((a, b) => new Date(a.month) - new Date(b.month));
+
+const BillStatusTag = ({ status }) => {
+  const tag = BILL_STATUS_TAGS[status] || BILL_STATUS_TAGS[BILL_STATUS.UNPAID];
+  return <Tag color={tag.color}>{tag.label}</Tag>;
+};
 
 const FeeTracker = ({ student, visible, onCancel }) => {
   const {
@@ -354,8 +360,10 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       key: 'paymentDate',
       render: (_, record) => {
         const bill = getBillForInstallment(record);
-        if (bill?.status === 'unpaid') return '-';
-        return bill ? formatDate(bill.payment_date) : '—';
+        if (bill && bill.status !== BILL_STATUS.PAID) return '-';
+        if (bill) return formatDate(bill.payment_date);
+        // Marked paid without a bill — fall back to when it was marked
+        return record.paidDate ? formatDate(record.paidDate) : '—';
       },
     },
     {
@@ -364,11 +372,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       render: (_, record) => {
         const bill = getBillForInstallment(record);
         if (!bill) return <Tag color="default">No Bill</Tag>;
-        return (
-          <Tag color={bill.status === 'paid' ? 'green' : 'orange'}>
-            {bill.status === 'paid' ? 'Paid' : 'Unpaid'}
-          </Tag>
-        );
+        return <BillStatusTag status={bill.status} />;
       },
     },
     {
@@ -412,7 +416,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         return (
           <Space>
             {/* If a bill exists and is unpaid, allow marking the bill as paid */}
-            {bill && bill.status !== 'paid' && (
+            {bill?.status === BILL_STATUS.UNPAID && (
               <Button
                 type="primary"
                 size="small"
@@ -437,7 +441,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
             )}
 
             {/* Mark installment as paid directly (no bill) — only shown when no bill has been generated yet */}
-            {record.status === 'pending' && (
+            {record.status === 'pending' && permissions.fee_tracker.mark_installment_paid?.includes(user?.role) && (
               <Popconfirm
                 title="Mark as Paid (No Bill)"
                 description={
@@ -589,7 +593,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       title: 'Paid On',
       dataIndex: 'payment_date',
       key: 'payment_date',
-      render: (date, record) => record?.status === 'unpaid' ? '—' : formatDate(date),
+      render: (date, record) => record?.status === BILL_STATUS.PAID ? formatDate(date) : '—',
     },
     {
       title: 'Total',
@@ -601,11 +605,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => (
-        <Tag color={status === 'paid' ? 'green' : 'orange'}>
-          {status === 'paid' ? 'Paid' : 'Unpaid'}
-        </Tag>
-      ),
+      render: (status) => <BillStatusTag status={status} />,
     },
     {
       title: 'Action',
@@ -614,7 +614,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         if (!permissions.fee_tracker.edit.includes(user?.role)) return null;
         if (record.subject !== 'course') return null;
 
-        if (record.status === 'paid') {
+        if (record.status === BILL_STATUS.PAID) {
           return (
             <Button
               type="primary"
@@ -627,6 +627,9 @@ const FeeTracker = ({ student, visible, onCancel }) => {
             </Button>
           );
         }
+
+        // Draft bills must be finalized first; migration-closed bills are cancelled
+        if (record.status !== BILL_STATUS.UNPAID) return null;
 
         return (
           <Button
@@ -855,32 +858,9 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         destroyOnClose
       >
         {viewBill && (
-          <div style={{ height: isAndroid ? 'auto' : '80vh' }}>
-            {isAndroid ? (
-              <div className="flex flex-col gap-4 justify-center items-center py-10">
-                <Alert
-                  message="Preview Not Available"
-                  description="PDF preview is not supported on Android browsers. Please download the invoice to view it."
-                  type="info"
-                  showIcon
-                />
-                <PDFDownloadLink
-                  document={<InvoicePdf bill={viewBill} />}
-                  fileName={`INV-${viewBill?.center_initial || ''}${viewBill?.invoiceNo || 'Untitled'}.pdf`}
-                >
-                  {({ loading: pdfLoading }) => (
-                    <Button type="primary" size="large" loading={pdfLoading} icon={<DownloadOutlined />}>
-                      {pdfLoading ? 'Preparing PDF...' : 'Download Invoice'}
-                    </Button>
-                  )}
-                </PDFDownloadLink>
-              </div>
-            ) : (
-              <PDFViewer width="100%" height="100%">
-                <InvoicePdf bill={viewBill} />
-              </PDFViewer>
-            )}
-          </div>
+          <Suspense fallback={<div className="flex justify-center py-10"><Spin /></div>}>
+            <InvoicePdfPreview bill={viewBill} />
+          </Suspense>
         )}
       </Modal >
 

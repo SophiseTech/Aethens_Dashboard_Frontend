@@ -32,10 +32,10 @@ function AttendanceHistory({ records }) {
     })
 
   return (
-    <div className='bg-card p-4 rounded-3xl flex-1 flex flex-col gap-3 overflow-auto'>
+    <div className='bg-card p-4 rounded-3xl flex-1 flex flex-col gap-3 max-h-[350px] overflow-auto'>
       <h1 className='font-bold | text-sm 2xl:text-xl'>Recent History</h1>
 
-      <div className='flex flex-col gap-3 flex-1 overflow-auto no-scrollbar'>
+      <div className='flex overflow-auto flex-col flex-1 gap-3 no-scrollbar'>
         {filteredAndSortedRecords.map((item, index) => (
           <HistoryItem key={index} item={item} index={index} />
         ))}
@@ -49,7 +49,7 @@ const HistoryItem = ({ item, index }) => {
   const { markAbsent } = slotStore()
   return (
     <div className={`flex items-center justify-start | p-1 2xl:p-3 ${(index === 0 && dayjs(item.start_date).isSame(dayjs(), 'day')) && 'bg-stone-200 rounded-xl'}`}>
-      <div className='flex gap-3 flex-1 items-center'>
+      <div className='flex flex-1 gap-3 items-center'>
         <div className='bg-accent p-2 rounded-full w-[13%] aspect-square flex items-center justify-center'>
           <img src="/icons/alarm.svg" alt="alarm" className='w-3/4 h-fw-3/4' />
         </div>
@@ -74,7 +74,7 @@ const HistoryItem = ({ item, index }) => {
       <div>
         <p className='text-gray-500 font-bold | text-xs 2xl:text-lg'>{dateObj.format("h:mm A")}</p>
         {dayjs(item.start_date).isAfter(dayjs()) && item.status === "booked" && (
-          <Button variant='filled' color='orange' size='small' className='outline-none'
+          <Button variant='filled' color='orange' size='small' className='text-xs outline-none'
             onClick={() => {
               Modal.confirm({
                 title: "Mark as Absent",

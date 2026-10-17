@@ -8,8 +8,16 @@ import {
   syncTemplateStatus,
 } from "@/services/WhatsAppTemplate";
 
+// In-flight lookups by "name:language", so concurrent callers share one request.
+const pendingTemplateLookups = new Map();
+const templateKey = (name, language) => `${name}:${language}`;
+
 const useWhatsAppTemplateStore = create((set, get) => ({
   templates: [],
+  // Single-template cache for features that need one known template (e.g. the fee
+  // reminder preview): key "name:language" → template, or null when it doesn't
+  // exist. Absent key = not loaded yet.
+  templatesByKey: {},
   loading: false,
   error: null,
   selected: null,
@@ -20,10 +28,36 @@ const useWhatsAppTemplateStore = create((set, get) => ({
     set({ loading: true });
     try {
       const data = await listWhatsAppTemplates();
-      set({ templates: data, loading: false });
+      // Every admin create/update/delete/sync ends here, so also drop the
+      // single-template cache to avoid serving a stale template to ensureTemplate.
+      set({ templates: data, templatesByKey: {}, loading: false });
     } catch (error) {
       set({ error, loading: false });
     }
+  },
+
+  // Loads one template by name/language at most once per session (a missing template
+  // is cached as null, so it isn't re-requested). Concurrent calls share one request.
+  ensureTemplate: async (name, language = "en") => {
+    const key = templateKey(name, language);
+    if (key in get().templatesByKey) return get().templatesByKey[key];
+    if (pendingTemplateLookups.has(key)) return pendingTemplateLookups.get(key);
+
+    const lookup = listWhatsAppTemplates({ name, language })
+      .then((data) => {
+        const template = data?.[0] || null;
+        set((state) => ({ templatesByKey: { ...state.templatesByKey, [key]: template } }));
+        return template;
+      })
+      .catch((error) => {
+        // Not cached: a transient failure can be retried on the next open.
+        set({ error });
+        return null;
+      })
+      .finally(() => pendingTemplateLookups.delete(key));
+
+    pendingTemplateLookups.set(key, lookup);
+    return lookup;
   },
 
   create: async (payload) => {

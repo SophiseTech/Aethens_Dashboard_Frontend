@@ -23,12 +23,15 @@ import {
   SolutionOutlined,
   UserOutlined,
   FileTextOutlined,
+  WhatsAppOutlined,
 } from "@ant-design/icons";
 
 import Target from "@/assets/Target";
 import SubMenu from "@components/SubMenu";
 import UserDetailsDrawer from "@components/UserDetailsDrawer";
 import StudentContextHoverDrawer from "@components/StudentContextHoverDrawer";
+import StudentMobileNav from "@components/student/StudentMobileNav";
+import WhatsAppInboxMenuLabel from "@components/WhatsAppInboxMenuLabel";
 import userStore from "@stores/UserStore";
 import studentStore from "@stores/StudentStore";
 import { ROLES } from "@utils/constants";
@@ -209,6 +212,12 @@ const getMenuConfig = (role) => {
       path: "/manager/whatsapp-campaigns",
     },
     {
+      label: <WhatsAppInboxMenuLabel />,
+      icon: <WhatsAppOutlined />,
+      key: "whatsapp-inbox",
+      path: "/manager/whatsapp-inbox",
+    },
+    {
       label: "Notifications",
       icon: <BellOutlined />,
       key: "notifications",
@@ -344,6 +353,12 @@ const getMenuConfig = (role) => {
       icon: <MessageOutlined />,
       key: "whatsapp-campaigns",
       path: "/manager/whatsapp-campaigns",
+    },
+    {
+      label: <WhatsAppInboxMenuLabel />,
+      icon: <WhatsAppOutlined />,
+      key: "whatsapp-inbox",
+      path: "/manager/whatsapp-inbox",
     },
     {
       label: "Notifications",
@@ -598,6 +613,12 @@ const getMenuConfig = (role) => {
       icon: <MessageOutlined />,
       key: "whatsapp-campaigns",
       path: "/manager/whatsapp-campaigns",
+    },
+    {
+      label: <WhatsAppInboxMenuLabel />,
+      icon: <WhatsAppOutlined />,
+      key: "whatsapp-inbox",
+      path: "/manager/whatsapp-inbox",
     },
     {
       label: "Notifications",
@@ -905,6 +926,8 @@ function Sidebar({ children }) {
     return findOpenKey(menuConfig);
   }, [pathname, menuConfig]);
 
+  const isStudent = user?.role === ROLES.STUDENT;
+
   const handleMenuClick = ({ key }) => {
     const findPath = (items) => {
       for (const item of items) {
@@ -965,7 +988,18 @@ function Sidebar({ children }) {
       />
 
       <div className="drawer-content">
-        <MobileMenuButton />
+        {isStudent ? (
+          <StudentMobileNav
+            menuItems={menuConfig}
+            selectedKey={selectedKeys[0]}
+            user={user}
+            onNavigate={handleMenuClick}
+            onProfile={handleProfileClick}
+            onLogout={handleLogout}
+          />
+        ) : (
+          <MobileMenuButton />
+        )}
         {children}
       </div>
 

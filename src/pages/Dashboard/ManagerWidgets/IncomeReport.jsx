@@ -1,119 +1,31 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Card, Select, DatePicker, Row, Col, Spin, Empty } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
+import { Card, Row, Col, Spin, Empty } from 'antd';
 import { DollarOutlined } from '@ant-design/icons';
 import EChart from '@pages/Dashboard/Chart/EChart';
-import billService from '@services/Bills';
 import userStore from '@stores/UserStore';
 import centerStore from '@stores/CentersStore';
 import { useStore } from 'zustand';
-import dayjs from 'dayjs';
-import { getMonthRange, toISTDateString } from '@utils/helper';
 import { post } from '@utils/Requests';
 
-const { RangePicker } = DatePicker;
-
-const TIME_FILTERS = {
-  daily: 'day',
-  weekly: 'week',
-  monthly: 'month',
-  yearly: 'year',
-  custom: 'custom'
-};
-
-function IncomeReport({ dateRange: dashboardDateRange, onDateRangeChange }) {
-  const [timeFilter, setTimeFilter] = useState('monthly');
-  const [customDateRange, setCustomDateRange] = useState(null);
-  const [dateRange, setDateRange] = useState(getMonthRange(new Date()));
+// Driven entirely by the dashboard's date range — no widget-level date filter.
+function IncomeReport({ dateRange }) {
   const [loading, setLoading] = useState(false);
   const [paymentModeData, setPaymentModeData] = useState([]);
   const [subjectData, setSubjectData] = useState([]);
-  const isSyncingFromParent = useRef(false);
-  const isSyncingFromSelf = useRef(false);
 
   const { user } = useStore(userStore);
   const { selectedCenter } = useStore(centerStore);
 
   useEffect(() => {
-    if (!dashboardDateRange?.firstDay || !dashboardDateRange?.lastDay) return;
-    if (isSyncingFromSelf.current) {
-      isSyncingFromSelf.current = false;
-      return;
-    }
-    isSyncingFromParent.current = true;
-    setTimeFilter('custom');
-    setCustomDateRange([
-      dayjs(dashboardDateRange.firstDay),
-      dayjs(dashboardDateRange.lastDay),
-    ]);
-    setDateRange({
-      firstDay: dashboardDateRange.firstDay,
-      lastDay: dashboardDateRange.lastDay,
-    });
-  }, [dashboardDateRange?.firstDay, dashboardDateRange?.lastDay]);
-
-  // Calculate date range based on time filter
-  useEffect(() => {
-    const now = dayjs();
-    let firstDay, lastDay;
-
-    switch (timeFilter) {
-      case 'daily':
-        firstDay = now.startOf('day');
-        lastDay = now.endOf('day');
-        break;
-      case 'weekly':
-        firstDay = now.startOf('week');
-        lastDay = now.endOf('week');
-        break;
-      case 'monthly':
-        firstDay = now.startOf('month');
-        lastDay = now.endOf('month');
-        break;
-      case 'yearly':
-        firstDay = now.startOf('year');
-        lastDay = now.endOf('year');
-        break;
-      case 'custom':
-        if (customDateRange && customDateRange[0] && customDateRange[1]) {
-          firstDay = customDateRange[0].startOf('day');
-          lastDay = customDateRange[1].endOf('day');
-        } else {
-          return;
-        }
-        break;
-      default:
-        firstDay = now.startOf('month');
-        lastDay = now.endOf('month');
-    }
-
-    const nextRange = {
-      firstDay: toISTDateString(firstDay),
-      lastDay: toISTDateString(lastDay),
-    };
-    setDateRange(nextRange);
-    if (isSyncingFromParent.current) {
-      isSyncingFromParent.current = false;
-      return;
-    }
-    if (
-      onDateRangeChange &&
-      (dashboardDateRange?.firstDay !== nextRange.firstDay ||
-        dashboardDateRange?.lastDay !== nextRange.lastDay)
-    ) {
-      isSyncingFromSelf.current = true;
-      onDateRangeChange(nextRange);
-    }
-  }, [timeFilter, customDateRange]);
-
-  // Fetch bills data
-  useEffect(() => {
-    if (!dateRange.firstDay || !dateRange.lastDay) return;
+    if (!dateRange?.firstDay || !dateRange?.lastDay) return;
+    // Ignore a response that arrives after the date/center has changed again
+    let ignore = false;
 
     const fetchData = async () => {
       try {
         setLoading(true);
         const centerId = user.role === 'admin' ? selectedCenter : user.center_id;
-        
+
         const filters = {
           filters: {
             query: {
@@ -126,12 +38,12 @@ function IncomeReport({ dateRange: dashboardDateRange, onDateRangeChange }) {
           }
         };
 
-        // Fetch income report data
         const response = await post('/bills/income-report', filters);
-        
+        if (ignore) return;
+
         if (response && response.data) {
           const { paymentMode, subject } = response.data;
-          
+
           setPaymentModeData(
             paymentMode.map(item => ({ name: item.payment_method, value: item.total }))
           );
@@ -143,25 +55,15 @@ function IncomeReport({ dateRange: dashboardDateRange, onDateRangeChange }) {
           setSubjectData([]);
         }
       } catch (error) {
-        console.error('Error fetching income data:', error);
+        if (!ignore) console.error('Error fetching income data:', error);
       } finally {
-        setLoading(false);
+        if (!ignore) setLoading(false);
       }
     };
 
     fetchData();
-  }, [dateRange, user, selectedCenter]);
-
-  const handleTimeFilterChange = (value) => {
-    setTimeFilter(value);
-    if (value !== 'custom') {
-      setCustomDateRange(null);
-    }
-  };
-
-  const handleCustomDateChange = (dates) => {
-    setCustomDateRange(dates);
-  };
+    return () => { ignore = true; };
+  }, [dateRange?.firstDay, dateRange?.lastDay, user?.role, user?.center_id, selectedCenter]);
 
   // Payment Mode Pie Chart
   const paymentModeChart = useMemo(() => {
@@ -216,29 +118,6 @@ function IncomeReport({ dateRange: dashboardDateRange, onDateRangeChange }) {
         <div className="flex items-center gap-2">
           <DollarOutlined />
           <span>Income Report</span>
-        </div>
-      }
-      extra={
-        <div className="flex items-center gap-2">
-          <Select
-            value={timeFilter}
-            onChange={handleTimeFilterChange}
-            style={{ width: 120 }}
-            options={[
-              { label: 'Daily', value: 'daily' },
-              { label: 'Weekly', value: 'weekly' },
-              { label: 'Monthly', value: 'monthly' },
-              { label: 'Yearly', value: 'yearly' },
-              { label: 'Custom', value: 'custom' }
-            ]}
-          />
-          {timeFilter === 'custom' && (
-            <RangePicker
-              value={customDateRange}
-              onChange={handleCustomDateChange}
-              format="YYYY-MM-DD"
-            />
-          )}
         </div>
       }
     >

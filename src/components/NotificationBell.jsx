@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom';
 import notificationStore from '@stores/notificationStore';
 import userStore from '@stores/UserStore';
 import { formatDate } from '@utils/helper';
+import { isForOtherAccount } from '@utils/pushNotification';
 import pushNotificationService from '@services/PushNotificationService';
 import PushNotificationSettingsModal from '@pages/Notifications/components/PushNotificationSettingsModal';
 
@@ -26,11 +27,14 @@ const NotificationBell = () => {
   }, [getNotifications]);
 
   useEffect(() => {
+    // A push click for another account on this browser is handled by ForUserGuard;
+    // don't open this account's panel as if it were the clicked notification.
+    if (isForOtherAccount(searchParams, user?._id)) return;
     if (searchParams.get('notifications') === 'open' || searchParams.get('openNotifications') === 'true') {
       setPopoverOpen(true);
       getNotifications();
     }
-  }, [searchParams, getNotifications]);
+  }, [searchParams, getNotifications, user?._id]);
 
   const handleOpenChange = (newOpen) => {
     setPopoverOpen(newOpen);
@@ -57,6 +61,7 @@ const NotificationBell = () => {
 
   const unreadNotifications = notifications.filter(n => !n.is_read);
   const unreadCount = unreadNotifications.length;
+  const isStudent = user?.role === 'student';
 
   const handleNotificationClick = async (notification) => {
     if (!notification.is_read) {
@@ -76,7 +81,7 @@ const NotificationBell = () => {
   };
 
   const notificationContent = (
-    <div style={{ width: 350, maxHeight: '50vh', overflowY: 'auto' }}>
+    <div style={{ width: isStudent ? 'min(350px, calc(100vw - 48px))' : 350, maxHeight: '50vh', overflowY: 'auto' }}>
       {!isSubscribed && isSupported && (
         <div className="flex items-center justify-between p-2 mb-2 bg-amber-50 border border-amber-200 rounded text-xs">
           <div className="flex items-center gap-1.5 text-amber-800">
@@ -205,9 +210,23 @@ const NotificationBell = () => {
         trigger="click"
         placement="bottomRight"
       >
-        <Badge count={unreadCount}>
-          <BellOutlined style={{ fontSize: '24px', cursor: 'pointer' }} className="border border-stone-200 p-3 rounded-full" />
-        </Badge>
+        {isStudent ? (
+          <button
+            type="button"
+            className="student-bell"
+            aria-label={unreadCount ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+            aria-expanded={popoverOpen}
+          >
+            <BellOutlined />
+            {unreadCount > 0 && (
+              <span className="student-bell__badge" aria-hidden="true">{unreadCount > 9 ? '9+' : unreadCount}</span>
+            )}
+          </button>
+        ) : (
+          <Badge count={unreadCount}>
+            <BellOutlined style={{ fontSize: '24px', cursor: 'pointer' }} className="border border-stone-200 p-3 rounded-full" />
+          </Badge>
+        )}
       </Popover>
 
       <PushNotificationSettingsModal

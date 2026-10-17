@@ -135,6 +135,15 @@ class UserService {
     }
   }
 
+  // Fire-and-forget usage beacon; failures are silent so they never bother the user
+  async recordAppUsage({ event, mode, platform }) {
+    try {
+      await post(`/user/app-usage`, { event, mode, platform });
+    } catch {
+      // Analytics only
+    }
+  }
+
   async searchUsersV2(search, limit = 10) {
     try {
       const params = new URLSearchParams({

@@ -1,111 +1,29 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Card, Select, DatePicker, Row, Col, Spin, Empty, Flex } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
+import { Card, Row, Col, Spin, Empty, Flex } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import EChart from '@pages/Dashboard/Chart/EChart';
 import userStore from '@stores/UserStore';
 import centerStore from '@stores/CentersStore';
 import { useStore } from 'zustand';
-import dayjs from 'dayjs';
-import { getMonthRange, toISTDateString } from '@utils/helper';
 import { post } from '@utils/Requests';
 
-const { RangePicker } = DatePicker;
+const EMPTY_SUMMARY = { totalSlots: 0, presentCount: 0, absentCount: 0 };
 
-function AttendanceReport({ dateRange: dashboardDateRange, onDateRangeChange }) {
+// Driven entirely by the dashboard's date range — no widget-level date filter.
+function AttendanceReport({ dateRange }) {
   /* ---------------- State ---------------- */
-  const [timeFilter, setTimeFilter] = useState('monthly');
-  const [customDateRange, setCustomDateRange] = useState(null);
-  const [dateRange, setDateRange] = useState(getMonthRange(new Date()));
   const [loading, setLoading] = useState(false);
-
-  const [summary, setSummary] = useState({
-    totalSlots: 0,
-    presentCount: 0,
-    absentCount: 0,
-  });
-
+  const [summary, setSummary] = useState(EMPTY_SUMMARY);
   const [courses, setCourses] = useState([]);
-
-  const isSyncingFromParent = useRef(false);
-  const isSyncingFromSelf = useRef(false);
 
   const { user } = useStore(userStore);
   const { selectedCenter } = useStore(centerStore);
 
-  /* ---------------- Sync from Dashboard ---------------- */
-  useEffect(() => {
-    if (!dashboardDateRange?.firstDay || !dashboardDateRange?.lastDay) return;
-
-    if (isSyncingFromSelf.current) {
-      isSyncingFromSelf.current = false;
-      return;
-    }
-
-    isSyncingFromParent.current = true;
-    setTimeFilter('custom');
-    setCustomDateRange([
-      dayjs(dashboardDateRange.firstDay),
-      dayjs(dashboardDateRange.lastDay),
-    ]);
-    setDateRange(dashboardDateRange);
-  }, [dashboardDateRange?.firstDay, dashboardDateRange?.lastDay]);
-
-  /* ---------------- Date Calculation ---------------- */
-  useEffect(() => {
-    const now = dayjs();
-    let firstDay, lastDay;
-
-    switch (timeFilter) {
-      case 'daily':
-        firstDay = now.startOf('day');
-        lastDay = now.endOf('day');
-        break;
-      case 'weekly':
-        firstDay = now.startOf('week');
-        lastDay = now.endOf('week');
-        break;
-      case 'monthly':
-        firstDay = now.startOf('month');
-        lastDay = now.endOf('month');
-        break;
-      case 'yearly':
-        firstDay = now.startOf('year');
-        lastDay = now.endOf('year');
-        break;
-      case 'custom':
-        if (!customDateRange) return;
-        firstDay = customDateRange[0].startOf('day');
-        lastDay = customDateRange[1].endOf('day');
-        break;
-      default:
-        return;
-    }
-
-    const nextRange = {
-      firstDay: toISTDateString(firstDay),
-      lastDay: toISTDateString(lastDay),
-    };
-
-    setDateRange(nextRange);
-
-    if (isSyncingFromParent.current) {
-      isSyncingFromParent.current = false;
-      return;
-    }
-
-    if (
-      onDateRangeChange &&
-      (dashboardDateRange?.firstDay !== nextRange.firstDay ||
-        dashboardDateRange?.lastDay !== nextRange.lastDay)
-    ) {
-      isSyncingFromSelf.current = true;
-      onDateRangeChange(nextRange);
-    }
-  }, [timeFilter, customDateRange]);
-
   /* ---------------- Single API Call ---------------- */
   useEffect(() => {
-    if (!dateRange.firstDay || !dateRange.lastDay) return;
+    if (!dateRange?.firstDay || !dateRange?.lastDay) return;
+    // Ignore a response that arrives after the date/center has changed again
+    let ignore = false;
 
     const fetchData = async () => {
       try {
@@ -127,25 +45,23 @@ function AttendanceReport({ dateRange: dashboardDateRange, onDateRangeChange }) 
         };
 
         const res = await post('/attendance/report', payload);
+        if (ignore) return;
 
-        setSummary(res?.data?.summary || {
-          totalSlots: 0,
-          presentCount: 0,
-          absentCount: 0,
-        });
-
+        setSummary(res?.data?.summary || EMPTY_SUMMARY);
         setCourses(res?.data?.courses || []);
       } catch (e) {
+        if (ignore) return;
         console.error('Attendance fetch failed', e);
-        setSummary({ totalSlots: 0, presentCount: 0, absentCount: 0 });
+        setSummary(EMPTY_SUMMARY);
         setCourses([]);
       } finally {
-        setLoading(false);
+        if (!ignore) setLoading(false);
       }
     };
 
     fetchData();
-  }, [dateRange, user, selectedCenter]);
+    return () => { ignore = true; };
+  }, [dateRange?.firstDay, dateRange?.lastDay, user?.role, user?.center_id, selectedCenter]);
 
   /* ---------------- Overall Pie ---------------- */
   const overallChart = useMemo(() => {
@@ -165,7 +81,6 @@ function AttendanceReport({ dateRange: dashboardDateRange, onDateRangeChange }) 
     };
   }, [summary]);
 
-  /* ---------------- Course-wise Bar ---------------- */
   /* ---------------- Course-wise Bar ---------------- */
   const courseChart = useMemo(() => {
     if (!courses.length) return null;
@@ -267,31 +182,6 @@ function AttendanceReport({ dateRange: dashboardDateRange, onDateRangeChange }) 
         <div className="flex items-center gap-2">
           <UserOutlined />
           Attendance Report
-        </div>
-      }
-      extra={
-        <div className="flex gap-2">
-          <Select
-            value={timeFilter}
-            onChange={(v) => {
-              setTimeFilter(v);
-              if (v !== 'custom') setCustomDateRange(null);
-            }}
-            style={{ width: 120 }}
-            options={[
-              { label: 'Daily', value: 'daily' },
-              { label: 'Weekly', value: 'weekly' },
-              { label: 'Monthly', value: 'monthly' },
-              { label: 'Yearly', value: 'yearly' },
-              { label: 'Custom', value: 'custom' },
-            ]}
-          />
-          {timeFilter === 'custom' && (
-            <RangePicker
-              value={customDateRange}
-              onChange={setCustomDateRange}
-            />
-          )}
         </div>
       }
     >

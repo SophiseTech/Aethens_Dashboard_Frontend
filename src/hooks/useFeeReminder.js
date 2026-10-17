@@ -4,45 +4,38 @@ import dayjs from 'dayjs';
 import feeStore from '@stores/FeeStore';
 import useWhatsAppTemplateStore from '@stores/WhatsAppTemplateStore';
 import useAlert from '@hooks/useAlert';
+import { substituteTemplate } from '@utils/whatsappTemplate';
 
 const FEE_REMINDER_TEMPLATE_NAME = 'fee_due_reminder';
 const FEE_REMINDER_TEMPLATE_LANGUAGE = 'en';
-
-// Substitutes {{1}}, {{2}}, ... placeholders in a WhatsApp template body with
-// the given values, leaving any placeholder without a supplied value as-is.
-function substituteTemplate(bodyText, values) {
-  return bodyText.replace(/\{\{(\d+)\}\}/g, (match, index) => (
-    values[index] !== undefined ? String(values[index]) : match
-  ));
-}
 
 // Drives the Fee Reminder dialog: renders a live preview of the approved
 // "fee_due_reminder" WhatsApp template as the manager edits amount/due date,
 // and sends the reminder (server re-does rounding/formatting as the source
 // of truth — this preview is only so the manager can see what they're about
 // to send).
+// The dialog is mounted only while open (one shared instance for the whole Fee
+// KPIs card), so the template is looked up on open — once per session, shared via
+// WhatsAppTemplateStore.ensureTemplate — never once per table row.
 function useFeeReminder(row, amount, dueDate) {
-  const { sendFeeReminder } = useStore(feeStore);
-  const { templates, fetch: fetchTemplates } = useStore(useWhatsAppTemplateStore);
+  const sendFeeReminder = useStore(feeStore, (state) => state.sendFeeReminder);
+  // undefined = still loading, null = no such template
+  const template = useStore(
+    useWhatsAppTemplateStore,
+    (state) => state.templatesByKey[`${FEE_REMINDER_TEMPLATE_NAME}:${FEE_REMINDER_TEMPLATE_LANGUAGE}`]
+  );
+  const ensureTemplate = useStore(useWhatsAppTemplateStore, (state) => state.ensureTemplate);
   const alert = useAlert();
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    if (!templates?.length) fetchTemplates();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const template = useMemo(
-    () => templates?.find(
-      (t) => t.name === FEE_REMINDER_TEMPLATE_NAME && t.language === FEE_REMINDER_TEMPLATE_LANGUAGE
-    ),
-    [templates]
-  );
+    ensureTemplate(FEE_REMINDER_TEMPLATE_NAME, FEE_REMINDER_TEMPLATE_LANGUAGE);
+  }, [ensureTemplate]);
 
   const templateReady = Boolean(template?.approvalStatus === 'approved' && template?.active);
 
   const previewText = useMemo(() => {
-    if (!templates) return '';
+    if (template === undefined) return 'Loading template…';
     if (!template) return `No approved "${FEE_REMINDER_TEMPLATE_NAME}" WhatsApp template found — create and get it approved first.`;
     if (!templateReady) return `The "${FEE_REMINDER_TEMPLATE_NAME}" template is not approved/active yet.`;
 
@@ -51,7 +44,7 @@ function useFeeReminder(row, amount, dueDate) {
       2: Math.round(amount || 0),
       3: dueDate ? dayjs(dueDate).format('DD MMM YYYY') : '',
     });
-  }, [templates, template, templateReady, row?.studentName, amount, dueDate]);
+  }, [template, templateReady, row?.studentName, amount, dueDate]);
 
   const send = async ({ amount: sendAmount, dueDate: sendDueDate }) => {
     if (!row?.studentId || !sendDueDate) return false;

@@ -1,19 +1,27 @@
 import { create } from 'zustand';
 import { FeeService } from '@services/Fee';
 
+// Incremented per KPI request so a slow response for a previously selected center
+// can't overwrite the KPIs of the center selected after it.
+let kpisRequestId = 0;
+
 const feeStore = create((set) => ({
   feeDetails: null,
   kpis: null,
+  kpisLoading: false,
   loading: false,
   error: null,
   getFeeKpis: async (filters = {}) => {
-    set({ loading: true, error: null });
+    const requestId = ++kpisRequestId;
+    set({ kpisLoading: true, error: null });
     try {
       const response = await FeeService.getFeeKpis(filters);
-      set({ kpis: response.data, loading: false });
+      if (requestId !== kpisRequestId) return;
+      set({ kpis: response.data, kpisLoading: false });
       return response.data;
     } catch (error) {
-      set({ error: error.message, loading: false });
+      if (requestId !== kpisRequestId) return;
+      set({ error: error.message, kpisLoading: false });
       throw error;
     }
   },
@@ -83,7 +91,8 @@ const feeStore = create((set) => ({
       await FeeService.markInstallmentAsPaid(feeAccountId, installmentId, payload);
       set({ loading: false });
     } catch (error) {
-      set({ error: error.message, loading: false });
+      // Not stored in `error` — that replaces the whole fee tracker; the caller shows a toast instead.
+      set({ loading: false });
       throw error;
     }
   },

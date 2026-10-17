@@ -21,12 +21,14 @@ import {
   EditOutlined,
   CalendarOutlined,
   DeleteOutlined,
+  WhatsAppOutlined,
 } from "@ant-design/icons";
 import { formatDate, formatTime } from "@utils/helper";
 import { MESSAGE_STATUS_COLORS } from "@utils/whatsappMessageStatus";
 import enquiryStore from "@stores/EnquiryStore";
 import { useStore } from "zustand";
 import EditEnquiryModal from "./EditEnquiryModal";
+import { ENQUIRY_ENROLL_MODES as ENROLL_MODES } from "@utils/constants";
 import CloseEnquiryModal from './CloseEnquiryModal';
 import { age_categories } from "@utils/constants";
 import BranchTransferCard from "@pages/Enquiries/Component/BranchTranserCard";
@@ -36,6 +38,7 @@ import permissions from "@utils/permissions";
 import userStore from "@stores/UserStore";
 import ReopenEnquiryModal from "./ReopenEnquiryModal";
 import AddStudent from "@pages/Students/Component/AddStudent";
+import EnquiryWhatsAppHistoryModal from "@pages/WhatsAppInbox/components/EnquiryWhatsAppHistoryModal";
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
@@ -48,6 +51,10 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
   const [isFollowUpVisible, setFollowUpVisible] = useState(false);
   const [isReschduleSlot, setReschduleSlot] = useState(false);
   const [isEnrolled, setEnrolled] = useState(false);
+  const [isWhatsAppHistoryVisible, setWhatsAppHistoryVisible] = useState(false);
+  // Hidden inside the inbox itself, where the chat is already on screen.
+  const canViewWhatsAppHistory =
+    parentPage !== "whatsappInbox" && permissions.whatsappInbox.view.includes(user?.role);
 
   const {
     editEnquiry,
@@ -83,11 +90,16 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
 
   const handleSave = async (values) => {
     const movingToEnrolled = values.stage === "Enrolled" && enquiry?.stage !== "Enrolled";
+    const { enrollMode, enrollmentCourseId, ...formValues } = values;
     const updateData = {
-      ...values,
+      ...formValues,
       selectedCourses: values.selectedCourses,
     };
-    if (movingToEnrolled) {
+    if (movingToEnrolled && enrollMode === ENROLL_MODES.WITHOUT_REGISTRATION) {
+      // Stage changes right away; the server appends the "manually updated" remark
+      updateData.enrollWithoutRegistration = true;
+      if (enrollmentCourseId) updateData.enrollmentCourseId = enrollmentCourseId;
+    } else if (movingToEnrolled) {
       // Save the other edits now; the stage changes once the student is enrolled
       delete updateData.stage;
       await editEnquiry(enquiry._id, updateData);
@@ -224,6 +236,16 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
                 <PhoneOutlined /> Phone:
               </Text>{" "}
               <Text>{enquiry?.phoneNumber || "N/A"}</Text>
+              {canViewWhatsAppHistory && enquiry?.phoneNumber ? (
+                <Button
+                  size="small"
+                  type="link"
+                  icon={<WhatsAppOutlined />}
+                  onClick={() => setWhatsAppHistoryVisible(true)}
+                >
+                  WhatsApp history
+                </Button>
+              ) : null}
             </Col>
 
             <Col span={24}>
@@ -473,6 +495,12 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
           </Button>
         }
       </Drawer>
+
+      <EnquiryWhatsAppHistoryModal
+        enquiryId={enquiry?._id}
+        open={isWhatsAppHistoryVisible}
+        onClose={() => setWhatsAppHistoryVisible(false)}
+      />
 
       {/* Edit Modal */}
       <EditEnquiryModal

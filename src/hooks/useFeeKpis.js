@@ -2,19 +2,27 @@ import { useEffect, useState, useCallback } from 'react';
 import { useStore } from 'zustand';
 import { message } from 'antd';
 import feeStore from '@stores/FeeStore';
+import centerStore from '@stores/CentersStore';
 import studentService from '@services/Student';
 import walletService from '@services/WalletService';
 import logger from '@utils/logger';
 
 function useFeeKpis() {
-  const { getFeeKpis, kpis, loading } = useStore(feeStore);
+  const { getFeeKpis, kpis, kpisLoading: loading } = useStore(feeStore);
+  const { selectedCenter } = useStore(centerStore);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
+  // Row whose reminder dialog is open; one shared dialog for both tables.
+  const [reminderRow, setReminderRow] = useState(null);
 
+  // Server pins center-bound roles to their own center, so sending the selector value
+  // is safe for every role.
   useEffect(() => {
-    getFeeKpis({});
-  }, []);
+    getFeeKpis({ query: { center_id: selectedCenter } }).catch((error) => {
+      logger.error('Error fetching fee KPIs:', error);
+    });
+  }, [selectedCenter]);
 
   const openStudent = useCallback(async (studentId) => {
     if (!studentId) return;
@@ -52,6 +60,9 @@ function useFeeKpis() {
     setSelectedStudent(null);
   }, []);
 
+  const openReminder = useCallback((row) => setReminderRow(row), []);
+  const closeReminder = useCallback(() => setReminderRow(null), []);
+
   return {
     kpis,
     loading,
@@ -60,6 +71,9 @@ function useFeeKpis() {
     modalVisible,
     openStudent,
     closeModal,
+    reminderRow,
+    openReminder,
+    closeReminder,
   };
 }
 

@@ -15,17 +15,19 @@ export default defineConfig({
       workbox: {
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
         importScripts: ['/sw-push.js'],
+        navigateFallbackDenylist: [
+          /^\/\.well-known\/assetlinks\.json$/
+        ]
       },
 
       includeAssets: [
-        "favicon.ico",
-        "apple-touch-icon.png",
-        "mask-icon.svg"
+        "logo_small.jpeg",
+        "icons/launchericon-192x192.png"
       ],
 
       manifest: {
         name: "School of Athens CRM",
-        short_name: "CRM",
+        short_name: "School Of Athens",
 
         description: "School Management System",
 
@@ -35,12 +37,22 @@ export default defineConfig({
 
         display: "standalone",
 
+        id: "/",
+
         start_url: "/",
 
         scope: "/",
 
 
         orientation: "portrait",
+
+        // Lets getInstalledRelatedApps() detect the installed PWA or the Android APK (TWA),
+        // so the install popup isn't shown to people who already have either
+        prefer_related_applications: false,
+        related_applications: [
+          { platform: "webapp", url: "https://app.schoolofathens.art/manifest.webmanifest" },
+          { platform: "play", id: "art.schoolofathens.app.twa" }
+        ],
 
         icons: [
           {
@@ -54,7 +66,7 @@ export default defineConfig({
             type: "image/png"
           },
           {
-            src: "/icons/icon-512-maskable.png",
+            src: "/icons/launchericon-512x512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable"
@@ -73,5 +85,17 @@ export default defineConfig({
       "@services": "/src/services",
       '@': '/src'
     }
-  }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        // Stable vendor chunks: a deploy that only changes app code leaves these
+        // cached in the browser instead of re-downloading the whole bundle.
+        manualChunks: {
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-antd": ["antd", "@ant-design/icons"],
+        },
+      },
+    },
+  },
 })

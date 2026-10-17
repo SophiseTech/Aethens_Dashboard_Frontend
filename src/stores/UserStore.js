@@ -40,6 +40,9 @@ const userStore = create((set, get) => ({
       set({ authLoading: false })
     }
   },
+  // Must NOT touch push: don't call subscription.unsubscribe() or remove the server
+  // link. The browser's push endpoint is shared by every account that has logged in
+  // here, and each keeps receiving (labelled by account) after logging out.
   logOut: async () => {
     localStorage.removeItem("jwt_token")
     set({
