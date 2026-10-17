@@ -16,6 +16,7 @@ const NOTIFICATION_TYPE_OPTIONS = [
   { label: 'Final Project', value: 'final_project' },
   { label: 'Holiday', value: 'holiday' },
   { label: 'Upcoming Class Reminder', value: 'class_reminder' },
+  { label: 'WhatsApp Inbox Message', value: 'whatsapp_inbox' },
   { label: 'Test Notification', value: 'test' },
 ];
 

@@ -199,6 +199,10 @@ const permissions = {
   },
   fee_reminder: {
     send: [ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER]
+  },
+  // Managers see their own center's chats; the server enforces this per conversation.
+  whatsappInbox: {
+    view: [ROLES.ADMIN, ROLES.MANAGER, ROLES.OPERATIONS_MANAGER]
   }
 }
 

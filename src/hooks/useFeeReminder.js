@@ -4,17 +4,10 @@ import dayjs from 'dayjs';
 import feeStore from '@stores/FeeStore';
 import useWhatsAppTemplateStore from '@stores/WhatsAppTemplateStore';
 import useAlert from '@hooks/useAlert';
+import { substituteTemplate } from '@utils/whatsappTemplate';
 
 const FEE_REMINDER_TEMPLATE_NAME = 'fee_due_reminder';
 const FEE_REMINDER_TEMPLATE_LANGUAGE = 'en';
-
-// Substitutes {{1}}, {{2}}, ... placeholders in a WhatsApp template body with
-// the given values, leaving any placeholder without a supplied value as-is.
-function substituteTemplate(bodyText, values) {
-  return bodyText.replace(/\{\{(\d+)\}\}/g, (match, index) => (
-    values[index] !== undefined ? String(values[index]) : match
-  ));
-}
 
 // Drives the Fee Reminder dialog: renders a live preview of the approved
 // "fee_due_reminder" WhatsApp template as the manager edits amount/due date,

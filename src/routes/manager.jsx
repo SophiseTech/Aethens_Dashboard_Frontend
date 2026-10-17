@@ -30,6 +30,7 @@ const ManagerSlots = lazy(() => import("@pages/Slots/ManagerSlots"))
 const ManagerCourseHistory = lazy(() => import("@pages/CourseHistory/ManagerCourseHistory"))
 const ManagerAnnouncementPage = lazy(() => import("@pages/Announcement/ManagerAnnouncement"))
 const WhatsAppCampaigns = lazy(() => import("@pages/WhatsAppCampaigns"))
+const WhatsAppInbox = lazy(() => import("@pages/WhatsAppInbox"))
 const EnquiryDocumentSets = lazy(() => import("@pages/EnquiryDocumentSets"))
 const Notifications = lazy(() => import("@pages/Notifications/Notifications"))
 const ReviewSubmission = lazy(() => import("@pages/FinalProject/ReviewSubmission"))
@@ -202,6 +203,13 @@ export const managerRoutes = [
               <LazyLoader element={<WhatsAppCampaigns />} />
             ),
             title: "WhatsApp Campaigns",
+          },
+          {
+            path: "/manager/whatsapp-inbox",
+            element: (
+              <LazyLoader element={<WhatsAppInbox />} />
+            ),
+            title: "WhatsApp Inbox",
           },
           {
             path: "/manager/enquiry-document-sets",

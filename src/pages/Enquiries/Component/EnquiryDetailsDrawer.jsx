@@ -21,6 +21,7 @@ import {
   EditOutlined,
   CalendarOutlined,
   DeleteOutlined,
+  WhatsAppOutlined,
 } from "@ant-design/icons";
 import { formatDate, formatTime } from "@utils/helper";
 import { MESSAGE_STATUS_COLORS } from "@utils/whatsappMessageStatus";
@@ -37,6 +38,7 @@ import permissions from "@utils/permissions";
 import userStore from "@stores/UserStore";
 import ReopenEnquiryModal from "./ReopenEnquiryModal";
 import AddStudent from "@pages/Students/Component/AddStudent";
+import EnquiryWhatsAppHistoryModal from "@pages/WhatsAppInbox/components/EnquiryWhatsAppHistoryModal";
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
@@ -49,6 +51,10 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
   const [isFollowUpVisible, setFollowUpVisible] = useState(false);
   const [isReschduleSlot, setReschduleSlot] = useState(false);
   const [isEnrolled, setEnrolled] = useState(false);
+  const [isWhatsAppHistoryVisible, setWhatsAppHistoryVisible] = useState(false);
+  // Hidden inside the inbox itself, where the chat is already on screen.
+  const canViewWhatsAppHistory =
+    parentPage !== "whatsappInbox" && permissions.whatsappInbox.view.includes(user?.role);
 
   const {
     editEnquiry,
@@ -230,6 +236,16 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
                 <PhoneOutlined /> Phone:
               </Text>{" "}
               <Text>{enquiry?.phoneNumber || "N/A"}</Text>
+              {canViewWhatsAppHistory && enquiry?.phoneNumber ? (
+                <Button
+                  size="small"
+                  type="link"
+                  icon={<WhatsAppOutlined />}
+                  onClick={() => setWhatsAppHistoryVisible(true)}
+                >
+                  WhatsApp history
+                </Button>
+              ) : null}
             </Col>
 
             <Col span={24}>
@@ -479,6 +495,12 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
           </Button>
         }
       </Drawer>
+
+      <EnquiryWhatsAppHistoryModal
+        enquiryId={enquiry?._id}
+        open={isWhatsAppHistoryVisible}
+        onClose={() => setWhatsAppHistoryVisible(false)}
+      />
 
       {/* Edit Modal */}
       <EditEnquiryModal
