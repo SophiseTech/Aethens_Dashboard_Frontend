@@ -11,7 +11,7 @@ import handleError from '@utils/handleError';
 import { isUserActive } from '@utils/helper';
 import { Button, Form, Modal } from 'antd';
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 function AllotSessions({ student }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,6 +21,13 @@ function AllotSessions({ student }) {
   const getActiveSessions = studentStore((state) => state.getActiveSessions)
   const activeStudentSessions = studentStore((state) => state.activeStudentSessions)
   const studentActiveSession = activeStudentSessions[student._id]
+  // Sessions belong to the student's center — admins have no own center and the global picker may be "all"
+  const studentCenterId = student?.center_id?._id || student?.center_id
+
+  const getStudentCenterSessions = useCallback(
+    (date, _centerId, ...rest) => getAvailableSessions(date, studentCenterId, ...rest),
+    [getAvailableSessions, studentCenterId]
+  )
 
   useEffect(() => {
     if (isModalOpen) {
@@ -42,6 +49,7 @@ function AllotSessions({ student }) {
     if (values.type === "regular" && studentActiveSession?.length > 0) return handleError("Student already has an active session")
     values.booked_student_id = student._id
     values.course_id = student.details_id?.course_id?._id || student?.details_id?.course_id
+    values.center_id = studentCenterId
 
     // Transform sessionSchedule array to sessions format
     if (values.sessionSchedule && Array.isArray(values.sessionSchedule)) {
@@ -90,7 +98,7 @@ function AllotSessions({ student }) {
           <SessionDateSelector
             name="sessionSchedule"
             label="Session Schedule"
-            getAvailableSessions={getAvailableSessions}
+            getAvailableSessions={getStudentCenterSessions}
             availableSessions={availableSessions}
             loading={loading}
             minItems={1}
