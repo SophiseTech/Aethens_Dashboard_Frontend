@@ -128,6 +128,22 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
 
 
 
+  // Row-keyed state must shift down when a row is removed, else later rows inherit stale data
+  const shiftAfterRemove = (map, removedIndex) => {
+    const shifted = {}
+    Object.keys(map || {}).forEach(key => {
+      const i = Number(key)
+      if (i < removedIndex) shifted[i] = map[key]
+      else if (i > removedIndex) shifted[i - 1] = map[key]
+    })
+    return shifted
+  }
+
+  const onItemRemove = (index) => {
+    setSelectedItem(shiftAfterRemove(selectedItem, index))
+    setDiscountType(prev => shiftAfterRemove(prev, index))
+  }
+
   // Called when any field in the items change so taht all other dependend values are recalculated
   useEffect(() => {
 
@@ -181,7 +197,7 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
   }, [itemsFields, discountType])
 
   return (
-    <DynamicInpuTable form={form} name={name} columns={itemsColumns} options={itemsOptions} onSelect={onItemsChange} disableAddItem={disableAddItem} disableDelete={disableDelete} />
+    <DynamicInpuTable form={form} name={name} columns={itemsColumns} options={itemsOptions} onSelect={onItemsChange} onRemove={onItemRemove} disableAddItem={disableAddItem} disableDelete={disableDelete} />
 
   )
 }

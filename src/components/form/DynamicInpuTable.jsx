@@ -6,7 +6,7 @@ import React, { useState } from 'react'
 
 
 
-function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = () => { }, disableAddItem, disableDelete }) {
+function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = () => { }, onRemove = () => { }, disableAddItem, disableDelete }) {
 
   const [editingIndex, setEditingIndex] = useState(-1);
   const isEditing = (index) => index === editingIndex;
@@ -53,6 +53,7 @@ function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = (
     const currentRows = form.getFieldValue(name)
     const removedRows = currentRows.filter((_, i) => i !== index)
     await form.setFieldValue(name, removedRows)
+    onRemove(index)
     if (editingIndex === index) setEditingIndex(-1)
   }
 
