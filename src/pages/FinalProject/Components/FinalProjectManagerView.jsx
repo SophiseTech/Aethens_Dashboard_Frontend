@@ -4,6 +4,9 @@ import { useFinalProject } from '@hooks/useFinalProject';
 // import useStudents from '@hooks/useStudents';
 import CreateProject from '@pages/FinalProject/Components/CreateProject';
 import ProjectOpenedStudentsList from '@pages/FinalProject/Components/ProjectOpenedStudentsList';
+import PendingFinalProjectList from '@pages/FinalProject/Components/PendingFinalProjectList';
+import { usePendingFinalProjects } from '@hooks/usePendingFinalProjects';
+import useCourse from '@hooks/useCourse';
 import { formatDate } from '@utils/helper';
 import { Avatar, Button, Card, Segmented, Space, Spin, Table, Tag, Typography } from 'antd';
 import { debounce } from 'lodash';
@@ -16,6 +19,32 @@ import { ROLES } from '@utils/constants';
 import TitleLayout from '@components/layouts/Title'
 
 const { Text, Title } = Typography
+
+const PENDING_FINAL_PROJECT_VIEW = 'not_created'
+
+// Mounted only while its view is selected, so the list isn't fetched on the other views.
+function PendingFinalProjectSection() {
+  const nav = useNavigate()
+  // Courses are already loaded into the shared course store by <CreateProject /> on this page;
+  // getCourses appends, so calling it again here would duplicate the options.
+  const { courseOptions } = useCourse()
+  const pending = usePendingFinalProjects()
+
+  return (
+    <PendingFinalProjectList
+      students={pending.students}
+      total={pending.total}
+      loading={pending.loading}
+      filters={pending.filters}
+      pagination={pending.pagination}
+      courseOptions={courseOptions}
+      onFiltersChange={pending.handleFiltersChange}
+      onSearch={pending.handleSearch}
+      onPaginationChange={pending.handlePaginationChange}
+      onView={(studentId) => nav(`/manager/final-project/student/${studentId}/details`)}
+    />
+  )
+}
 
 function FinalProjectManagerView() {
   const { getStatusConfig, fetchPendingSubmissions, pendingSubmissions, loading, listProjects, projectsInfo, handlePaginationChange,
@@ -36,7 +65,16 @@ function FinalProjectManagerView() {
     }
   }, [selectedCenter])
 
+  const canViewPendingFinalProjects = user.role === ROLES.ADMIN || user.role === ROLES.ACADEMIC_MANAGER
+  const isPendingFinalProjectView = canViewPendingFinalProjects && selectedView === PENDING_FINAL_PROJECT_VIEW
+
+  // Anyone else opening a ?view=not_created link falls back to the default view
   useEffect(() => {
+    if (!canViewPendingFinalProjects && selectedView === PENDING_FINAL_PROJECT_VIEW) setView('pending')
+  }, [canViewPendingFinalProjects, selectedView])
+
+  useEffect(() => {
+    if (selectedView === PENDING_FINAL_PROJECT_VIEW) return;
     let query = { status: selectedView };
     if ((user.role === ROLES.ADMIN || user.role === ROLES.ACADEMIC_MANAGER) && selectedCenter) {
       query.centerId = selectedCenter;
@@ -168,22 +206,30 @@ function FinalProjectManagerView() {
         </Card>
 
         <Segmented
-          options={[{ label: 'Completed Students', value: 'completed' }, { label: 'Opened Students', value: 'pending' }]}
+          options={[
+            { label: 'Completed Students', value: 'completed' },
+            { label: 'Opened Students', value: 'pending' },
+            ...(canViewPendingFinalProjects ? [{ label: 'Pending Final Project', value: PENDING_FINAL_PROJECT_VIEW }] : []),
+          ]}
           value={selectedView}
           onChange={setView}
           className='mb-2'
         />
 
-        <ProjectOpenedStudentsList
-          projectsInfo={{
-            ...projectsInfo,
-            handlePaginationChange: handlePaginationChange
-          }}
-          loading={projectFetchLoading}
-          onView={onViewStudents}
-          onSearch={handleStudentSearch}
-          title={selectedView === 'completed' ? 'Completed Students' : 'Opened Students'}
-        />
+        {isPendingFinalProjectView ? (
+          <PendingFinalProjectSection />
+        ) : (
+          <ProjectOpenedStudentsList
+            projectsInfo={{
+              ...projectsInfo,
+              handlePaginationChange: handlePaginationChange
+            }}
+            loading={projectFetchLoading}
+            onView={onViewStudents}
+            onSearch={handleStudentSearch}
+            title={selectedView === 'completed' ? 'Completed Students' : 'Opened Students'}
+          />
+        )}
       </div>
     </TitleLayout>
   );

@@ -15,6 +15,9 @@ export const useFinalProjectStore = create((set, get) => ({
   error: null,
   createLoading: false,
   latestSubmission: null,
+  pendingFinalProjects: [],
+  pendingFinalProjectsTotal: 0,
+  pendingFinalProjectsLoading: false,
 
   // Filters and Pagination
   filters: {},
@@ -183,6 +186,23 @@ export const useFinalProjectStore = create((set, get) => ({
     }
   },
 
+
+  // Active students with a completed/migrated course but no final project for it
+  listPendingFinalProjects: async (query = {}, pagination = { page: 1, limit: 10 }) => {
+    set({ pendingFinalProjectsLoading: true, error: null });
+    try {
+      const response = await finalProjectService.getPendingFinalProjects(query, pagination);
+      set({
+        pendingFinalProjects: response?.students || [],
+        pendingFinalProjectsTotal: response?.pagination?.total || 0,
+        pendingFinalProjectsLoading: false
+      });
+      return response;
+    } catch (error) {
+      set({ error, pendingFinalProjectsLoading: false });
+      throw error;
+    }
+  },
 
   // Get latest submission by filters (only studentId, projectId filter enabled in server)
   getLatestSubmission: async (filters = {}) => {

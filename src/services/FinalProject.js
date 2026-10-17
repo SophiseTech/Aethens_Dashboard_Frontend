@@ -151,6 +151,16 @@ class FinalProjectService {
     }
   }
 
+  async getPendingFinalProjects(query = {}, pagination = { page: 1, limit: 10 }) {
+    try {
+      const response = await post(`/v2/finalProject/pending-final-projects`, { query, pagination });
+      if (!response) throw new Error("An error occurred while fetching pending final projects");
+      return response.data;
+    } catch (error) {
+      handleInternalError(error);
+    }
+  }
+
   async reviewSubmission(submissionId, data) {
     try {
       const response = await post(`/v2/finalProject/submission/${submissionId}/review`, data);
