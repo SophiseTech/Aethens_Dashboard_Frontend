@@ -20,7 +20,7 @@ const permissions = {
     view_bill: [ROLES.MANAGER, ROLES.STUDENT]
   },
   bills: {
-    add: [ROLES.MANAGER],
+    add: [ROLES.MANAGER, ROLES.ADMIN],
     record_payment: [ROLES.MANAGER, ROLES.ADMIN],
     delete: [ROLES.ADMIN],
     finalize: [ROLES.MANAGER, ROLES.ADMIN],

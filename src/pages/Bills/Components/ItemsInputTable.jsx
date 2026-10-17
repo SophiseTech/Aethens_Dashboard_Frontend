@@ -5,7 +5,7 @@ import { sum } from 'lodash';
 import React, { useEffect, useState } from 'react'
 const { Option } = Select;
 
-function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSelectedItem, setTotals, disableAddItem = false, disableDelete = false, itemType, onSearch }) {
+function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSelectedItem, setTotals, disableAddItem = false, disableDelete = false, itemType, onSearch, itemsLoading = false }) {
 
   const itemsFields = Form.useWatch(name, form)
   const [discountType, setDiscountType] = useState({ 0: "percentage" })
@@ -21,6 +21,7 @@ function ItemsInputTable({ form, name, items, itemsOptions, selectedItem, setSel
       onSearch: (value) => { onSearch(value, itemType) },
       itemType: itemType,
       options: itemsOptions,
+      loading: itemsLoading,
     },
     {
       title: 'Quantity',

@@ -18,6 +18,8 @@ export default function useSearchableStudents() {
             logger.info("Search query", searchQuery)
             setLoading(true)
             const filters = { searchQuery }
+            // Optional center scope — server honours it for admin/academic_manager only
+            if (query.centerId && query.centerId !== 'all') filters.query = { center_id: query.centerId }
             const response = await userService.search(page, limit, filters)
             setStudents(response.users)
             setTotal(response.total)
@@ -28,6 +30,11 @@ export default function useSearchableStudents() {
         }
     }
 
-    return { students, total, loading, searchStudents }
+    const resetStudents = () => {
+        setStudents([])
+        setTotal(0)
+    }
+
+    return { students, total, loading, searchStudents, resetStudents }
 
 }

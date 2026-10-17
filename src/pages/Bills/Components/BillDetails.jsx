@@ -141,45 +141,58 @@ function BillDetails() {
     }
   };
 
-  const handleSearch = useMemo(
+  const [itemsSearching, setItemsSearching] = useState(false);
+
+  const debouncedItemSearch = useMemo(
     () =>
-      debounce(async (value, itemType) => {
-        const effectiveCenterId =
-          user.role === ROLES.MANAGER ? user?.center_id : selectedCenter;
+      debounce(async (value, itemType, centerId) => {
+        try {
+          // Prefer the bill's own center so admins search the inventory the bill deducts from
+          const effectiveCenterId =
+            user.role === ROLES.MANAGER ? user?.center_id : (centerId || selectedCenter);
 
-        if (!effectiveCenterId) return;
+          if (!effectiveCenterId || effectiveCenterId === 'all') return;
 
-        const response = await inventoryService.getCenterInventoryItems(
-          effectiveCenterId,
-          0,
-          10,
-          {
-            searchQuery: value,
-            type: itemType,
+          const response = await inventoryService.getCenterInventoryItems(
+            effectiveCenterId,
+            0,
+            10,
+            {
+              searchQuery: value,
+              type: itemType,
+            }
+          );
+
+          if (response?.items) {
+            const mappedItems = response.items.map((record) => ({
+              ...record.item_id,
+              rate: record.rate,
+              discount: record.discount,
+              taxes: record.tax,
+              quantity: record.quantity,
+              type: record.type,
+            }));
+
+            setLineItems(mappedItems);
           }
-        );
-
-        if (response?.items) {
-          const mappedItems = response.items.map((record) => ({
-            ...record.item_id,
-            rate: record.rate,
-            discount: record.discount,
-            taxes: record.tax,
-            quantity: record.quantity,
-            type: record.type,
-          }));
-
-          setLineItems(mappedItems);
+        } finally {
+          setItemsSearching(false);
         }
       }, 300),
     [user.role, user?.center_id, selectedCenter]
   );
 
+  // Spinner starts on the keystroke so the debounce window doesn't show "No data"
+  const handleSearch = (...args) => {
+    setItemsSearching(true);
+    debouncedItemSearch(...args);
+  };
+
   useEffect(() => {
     return () => {
-      handleSearch.cancel();
+      debouncedItemSearch.cancel();
     };
-  }, [handleSearch]);
+  }, [debouncedItemSearch]);
 
   useEffect(() => {
     if (!bill?.items?.length) return;
@@ -394,6 +407,7 @@ function BillDetails() {
             invoiceNo={bill?.invoiceNo}
             center_initial={bill?.center_initial}
             onSearch={handleSearch}
+            itemsLoading={itemsSearching}
           />
         )}
       </Suspense>

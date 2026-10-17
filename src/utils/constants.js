@@ -310,7 +310,9 @@ export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
   "/manager/tasks",
   "/manager/expenses",
   "/manager/ledgers",
-  "/manager/reports/financial"
+  "/manager/reports/financial",
+  // Bill form has its own center select for admins
+  "/manager/bills"
 ]
 
 export const GLOBAL_USER_ROLES = [

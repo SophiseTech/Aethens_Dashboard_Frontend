@@ -13,7 +13,7 @@ import { toISTStartOfDayISO } from '@utils/helper'
 import permissions from '@utils/permissions'
 import dayjs from 'dayjs'
 import _, { debounce } from 'lodash'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useStore } from 'zustand'
 
@@ -21,7 +21,7 @@ import { useStore } from 'zustand'
 function Bills() {
 
   const { getBills, bills, loading, createBill, total, getInvoiceNo, invoiceNo, center_initial, filters: stateFilters } = billStore()
-  const { searchStudents, students } = useSearchableStudents()
+  const { searchStudents, students, resetStudents } = useSearchableStudents()
   const [searchParams] = useSearchParams();
   const student_id = searchParams.get("student_id")
   const staff_id = searchParams.get("staff_id")
@@ -68,16 +68,26 @@ function Bills() {
     getBills(limit, { ...stateFilters, ...filters, populate: BILL_POPULATE })
   }
 
-  const handleDebouncedCustomerSearch = useCallback(
-    debounce((searchQuery) => {
+  // Tracked from the keystroke, not the request, so the dropdown doesn't show "No data" during the debounce
+  const [customerSearching, setCustomerSearching] = useState(false)
+
+  const debouncedCustomerSearch = useCallback(
+    debounce(async (searchQuery, centerId) => {
       try {
-        searchStudents(0, 15, { searchQuery });
+        await searchStudents(0, 15, { searchQuery, centerId });
       } catch (error) {
         console.error(error);
+      } finally {
+        setCustomerSearching(false)
       }
     }, 500),
     []
   );
+
+  const handleDebouncedCustomerSearch = (searchQuery, centerId) => {
+    setCustomerSearching(true)
+    debouncedCustomerSearch(searchQuery, centerId)
+  }
 
   const loadInitData = async ({ itemType, centerId }) => {
     if (!invoiceNo || invoiceNo === 0 || user.role === ROLES.ADMIN || user.role === ROLES.OPERATIONS_MANAGER) {
@@ -131,14 +141,34 @@ function Bills() {
     await createBill(values)
   }
 
-  const handleSearch = async (value, itemType) => {
+  // Bill center changed mid-creation — drop options loaded for the previous center
+  const handleCenterChange = () => {
+    setLineItems([])
+    resetStudents()
+  }
+
+  // Only the latest search may clear the spinner — an older response can land after a newer request starts
+  const [itemsSearching, setItemsSearching] = useState(false)
+  const itemSearchSeq = useRef(0)
+
+  const handleSearch = async (...args) => {
+    const seq = ++itemSearchSeq.current
+    setItemsSearching(true)
+    try {
+      await searchCenterItems(...args)
+    } finally {
+      if (seq === itemSearchSeq.current) setItemsSearching(false)
+    }
+  }
+
+  const searchCenterItems = async (value, itemType, centerId) => {
     let effectiveCenterId;
     if (user.role === 'manager') {
       effectiveCenterId = user?.center_id
     } else {
-      effectiveCenterId = selectedCenter
+      effectiveCenterId = centerId || selectedCenter
     }
-    if (!effectiveCenterId) return;
+    if (!effectiveCenterId || effectiveCenterId === 'all') return;
 
     if (itemType === "materials") {
       const response = await inventoryService.getCenterInventoryItems(
@@ -196,6 +226,9 @@ function Bills() {
         center_initial={center_initial}
         onSearch={handleSearch}
         onCustomerSearch={handleDebouncedCustomerSearch}
+        customersLoading={customerSearching}
+        itemsLoading={itemsSearching}
+        onCenterChange={handleCenterChange}
       />
     }>
       <BillsLayot

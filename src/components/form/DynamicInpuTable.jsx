@@ -120,6 +120,7 @@ function DynamicInpuTable({ form, name, columns = [], options = [], onSelect = (
         selectAfter: col.selectAfter,
         editing: isEditing(index),
         itemType: col.itemType,
+        loading: col.loading,
       }),
     };
   });
@@ -179,24 +180,33 @@ const EditableCell = ({
   selectAfter,
   onSearch,
   itemType,
+  loading,
   ...restProps
 }) => {
 
-  const [searchLoading, setSearchLoading] = useState(false)
+  // `loading` is opt-in per column: the caller reports its request, this covers the debounce gap before it
+  const showsLoading = loading !== undefined
+  const [searchPending, setSearchPending] = useState(false)
+  const isSearchLoading = showsLoading && (searchPending || loading)
 
-  const debouncedSearch = React.useMemo(() => {
-    if (!onSearch) return () => { };
-    return debounce((val) => {
-      try {
-        setSearchLoading(true);
-        onSearch?.(val, index);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setSearchLoading(false);
-      }
-    }, 300);
-  }, [onSearch, index]);
+  // Ref keeps the debounced fn stable across renders, so keystrokes actually debounce
+  const onSearchRef = React.useRef(onSearch)
+  onSearchRef.current = onSearch
+
+  const debouncedSearch = React.useMemo(() => debounce((val) => {
+    setSearchPending(false);
+    try {
+      onSearchRef.current?.(val, index);
+    } catch (error) {
+      console.log(error);
+    }
+  }, 300), [index]);
+
+  const handleSearch = (val) => {
+    if (!onSearchRef.current) return;
+    if (showsLoading) setSearchPending(true);
+    debouncedSearch(val);
+  };
 
   // Ensure the currently selected item is always in the options so the label shows instead of the raw _id
   const effectiveOptions = React.useMemo(() => {
@@ -216,15 +226,11 @@ const EditableCell = ({
         filterOption={itemType !== "course" ? false : (input, option) => {
           return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
         }}
-        onSearch={debouncedSearch}
+        onSearch={handleSearch}
         showSearch
-      >
-        {searchLoading ? <Spin className='animate-spin' /> : effectiveOptions?.map((option) => (
-          <Select.Option key={option.value} value={option.value}>
-            {option.label}
-          </Select.Option>
-        ))}
-      </Select>
+        loading={isSearchLoading}
+        notFoundContent={isSearchLoading ? <Spin size="small" /> : undefined}
+      />
       : inputType === "percentage" ? <Input addonAfter={selectAfter(index)} />
         : inputType === "select" ?
           <Select

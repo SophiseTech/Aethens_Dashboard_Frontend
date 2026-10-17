@@ -5,7 +5,7 @@ import CustomSelect from "@components/form/CustomSelect";
 import CustomSubmit from "@components/form/CustomSubmit";
 import ItemsInputTable from "@pages/Bills/Components/ItemsInputTable";
 import { sumFromObjects } from "@utils/helper";
-import { Form, Modal, Table, Checkbox, Card, Divider, Tag, Space, Alert, Button } from "antd";
+import { Form, Modal, Table, Checkbox, Card, Divider, Tag, Space, Alert, Button, Spin } from "antd";
 import { WalletOutlined, DollarOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
@@ -30,7 +30,10 @@ function GenerateBill({
   isModalOpen,
   handleOk,
   onSearch,
-  onCustomerSearch
+  onCustomerSearch,
+  customersLoading = false,
+  itemsLoading = false,
+  onCenterChange = () => { }
 }) {
   const [selectedItem, setSelectedItem] = useState({});
   const [totals, setTotals] = useState({});
@@ -48,6 +51,15 @@ function GenerateBill({
   const isEditUnpaid = isEditMode && bill?.status === 'unpaid';
   const [selectedCustomerWallet, setSelectedCustomerWallet] = useState({})
   const { getInvoiceNo, invoiceNo } = billStore()
+  // Admin has no own center — the bill's center is picked in the form and drives inventory, customers and stock deduction
+  const isAdmin = user.role === ROLES.ADMIN
+  // Bumped on center change to remount the items table (clears its row-edit state)
+  const [itemsTableKey, setItemsTableKey] = useState(0)
+
+  const centerOptions = useMemo(
+    () => centers?.map((center) => ({ label: center.center_name, value: center._id })) || [],
+    [centers]
+  );
 
   // Format invoice number for display (e.g., "WFD1001")
   const formattedInvoiceNo = `${center_initial || bill?.center_initial || bill?.center_id?.center_initial || ''}${invoiceNo || bill?.invoiceNo || ''}`;
@@ -59,7 +71,7 @@ function GenerateBill({
     subject: "",
     generated_on: dayjs(),
     discountType: "percentage",
-    centerId: selectedCenter
+    centerId: selectedCenter !== "all" ? selectedCenter : undefined
   }), [invoiceNo, selectedCenter]);
 
   const initialValues = useMemo(() => {
@@ -77,10 +89,13 @@ function GenerateBill({
       subject: bill.subject || "",
       generated_on: bill.generated_on ? dayjs(bill.generated_on) : dayjs(),
       discountType: bill.discountType || "percentage",
-      centerId: bill.center_id || bill.centerId || selectedCenter
+      centerId: bill.center_id?._id || bill.center_id || bill.centerId || selectedCenter
     }
   }, [bill, defaultInitialValues, selectedCenter]);
-  const loading = false;
+  const [saving, setSaving] = useState(false);
+  // Spinner on the clicked button only; the rest are disabled so a second save can't be fired
+  const draftButtonLoading = saving && savingAsDraft;
+  const finalButtonLoading = saving && !savingAsDraft;
 
   const subjectOptions = [
     {
@@ -166,8 +181,21 @@ function GenerateBill({
       setTotals({});
       setApplyWallet(false);
       setPaymentAmount(0);
+      // Options from a previous session may belong to another center
+      if (isAdmin) onCenterChange();
     }
   }, [isModalOpen, bill, initialValues]);
+
+  // Customers, inventory and line items are all per-center — start over when the center changes
+  const handleFormCenterChange = () => {
+    form.setFieldsValue({ items: [], generated_for: undefined });
+    setSelectedItem({});
+    setTotals({});
+    setApplyWallet(false);
+    setSelectedCustomerWallet({});
+    setItemsTableKey((key) => key + 1);
+    onCenterChange();
+  };
 
   const columns2 = [
     {
@@ -241,24 +269,31 @@ function GenerateBill({
       item.name = selectedItem[index]?.name;
       item.item_type = getItemType(selectedSubject);
     });
+    // Server only infers center for non-admins; an admin's bill carries the picked center
+    if (isAdmin && !isEditMode) values.center_id = values.centerId;
     const shouldSaveAsDraft = isEditDraft || savingAsDraft;
-    await onSave({
-      ...values,
-      ...totals,
-      status: isEditDraft ? 'draft' : bill?.status,
-      saveAsDraft: shouldSaveAsDraft,
-      center_initial: bill?.center_initial || center_initial,  // Include center initial for storage
-      walletBalance: walletBalance,
-      applyWallet: applyWallet,
-      walletAmountDeducted: effectiveWalletAmountDeducted,
-      finalTotal: finalGrandTotal,
-      paymentAmount: paymentAmount,
-      walletCreditAmount: walletCreditAmount,
-      newWalletBalance: walletBalance + walletCreditAmount - walletAmountDeducted,
-      walletId: selectedCustomerWallet?._id
-    });
-    handleOk();
-    setSavingAsDraft(false);
+    setSaving(true);
+    try {
+      await onSave({
+        ...values,
+        ...totals,
+        status: isEditDraft ? 'draft' : bill?.status,
+        saveAsDraft: shouldSaveAsDraft,
+        center_initial: bill?.center_initial || center_initial,  // Include center initial for storage
+        walletBalance: walletBalance,
+        applyWallet: applyWallet,
+        walletAmountDeducted: effectiveWalletAmountDeducted,
+        finalTotal: finalGrandTotal,
+        paymentAmount: paymentAmount,
+        walletCreditAmount: walletCreditAmount,
+        newWalletBalance: walletBalance + walletCreditAmount - walletAmountDeducted,
+        walletId: selectedCustomerWallet?._id
+      });
+      handleOk();
+    } finally {
+      setSaving(false);
+      setSavingAsDraft(false);
+    }
   };
 
   // logger.debug(walletBalance, walletAmountDeducted, bill, effectiveWalletAmountDeducted)
@@ -287,31 +322,36 @@ function GenerateBill({
           </div>
           <div className="flex gap-5">
             {/* <CustomInput label={"Subject"} name={"subject"} placeholder={"Materials"} /> */}
+            {isAdmin && (
+              <CustomSelect
+                label={"Center"}
+                name={"centerId"}
+                options={centerOptions}
+                placeholder="Center"
+                disabled={isEditMode}
+                onChange={handleFormCenterChange}
+              />
+            )}
             <CustomSelect
               name={"generated_for"}
               options={customersOptions}
               label={"Select Customer"}
               placeholder="Customer"
-              onSearch={onCustomerSearch}
+              onSearch={onCustomerSearch ? (query) => onCustomerSearch(query, selectedFormCenter) : undefined}
+              disabled={isAdmin && !selectedFormCenter}
+              loading={customersLoading}
+              notFoundContent={customersLoading ? <Spin size="small" /> : undefined}
             />
             <CustomSelect
               name={"subject"}
               options={subjectOptions}
               label={"Subject"}
               placeholder="Subject"
-              disabled={user.role === ROLES.ADMIN && !selectedFormCenter}
+              disabled={isAdmin && !selectedFormCenter}
             />
           </div>
-          {/* <div className="w-1/2">
-            {user.role === ROLES.ADMIN && (
-              <CustomSelect
-                label={"Center"}
-                name={"centerId"}
-                options={centerOptions}
-              />
-            )}
-          </div> */}
           <ItemsInputTable
+            key={itemsTableKey}
             form={form}
             items={items}
             itemsOptions={itemsOptionsBySubject}
@@ -320,7 +360,8 @@ function GenerateBill({
             setSelectedItem={setSelectedItem}
             setTotals={setTotals}
             itemType={selectedSubject}
-            onSearch={onSearch}
+            onSearch={(value, itemType) => onSearch?.(value, itemType, selectedFormCenter)}
+            itemsLoading={itemsLoading}
           />
           <div className="flex flex-row-reverse gap-6 items-start">
             <Table
@@ -459,7 +500,7 @@ function GenerateBill({
                   setSavingAsDraft(true);
                   form.submit();
                 }}
-                loading={loading}
+                loading={draftButtonLoading}
               >
                 Save Draft Changes
               </Button>
@@ -471,7 +512,7 @@ function GenerateBill({
                   setSavingAsDraft(false);
                   form.submit();
                 }}
-                loading={loading}
+                loading={finalButtonLoading}
               >
                 Save Unpaid Changes
               </Button>
@@ -482,7 +523,8 @@ function GenerateBill({
                     setSavingAsDraft(true);
                     form.submit();
                   }}
-                  loading={loading}
+                  loading={draftButtonLoading}
+                  disabled={finalButtonLoading}
                 >
                   Save as Draft
                 </Button>
@@ -493,7 +535,8 @@ function GenerateBill({
                     setSavingAsDraft(false);
                     form.submit();
                   }}
-                  loading={loading}
+                  loading={finalButtonLoading}
+                  disabled={draftButtonLoading}
                 >
                   Generate Invoice
                 </Button>
