@@ -13,6 +13,7 @@ import { useStore } from 'zustand';
 import { age_categories, classPreferenceOptions, EnquiryModeOptions, foundUsOptions, ROLES } from '@utils/constants';
 import userStore from '@stores/UserStore';
 import centersStore from '@stores/CentersStore';
+import { formatCenterCounts } from '@utils/helper';
 
 function AddEnquiry() {
 
@@ -86,17 +87,26 @@ function AddEnquiry() {
 
     // First click: check if enquiry exists for phoneNumber
     try {
-      const res = await enquiryService.enquiryExists('phoneNumber', cleanedPhone);
+      // Managers are scoped server-side; admins check against the center picked on the form
+      const centerId = values.centerId;
+      const res = await enquiryService.enquiryExists('phoneNumber', cleanedPhone, centerId);
       // normalize response: support { count } or { exists }
       const existsCount = (res && (res.count ?? (res.exists ? res.exists : 0))) || 0;
-      const existsObj = { exists: Number(existsCount) > 0, count: Number(existsCount) };
+      const existsObj = {
+        exists: Number(existsCount) > 0,
+        count: Number(existsCount),
+        sameCenterCount: Number(res?.sameCenterCount || 0),
+        otherCenters: res?.otherCenters || [],
+        // without a center (e.g. admin with none picked) every match is listed per center
+        hasOwnCenter: user.role === ROLES.MANAGER || Boolean(centerId),
+      };
       setExistence(existsObj);
       // mark as checked so next click will proceed
       checkedRef.current = true;
       return { reset: false, checked: true, ...existsObj };
     } catch {
       // service handles errors; still mark checked to allow proceeding
-      const fallback = { exists: false, count: 0 };
+      const fallback = { exists: false, count: 0, sameCenterCount: 0, otherCenters: [], hasOwnCenter: true };
       setExistence(fallback);
       checkedRef.current = true;
       return { reset: false, checked: true, ...fallback };
@@ -133,11 +143,23 @@ function AddEnquiry() {
           {existence !== null && (
             <div className="mb-3">
               {existence.exists ? (
-                <Alert
-                  message={`${existence.count} enquiries exist for this phone number`}
-                  type="error"
-                  showIcon
-                />
+                <>
+                  {existence.sameCenterCount > 0 && (
+                    <Alert
+                      message={`${existence.sameCenterCount} enquiries exist in this center for this phone number`}
+                      type="error"
+                      showIcon
+                    />
+                  )}
+                  {existence.otherCenters.length > 0 && (
+                    <Alert
+                      className="mt-2"
+                      message={`${existence.hasOwnCenter ? "Also exists in other centers" : "Exists in"}: ${formatCenterCounts(existence.otherCenters)}`}
+                      type="warning"
+                      showIcon
+                    />
+                  )}
+                </>
               ) : (
                 <Alert message={"No existing enquiries found"} type="success" showIcon />
               )}

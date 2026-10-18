@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
-import { Segmented, Table, Tag, Tooltip, message } from "antd";
+import { Alert, Segmented, Table, Tag, Tooltip, message } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import enquiryStore from "@stores/EnquiryStore";
 import EnquiryDetailsDrawer from "@pages/Enquiries/Component/EnquiryDetailsDrawer";
 import ViewWiseFilters from './ViewWiseFilters'
-import { formatDate, formatDateTime } from "@utils/helper";
+import { formatCenterCounts, formatDate, formatDateTime } from "@utils/helper";
 import Chip from "@components/Chips/Chip";
 import EnquiryDashboard from "@pages/Enquiries/Component/EnquiryDashboard";
 import userStore from "@stores/UserStore";
@@ -20,6 +20,7 @@ function EnquiryList() {
     loading,
     getEnquiries,
     total,
+    otherCenters,
     searchQuery,
     searchTotal,
     search,
@@ -242,6 +243,15 @@ function EnquiryList() {
           <div>
             <p>Total Enquiries: <span className="font-bold">{total}</span></p>
           </div>
+
+          {otherCenters?.length > 0 && (
+            <Alert
+              className="my-2"
+              type="warning"
+              showIcon
+              message={`Also found in other centers: ${formatCenterCounts(otherCenters)}`}
+            />
+          )}
 
           <Table
             columns={columns}

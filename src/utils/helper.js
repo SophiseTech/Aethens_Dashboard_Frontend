@@ -441,3 +441,6 @@ export function getSlotColor(freeSlotPercent) {
 
   return '#ffccc7'
 }
+// [{ centerName, count }] → "SOA-Brookefield (2), SOA-Whitefield (1)"
+export const formatCenterCounts = (centers = []) =>
+  centers.map((c) => `${c.centerName} (${c.count})`).join(", ");

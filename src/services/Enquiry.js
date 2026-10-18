@@ -86,13 +86,14 @@ class EnquiryService {
   }
 
   // Check if an enquiry exists based on a field and value
-  async enquiryExists(field, value) {
+  async enquiryExists(field, value, centerId) {
     try {
       if (!field) throw new Error("field is required");
       // encode value to be safe in query string
       const qsValue = encodeURIComponent(value ?? "");
+      const centerQs = centerId ? `&centerId=${encodeURIComponent(centerId)}` : "";
       const response = await get(
-        `/v3/enquiry/exists?field=${field}&value=${qsValue}`
+        `/v3/enquiry/exists?field=${field}&value=${qsValue}${centerQs}`
       );
       if (!response || response.status >= 400)
         throw new Error("An error occurred. Please try again");

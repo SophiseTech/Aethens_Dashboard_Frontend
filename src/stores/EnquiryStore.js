@@ -7,6 +7,7 @@ const enquiryStore = create((set, get) => ({
   enquiries: [],
   loading: true,
   total: 0,
+  otherCenters: [], // [{ centerName, count }] — search matches in centers the user can't see
   enquiry: {},
   searchResults: [],
   searchTotal: 0,
@@ -19,7 +20,7 @@ const enquiryStore = create((set, get) => ({
     try {
       set({ loading: true });
 
-      const { enquiries, total } = await enquiryService.getEnquiries(
+      const { enquiries, total, otherCenters } = await enquiryService.getEnquiries(
         page,
         limit,
         filters
@@ -27,7 +28,7 @@ const enquiryStore = create((set, get) => ({
 
       if (enquiries) {
         console.log(enquiries);
-        set({ enquiries, total });
+        set({ enquiries, total, otherCenters: otherCenters || [] });
       }
     } catch (error) {
       handleInternalError(error);
