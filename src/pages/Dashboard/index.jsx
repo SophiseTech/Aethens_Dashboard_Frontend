@@ -1,8 +1,8 @@
 import Title from '@components/layouts/Title';
 import userStore from '@stores/UserStore';
 import useMediaQuery, { DESKTOP_QUERY } from '@hooks/useMediaQuery';
-import { ROLES } from '@utils/constants';
-import { Spin } from 'antd';
+import { ROLES, SELF_ATTENDANCE_ROLES } from '@utils/constants';
+import { Flex, Spin } from 'antd';
 import { lazy, Suspense } from 'react';
 import { Navigate } from 'react-router-dom';
 // ✅ Define lazy imports ONCE here. Every role dashboard is lazy — a static import
@@ -13,12 +13,16 @@ const Student = lazy(() => import('@pages/Dashboard/Student'));
 const Manager = lazy(() => import('@pages/Dashboard/Manager'));
 const Admin = lazy(() => import('@pages/Dashboard/Admin'));
 const ManagerStudents = lazy(() => import('@pages/Students/ManagerStudents'));
+const MyCalendarWidget = lazy(() => import('@pages/Dashboard/Components/MyCalendarWidget'));
 
 function Dashboard() {
   const { user } = userStore();
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
   // Matches the "Home" tab students see below the desktop breakpoint.
   const title = user.role === ROLES.STUDENT && !isDesktop ? "Home" : "Dashboard";
+  // Personal calendar for every staff role except admin (and roles redirected away below)
+  const showMyCalendar = SELF_ATTENDANCE_ROLES.includes(user.role)
+    && ![ROLES.MEDIA_MANAGER, ROLES.PURCHASE_MANAGER].includes(user.role);
 
   const renderDashboard = () => {
     switch (user.role) {
@@ -46,7 +50,10 @@ function Dashboard() {
   return (
     <Title title={title}>
       <Suspense fallback={<Spin />}>
-        {renderDashboard()}
+        <Flex vertical gap={20}>
+          {showMyCalendar && <MyCalendarWidget />}
+          {renderDashboard()}
+        </Flex>
       </Suspense>
     </Title>
   );

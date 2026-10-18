@@ -1,8 +1,9 @@
 import { Badge, Calendar, Card, Tag } from "antd";
 import dayjs from "dayjs";
 import { useMemo } from "react";
+import { generateHolidayDates, getHolidayInfo } from "@utils/helper";
 
-function AttendanceCalendar({ month, records = [], holidays = [], onDateSelect }) {
+function AttendanceCalendar({ month, records = [], holidays = [], getHoliday, onDateSelect }) {
     // Convert records array to a map for quick lookup
     const recordsMap = useMemo(() => {
         const map = {};
@@ -11,6 +12,12 @@ function AttendanceCalendar({ month, records = [], holidays = [], onDateSelect }
         });
         return map;
     }, [records]);
+
+    // Recurring holidays are stored as MM-DD, so resolve against the displayed year
+    const year = dayjs(typeof month === "string" ? month + "-01" : month).year();
+    const holidayDates = useMemo(() => generateHolidayDates(holidays, year), [holidays, year]);
+    const resolveHoliday = getHoliday
+        || ((dateStr) => (holidayDates.has(dateStr) ? getHolidayInfo(dateStr, holidays, year) : null));
 
     const getAttendanceColor = (type) => {
         switch (type) {
@@ -49,13 +56,7 @@ function AttendanceCalendar({ month, records = [], holidays = [], onDateSelect }
         const dateStr = date.format("YYYY-MM-DD");
         const record = recordsMap[dateStr];
 
-        // Check if it's a holiday
-        const isHoliday = holidays?.some(holiday => {
-            const startDate = dayjs(holiday.startDate).startOf('day');
-            const endDate = dayjs(holiday.endDate).startOf('day');
-            const currentDate = date.startOf('day');
-            return currentDate.isSameOrAfter(startDate) && currentDate.isSameOrBefore(endDate);
-        });
+        const isHoliday = !!resolveHoliday(dateStr);
 
         if (!record && !isHoliday) {
             return null;

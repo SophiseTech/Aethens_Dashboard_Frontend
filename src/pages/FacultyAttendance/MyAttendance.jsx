@@ -11,110 +11,15 @@ import Title from "@components/layouts/Title";
 import DailySwipes from "./Components/DailySwipes";
 import AttendanceCalendar from "./Components/AttendanceCalendar";
 import attendanceService from "@services/AttendanceService";
-import leaveService from "@services/LeaveService";
-import holidayService from "@services/Holiday";
-import userStore from "@stores/UserStore";
-import { useStore } from "zustand";
+import useMyMonthCalendar from "@hooks/useMyMonthCalendar";
 
 function MyAttendance() {
     const [loading, setLoading] = useState(false);
     const [selectedDate, setSelectedDate] = useState(dayjs());
     const [selectedMonth, setSelectedMonth] = useState(dayjs().format("YYYY-MM"));
-    const { user } = useStore(userStore);
 
-    // Data states
     const [dailyData, setDailyData] = useState(null);
-    const [monthlyData, setMonthlyData] = useState(null);
-    const [holidays, setHolidays] = useState([]);
-
-    // Fetch holidays on mount
-    useEffect(() => {
-        const fetchHolidays = async () => {
-            try {
-                const response = await holidayService.fetchHolidays({
-                    skip: 0,
-                    limit: 100,
-                    centerId: user?.center_id,
-                    status: 'published'
-                });
-                setHolidays(response?.holidays || []);
-            } catch (error) {
-                console.error("Failed to load holidays:", error);
-            }
-        };
-
-        if (user?.center_id) {
-            fetchHolidays();
-        }
-    }, [user?.center_id]);
-
-    // Fetch monthly attendance data
-    useEffect(() => {
-        const fetchMonthlyData = async () => {
-            try {
-                setLoading(true);
-
-                // Fetch attendance data
-                const attendanceData = await attendanceService.getCurrentMonthAttendance();
-
-                // Fetch approved leaves for the selected month
-                const allLeaves = await leaveService.getLeaves();
-                const myApprovedLeaves = allLeaves?.filter(leave => leave.status === "APPROVED") || [];
-
-                // Convert approved leaves to attendance records format
-                const leaveRecords = [];
-                myApprovedLeaves.forEach(leave => {
-                    const fromDate = dayjs(leave.fromDate);
-                    const toDate = dayjs(leave.toDate);
-                    const monthStart = dayjs(selectedMonth + "-01");
-
-                    // Iterate through each day of the leave
-                    let currentDate = fromDate;
-                    while (currentDate.isBefore(toDate) || currentDate.isSame(toDate, 'day')) {
-                        // Only include dates within the selected month
-                        if (currentDate.isSame(monthStart, 'month')) {
-                            leaveRecords.push({
-                                date: currentDate.format("YYYY-MM-DD"),
-                                attendanceType: "LEAVE"
-                            });
-                        }
-                        currentDate = currentDate.add(1, 'day');
-                    }
-                });
-
-                // Merge attendance records with leave records
-                const attendanceRecords = attendanceData?.records || [];
-                const mergedRecords = [...attendanceRecords];
-
-                // Add leave records only if there's no existing attendance for that date
-                leaveRecords.forEach(leaveRecord => {
-                    const existingRecord = mergedRecords.find(r => r.date === leaveRecord.date);
-                    if (!existingRecord) {
-                        mergedRecords.push(leaveRecord);
-                    }
-                });
-
-                // Recalculate stats to include leaves
-                const leaveCount = mergedRecords.filter(r => r.attendanceType === "LEAVE").length;
-                const updatedStats = {
-                    ...(attendanceData?.stats || {}),
-                    leaves: leaveCount
-                };
-
-                setMonthlyData({
-                    ...attendanceData,
-                    records: mergedRecords,
-                    stats: updatedStats
-                });
-            } catch (error) {
-                message.error("Failed to load attendance data");
-                console.error(error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchMonthlyData();
-    }, [selectedMonth]);
+    const { loading: monthLoading, records, stats, getHoliday } = useMyMonthCalendar(selectedMonth);
 
     // Fetch daily swipes data
     useEffect(() => {
@@ -152,17 +57,9 @@ function MyAttendance() {
         setSelectedMonth(newMonth);
     };
 
-    const stats = monthlyData?.stats || {
-        totalDays: 0,
-        fullDays: 0,
-        halfDays: 0,
-        absents: 0,
-        leaves: 0
-    };
-
     return (
         <Title title="My Attendance">
-            <Spin spinning={loading}>
+            <Spin spinning={loading || monthLoading}>
                 <div className="space-y-6">
                     {/* Statistics Cards */}
                     <Row gutter={[16, 16]}>
@@ -223,8 +120,8 @@ function MyAttendance() {
                         <Col xs={24} lg={14}>
                             <AttendanceCalendar
                                 month={selectedMonth}
-                                records={monthlyData?.records || []}
-                                holidays={holidays}
+                                records={records}
+                                getHoliday={getHoliday}
                                 onDateSelect={handleDateSelect}
                                 onMonthChange={handleMonthChange}
                             />
