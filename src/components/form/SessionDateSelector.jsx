@@ -123,7 +123,7 @@ function SessionDateRow({
   listName = 'sessionSchedule',
 }) {
   const form = Form.useFormInstance();
-  const hasCalledRef = useRef(new Set()); // Track dates we've already triggered
+  const lastFetchedRef = useRef(null); // Day this row last fetched sessions for
 
   const dateValue = Form.useWatch([listName, fieldMeta.name, 'date']);
   const sessionValue = Form.useWatch([listName, fieldMeta.name, 'session_id']);
@@ -155,11 +155,10 @@ function SessionDateRow({
       return;
     }
 
+    // Fetch when this row's day changes (the shared list may hold another row's day)
     const dateStr = dateValue.format("YYYY-MM-DD");
-
-    // Only call once per unique date to avoid duplicate calls
-    if (!hasCalledRef.current.has(dateStr)) {
-      hasCalledRef.current.add(dateStr);
+    if (lastFetchedRef.current !== dateStr) {
+      lastFetchedRef.current = dateStr;
       getAvailableSessions(dateValue, null, 'booking');
     }
 
@@ -172,8 +171,17 @@ function SessionDateRow({
     prevDateRef.current = dateValue;
   }, [dateValue, getAvailableSessions, form, listName, fieldMeta.name]);
 
-  // Format available sessions for Select component
-  const formattedSessions = formatSessions(availableSessions);
+  // availableSessions is shared by every row and holds the last date fetched, so keep
+  // only this row's weekday — otherwise a row can pair its date with another day's session
+  const rowSessions = dateValue
+    ? (availableSessions || []).filter((session) => session.weekDay === dateValue.day())
+    : [];
+  const formattedSessions = formatSessions(rowSessions);
+
+  // Reload this row's date when its dropdown opens (another row may have replaced the list)
+  const handleDropdownOpen = (open) => {
+    if (open && dateValue) getAvailableSessions(dateValue, null, 'booking');
+  };
   const selectedSessionData = formattedSessions.find(s => s.value === sessionValue);
   const { user } = userStore();
 
@@ -225,7 +233,8 @@ function SessionDateRow({
               aria-autocomplete='false'
               showSearch
               loading={loading}
-              disabled={!dateValue || formattedSessions.length === 0}
+              disabled={!dateValue}
+              onDropdownVisibleChange={handleDropdownOpen}
               filterOption={(inputValue, option) =>
                 option.label.toLowerCase().includes(inputValue.toLowerCase())
               }
