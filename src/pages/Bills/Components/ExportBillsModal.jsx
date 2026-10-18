@@ -19,6 +19,8 @@ const EXPORT_FIELDS = [
   { key: 'status', label: 'Status', group: 'Bill' },
   { key: 'subject', label: 'Subject', group: 'Bill' },
   { key: 'payment_method', label: 'Payment Method', group: 'Bill' },
+  { key: 'transaction_id', label: 'Transaction ID', group: 'Bill' },
+  { key: 'reconciliation', label: 'Reconciliation', group: 'Bill' },
   { key: 'items', label: 'Items', group: 'Bill' },
   { key: 'subtotal', label: 'Subtotal', group: 'Amount' },
   { key: 'total_discount', label: 'Total Discount', group: 'Amount' },
@@ -72,6 +74,12 @@ function flattenBill(bill, selectedFields) {
   }
   if (fieldSet.has('payment_method')) {
     row['Payment Method'] = (bill.payment_method || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+  if (fieldSet.has('transaction_id')) {
+    row['Transaction ID'] = bill.transaction_id || '';
+  }
+  if (fieldSet.has('reconciliation')) {
+    row['Reconciliation'] = { matched: 'Reconciled', amount_mismatch: 'Amount mismatch' }[bill.reconciliation?.status] || '';
   }
   if (fieldSet.has('items')) {
     row['Items'] = (bill.items || []).map(i => `${i.name}${i.qty > 1 ? ` x${i.qty}` : ''}`).join(', ');

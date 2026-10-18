@@ -94,6 +94,11 @@ const getMenuConfig = (role) => {
           key: "ledgers",
           path: "/manager/ledgers",
         },
+        {
+          label: "Payment Reconciliation",
+          key: "payment-reconciliation",
+          path: "/manager/payment-reconciliation",
+        },
       ],
     },
     {
@@ -643,6 +648,12 @@ const getMenuConfig = (role) => {
       icon: <DollarOutlined />,
       key: "bills",
       path: "/manager/bills",
+    },
+    {
+      label: "Payment Reconciliation",
+      icon: <DollarOutlined />,
+      key: "payment-reconciliation",
+      path: "/manager/payment-reconciliation",
     },
     {
       label: "Financial Reports",

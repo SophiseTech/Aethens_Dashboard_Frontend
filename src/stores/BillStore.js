@@ -158,6 +158,28 @@ const billStore = create((set, get) => ({
       handleInternalError(error)
     }
   },
+  // The PATCH response is unpopulated, so only the changed fields are merged in.
+  updateTransactionId: async (id, transactionId) => {
+    try {
+      set({ createLoading: true })
+      if (!id) throw new Error("Bad Data")
+      const updated = await billService.updateTransactionId(id, transactionId)
+      if (updated) {
+        const merge = (item) => ({ ...item, transaction_id: updated.transaction_id, reconciliation: updated.reconciliation })
+        const { bills, selectedBill } = get()
+        set({
+          bills: bills.map(item => (item._id === id ? merge(item) : item)),
+          ...(selectedBill?._id === id ? { selectedBill: merge(selectedBill) } : {}),
+        })
+        handleSuccess("Transaction ID updated")
+        return true
+      }
+    } catch (error) {
+      handleInternalError(error)
+    } finally {
+      set({ createLoading: false })
+    }
+  },
   resyncZoho: async (id, reason) => {
     try {
       set({ createLoading: true })

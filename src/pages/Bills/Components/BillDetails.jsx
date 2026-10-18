@@ -1,6 +1,7 @@
 
 import Invoice from '@pages/Bills/Components/Invoice';
 import RecordPaymentModal from '@pages/Bills/Components/RecordPaymentModal';
+import TransactionIdModal from '@pages/Bills/Components/TransactionIdModal';
 import ZohoReasonModal from '@pages/Bills/Components/ZohoReasonModal';
 import userStore from '@stores/UserStore';
 import permissions from '@utils/permissions';
@@ -43,7 +44,7 @@ function BillDetails() {
   const { selectedCenter } = useStore(centersStore);
   const nav = useNavigate();
   const invoiceRef = useRef(null);
-  const { finalizeBill, resyncZoho, getZohoOrgConfig, zohoOrgConfig, selectedBill, selectedBillLoading, getBillById } = billStore();
+  const { finalizeBill, resyncZoho, updateTransactionId, getZohoOrgConfig, zohoOrgConfig, selectedBill, selectedBillLoading, getBillById } = billStore();
   const [lineItems, setLineItems] = useState([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -122,7 +123,7 @@ function BillDetails() {
 
   const handleRecordPayment = async (values) => {
     if (id && bill) {
-      editBill(id, { status: "paid", payment_date: values.payment_date, payment_method: values.payment_method });
+      editBill(id, { status: "paid", payment_date: values.payment_date, payment_method: values.payment_method, transaction_id: values.transaction_id || undefined });
       // Backend automatically deducts inventory when marking materials as collected
       editMaterials(bill._id, { status: "collected", collected_on: new Date() });
     }
@@ -300,6 +301,10 @@ function BillDetails() {
           {permissions.bills?.record_payment?.includes(user.role) && bill?.status !== 'draft' &&
             <RecordPaymentModal handleRecordPayment={handleRecordPayment} bill={bill} />
           }
+
+          {bill?.status === 'paid' && permissions.bills?.edit_transaction_id?.includes(user.role) && (
+            <TransactionIdModal bill={bill} onSave={(transactionId) => updateTransactionId(bill._id, transactionId)} />
+          )}
 
           {user.role === 'student' && bill?.status === 'unpaid' && (
             <PayOnlineButton

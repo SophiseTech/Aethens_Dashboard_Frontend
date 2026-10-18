@@ -260,6 +260,8 @@ export const paymentMethods = [
   { label: 'Cheque', value: 'cheque' },
   { label: 'Wallet', value: 'wallet' },
 ]
+// Payment methods with no external reference — the transaction ID field is hidden for these.
+export const METHODS_WITHOUT_TXN_ID = ['cash'];
 export const TASK_PRIORITY = [
   { label: "Urgent", value: "Urgent" },
   { label: "Normal", value: "Normal" },

@@ -7,6 +7,7 @@ import feeStore from '@stores/FeeStore';
 import { formatDate, toISTStartOfDayISO } from '@utils/helper';
 import { BILL_STATUS, BILL_STATUS_TAGS } from '@utils/constants';
 import CustomInput from '@components/form/CustomInput';
+import TransactionIdInput from '@components/form/TransactionIdInput';
 import { paymentMethods } from '@utils/constants';
 import permissions from '@utils/permissions';
 import userStore from '@stores/UserStore';
@@ -153,6 +154,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
           bill_id: selectedBill._id,
           payment_method: values.payment_method,
           payment_date: values.payment_date ? toISTStartOfDayISO(values.payment_date) : undefined,
+          transaction_id: values.transaction_id,
           useWallet,
           walletDeduction,
           excessPayment,
@@ -164,6 +166,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         const payload = {
           payment_method: values.payment_method,
           payment_date: values.payment_date ? toISTStartOfDayISO(values.payment_date) : undefined,
+          transaction_id: values.transaction_id,
           useWallet,
           walletDeduction,
           excessPayment,
@@ -309,6 +312,7 @@ const FeeTracker = ({ student, visible, onCancel }) => {
         description: values.description,
         payment_method: values.payment_method,
         payment_date: values.payment_date ? toISTStartOfDayISO(values.payment_date) : undefined,
+        transaction_id: values.transaction_id,
         useWallet: useWalletForAdditional,
         walletDeduction: additionalWalletDeduction,
         excessPayment: 0,
@@ -978,6 +982,8 @@ const FeeTracker = ({ student, visible, onCancel }) => {
             <Select placeholder="Select payment method (optional)" allowClear options={paymentMethods} />
           </Form.Item>
 
+          <TransactionIdInput />
+
           <Form.Item label="Payment Date" name="payment_date">
             <DatePicker style={{ width: '100%' }} />
           </Form.Item>
@@ -1065,6 +1071,8 @@ const FeeTracker = ({ student, visible, onCancel }) => {
           <Form.Item label="Payment Method" name="payment_method">
             <Select placeholder="Select payment method" options={paymentMethods} />
           </Form.Item>
+
+          <TransactionIdInput />
 
           <Form.Item label="Payment Date" name="payment_date">
             <DatePicker style={{ width: '100%' }} />

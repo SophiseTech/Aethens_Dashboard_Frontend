@@ -83,6 +83,16 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
         </p>
         <p>Paid On: <strong>{formatDate(bill.payment_date)}</strong></p>
         <p className='capitalize'>Mode: <strong>{bill.payment_method?.replace("_", " ")}</strong></p>
+        {bill.transaction_id && (
+          <p className='flex items-center gap-2'>
+            <span>Txn ID: <strong>{bill.transaction_id}</strong></span>
+            {bill.reconciliation?.status && (
+              <Tag color={bill.reconciliation.status === 'matched' ? 'green' : 'orange'} className='m-0'>
+                {bill.reconciliation.status === 'matched' ? 'Reconciled' : 'Amount mismatch'}
+              </Tag>
+            )}
+          </p>
+        )}
       </div>,
       total: `₹ ${payableTotal}`,
       chipStatus: <Status status={bill?.status} />

@@ -5,6 +5,7 @@ import CustomForm from '@components/form/CustomForm';
 import CustomSelect from '@components/form/CustomSelect';
 import CustomDatePicker from '@components/form/CustomDatePicker';
 import CustomSubmit from '@components/form/CustomSubmit';
+import TransactionIdInput from '@components/form/TransactionIdInput';
 import dayjs from 'dayjs';
 
 function RecordPaymentModal({ handleRecordPayment, bill }) {
@@ -46,6 +47,7 @@ function RecordPaymentModal({ handleRecordPayment, bill }) {
       >
         <CustomForm initialValues={initialValues} action={onSubmit} form={form}>
           <CustomSelect name="payment_method" label="Payment Method" options={paymentMethods} placeholder="Select payment method" />
+          <TransactionIdInput />
           <CustomDatePicker name="payment_date" label="Payment Date" placeholder="Select payment date" time={false} className='w-full' />
           <CustomSubmit className='bg-primary' label='Submit' />
         </CustomForm>

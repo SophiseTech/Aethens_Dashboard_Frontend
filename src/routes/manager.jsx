@@ -47,6 +47,8 @@ const DiplomaPreRegistrationManager = lazy(() => import("@pages/DiplomaPreRegist
 const Reports = lazy(() => import("@pages/Reports"))
 const FinancialReports = lazy(() => import("@pages/Reports/Financial"))
 const StudentReports = lazy(() => import("@pages/Reports/Students"))
+const PaymentReconciliation = lazy(() => import("@pages/PaymentReconciliation"))
+const PaymentStatementDetails = lazy(() => import("@pages/PaymentReconciliation/StatementDetails"))
 
 // `stableKey` opts a route out of the pathname-keyed Suspense. Parent routes that
 // own an <Outlet> must set it, otherwise opening a child route (e.g. /bills/:id)
@@ -313,6 +315,26 @@ export const managerRoutes = [
             path: "/manager/reports/students",
             element: <LazyLoader element={<StudentReports />} />,
             title: "Student Reports"
+          },
+        ]
+      }
+    ]
+  },
+  {
+    element: <Protected roles={[ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]} />,
+    children: [
+      {
+        element: <SidebarLayout />,
+        children: [
+          {
+            path: "/manager/payment-reconciliation",
+            element: <LazyLoader element={<PaymentReconciliation />} />,
+            title: "Payment Reconciliation"
+          },
+          {
+            path: "/manager/payment-reconciliation/:id",
+            element: <LazyLoader element={<PaymentStatementDetails />} />,
+            title: "Payment Statement"
           },
         ]
       }

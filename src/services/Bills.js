@@ -1,5 +1,5 @@
 import handleError from "@utils/handleError"
-import { del, get, post, put } from "@utils/Requests"
+import { del, get, patch, post, put } from "@utils/Requests"
 import centersStore from "@stores/CentersStore";
 import userStore from "@stores/UserStore";
 
@@ -41,6 +41,16 @@ class BillServices {
       return response.data
     } catch (error) {
       handleError(error)
+    }
+  }
+
+  async updateTransactionId(id, transaction_id) {
+    try {
+      const response = await patch(`/bills/${id}/transaction-id`, { transaction_id });
+      if (!response || !response.data) throw new Error("An error occurred. Please try again");
+      return response.data;
+    } catch (error) {
+      handleError(error);
     }
   }
 

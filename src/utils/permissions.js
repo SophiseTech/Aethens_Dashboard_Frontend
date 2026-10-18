@@ -28,6 +28,7 @@ const permissions = {
     edit_unpaid: [ROLES.ADMIN],
     export: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     zoho_resync: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    edit_transaction_id: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
   },
   fda: {
     mark_don: [ROLES.MANAGER, ROLES.ACADEMIC_MANAGER]
