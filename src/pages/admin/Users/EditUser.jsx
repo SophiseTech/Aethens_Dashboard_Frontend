@@ -12,7 +12,7 @@ import usersV2Service from "@services/UsersV2";
 import centersService from "@services/Centers";
 import { calculateAge } from "@utils/helper";
 import dayjs from "dayjs";
-import { GLOBAL_USER_ROLES, ROLES } from "@utils/constants";
+import { GLOBAL_USER_ROLES, ROLES, SELF_ATTENDANCE_ROLES } from "@utils/constants";
 
 const { Text } = Typography;
 
@@ -57,6 +57,7 @@ function EditUser() {
                         school_uni_work: user.school_uni_work,
                         profile_img: user.profile_img || "https://app.schoolofathens.art/images/default.jpg",
                         idCardNumber: user.idCardNumber,
+                        fingerPrintId: user.fingerPrintId ?? "",
                     });
                 })
                 .catch(() => {
@@ -214,14 +215,26 @@ function EditUser() {
                         )}
                     </Row>
 
-                    {roleValue === 'faculty' && (
+                    {SELF_ATTENDANCE_ROLES.includes(roleValue) && (
                         <Row gutter={16}>
+                            {roleValue === 'faculty' && (
+                                <Col xs={24} md={12}>
+                                    <CustomInput
+                                        name="idCardNumber"
+                                        label="ID Card Number"
+                                        placeholder="Enter ID Card Number"
+                                        required={true}
+                                    />
+                                </Col>
+                            )}
                             <Col xs={24} md={12}>
                                 <CustomInput
-                                    name="idCardNumber"
-                                    label="ID Card Number"
-                                    placeholder="Enter ID Card Number"
-                                    required={true}
+                                    name="fingerPrintId"
+                                    label="Fingerprint ID"
+                                    placeholder="ID enrolled on the center's attendance device"
+                                    type="number"
+                                    required={false}
+                                    rules={[{ pattern: /^\d+$/, message: "Fingerprint ID must be a whole number" }]}
                                 />
                             </Col>
                         </Row>

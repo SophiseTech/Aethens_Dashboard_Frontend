@@ -87,6 +87,7 @@ function AdminCenters() {
       location: record.location,
       center_initial: record.center_initial,
       state: record.state,
+      deviceId: record.deviceId,
       maxCount: record.maxCount,
       rescheduleAutoApprovalMaxCount: autoApproval,
       autoReject: record.autoReject ?? false,
@@ -168,6 +169,7 @@ function AdminCenters() {
     { title: "Location", dataIndex: "location", key: "location" },
     { title: "Initial", dataIndex: "center_initial", key: "center_initial" },
     { title: "State", dataIndex: "state", key: "state", render: (val) => val || "—" },
+    { title: "Device ID", dataIndex: "deviceId", key: "deviceId", render: (val) => val || "—" },
     { title: "Max Count", dataIndex: "maxCount", key: "maxCount", render: (val) => val ?? "—" },
     {
       title: "Auto Approve Limit",
@@ -278,6 +280,13 @@ function AdminCenters() {
               options={GST_STATE_OPTIONS}
               optionFilterProp="label"
             />
+          </Form.Item>
+          <Form.Item
+            name="deviceId"
+            label="Device ID"
+            tooltip="ID of the attendance device (v2) installed at this center. Punches from this device are only accepted for this center's students and staff."
+          >
+            <Input placeholder="e.g. AETH-DEV-01" allowClear />
           </Form.Item>
           <Form.Item name="maxCount" label="Max Count" rules={[{ type: "number", min: 0, message: "Must be a positive number" }]}>
             <InputNumber min={0} placeholder="e.g. 30" style={{ width: "100%" }} />
