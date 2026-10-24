@@ -30,7 +30,7 @@ function PaymentConfirmation({
   const orderId = transaction?.orderId || '';
   const txnId = transaction?.gatewayTxnId || transaction?.bankTxnId || '-';
   const amount = transaction?.amount || activeBill?.total || 0;
-  const paymentMode = transaction?.paymentMode || 'Online (Paytm)';
+  const paymentMode = transaction?.paymentMode || 'Online (Razorpay)';
   const invoiceNumber = activeBill?.invoiceNo
     ? `${activeBill?.center_initial || activeBill?.center_id?.center_initial || ''}${activeBill?.invoiceNo}`
     : 'Invoice';
@@ -104,7 +104,7 @@ function PaymentConfirmation({
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-1">Payment Successful!</h2>
             <p className="text-gray-500 text-sm mb-5">
-              Your payment has been received and verified by Paytm.
+              Your payment has been received and verified.
             </p>
 
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-left mb-6 space-y-3">
@@ -124,7 +124,7 @@ function PaymentConfirmation({
               </div>
               {txnId && txnId !== '-' && (
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500">Paytm Txn ID</span>
+                  <span className="text-gray-500">Transaction ID</span>
                   <span className="font-mono text-xs text-gray-700">{txnId}</span>
                 </div>
               )}
@@ -242,7 +242,7 @@ function PaymentConfirmation({
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-1">Payment Processing</h2>
             <p className="text-gray-500 text-sm mb-4">
-              We are verifying your transaction with Paytm. This usually takes just a few seconds.
+              We are verifying your transaction. This usually takes just a few seconds.
             </p>
 
             <div className="flex gap-3 justify-center">

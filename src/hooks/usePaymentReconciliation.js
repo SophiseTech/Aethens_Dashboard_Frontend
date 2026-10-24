@@ -5,7 +5,7 @@ import * as XLSX from 'xlsx';
 import paymentReconciliationStore from '@stores/PaymentReconciliationStore';
 import { formatDate, formatDateTime } from '@utils/helper';
 
-// Only these Paytm columns are sent to the server — the full export has ~150.
+// Only these statement columns are sent to the server — the full export has ~150.
 const STATEMENT_COLUMNS = [
   'Transaction_ID', 'Order_ID', 'Transaction_Date', 'Transaction_Type', 'Status', 'Amount', 'RRN',
   'Bank_Transaction_ID', 'Payment_Mode', 'Customer_Name', 'Customer_Nickname', 'Customer_VPA',
@@ -57,7 +57,7 @@ export function usePaymentStatements() {
   const parseAndUpload = useCallback(async (file) => {
     try {
       const buffer = await file.arrayBuffer();
-      // raw: keep every cell as text — Paytm ids are 35-digit numbers that lose precision as floats.
+      // raw: keep every cell as text — ids may be long numbers that lose precision as floats.
       const workbook = XLSX.read(buffer, { type: 'array', raw: true });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const parsed = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false });

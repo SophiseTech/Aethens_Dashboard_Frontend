@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import CustomInput from '@components/form/CustomInput';
 import { METHODS_WITHOUT_TXN_ID } from '@utils/constants';
 
-// Optional payment reference (UPI ref / card RRN / Paytm txn id), used for statement
+// Optional payment reference (UPI ref / card RRN / transaction ID), used for statement
 // reconciliation. Shown once a payment method other than cash is picked; must sit
 // inside a Form that has a `payment_method` field.
 function TransactionIdInput({ methodField = 'payment_method' }) {
@@ -15,7 +15,7 @@ function TransactionIdInput({ methodField = 'payment_method' }) {
     <CustomInput
       name="transaction_id"
       label="Transaction ID"
-      placeholder="UPI ref / card RRN / Paytm transaction ID (optional)"
+      placeholder="UPI ref / card RRN / transaction ID (optional)"
       required={false}
     />
   );

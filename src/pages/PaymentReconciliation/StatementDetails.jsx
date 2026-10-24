@@ -17,7 +17,7 @@ const billLink = (billId, label) => (
 
 const txnColumns = [
   { title: 'Date', dataIndex: 'txnDate', key: 'txnDate', width: 170 },
-  { title: 'Paytm Txn ID', dataIndex: 'transactionId', key: 'transactionId' },
+  { title: 'Transaction ID', dataIndex: 'transactionId', key: 'transactionId' },
   { title: 'RRN / UPI Ref', dataIndex: 'rrn', key: 'rrn' },
   { title: 'Mode', dataIndex: 'mode', key: 'mode' },
   { title: 'Customer', dataIndex: 'customer', key: 'customer' },
@@ -65,7 +65,7 @@ const TABS = [
     key: 'statementOnly',
     label: 'In statement, not in ERP',
     columns: txnColumns,
-    hint: 'Paytm received these payments but no paid bill carries their transaction ID. Find the bill and add the ID, or record the payment.',
+    hint: 'The gateway or bank recorded these payments but no paid bill carries their transaction ID. Find the bill and add the ID, or record the payment.',
   },
   {
     key: 'erpOnly',
@@ -77,7 +77,7 @@ const TABS = [
     key: 'mismatched',
     label: 'Amount mismatch',
     columns: matchColumns,
-    hint: 'The transaction ID matched, but the bill amount differs from what Paytm received.',
+    hint: 'The transaction ID matched, but the bill amount differs from what was received in the statement.',
   },
   {
     key: 'missingTxnId',

@@ -17,7 +17,6 @@ import InvoicePdf from '@pages/Bills/Components/Invoice';
 import InvoiceHtml from '@pages/Bills/Components/InvoiceHtml';
 import PayOnlineButton from '@pages/Bills/Components/PayOnlineButton';
 import PaymentConfirmation from '@pages/Bills/Components/PaymentConfirmation';
-import usePaytmCheckout from '@/hooks/usePaytmCheckout';
 import paymentService from '@services/Payment';
 import { CheckSquareOutlined, DownloadOutlined, EditOutlined, LinkOutlined, ReloadOutlined, RestOutlined } from '@ant-design/icons';
 import billStore from '@stores/BillStore';
@@ -50,23 +49,6 @@ function BillDetails() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [externalTransaction, setExternalTransaction] = useState(null);
-
-  const {
-    startCheckout,
-    loading: checkoutLoading,
-    paymentResult,
-    resetCheckout,
-  } = usePaytmCheckout({
-    onPaymentSuccess: (result) => {
-      setExternalTransaction(result);
-      setIsConfirmationOpen(true);
-      if (id) getBillById(id);
-    },
-    onPaymentFailure: (result) => {
-      setExternalTransaction(result);
-      setIsConfirmationOpen(true);
-    },
-  });
 
   useEffect(() => {
     const paymentStatus = searchParams.get('paymentStatus');
@@ -309,8 +291,12 @@ function BillDetails() {
           {user.role === 'student' && bill?.status === 'unpaid' && (
             <PayOnlineButton
               bill={bill}
-              onPay={(billId) => startCheckout(billId)}
-              loading={checkoutLoading}
+              onPay={() => {
+                import('antd').then(({ message }) => {
+                  message.info('Online payment is currently being upgraded to Razorpay.');
+                });
+              }}
+              loading={false}
             />
           )}
 
@@ -422,14 +408,12 @@ function BillDetails() {
         onClose={() => {
           setIsConfirmationOpen(false);
           setExternalTransaction(null);
-          resetCheckout();
           if (id) getBillById(id);
         }}
-        transaction={externalTransaction || paymentResult}
+        transaction={externalTransaction}
         bill={bill}
         onRetry={() => {
           setIsConfirmationOpen(false);
-          startCheckout(bill?._id);
         }}
       />
 

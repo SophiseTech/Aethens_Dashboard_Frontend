@@ -18,7 +18,7 @@ function TransactionIdModal({ bill, onSave }) {
       </Button>
       <Modal title="Transaction ID" open={isModalOpen} onCancel={handleCancel} footer={null} destroyOnClose>
         <p className='mb-4 text-sm text-gray-500'>
-          UPI reference, card RRN or Paytm transaction ID. Leave empty to clear it. Re-run the statement reconciliation afterwards.
+          UPI reference, card RRN or payment transaction ID. Leave empty to clear it. Re-run the statement reconciliation afterwards.
         </p>
         <CustomForm form={form} action={handleOk} initialValues={{ transaction_id: bill?.transaction_id || '' }}>
           <CustomInput name="transaction_id" label="Transaction ID" placeholder="e.g. 130504022289" required={false} />

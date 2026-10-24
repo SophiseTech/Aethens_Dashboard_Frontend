@@ -76,10 +76,10 @@ function PaymentReconciliation() {
       <Card>
         <Upload.Dragger accept='.csv,.xlsx,.xls' showUploadList={false} beforeUpload={handleUpload} disabled={uploading}>
           <p className='ant-upload-drag-icon'><InboxOutlined /></p>
-          <p className='ant-upload-text'>{uploading ? 'Uploading and matching…' : 'Upload a Paytm transactions statement'}</p>
+          <p className='ant-upload-text'>{uploading ? 'Uploading and matching…' : 'Upload a payment transactions statement'}</p>
           <p className='ant-upload-hint'>
-            CSV downloaded from the Paytm merchant dashboard. Transactions are matched to paid bills by their Transaction ID
-            (Paytm transaction ID, order ID or UPI / card RRN).
+            CSV downloaded from the payment gateway or bank dashboard. Transactions are matched to paid bills by their Transaction ID
+            (transaction ID, order ID or UPI / card RRN).
           </p>
         </Upload.Dragger>
       </Card>

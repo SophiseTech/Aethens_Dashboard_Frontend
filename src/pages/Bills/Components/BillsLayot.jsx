@@ -192,7 +192,7 @@ function BillsLayot({ bills, loading, total, onLoadMore }) {
     {
       key: 'payment_method', type: 'select', placeholder: 'Select Payment Method', span: 12, options: [
         { value: '', label: 'Select' },
-        { value: 'online_paytm', label: 'Online (Paytm)' },
+        { value: 'online_razorpay', label: 'Online (Razorpay)' },
         { value: 'cash', label: 'Cash' },
         { value: 'credit_card', label: 'Credit Card' },
         { value: 'bank_transfer', label: 'Bank Transfer' },
