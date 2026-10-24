@@ -70,6 +70,25 @@ function BillDetails() {
     }
   }, [searchParams, id, getBillById, setSearchParams]);
 
+  useEffect(() => {
+    const orderId = externalTransaction?.orderId;
+    const status = externalTransaction?.status;
+
+    if (!orderId || ['success', 'failed'].includes(status)) return undefined;
+
+    const interval = setInterval(async () => {
+      const transaction = await paymentService.getPaymentStatus(orderId);
+      if (!transaction) return;
+
+      setExternalTransaction(transaction);
+      if (['success', 'failed'].includes(transaction.status) && id) {
+        getBillById(id);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [externalTransaction?.orderId, externalTransaction?.status, getBillById, id]);
+
   // Zoho needs a reason to change a sent invoice: { mode: 'edit', values } holds a bill
   // edit until the reason is given; { mode: 'resync' } is a retry of a reason_required sync.
   const [zohoReasonRequest, setZohoReasonRequest] = useState(null);
@@ -291,12 +310,11 @@ function BillDetails() {
           {user.role === 'student' && bill?.status === 'unpaid' && (
             <PayOnlineButton
               bill={bill}
-              onPay={() => {
-                import('antd').then(({ message }) => {
-                  message.info('Online payment is currently being upgraded to Razorpay.');
-                });
+              onPaymentSuccess={(transaction) => {
+                setExternalTransaction(transaction);
+                setIsConfirmationOpen(true);
+                getBillById(id);
               }}
-              loading={false}
             />
           )}
 

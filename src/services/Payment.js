@@ -14,11 +14,27 @@ class PaymentService {
     }
   }
 
-  async initiatePayment(billId) {
+  async createOrder(billId) {
     try {
-      const response = await post("/v1/payment/initiate", { billId });
+      const response = await post("/v1/payment/create-order", { billId });
       if (!response || !response.data) {
-        throw new Error("Failed to initiate payment");
+        throw new Error("Failed to create payment order");
+      }
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async initiatePayment(billId) {
+    return this.createOrder(billId);
+  }
+
+  async verifyPayment(paymentDetails) {
+    try {
+      const response = await post("/v1/payment/verify-payment", paymentDetails);
+      if (!response || !response.data) {
+        throw new Error("Failed to verify payment");
       }
       return response.data;
     } catch (error) {
