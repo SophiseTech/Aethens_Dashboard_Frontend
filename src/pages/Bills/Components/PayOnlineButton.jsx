@@ -23,6 +23,8 @@ function PayOnlineButton({ bill, onPaymentSuccess, loading = false }) {
   if (!bill || bill.status !== 'unpaid') return null;
 
   const handlePayment = async () => {
+    if (isProcessing || loading) return;
+
     try {
       setIsProcessing(true);
       const order = await paymentService.createOrder(bill._id);
@@ -48,7 +50,11 @@ function PayOnlineButton({ bill, onPaymentSuccess, loading = false }) {
         handler: async (response) => {
           try {
             const transaction = await paymentService.verifyPayment(response);
-            message.info('Payment received. Awaiting Razorpay confirmation.');
+            if (transaction?.billStatus === 'paid' || transaction?.status === 'success') {
+              message.success('Payment completed successfully!');
+            } else {
+              message.info('Payment received. Processing confirmation.');
+            }
             onPaymentSuccess?.(transaction);
           } catch (error) {
             message.error(error.message || 'Payment verification failed');
@@ -66,7 +72,10 @@ function PayOnlineButton({ bill, onPaymentSuccess, loading = false }) {
 
       checkout.on('payment.failed', (response) => {
         setIsProcessing(false);
-        message.error(response.error?.description || 'Payment failed');
+        const err = response.error || {};
+        const reason = err.description || err.reason || 'Payment failed';
+        const step = err.step ? ` at ${err.step.replace(/_/g, ' ')}` : '';
+        message.error(`${reason}${step}`);
       });
       checkout.open();
     } catch (error) {
