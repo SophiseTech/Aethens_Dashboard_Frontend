@@ -103,6 +103,7 @@ function AllotSessions({ student }) {
             loading={loading}
             minItems={1}
             maxItems={sessionType === "regular" ? 7 : 1}
+            countMode={sessionType === "regular" ? "batch" : "day"}
           />
           <CustomInput type='number' name={"customSessionCount"} label={"Number of sessions to allot"} placeholder={10} className='w-full' required={false} />
           <CustomSubmit className='bg-primary' label='Submit' loading={loading} />

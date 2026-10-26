@@ -290,6 +290,7 @@ function AddStudent({ open, onClose, enquiry, onEnrolled }) {
             loading={sessionsLoading}
             minItems={1}
             maxItems={10}
+            countMode="batch"
           />
           {user.role === ROLES.ADMIN && <CustomSelect name={"center_id"} options={centerOptions} label={"Select Center"} />}
           <CustomSelect

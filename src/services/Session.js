@@ -72,6 +72,25 @@ class SessionService {
     }
   }
 
+  async getBatchCapacity() {
+    try {
+      const { user } = userStore.getState();
+      const { selectedCenter } = centersStore.getState();
+
+      let constructedPath;
+      if (GLOBAL_USER_ROLES.includes(user.role) && selectedCenter) {
+        constructedPath = `/sessions/batchCapacity?centerId=${selectedCenter}`;
+      } else {
+        constructedPath = `/sessions/batchCapacity`;
+      }
+      const response = await get(constructedPath);
+      if (!response || !response.data) throw new Error("An error occured. Please try again")
+      return response.data
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
   async getStudentsBySessionId(sessionId, slotDate) {
     try {
       const { user } = userStore.getState();

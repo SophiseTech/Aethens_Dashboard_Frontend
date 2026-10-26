@@ -325,6 +325,14 @@ export const GLOBAL_USER_ROLES = [
   ROLES.PURCHASE_MANAGER
 ]
 
+// Roles that can view weekly batch capacity (matches the server check)
+export const BATCH_CAPACITY_ROLES = [
+  ROLES.ADMIN,
+  ROLES.ACADEMIC_MANAGER,
+  ROLES.OPERATIONS_MANAGER,
+  ROLES.MANAGER,
+]
+
 export const DIPLOMA_APPLY_URL = "https://app.schoolofathens.art/diploma/apply"
 
 // Open-ended course grouping (level1, level2, ...). Pickers show this level

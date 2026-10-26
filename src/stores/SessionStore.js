@@ -14,6 +14,20 @@ const SessionStore = create((set, get) => ({
   sessions: [],
   allocationHistory: [],
   loadingHistory: false,
+  batchCapacity: [],
+  loadingBatchCapacity: false,
+  getBatchCapacity: async () => {
+    try {
+      set({ loadingBatchCapacity: true })
+      const data = await sessionService.getBatchCapacity()
+      set({ batchCapacity: data || [] })
+      return data
+    } catch (error) {
+      handleInternalError(error)
+    } finally {
+      set({ loadingBatchCapacity: false })
+    }
+  },
   getAllocationHistory: async (studentId) => {
     try {
       set({ loadingHistory: true })

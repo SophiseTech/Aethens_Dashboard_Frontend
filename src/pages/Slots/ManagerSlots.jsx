@@ -2,13 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { Select, Button, Table, message, Space, Typography, Empty, Popconfirm, DatePicker, Tag } from 'antd';
 import dayjs from 'dayjs';
 import SessionStore from '@stores/SessionStore';
-import { ROLES, weekDays } from '@utils/constants';
+import { BATCH_CAPACITY_ROLES, ROLES, weekDays } from '@utils/constants';
 import sessionService from '@/services/Session';
 import userStore from '@stores/UserStore';
 import { useStore } from 'zustand';
 import centersStore from '@stores/CentersStore';
 import TitleLayout from '@components/layouts/Title';
 import { sessionSlotOptionRenderer } from '@components/form/SessionDateSelector';
+import BatchCapacityGrid from '@pages/Slots/Components/BatchCapacityGrid';
 
 const { Title } = Typography;
 
@@ -217,6 +218,7 @@ function ManagerSlots() {
   return (
     <TitleLayout title="View Students by Session">
       <Space direction="vertical" style={{ width: '100%' }} size="large">
+        {BATCH_CAPACITY_ROLES.includes(user.role) && <BatchCapacityGrid />}
         <Space wrap>
           <Select
             showSearch

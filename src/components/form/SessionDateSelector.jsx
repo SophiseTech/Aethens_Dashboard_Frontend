@@ -20,19 +20,43 @@ const formatSessionLabel = (session) => {
 
 /**
  * Render session option with availability details
- * Shows remaining slots and additional slots with color coding
+ * Shows remaining slots and additional slots with color coding.
+ * Staff see two numbers: seats free on the selected date, and the weekly batch
+ * (members / max, plus students waiting for allocation). countMode "batch" puts
+ * the batch number first — used when allotting a student into a batch.
  */
-export const sessionSlotOptionRenderer = (option, user, showSlotCount = true) => {
+export const sessionSlotOptionRenderer = (option, user, showSlotCount = true, countMode = 'day') => {
   const { data: session } = option.data;
   if (!session) return null;
 
-  const { remainingSlots: regularRemainingSLots = 0, additional = 0, effectiveRemainingSlots: totalRemainingSlots = 0, rescheduled = 0, freeSlotPercent, demo } = session;
+  const { remainingSlots: regularRemainingSLots = 0, additional = 0, effectiveRemainingSlots: totalRemainingSlots = 0, rescheduled = 0, freeSlotPercent, demo, batchMembers, batchWaiting = 0, max } = session;
   const weekday = weekDays[session.weekDay];
   const time = dayjs(session.start_time).format('h:mm A');
-  const remainingSlots = user.role === ROLES.STUDENT ? totalRemainingSlots : regularRemainingSLots
+  const isStaff = !!user?.role && user.role !== ROLES.STUDENT;
+  const hasBatch = isStaff && batchMembers !== null && batchMembers !== undefined;
+  const remainingSlots = !isStaff ? totalRemainingSlots : regularRemainingSLots
 
   // Determine color based on remaining slots
   let slotColor = getSlotColor(freeSlotPercent)
+
+  const tagStyle = { fontWeight: 600, borderRadius: 4, marginRight: 0 };
+  const dayTag = (
+    <Tag key="day" color={'default'} style={tagStyle}>
+      {totalRemainingSlots} free on this date
+    </Tag>
+  );
+  const batchTag = (
+    <Tag key="batch" color={'blue'} style={tagStyle}>
+      Batch {batchMembers}/{max}{batchWaiting > 0 ? ` (+${batchWaiting} waiting)` : ''}
+    </Tag>
+  );
+  const countTags = hasBatch
+    ? (countMode === 'batch' ? [batchTag, dayTag] : [dayTag, batchTag])
+    : [(
+      <Tag key="slots" color={'default'} style={tagStyle}>
+        {remainingSlots} slot{remainingSlots !== 1 ? 's' : ''} left
+      </Tag>
+    )];
 
   return (
     <Flex direction="vertical" justify="space-between" align="center" size={2} style={{ width: '100%', background: slotColor }} className='px-2 py-1 rounded-lg'>
@@ -41,17 +65,8 @@ export const sessionSlotOptionRenderer = (option, user, showSlotCount = true) =>
         <p style={{ fontWeight: "bold", margin: 0 }}>{time}</p>
       </div>
       {showSlotCount && (
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Tag
-            color={'default'}
-            style={{
-              fontWeight: 600,
-              borderRadius: 4,
-              marginRight: 0
-            }}
-          >
-            {remainingSlots} slot{remainingSlots !== 1 ? 's' : ''} left
-          </Tag>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          {countTags}
           {(demo > 0 && [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER].includes(user.role)) && (
             <Tag
               color='warning'
@@ -121,6 +136,7 @@ function SessionDateRow({
   minItems = 1,
   totalItems = 1,
   listName = 'sessionSchedule',
+  countMode = 'day',
 }) {
   const form = Form.useFormInstance();
   const lastFetchedRef = useRef(null); // Day this row last fetched sessions for
@@ -239,7 +255,7 @@ function SessionDateRow({
                 option.label.toLowerCase().includes(inputValue.toLowerCase())
               }
               optionRender={(option) => {
-                return sessionSlotOptionRenderer(option, user)
+                return sessionSlotOptionRenderer(option, user, true, countMode)
               }}
               notFoundContent={
                 loading ? (
@@ -297,6 +313,7 @@ function SessionDateRow({
  * @param {boolean} props.loading - Loading state for session fetching
  * @param {number} props.maxItems - Maximum number of date-session pairs (default: Infinity)
  * @param {number} props.minItems - Minimum number of date-session pairs (default: 1)
+ * @param {string} props.countMode - "day" (default) or "batch": which slot count staff see first
  */
 function SessionDateSelector({
   name,
@@ -306,6 +323,7 @@ function SessionDateSelector({
   loading = false,
   maxItems = Infinity,
   minItems = 1,
+  countMode = 'day',
 }) {
   return (
     <Form.List name={name}>
@@ -342,6 +360,7 @@ function SessionDateSelector({
                     minItems={minItems}
                     totalItems={listFields.length}
                     listName={name}
+                    countMode={countMode}
                   />
                 ))
               )}
@@ -371,6 +390,7 @@ SessionDateSelector.propTypes = {
   loading: PropTypes.bool,
   maxItems: PropTypes.number,
   minItems: PropTypes.number,
+  countMode: PropTypes.oneOf(['day', 'batch']),
 };
 
 SessionDateSelector.defaultProps = {
