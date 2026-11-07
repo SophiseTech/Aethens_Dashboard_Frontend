@@ -110,6 +110,12 @@ function EnquiryList() {
   //   );
   // }, [enquiries, searchResults, searchQuery, selectedView]);
 
+  // Enrolled and Closed tabs show their own outcome date in place of Created/Updated At
+  const stageDateColumn = {
+    Enrolled: { title: "Enrolled On", dataIndex: "enrollmentDate", format: formatDate },
+    Closed: { title: "Closed On", dataIndex: "closedAt", format: formatDateTime },
+  }[selectedView];
+
   const columns = [
     {
       title: "#",
@@ -158,27 +164,35 @@ function EnquiryList() {
       dataIndex: "classPreference",
       render: (value) => value || "-",
     },
-    {
-      title: selectedView === "Demo" ? "Demo Date" : "Created At",
-      dataIndex: "createdAt",
-      render: (_, row) => {
-        const finalDate =
-          (row?.stage === "Demo" && selectedView === "Demo")
-            ? row?.demoSlot?.scheduledAt
-            : row?.createdAt;
+    ...(stageDateColumn
+      ? [{
+        title: stageDateColumn.title,
+        dataIndex: stageDateColumn.dataIndex,
+        render: (value) => stageDateColumn.format(value) || "-",
+      }]
+      : [
+        {
+          title: selectedView === "Demo" ? "Demo Date" : "Created At",
+          dataIndex: "createdAt",
+          render: (_, row) => {
+            const finalDate =
+              (row?.stage === "Demo" && selectedView === "Demo")
+                ? row?.demoSlot?.scheduledAt
+                : row?.createdAt;
 
-        return formatDateTime(finalDate);
-      },
-    },
-    {
-      title: "Updated At",
-      dataIndex: "updatedAt",
-      render: (value, record) => (
-        <span className={record?.isUnfollowed ? "text-red-500 font-semibold" : ""}>
-          {formatDateTime(value)}
-        </span>
-      )
-    },
+            return formatDateTime(finalDate);
+          },
+        },
+        {
+          title: "Updated At",
+          dataIndex: "updatedAt",
+          render: (value, record) => (
+            <span className={record?.isUnfollowed ? "text-red-500 font-semibold" : ""}>
+              {formatDateTime(value)}
+            </span>
+          )
+        },
+      ]),
     {
       title: "Status",
       dataIndex: "stage",
