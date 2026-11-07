@@ -5,7 +5,7 @@ import TransactionIdModal from '@pages/Bills/Components/TransactionIdModal';
 import ZohoReasonModal from '@pages/Bills/Components/ZohoReasonModal';
 import userStore from '@stores/UserStore';
 import permissions from '@utils/permissions';
-import { Button, Empty, message, Popconfirm, Spin } from 'antd';
+import { Button, Empty, message, Popconfirm, Spin, Tag } from 'antd';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import { useStore } from 'zustand';
@@ -257,7 +257,12 @@ function BillDetails() {
   return (
     <div className='flex flex-col rounded-xl lg:flex-1 lg:h-full lg:overflow-auto bg-card'>
       <div className='border-b border-border flex justify-between | p-5 2xl:p-10'>
-        <h1 className='font-bold | max-2xl:text-xl 2xl:text-2xl'>Preview</h1>
+        <div className='flex items-center gap-3'>
+          <h1 className='font-bold | max-2xl:text-xl 2xl:text-2xl'>Preview</h1>
+          {(bill?.status === 'draft' || !bill?.invoiceNo) && (
+            <Tag color='orange' className='font-semibold'>DRAFT</Tag>
+          )}
+        </div>
         <div className='flex gap-2'>
           {(bill?.status === 'unpaid') && permissions.bills?.edit_unpaid?.includes(user.role) && (
             <Button

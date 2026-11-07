@@ -78,7 +78,7 @@ function GenerateBill({
     if (!bill) return defaultInitialValues;
 
     return {
-      invoiceNo: bill.invoiceNo || 0,
+      invoiceNo: isEditDraft ? "DRAFT" : (bill.invoiceNo || 0),
       items: bill.items?.map((item) => ({
         ...item,
         itemName: item.name,
@@ -300,7 +300,12 @@ function GenerateBill({
   return (
     <>
       <Modal
-        title={isEditDraft ? "Edit Draft" : isEditMode ? "Edit Bill" : "Generate Bill"}
+        title={
+          <div className="flex items-center gap-2">
+            <span>{isEditDraft ? "Edit Draft" : isEditMode ? "Edit Bill" : "Generate Bill"}</span>
+            {isEditDraft && <Tag color="orange" className="font-semibold">DRAFT</Tag>}
+          </div>
+        }
         open={isModalOpen}
         footer={null}
         onCancel={handleCancel}
@@ -309,9 +314,9 @@ function GenerateBill({
         <CustomForm form={form} initialValues={initialValues} action={onSubmit}>
           <div className="flex gap-5">
             <CustomInput
-              label={center_initial ? `Invoice Number (${formattedInvoiceNo})` : "Invoice Number"}
+              label={isEditDraft ? "Invoice Number (Allocated on finalization)" : (center_initial ? `Invoice Number (${formattedInvoiceNo})` : "Invoice Number")}
               name={"invoiceNo"}
-              placeholder={"1001"}
+              placeholder={isEditDraft ? "DRAFT" : "1001"}
               inputProps={{ readOnly: true }}
             />
             <CustomDatePicker
