@@ -17,7 +17,9 @@ function FeeReminderModal({ row, onClose }) {
 
   const amount = Form.useWatch('amount', form);
   const dueDate = Form.useWatch('dueDate', form);
-  const { previewText, canSend, missingCenterFields, sending, send } = useFeeReminder(row, amount, dueDate);
+  const paymentLink = Form.useWatch('paymentLink', form);
+  const { previewText, canSend, problems, linkHint, onLinkEdited, sending, send } =
+    useFeeReminder(row, form, { amount, dueDate, paymentLink });
 
   const initialValues = {
     amount: row?.amount ? Math.round(row.amount) : 0,
@@ -40,13 +42,22 @@ function FeeReminderModal({ row, onClose }) {
       <CustomForm form={form} action={onSubmit} initialValues={initialValues} resetOnFinish={false}>
         <CustomInput name='amount' label='Amount' type='number' inputProps={{ min: 0 }} />
         <CustomDatePicker name='dueDate' label='Due Date' />
-        {missingCenterFields.length > 0 && (
+        <CustomInput
+          name='paymentLink'
+          label='Payment Link'
+          placeholder='https://…'
+          required={false}
+          rules={[{ type: 'url', message: 'Enter a valid link (https://…)' }]}
+          extra={linkHint}
+          inputProps={{ allowClear: true, onChange: onLinkEdited }}
+        />
+        {problems.length > 0 && (
           <Alert
             className='mb-4'
             type='warning'
             showIcon
-            message={`This student's center has no ${missingCenterFields.join(' or ')} set`}
-            description='An admin can add them on the Centers page. The reminder can be sent after that.'
+            message="This reminder can't be sent yet"
+            description={problems.join('. ')}
           />
         )}
         <Form.Item label='Draft Message'>

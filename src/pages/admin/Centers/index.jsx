@@ -89,7 +89,6 @@ function AdminCenters() {
       state: record.state,
       deviceId: record.deviceId,
       upi_id: record.upi_id,
-      payment_link: record.payment_link,
       maxCount: record.maxCount,
       rescheduleAutoApprovalMaxCount: autoApproval,
       autoReject: record.autoReject ?? false,
@@ -296,14 +295,6 @@ function AdminCenters() {
             tooltip="Sent in fee reminder WhatsApp messages to this center's students"
           >
             <Input placeholder="e.g. paytm.s2uxvt7@pty" allowClear />
-          </Form.Item>
-          <Form.Item
-            name="payment_link"
-            label="Payment Link"
-            tooltip="Sent in fee reminder WhatsApp messages to this center's students"
-            rules={[{ type: "url", message: "Enter a valid link (https://…)" }]}
-          >
-            <Input placeholder="https://…" allowClear />
           </Form.Item>
           <Form.Item name="maxCount" label="Max Count" rules={[{ type: "number", min: 0, message: "Must be a positive number" }]}>
             <InputNumber min={0} placeholder="e.g. 30" style={{ width: "100%" }} />

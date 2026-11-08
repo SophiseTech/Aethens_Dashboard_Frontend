@@ -89,6 +89,9 @@ const permissions = {
   adminCenters: {
     view: [ROLES.ADMIN]
   },
+  adminPaymentLinks: {
+    view: [ROLES.ADMIN]
+  },
   adminBlogPost: {
     view: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],
     add: [ROLES.ADMIN, ROLES.MEDIA_MANAGER],

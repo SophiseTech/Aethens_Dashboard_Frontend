@@ -42,6 +42,7 @@ const AdminDiplomaTimetable = lazy(() => import("@pages/AdminDiplomaTimetable"))
 const AdminUsers = lazy(() => import("@pages/admin/Users"));
 const AdminEditUser = lazy(() => import("@pages/admin/Users/EditUser"));
 const AdminCenters = lazy(() => import("@pages/admin/Centers"));
+const AdminPaymentLinks = lazy(() => import("@pages/admin/PaymentLinks"));
 const AdminBlogPosts = lazy(() => import("@pages/admin/BlogPosts"));
 const EditBlogPost = lazy(() => import("@pages/admin/BlogPosts/EditBlogPost"));
 const AdminNewsletters = lazy(() => import("@pages/admin/Newsletters"));
@@ -418,6 +419,15 @@ export const generalRoutes = [
               </LazyLoader>
             ),
             title: "Centers",
+          },
+          {
+            path: "/admin/payment-links",
+            element: (
+              <LazyLoader>
+                <AdminPaymentLinks />
+              </LazyLoader>
+            ),
+            title: "Payment Links",
           },
           {
             path: "/admin/certificates",

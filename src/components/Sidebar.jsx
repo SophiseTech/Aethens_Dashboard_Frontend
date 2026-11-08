@@ -24,6 +24,7 @@ import {
   UserOutlined,
   FileTextOutlined,
   WhatsAppOutlined,
+  LinkOutlined,
 } from "@ant-design/icons";
 
 import Target from "@/assets/Target";
@@ -203,6 +204,12 @@ const getMenuConfig = (role) => {
       icon: <BankOutlined />,
       key: "centers",
       path: "/admin/centers",
+    },
+    {
+      label: "Payment Links",
+      icon: <LinkOutlined />,
+      key: "payment-links",
+      path: "/admin/payment-links",
     },
     {
       label: "Announcements",

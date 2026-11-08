@@ -282,6 +282,7 @@ export const ADMIN_CENTER_SELECTOR_EXCLUSION_ROUTES = [
   "/manager/inventory-items",
   "/admin/users",
   "/admin/centers",
+  "/admin/payment-links",
   "/admin/blog-posts",
   "/admin/newsletters",
   "/admin/shop-items",
@@ -300,6 +301,7 @@ export const ADMIN_TITLE_BUTTONS_EXCLUSION_ROUTES = [
   // Admin content pages: show Add/other title buttons without requiring center selection
   "/admin/users",
   "/admin/centers",
+  "/admin/payment-links",
   "/admin/blog-posts",
   "/admin/newsletters",
   "/admin/shop-items",

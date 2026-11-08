@@ -1,11 +1,12 @@
 import { Form, Input } from 'antd'
 
-function CustomInput({ name, label, placeholder, type = "text", selectAfter, className = "", required = true, rules = [], inputProps = {} }) {
+function CustomInput({ name, label, placeholder, type = "text", selectAfter, className = "", required = true, rules = [], inputProps = {}, extra }) {
   return (
     <Form.Item
       name={name}
       label={label}
       className='w-full'
+      extra={extra}
       rules={[
         { required: required, message: `Please input the ${label}!` },
         ...rules
