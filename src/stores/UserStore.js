@@ -12,6 +12,8 @@ const userStore = create((set, get) => ({
   submitLoading: false,
   isAuthenticated: false,
   summary: {},
+  // Filters of the last getSummary call, so the "Enrolled Students" list matches the count
+  summaryFilters: null,
   login: async ({ email, password }) => {
     try {
       if (!email || !password) throw new Error("Please provide username or password")
@@ -52,7 +54,7 @@ const userStore = create((set, get) => ({
   },
   getSummary: async (filters) => {
     try {
-      set({ loading: true })
+      set({ loading: true, summaryFilters: filters })
       const data = await userService.getSummary(filters)
       set({
         summary: data
@@ -62,6 +64,11 @@ const userStore = create((set, get) => ({
     } finally {
       set({ loading: false })
     }
+  },
+  // Paged list of the students counted in the summary. Kept out of the shared
+  // loading flag — the caller (useEnrolledStudents) tracks its own loading state.
+  getSummaryStudents: async (params) => {
+    return userService.getSummaryStudents(params)
   }
 }))
 

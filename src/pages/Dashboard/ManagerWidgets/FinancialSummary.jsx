@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, Row, Col, Statistic, Divider, Tag, Tooltip, Progress } from 'antd';
 import {
     ArrowUpOutlined,
@@ -11,6 +11,7 @@ import billStore from '@stores/BillStore';
 import userStore from '@stores/UserStore';
 import { useStore } from 'zustand';
 import { useNavigate } from 'react-router-dom';
+import EnrolledStudentsModal from '@pages/Dashboard/ManagerWidgets/EnrolledStudentsModal';
 
 const fmt = (val) =>
     new Intl.NumberFormat('en-IN', {
@@ -29,6 +30,7 @@ function FinancialSummary() {
     const { summary } = useStore(billStore);
     const { summary: userSummary } = useStore(userStore);
     const navigate = useNavigate();
+    const [studentsModalOpen, setStudentsModalOpen] = useState(false);
 
     const totalStudents = userSummary?.totalStudents || 0;
     const totalResult = summary?.totalResult || {};
@@ -64,11 +66,11 @@ function FinancialSummary() {
             <Row gutter={[16, 16]}>
                 {/* Enrolled Students */}
                 <Col xs={12} sm={8} lg={6}>
-                    <Tooltip title="View all students">
+                    <Tooltip title="View enrolled students">
                         <Card
                             size="small"
                             className="border border-border text-center bg-card cursor-pointer hover:shadow-md transition-shadow"
-                            onClick={() => navigate('/manager/students')}
+                            onClick={() => setStudentsModalOpen(true)}
                         >
                             <div className="flex flex-col items-center gap-1">
                                 <TeamOutlined style={{ color: PRIMARY, fontSize: 22 }} />
@@ -314,6 +316,8 @@ function FinancialSummary() {
                     </Row>
                 </>
             ) : null}
+
+            <EnrolledStudentsModal open={studentsModalOpen} onClose={() => setStudentsModalOpen(false)} />
         </Card>
     );
 }

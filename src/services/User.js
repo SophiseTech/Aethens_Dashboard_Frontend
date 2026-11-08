@@ -53,6 +53,13 @@ class UserService {
     }
   }
 
+  // Students behind the dashboard "Enrolled Students" count — { students, total }
+  async getSummaryStudents({ centerId, from, to, search, page, limit }) {
+    const response = await post(`/user/summary/students`, { centerId, from, to, search, page, limit })
+    if (!response || !response.data) throw new Error("An error occured. Please try again")
+    return response.data
+  }
+
   async getCurrentSessionAttendees(centerId) {
     try {
       const response = !centerId ? await post(`/user/getCurrentSessionAttendees`,) : await post(`/user/getCurrentSessionAttendees`, { centerId })
