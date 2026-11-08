@@ -36,6 +36,12 @@ const feeStore = create((set) => ({
       throw error;
     }
   },
+  // Variables the reminder would be sent with ({ variables, missing }). Doesn't touch
+  // the shared loading flag — it runs on every keystroke in the reminder dialog.
+  previewFeeReminder: async (payload) => {
+    const response = await FeeService.previewFeeReminder(payload);
+    return response.data;
+  },
   getFeeDetailsByStudent: async (studentId) => {
     set({ loading: true, error: null });
     try {

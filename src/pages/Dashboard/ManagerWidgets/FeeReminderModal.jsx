@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { Modal, Button, Form, Input } from 'antd';
+import { Modal, Button, Form, Input, Alert } from 'antd';
 import dayjs from 'dayjs';
 import useFeeReminder from '@hooks/useFeeReminder';
 import CustomForm from '@components/form/CustomForm';
@@ -17,7 +17,7 @@ function FeeReminderModal({ row, onClose }) {
 
   const amount = Form.useWatch('amount', form);
   const dueDate = Form.useWatch('dueDate', form);
-  const { previewText, templateReady, sending, send } = useFeeReminder(row, amount, dueDate);
+  const { previewText, canSend, missingCenterFields, sending, send } = useFeeReminder(row, amount, dueDate);
 
   const initialValues = {
     amount: row?.amount ? Math.round(row.amount) : 0,
@@ -40,11 +40,20 @@ function FeeReminderModal({ row, onClose }) {
       <CustomForm form={form} action={onSubmit} initialValues={initialValues} resetOnFinish={false}>
         <CustomInput name='amount' label='Amount' type='number' inputProps={{ min: 0 }} />
         <CustomDatePicker name='dueDate' label='Due Date' />
+        {missingCenterFields.length > 0 && (
+          <Alert
+            className='mb-4'
+            type='warning'
+            showIcon
+            message={`This student's center has no ${missingCenterFields.join(' or ')} set`}
+            description='An admin can add them on the Centers page. The reminder can be sent after that.'
+          />
+        )}
         <Form.Item label='Draft Message'>
-          <TextArea rows={4} value={previewText} readOnly />
+          <TextArea autoSize={{ minRows: 4, maxRows: 14 }} value={previewText} readOnly />
         </Form.Item>
         <Form.Item>
-          <Button type='primary' htmlType='submit' loading={sending} disabled={!templateReady} block>
+          <Button type='primary' htmlType='submit' loading={sending} disabled={!canSend} block>
             Send Reminder
           </Button>
         </Form.Item>

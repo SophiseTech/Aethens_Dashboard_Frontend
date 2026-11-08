@@ -20,6 +20,9 @@ export const FeeService = {
   sendFeeReminder: (payload) => {
     return post(`/fees/reminder`, payload);
   },
+  previewFeeReminder: (payload) => {
+    return post(`/fees/reminder/preview`, payload);
+  },
   generatePartialBalanceBill: (feeAccountId) => {
     return post(`/fees/${feeAccountId}/generate-partial-bill`);
   },

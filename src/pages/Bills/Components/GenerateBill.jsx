@@ -49,6 +49,9 @@ function GenerateBill({
   const isEditMode = Boolean(bill);
   const isEditDraft = isEditMode && bill?.status === 'draft';
   const isEditUnpaid = isEditMode && bill?.status === 'unpaid';
+  // Only a paid bill has a received amount; editing an unpaid/draft bill can't produce an
+  // excess payment (the server ignores paymentAmount/walletCreditAmount for those edits)
+  const isEditUnreceived = isEditMode && bill?.status !== 'paid';
   const [selectedCustomerWallet, setSelectedCustomerWallet] = useState({})
   const { getInvoiceNo, invoiceNo } = billStore()
   // Admin has no own center — the bill's center is picked in the form and drives inventory, customers and stock deduction
@@ -251,11 +254,11 @@ function GenerateBill({
   const walletAmountDeducted = applyWallet && walletBalance > 0 ? Math.min(walletBalance, totals?.total || 0) : 0;
   const effectiveWalletAmountDeducted = applyWallet && effectiveWalletBalance > 0 ? Math.min(effectiveWalletBalance, totals?.total || 0) : 0;
   const finalGrandTotal = (totals?.total || 0) - effectiveWalletAmountDeducted;
-  const excessPayment = Math.max(0, paymentAmount - finalGrandTotal);
+  const excessPayment = isEditUnreceived ? 0 : Math.max(0, paymentAmount - finalGrandTotal);
   let walletCreditAmount = excessPayment;
 
   useEffect(() => {
-    if (isEditMode) {
+    if (isEditMode && !isEditUnreceived) {
       setPaymentAmount(Number(applyWallet ? finalGrandTotal : bill?.paymentAmount));
     } else {
       setPaymentAmount(Number(applyWallet ? finalGrandTotal : totals?.total));
@@ -385,12 +388,12 @@ function GenerateBill({
                   ...(applyWallet ? [{ name: "Amount Deducted (Wallet)", value: effectiveWalletBalance }] : []),
                 ] : []),
                 ...(applyWallet && effectiveWalletBalance > 0 ? [{ name: "Final Total", value: finalGrandTotal }] : []),
-                ...(paymentAmount > 0 ? [{ name: "Payment Amount", value: paymentAmount }] : []),
+                ...(paymentAmount > 0 && !isEditUnreceived ? [{ name: "Payment Amount", value: paymentAmount }] : []),
                 ...(walletCreditAmount > 0 ? [{ name: "Wallet Credit", value: walletCreditAmount }] : []),
               ]}
             />
 
-            {finalGrandTotal > 0 && (
+            {finalGrandTotal > 0 && !isEditUnreceived && (
               <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200" style={{ borderLeft: "4px solid #52c41a" }}>
                 <Space direction="vertical" className="w-full" size="small">
                   <p className="text-sm text-gray-600">Payment Amount</p>
