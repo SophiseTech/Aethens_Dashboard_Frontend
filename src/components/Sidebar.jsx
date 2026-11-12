@@ -408,6 +408,8 @@ const getMenuConfig = (role) => {
     { label: "Latest Videos", icon: <PictureOutlined />, key: "latest-videos", path: "/admin/latest-videos" },
     { label: "Gallery", icon: <PictureOutlined />, key: "gallery", path: "/gallery" },
     { label: "Activity Gallery", icon: <PictureOutlined />, key: "activity-gallery", path: "/activity-gallery" },
+    // read-only (enquiry:view in server/lib/rbac.js)
+    { label: "Enquiries", icon: <MessageOutlined />, key: "enquiries", path: "/manager/enquiries" },
     ...staffSelfServiceItems,
   ];
 

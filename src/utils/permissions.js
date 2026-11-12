@@ -1,5 +1,7 @@
 import { ROLES } from "@utils/constants"
 
+// Enquiries, targets and tasks are not here: they come from the server's role map
+// (server/lib/rbac.js) via hooks/useCan.
 const permissions = {
   student: {
     add: [ROLES.MANAGER, ROLES.ADMIN],
@@ -43,12 +45,6 @@ const permissions = {
     add: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     edit: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     delete: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]
-  },
-  targets: {
-    add: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-    edit: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-    delete: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.SALES_EXECUTIVE]
   },
   certificates: {
     view: [ROLES.ADMIN],
@@ -134,28 +130,10 @@ const permissions = {
   fee_tracker: {
     view: [ROLES.MANAGER, ROLES.ADMIN]
   },
-  enquiries: {
-    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.SALES_EXECUTIVE],
-    add: [ROLES.MANAGER, ROLES.ADMIN, ROLES.SALES_EXECUTIVE],
-    // edit also gates enroll / close / re-open — sales executives stop at demo
-    edit: [ROLES.MANAGER, ROLES.ADMIN],
-    delete: [ROLES.MANAGER, ROLES.ADMIN],
-    // book / reschedule / complete demo slots
-    demo: [ROLES.MANAGER, ROLES.ADMIN, ROLES.SALES_EXECUTIVE],
-    follow_up: [ROLES.MANAGER, ROLES.ADMIN, ROLES.SALES_EXECUTIVE]
-  },
   wallets: {
     view: [ROLES.MANAGER, ROLES.ADMIN],
     add: [ROLES.MANAGER, ROLES.ADMIN],
     edit: [ROLES.MANAGER, ROLES.ADMIN],
-    delete: [ROLES.MANAGER, ROLES.ADMIN]
-  },
-  tasks: {
-    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.SALES_EXECUTIVE],
-    add: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-    edit: [ROLES.MANAGER, ROLES.ADMIN],
-    // mark own task completed / pending
-    update_status: [ROLES.MANAGER, ROLES.ADMIN, ROLES.SALES_EXECUTIVE],
     delete: [ROLES.MANAGER, ROLES.ADMIN]
   },
   notifications: {

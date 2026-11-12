@@ -1,4 +1,5 @@
 import Protected from "@components/layouts/Protected";
+import PermissionGate from "@components/layouts/PermissionGate";
 import SidebarLayout from "@components/layouts/Sidebar";
 import FinalProjectPage from "@pages/FinalProject";
 import { ROLES } from "@utils/constants";
@@ -69,31 +70,32 @@ export const LazyLoader = ({ element, stableKey = false }) => {
 
 
 export const managerRoutes = [
-  // Enquiry / sales pages — shared with sales executives (who get only these).
+  // Enquiry / sales pages. Access is per page from the server's permission map
+  // (server/lib/rbac.js) — add a role there, not here.
   {
-    element: <Protected roles={[ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER, ROLES.SALES_EXECUTIVE]} />,
+    element: <Protected />,
     children: [
       {
         element: <SidebarLayout />,
         children: [
           {
             path: "/manager/enquiries",
-            element: <LazyLoader element={<Enquiries />} />,
+            element: <PermissionGate action="enquiry:view"><LazyLoader element={<Enquiries />} /></PermissionGate>,
             title: "Enquiries"
           },
           {
             path: "/manager/enquiry-slots",
-            element: <LazyLoader element={<EnquirySlots />} />,
+            element: <PermissionGate action="enquiry:demo_view"><LazyLoader element={<EnquirySlots />} /></PermissionGate>,
             title: "Enquiry Slots"
           },
           {
             path: "/manager/targets",
-            element: <LazyLoader element={<Targets />} />,
+            element: <PermissionGate action="target:view"><LazyLoader element={<Targets />} /></PermissionGate>,
             title: "Targets"
           },
           {
             path: "/manager/tasks",
-            element: <LazyLoader element={<Tasks />} />,
+            element: <PermissionGate action="task:view"><LazyLoader element={<Tasks />} /></PermissionGate>,
             title: "Tasks",
           },
         ]

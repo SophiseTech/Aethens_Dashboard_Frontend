@@ -3,7 +3,7 @@ import { Segmented, Table } from "antd";
 import EnquiryDetailsDrawer from "@pages/Enquiries/Component/EnquiryDetailsDrawer";
 import enquiryStore from "@stores/EnquiryStore";
 import Chip from "@components/Chips/Chip";
-import userStore from "@stores/UserStore";
+import useCan from "@hooks/useCan";
 import centersStore from "@stores/CentersStore";
 import { formatDateTime } from "@utils/helper";
 
@@ -18,12 +18,12 @@ function EnquirySlotsList() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const { slots, today } = demoSlots || {}
-  const { user } = userStore();
+  const { canAllCenters } = useCan();
   const { selectedCenter } = centersStore();
 
   useEffect(() => {
     // getDemoSlots({ selectedView });     // fetch once when component loads
-    if ((user.role === 'admin' || user.role === 'operations_manager' || user.role === 'sales_executive') && selectedCenter) {
+    if (canAllCenters('enquiry:demo_view') && selectedCenter) {
       getDemoSlots({ selectedView, centerId: selectedCenter });
     } else {
       getDemoSlots({ selectedView });     // fetch once when component loads

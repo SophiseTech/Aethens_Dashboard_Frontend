@@ -10,13 +10,14 @@ import Chip from "@components/Chips/Chip";
 import CustomDatePicker from '@components/form/CustomDatePicker';
 import TargetDashboard from "./TargetDashboard";
 import TargetProgressDrawer from "./TargetProgressDrawer";
-import permissions from "@utils/permissions";
+import useCan from "@hooks/useCan";
 
 function TargetList() {
     const { targets, loading, getTargets } = useTargetStore();
     const { user } = userStore();
     const { selectedCenter, centers, getCenters } = centersStore();
-    const canViewProgress = permissions.targets?.view?.includes(user?.role);
+    const { can } = useCan();
+    const canViewProgress = can("target:view");
 
     const nav = useNavigate();
     const location = useLocation();

@@ -29,7 +29,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import useManagerTaskStore from "@/stores/ManagerTaskStore";
 import userStore from "@stores/UserStore";
 import { useNavigate } from "react-router-dom";
-import permissions from "@utils/permissions";
+import useCan from "@hooks/useCan";
 
 dayjs.extend(relativeTime);
 
@@ -43,6 +43,7 @@ export default function TaskDetailCard({ task, onClose }) {
     const [submitting, setSubmitting] = useState(false);
     const navigate = useNavigate();
 
+    const { can } = useCan();
     const isAdmin = user?.role === "admin";
     const hasMultipleAssignees = task.assignedTo?.length > 1;
 
@@ -288,7 +289,7 @@ export default function TaskDetailCard({ task, onClose }) {
                     </div>
                 )}
 
-                {permissions.tasks.update_status.includes(user.role) && <Button
+                {can("task:update_status") && <Button
                     type={
                         hasMultipleAssignees && !isAdmin
                             ? (isUserCompleted ? "default" : "primary")

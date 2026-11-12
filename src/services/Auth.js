@@ -8,7 +8,7 @@ class AuthService {
     try {
       const { data } = await post(baseUrl + '/login', { username: email, password })
       if (!data || !data.token || !data.user) throw new Error("An error occured. Please try again")
-      return { token: data.token, user: data.user }
+      return { token: data.token, user: data.user, permissions: data.permissions || {} }
     } catch (error) {
       handleError(error)
       throw error

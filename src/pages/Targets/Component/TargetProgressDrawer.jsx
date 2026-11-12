@@ -26,8 +26,7 @@ import {
 } from "@ant-design/icons";
 import { formatDate, toISTEndOfDayISO, toISTStartOfDayISO } from "@utils/helper";
 import Chip from "@components/Chips/Chip";
-import userStore from "@stores/UserStore";
-import permissions from "@utils/permissions";
+import useCan from "@hooks/useCan";
 import useTargetStore from "@stores/TargetStore";
 import centersStore from "@stores/CentersStore";
 import CustomForm from "@components/form/CustomForm";
@@ -40,14 +39,14 @@ import dayjs from "dayjs";
 const { Title, Text } = Typography;
 
 const TargetProgressDrawer = ({ target, visible, onClose, loading }) => {
-    const { user } = userStore();
     const { updateTarget, deleteTarget, loading: targetLoading } = useTargetStore();
     const { centers } = centersStore();
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [form] = Form.useForm();
 
-    const canEdit = permissions.targets?.edit?.includes(user?.role);
-    const canDelete = permissions.targets?.delete?.includes(user?.role);
+    const { can } = useCan();
+    const canEdit = can("target:edit");
+    const canDelete = can("target:delete");
 
     // Center options for select
     const centerOptions = useMemo(

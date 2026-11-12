@@ -10,8 +10,8 @@ import enquiryService from '@/services/Enquiry';
 import { Alert, Form, Modal } from 'antd';
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useStore } from 'zustand';
-import { age_categories, classPreferenceOptions, EnquiryModeOptions, foundUsOptions, ROLES } from '@utils/constants';
-import userStore from '@stores/UserStore';
+import { age_categories, classPreferenceOptions, EnquiryModeOptions, foundUsOptions } from '@utils/constants';
+import useCan from '@hooks/useCan';
 import centersStore from '@stores/CentersStore';
 import { formatCenterCounts } from '@utils/helper';
 
@@ -21,7 +21,7 @@ function AddEnquiry() {
   const { loading, addEnquiry, getEnquiries } = enquiryStore()
   const [form] = Form.useForm();
   const { getCourses, courses, total } = useStore(courseStore)
-  const { user } = useStore(userStore);
+  const { canAllCenters } = useCan();
   const { centers,getCenters } = useStore(centersStore);
 
   const initialValues = {
@@ -98,7 +98,7 @@ function AddEnquiry() {
         sameCenterCount: Number(res?.sameCenterCount || 0),
         otherCenters: res?.otherCenters || [],
         // without a center (e.g. admin with none picked) every match is listed per center
-        hasOwnCenter: user.role === ROLES.MANAGER || Boolean(centerId),
+        hasOwnCenter: !canAllCenters("enquiry:create") || Boolean(centerId),
       };
       setExistence(existsObj);
       // mark as checked so next click will proceed
@@ -179,7 +179,7 @@ function AddEnquiry() {
           />
           {/* <CustomInput label={"Age Category"} name={"ageCategory"} placeholder={"Age Category"} /> */}
           <CustomSelect label={"How they found us"} name={"foundUsBy"} options={foundUsOptions}/>
-          {(user.role === ROLES.ADMIN || user.role === ROLES.SALES_EXECUTIVE) && (
+          {canAllCenters("enquiry:create") && (
             <CustomSelect label={"Center"} name={"centerId"} options={centerOptions}/>
           )}
           <CustomSelect name={"modeOfEnquiry"} options={EnquiryModeOptions} label={"Mode of Enquiry"} />

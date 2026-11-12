@@ -3,9 +3,8 @@ import { Card, Row, Col, Typography, Spin } from "antd";
 import { AimOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, WarningOutlined } from "@ant-design/icons";
 import EChart from "@pages/Dashboard/Chart/EChart";
 import useTargetStore from "@stores/TargetStore";
-import userStore from "@stores/UserStore";
 import centersStore from "@stores/CentersStore";
-import permissions from "@utils/permissions";
+import useCan from "@hooks/useCan";
 
 const { Title, Text } = Typography;
 
@@ -13,7 +12,7 @@ export default function TargetDashboard() {
     const analytics = useTargetStore(state => state.analytics);
     const analyticsLoading = useTargetStore(state => state.analyticsLoading);
     const getAnalytics = useTargetStore(state => state.getAnalytics);
-    const { user } = userStore();
+    const { canAllCenters } = useCan();
     const { selectedCenter, centers } = centersStore();
 
     // Get selected center name for display
@@ -70,7 +69,7 @@ export default function TargetDashboard() {
     };
 
     // Determine view label based on role and selected center
-    const canViewAll = permissions.targets?.view?.includes(user?.role) && user?.role !== 'manager';
+    const canViewAll = canAllCenters("target:view");
     const getViewLabel = () => {
         if (!canViewAll) {
             return 'Center View';

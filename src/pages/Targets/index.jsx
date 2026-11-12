@@ -2,15 +2,13 @@ import Title from '@components/layouts/Title';
 import AddTarget from '@pages/Targets/Component/AddTarget';
 import { Skeleton } from 'antd';
 import { lazy, Suspense } from 'react';
-import { useStore } from 'zustand';
-import userStore from '@stores/UserStore';
-import permissions from '@utils/permissions';
+import useCan from '@hooks/useCan';
 
 const TargetList = lazy(() => import('@pages/Targets/Component/TargetList'));
 
 function Targets() {
-    const { user } = useStore(userStore);
-    const isAdmin = permissions.targets?.add?.includes(user?.role);
+    const { can } = useCan();
+    const isAdmin = can('target:create');
 
     return (
         <Title

@@ -7,6 +7,8 @@ import studentStore from "@stores/StudentStore";
 
 const userStore = create((set, get) => ({
   user: null,
+  // { action: scope } from the server (server/lib/rbac.js) — read via hooks/useCan
+  permissions: {},
   loading: false,
   authLoading: true,
   submitLoading: false,
@@ -18,9 +20,9 @@ const userStore = create((set, get) => ({
     try {
       if (!email || !password) throw new Error("Please provide username or password")
       set({ loading: true })
-      const { user, token } = await authService.Login({ email, password })
+      const { user, token, permissions } = await authService.Login({ email, password })
       localStorage.setItem('jwt_token', token);
-      set({ user: user, isAuthenticated: true })
+      set({ user: user, permissions, isAuthenticated: true })
     } catch (error) {
       throw new Error(error)
     } finally {
@@ -30,13 +32,13 @@ const userStore = create((set, get) => ({
   checkAuth: async () => {
     try {
       set({ authLoading: true })
-      const { user, loggedIn } = await authService.checkAuth()
-      set({ user: user, isAuthenticated: loggedIn })
+      const { user, loggedIn, permissions } = await authService.checkAuth()
+      set({ user: user, permissions: permissions || {}, isAuthenticated: loggedIn })
       if (user.role === ROLES.STUDENT) {
         studentStore.getState().setActiveStudent(user)
       }
     } catch (error) {
-      set({ user: null, isAuthenticated: false })
+      set({ user: null, permissions: {}, isAuthenticated: false })
       console.error('Failed to check authentication:', error);
     } finally {
       set({ authLoading: false })
@@ -49,6 +51,7 @@ const userStore = create((set, get) => ({
     localStorage.removeItem("jwt_token")
     set({
       user: null,
+      permissions: {},
       isAuthenticated: false
     })
   },

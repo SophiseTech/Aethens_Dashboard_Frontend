@@ -35,6 +35,7 @@ import BranchTransferCard from "@pages/Enquiries/Component/BranchTranserCard";
 import EnquiryDemoBookModal from "@pages/Enquiries/Component/EnquiryDemoBookModal";
 import EnquiryDemoRescheduleModal from "@pages/Enquiries/Component/EnquiryDemoRescheduleModal";
 import permissions from "@utils/permissions";
+import useCan from "@hooks/useCan";
 import userStore from "@stores/UserStore";
 import ReopenEnquiryModal from "./ReopenEnquiryModal";
 import AddStudent from "@pages/Students/Component/AddStudent";
@@ -44,6 +45,7 @@ const { TextArea } = Input;
 
 const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnquiries }) => {
   const { user } = useStore(userStore);
+  const { can } = useCan();
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isBookSlotModalVisible, setIsBookSlotModalVisible] = useState(false);
   const [isCloseModalVisible, setIsCloseModalVisible] = useState(false);
@@ -181,14 +183,14 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
         extra={
           parentPage === "enquiryList" && !isClosed ? (
             <div className="flex gap-2">
-              {permissions.enquiries.edit.includes(user.role) ? <Button
+              {can("enquiry:edit") ? <Button
                 type="primary"
                 icon={<EditOutlined />}
                 onClick={handleEditClick}
               >
                 Edit
               </Button> : null}
-              {permissions.enquiries.delete.includes(user.role) ? <Button
+              {can("enquiry:edit") ? <Button
                 variant="solid"
                 color="danger"
                 icon={<DeleteOutlined />}
@@ -448,7 +450,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
         {parentPage === "enquiryList" ? (
           <div className="flex gap-2 items-center mb-2">
             {(enquiry?.stage === "New" || enquiry?.stage === "Demo") &&
-              permissions.enquiries.follow_up.includes(user?.role) ? <Button
+              can("enquiry:followup") ? <Button
                 variant="filled"
                 color="orange"
                 onClick={() => setFollowUpVisible(true)}
@@ -457,7 +459,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
             </Button> : null
             }
             {enquiry?.stage === "New" &&
-              permissions.enquiries.demo.includes(user?.role) ? <Button
+              can("enquiry:demo") ? <Button
                 type="primary"
                 onClick={() => setIsBookSlotModalVisible(true)}
               >
@@ -472,10 +474,10 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
           enquiry?.stage === "Demo" &&
           enquiry?.demoSlot?.status !== "Completed" ? (
           <div className="flex gap-2 items-center">
-            {permissions.enquiries.demo.includes(user?.role) ? <Button type="primary" onClick={() => setReschduleSlot(true)}>
+            {can("enquiry:demo") ? <Button type="primary" onClick={() => setReschduleSlot(true)}>
               Reschedule Slot
             </Button> : null}
-            {permissions.enquiries.demo.includes(user?.role) ? <Button type="primary" danger onClick={handleMarkCompleted}>
+            {can("enquiry:demo") ? <Button type="primary" danger onClick={handleMarkCompleted}>
               Mark As Completed
             </Button> : null}
           </div>
@@ -485,11 +487,11 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
         {(parentPage === "slotlist" || parentPage === "enquiryList") &&
           enquiry?.stage === "Demo" &&
           enquiry?.demoSlot?.status === "Completed" &&
-          permissions.enquiries.edit.includes(user?.role) ? <Button type="primary" block onClick={openEnrollment}>
+          can("enquiry:enroll") ? <Button type="primary" block onClick={openEnrollment}>
           Enroll Student
         </Button> : null
         }
-        {(parentPage === 'enquiryList' && enquiry?.stage === 'Closed' && permissions.enquiries.edit.includes(user.role)) &&
+        {(parentPage === 'enquiryList' && enquiry?.stage === 'Closed' && can("enquiry:edit")) &&
           <Button type="primary" onClick={() => setIsReopenModalVisible(true)}>
             Re-Open Enquiry
           </Button>
