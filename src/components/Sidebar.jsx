@@ -767,6 +767,16 @@ const getMenuConfig = (role) => {
     },
   ];
 
+  // Sales executives work enquiries up to demo across all centers, plus read-only
+  // targets and tasks assigned to them. Their dashboard redirects to Enquiries.
+  const salesExecutiveItems = [
+    { label: "Enquiries", icon: <MessageOutlined />, key: "enquiries", path: "/manager/enquiries" },
+    { label: "Enquiry Slots", icon: <CalendarOutlined />, key: "enquiry-slots", path: "/manager/enquiry-slots" },
+    { label: "Targets", icon: <AimOutlined />, key: "targets", path: "/manager/targets" },
+    { label: "Tasks", icon: <CheckSquareOutlined />, key: "tasks", path: "/manager/tasks" },
+    ...staffSelfServiceItems,
+  ];
+
   switch (role) {
     case ROLES.ADMIN:
       return [...commonItems, ...adminItems];
@@ -784,6 +794,8 @@ const getMenuConfig = (role) => {
       return [...commonItems, ...mediaManagerItems];
     case ROLES.PURCHASE_MANAGER:
       return purchaseManagerItems;
+    case ROLES.SALES_EXECUTIVE:
+      return salesExecutiveItems;
     default:
       return commonItems;
   }

@@ -48,7 +48,7 @@ const permissions = {
     add: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     edit: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     delete: [ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER]
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.SALES_EXECUTIVE]
   },
   certificates: {
     view: [ROLES.ADMIN],
@@ -135,10 +135,14 @@ const permissions = {
     view: [ROLES.MANAGER, ROLES.ADMIN]
   },
   enquiries: {
-    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
-    add: [ROLES.MANAGER, ROLES.ADMIN],
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.SALES_EXECUTIVE],
+    add: [ROLES.MANAGER, ROLES.ADMIN, ROLES.SALES_EXECUTIVE],
+    // edit also gates enroll / close / re-open — sales executives stop at demo
     edit: [ROLES.MANAGER, ROLES.ADMIN],
-    delete: [ROLES.MANAGER, ROLES.ADMIN]
+    delete: [ROLES.MANAGER, ROLES.ADMIN],
+    // book / reschedule / complete demo slots
+    demo: [ROLES.MANAGER, ROLES.ADMIN, ROLES.SALES_EXECUTIVE],
+    follow_up: [ROLES.MANAGER, ROLES.ADMIN, ROLES.SALES_EXECUTIVE]
   },
   wallets: {
     view: [ROLES.MANAGER, ROLES.ADMIN],
@@ -147,9 +151,11 @@ const permissions = {
     delete: [ROLES.MANAGER, ROLES.ADMIN]
   },
   tasks: {
-    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
+    view: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.SALES_EXECUTIVE],
     add: [ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER],
     edit: [ROLES.MANAGER, ROLES.ADMIN],
+    // mark own task completed / pending
+    update_status: [ROLES.MANAGER, ROLES.ADMIN, ROLES.SALES_EXECUTIVE],
     delete: [ROLES.MANAGER, ROLES.ADMIN]
   },
   notifications: {

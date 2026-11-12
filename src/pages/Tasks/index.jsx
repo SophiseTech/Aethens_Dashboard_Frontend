@@ -11,6 +11,7 @@ import TaskForm from "./components/TaskForm";
 import ManagersPendingList from "./components/ManagersPendingList";
 import { TASK_PRIORITY, TASK_STATUS } from "@utils/constants";
 import Title from "@components/layouts/Title";
+import permissions from "@utils/permissions";
 
 const { Search } = Input;
 const { RangePicker } = DatePicker;
@@ -101,7 +102,7 @@ export default function TasksPage() {
         < Title title="Tasks"
             level={1}
             button={
-                (
+                permissions.tasks.add.includes(user?.role) && (
                     <Button
                         type="primary"
                         icon={<PlusOutlined />}

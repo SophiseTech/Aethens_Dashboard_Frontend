@@ -69,6 +69,37 @@ export const LazyLoader = ({ element, stableKey = false }) => {
 
 
 export const managerRoutes = [
+  // Enquiry / sales pages — shared with sales executives (who get only these).
+  {
+    element: <Protected roles={[ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER, ROLES.SALES_EXECUTIVE]} />,
+    children: [
+      {
+        element: <SidebarLayout />,
+        children: [
+          {
+            path: "/manager/enquiries",
+            element: <LazyLoader element={<Enquiries />} />,
+            title: "Enquiries"
+          },
+          {
+            path: "/manager/enquiry-slots",
+            element: <LazyLoader element={<EnquirySlots />} />,
+            title: "Enquiry Slots"
+          },
+          {
+            path: "/manager/targets",
+            element: <LazyLoader element={<Targets />} />,
+            title: "Targets"
+          },
+          {
+            path: "/manager/tasks",
+            element: <LazyLoader element={<Tasks />} />,
+            title: "Tasks",
+          },
+        ]
+      }
+    ]
+  },
   {
     element: <Protected roles={[ROLES.MANAGER, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER]} />,
     children: [
@@ -86,11 +117,6 @@ export const managerRoutes = [
             title: "Diploma Students"
           },
           {
-            path: "/manager/enquiries",
-            element: <LazyLoader element={<Enquiries />} />,
-            title: "Enquiries"
-          },
-          {
             path: "/manager/wallets/s/:studentId",
             element: <LazyLoader element={<Wallets />} />,
             title: "Wallets"
@@ -99,16 +125,6 @@ export const managerRoutes = [
             path: "/manager/remarks/s/:studentId",
             element: <LazyLoader element={<Remarks />} />,
             title: "Remarks"
-          },
-          {
-            path: "/manager/enquiry-slots",
-            element: <LazyLoader element={<EnquirySlots />} />,
-            title: "Enquiry Slots"
-          },
-          {
-            path: "/manager/targets",
-            element: <LazyLoader element={<Targets />} />,
-            title: "Targets"
           },
           {
             path: "/manager/inventory",
@@ -260,11 +276,6 @@ export const managerRoutes = [
             path: "/manager/final-project/student/:studentId/details",
             element: <LazyLoader element={<FinalProjectStudentView />} />,
             title: "Slots",
-          },
-          {
-            path: "/manager/tasks",
-            element: <LazyLoader element={<Tasks />} />,
-            title: "Tasks",
           },
           {
             path: "/manager/attendance-register",

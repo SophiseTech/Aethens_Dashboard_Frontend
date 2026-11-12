@@ -23,7 +23,7 @@ function EnquirySlotsList() {
 
   useEffect(() => {
     // getDemoSlots({ selectedView });     // fetch once when component loads
-    if ((user.role === 'admin' || user.role === 'operations_manager') && selectedCenter) {
+    if ((user.role === 'admin' || user.role === 'operations_manager' || user.role === 'sales_executive') && selectedCenter) {
       getDemoSlots({ selectedView, centerId: selectedCenter });
     } else {
       getDemoSlots({ selectedView });     // fetch once when component loads

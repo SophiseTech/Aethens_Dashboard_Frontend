@@ -100,7 +100,7 @@ export const generalRoutes = [
     title: "Terms and Conditions | School Of Athens",
   },
   {
-    element: <Protected roles={[ROLES.STUDENT, ROLES.MANAGER, ROLES.FACULTY, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER, ROLES.MEDIA_MANAGER, ROLES.PURCHASE_MANAGER]} />,
+    element: <Protected roles={[ROLES.STUDENT, ROLES.MANAGER, ROLES.FACULTY, ROLES.ADMIN, ROLES.OPERATIONS_MANAGER, ROLES.ACADEMIC_MANAGER, ROLES.MEDIA_MANAGER, ROLES.PURCHASE_MANAGER, ROLES.SALES_EXECUTIVE]} />,
     children: [
       {
         element: <SidebarLayout />,

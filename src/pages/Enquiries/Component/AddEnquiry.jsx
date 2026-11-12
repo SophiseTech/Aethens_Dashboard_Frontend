@@ -179,7 +179,7 @@ function AddEnquiry() {
           />
           {/* <CustomInput label={"Age Category"} name={"ageCategory"} placeholder={"Age Category"} /> */}
           <CustomSelect label={"How they found us"} name={"foundUsBy"} options={foundUsOptions}/>
-          {user.role === ROLES.ADMIN && (
+          {(user.role === ROLES.ADMIN || user.role === ROLES.SALES_EXECUTIVE) && (
             <CustomSelect label={"Center"} name={"centerId"} options={centerOptions}/>
           )}
           <CustomSelect name={"modeOfEnquiry"} options={EnquiryModeOptions} label={"Mode of Enquiry"} />

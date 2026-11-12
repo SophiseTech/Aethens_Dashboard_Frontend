@@ -6,7 +6,8 @@ export const ROLES = {
   OPERATIONS_MANAGER: "operations_manager",
   ACADEMIC_MANAGER: "academic_manager",
   MEDIA_MANAGER: "media_manager",
-  PURCHASE_MANAGER: "purchase_manager"
+  PURCHASE_MANAGER: "purchase_manager",
+  SALES_EXECUTIVE: "sales_executive"
 }
 
 // Every non-student role. Derived from ROLES so any future role is
@@ -324,7 +325,8 @@ export const GLOBAL_USER_ROLES = [
   ROLES.OPERATIONS_MANAGER,
   ROLES.ACADEMIC_MANAGER,
   ROLES.MEDIA_MANAGER,
-  ROLES.PURCHASE_MANAGER
+  ROLES.PURCHASE_MANAGER,
+  ROLES.SALES_EXECUTIVE
 ]
 
 // Roles that can view weekly batch capacity (matches the server check)

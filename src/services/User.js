@@ -123,7 +123,8 @@ class UserService {
     try {
       // Use dedicated getManagers endpoint
       const response = await post(`/user/getManagers`, {
-        centerId: filters.center_id || "all"
+        centerId: filters.center_id || "all",
+        includeSalesExecutives: filters.includeSalesExecutives === true,
       })
       if (!response || !response.data) throw new Error("An error occurred. Please try again")
       return response.data

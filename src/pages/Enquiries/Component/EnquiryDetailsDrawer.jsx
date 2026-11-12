@@ -448,7 +448,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
         {parentPage === "enquiryList" ? (
           <div className="flex gap-2 items-center mb-2">
             {(enquiry?.stage === "New" || enquiry?.stage === "Demo") &&
-              permissions.enquiries.edit.includes(user?.role) ? <Button
+              permissions.enquiries.follow_up.includes(user?.role) ? <Button
                 variant="filled"
                 color="orange"
                 onClick={() => setFollowUpVisible(true)}
@@ -457,7 +457,7 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
             </Button> : null
             }
             {enquiry?.stage === "New" &&
-              permissions.enquiries.edit.includes(user?.role) ? <Button
+              permissions.enquiries.demo.includes(user?.role) ? <Button
                 type="primary"
                 onClick={() => setIsBookSlotModalVisible(true)}
               >
@@ -472,10 +472,10 @@ const EnquiryDetailsDrawer = ({ enquiry, visible, onClose, parentPage, fetchEnqu
           enquiry?.stage === "Demo" &&
           enquiry?.demoSlot?.status !== "Completed" ? (
           <div className="flex gap-2 items-center">
-            {permissions.enquiries.edit.includes(user?.role) ? <Button type="primary" onClick={() => setReschduleSlot(true)}>
+            {permissions.enquiries.demo.includes(user?.role) ? <Button type="primary" onClick={() => setReschduleSlot(true)}>
               Reschedule Slot
             </Button> : null}
-            {permissions.enquiries.edit.includes(user?.role) ? <Button type="primary" danger onClick={handleMarkCompleted}>
+            {permissions.enquiries.demo.includes(user?.role) ? <Button type="primary" danger onClick={handleMarkCompleted}>
               Mark As Completed
             </Button> : null}
           </div>

@@ -197,6 +197,7 @@ function AdminUsers() {
             { value: ROLES.OPERATIONS_MANAGER, label: "Operations Manager" },
             { value: ROLES.MEDIA_MANAGER, label: "Media Manager" },
             { value: ROLES.PURCHASE_MANAGER, label: "Purchase Manager" },
+            { value: ROLES.SALES_EXECUTIVE, label: "Sales Executive" },
           ]}
         />
         <Select

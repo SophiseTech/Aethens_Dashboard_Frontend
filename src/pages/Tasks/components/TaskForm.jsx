@@ -16,7 +16,7 @@ import userStore from "@stores/UserStore";
 import centersStore from "@stores/CentersStore";
 import { useStore } from "zustand";
 import userService from "@/services/User";
-import { TASK_PRIORITY } from "@utils/constants";
+import { ROLES, TASK_PRIORITY } from "@utils/constants";
 
 const { TextArea } = Input;
 
@@ -63,7 +63,7 @@ export default function TaskForm() {
         setLoadingManagers(true);
         try {
             const centerId = user.role === "admin" ? selectedCenter : user.center_id;
-            const response = await userService.getUsers({ role: "manager", center_id: centerId });
+            const response = await userService.getUsers({ role: "manager", center_id: centerId, includeSalesExecutives: true });
             setManagers(response || []);
         } catch (error) {
             console.error("Error fetching managers:", error);
@@ -186,7 +186,7 @@ export default function TaskForm() {
                 {!assignToAll && (
                     <Form.Item
                         name="assignedTo"
-                        label="Assign to Managers"
+                        label="Assign to Managers / Sales Executives"
                         rules={[
                             {
                                 required: !assignToAll,
@@ -201,7 +201,7 @@ export default function TaskForm() {
                             optionFilterProp="label"
                             options={managers.map((m) => ({
                                 value: m._id,
-                                label: m.username,
+                                label: m.role === ROLES.SALES_EXECUTIVE ? `${m.username} (Sales Executive)` : m.username,
                             }))}
                         />
                     </Form.Item>

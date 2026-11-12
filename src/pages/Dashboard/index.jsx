@@ -22,7 +22,7 @@ function Dashboard() {
   const title = user.role === ROLES.STUDENT && !isDesktop ? "Home" : "Dashboard";
   // Personal calendar for every staff role except admin (and roles redirected away below)
   const showMyCalendar = SELF_ATTENDANCE_ROLES.includes(user.role)
-    && ![ROLES.MEDIA_MANAGER, ROLES.PURCHASE_MANAGER].includes(user.role);
+    && ![ROLES.MEDIA_MANAGER, ROLES.PURCHASE_MANAGER, ROLES.SALES_EXECUTIVE].includes(user.role);
 
   const renderDashboard = () => {
     switch (user.role) {
@@ -42,6 +42,8 @@ function Dashboard() {
         return <Navigate to="/admin/blog-posts" replace />;
       case ROLES.PURCHASE_MANAGER:
         return <Navigate to="/purchase-manager/inventory" replace />;
+      case ROLES.SALES_EXECUTIVE:
+        return <Navigate to="/manager/enquiries" replace />;
       default:
         return <p>404</p>;
     }

@@ -288,7 +288,7 @@ export default function TaskDetailCard({ task, onClose }) {
                     </div>
                 )}
 
-                {permissions.tasks.edit.includes(user.role) && <Button
+                {permissions.tasks.update_status.includes(user.role) && <Button
                     type={
                         hasMultipleAssignees && !isAdmin
                             ? (isUserCompleted ? "default" : "primary")
