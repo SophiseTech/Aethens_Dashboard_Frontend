@@ -3,6 +3,7 @@ import CustomForm from '@components/form/CustomForm';
 import CustomInput from '@components/form/CustomInput';
 import CustomSelect from '@components/form/CustomSelect';
 import CustomSubmit from '@components/form/CustomSubmit';
+import CustomTextArea from '@components/form/CustomTextArea';
 import DynamicMultiInputArray from '@components/form/DynamicMultiInputArray';
 import courseStore from '@stores/CourseStore';
 import enquiryStore from '@stores/EnquiryStore';
@@ -184,6 +185,14 @@ function AddEnquiry() {
           )}
           <CustomSelect name={"modeOfEnquiry"} options={EnquiryModeOptions} label={"Mode of Enquiry"} />
           <CustomSelect name={"classPreference"} options={classPreferenceOptions} label={"Class Preference"} required={false} />
+          {/* Saved to Enquiry.remarks (same field as Edit Enquiry; max 500 chars) */}
+          <CustomTextArea
+            name={"remarks"}
+            label={"Remarks"}
+            placeholder={"Any notes about this enquiry"}
+            required={false}
+            inputProps={{ rows: 3, maxLength: 500, showCount: true }}
+          />
           {/* <CustomSelect name={"selectedCourses"} options={options} label={"Select Course"} mode="multiple"/> */}
           <CustomSubmit className='bg-primary' label={existence ? 'Proceed' : 'Check'} loading={loading} />
         </CustomForm>
